@@ -1,0 +1,11 @@
+Hooks:
+	Think()
+	ClientThink(player) //Called after real think
+	EntityUnlinked(ent) //Called when an entity has been unlinked
+	FiredWeapon(player,weapon,delay,pos,angle)
+	PlayerDamaged(target,inflictor,attacker,damage,meansOfDeath,dir,origin)
+	PlayerKilled(target,inflictor,attacker,damage,meansOfDeath)
+	PlayerSpawned(player)
+	PlayerJoined(player)
+	PlayerDisconnected(player)
+	ShouldDropItem(classname)
