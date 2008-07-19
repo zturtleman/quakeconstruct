@@ -1,0 +1,3 @@
+|| Arguments: || weapon(number) ||
+|| Returns: || <nothing> ||
+|| Example: || <none> ||
