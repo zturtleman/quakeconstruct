@@ -11,3 +11,4 @@ Vector functions include:
  * VectorForward([Vector]) -given an angle(pitch,yaw,roll), this returns the Forward normal as a [Vector].
  * VectorRight([Vector]) -given an angle(pitch,yaw,roll), this returns the Right normal as a [Vector].
  * VectorUp([Vector]) -given an angle(pitch,yaw,roll), this returns the Up normal as a [Vector].
+ * TraceLine(start([Vector]),end([Vector]),ignore([Entity]),mask2(number),min([Vector]),max([Vector]))
