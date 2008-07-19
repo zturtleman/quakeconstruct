@@ -2,13 +2,13 @@ Currently, a [Vector] is just a table containing 3 variables, x, y, and z.
 
 Vector functions include:
 
- * [vAdd]
- * [vSub]
- * [vMul]
- * [Vector]
- * [VectorNormalize]
- * [VectorLength]
- * [VectorForward]
- * [VectorRight]
- * [VectorUp]
- * [TraceLine]
+ * [vAdd()]
+ * [vSub()]
+ * [vMul()]
+ * [Vector()]
+ * [VectorNormalize()]
+ * [VectorLength()]
+ * [VectorForward()]
+ * [VectorRight()]
+ * [VectorUp()]
+ * [TraceLine()]
