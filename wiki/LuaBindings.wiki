@@ -1,5 +1,5 @@
 #summary Lua Bindings For Quake Construct.
 
-==[Entity] ([Object])==
+==[[Entity]] ([Object])==
 
 [GAME|QAGAME] [Entity]:[Entity.AddEvent|AddEvent]
