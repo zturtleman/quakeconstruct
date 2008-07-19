@@ -2,4 +2,4 @@
 || Returns: || <nothing> ||
 || Example: || <none> ||
 
-Removes an [Entity] from the level.
+Removes the given [Entity] from the level.
