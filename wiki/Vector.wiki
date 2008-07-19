@@ -2,13 +2,13 @@ Currently, a [Vector] is just a table containing 3 variables, x, y, and z.
 
 Vector functions include:
 
- * vAdd([Vector],[Vector]) -returns the sum of the 2 [Vector]s.
- * vSub([Vector],[Vector]) -returns the difference of the 2 [Vector]s.
- * vMul([Vector],[Vector]) -returns the product or the 2 [Vector]s.
- * Vector(x(number),y(number),z(number)) -use this to create a new vector.
- * VectorNormalize([Vector]) -returns a normalized [Vector].
- * VectorLength([Vector]) -returns the length of a [Vector] as a number.
- * VectorForward([Vector]) -given an angle(pitch,yaw,roll), this returns the Forward normal as a [Vector].
- * VectorRight([Vector]) -given an angle(pitch,yaw,roll), this returns the Right normal as a [Vector].
- * VectorUp([Vector]) -given an angle(pitch,yaw,roll), this returns the Up normal as a [Vector].
- * TraceLine(start([Vector]),end([Vector]),ignore([Entity]),mask2(number),min([Vector]),max([Vector]))
+ * [vAdd]
+ * [vSub]
+ * [vMul]
+ * [Vector]
+ * [VectorNormalize]
+ * [VectorLength]
+ * [VectorForward]
+ * [VectorRight]
+ * [VectorUp]
+ * [TraceLine]
