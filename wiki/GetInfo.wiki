@@ -3,7 +3,7 @@
 || Example: || player:GetInfo()["name"] ||
 
 *Notes:*
-The returned table contains:
+ The returned table contains:
 
  *"name" (string)
  *"health" (number)
