@@ -2,8 +2,9 @@
 || Returns: || a table containing information about the given player ||
 || Example: || player:GetInfo()["name"] ||
 
-*Notes:*
- The returned table contains:
+*Notes:* 
+
+The returned table contains:
 
  *"name" (string)
  *"health" (number)
