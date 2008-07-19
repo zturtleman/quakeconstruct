@@ -6,10 +6,10 @@
 
 The returned table contains:
 
- *"name" (string)
- *"health" (number)
- *"score" (number)
- *"connected" (boolean)
- *"weapon" (number)
- *"buttons" (number)
- *"model" (number)
+ *""name" (string)
+ *""health" (number)
+ *""score" (number)
+ *""connected" (boolean)
+ *""weapon" (number)
+ *""buttons" (number)
+ *""model" (number)
