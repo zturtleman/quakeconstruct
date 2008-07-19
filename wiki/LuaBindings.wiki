@@ -27,3 +27,8 @@
 || [Q3GAME] || [Entity]:[SetPowerup]() ||
 || [Q3GAME] || [Entity]:[SetVelocity]() ||
 || [Q3GAME] || [Entity]:[SetWeapon]() ||
+
+==[hook] ([Library])==
+
+|| [[Q3GAME]] || [hook].[add]() ||
+|| [[Q3GAME]] || [hook].[hashook]() ||
