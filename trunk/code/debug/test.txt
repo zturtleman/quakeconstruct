@@ -1,662 +1,0 @@
-
-==[[Entity]] ([[Library]])==
-[[GAME|QAGAME]] [[Entity]].[[Entity.AddEvent|AddEvent]]<br />
-[[GAME|QAGAME]] [[Entity]].[[Entity.Classname|Classname]]<br />
-[[GAME|QAGAME]] [[Entity]].[[Entity.Damage|Damage]]<br />
-[[GAME|QAGAME]] [[Entity]].[[Entity.EntIndex|EntIndex]]<br />
-[[GAME|QAGAME]] [[Entity]].[[Entity.GetAimVector|GetAimVector]]<br />
-[[GAME|QAGAME]] [[Entity]].[[Entity.GetInfo|GetInfo]]<br />
-[[GAME|QAGAME]] [[Entity]].[[Entity.GetMuzzlePos|GetMuzzlePos]]<br />
-[[GAME|QAGAME]] [[Entity]].[[Entity.GetParent|GetParent]]<br />
-[[GAME|QAGAME]] [[Entity]].[[Entity.GetPos|GetPos]]<br />
-[[GAME|QAGAME]] [[Entity]].[[Entity.GetVelocity|GetVelocity]]<br />
-[[GAME|QAGAME]] [[Entity]].[[Entity.GiveWeapon|GiveWeapon]]<br />
-[[GAME|QAGAME]] [[Entity]].[[Entity.IsBot|IsBot]]<br />
-[[GAME|QAGAME]] [[Entity]].[[Entity.IsPlayer|IsPlayer]]<br />
-[[GAME|QAGAME]] [[Entity]].[[Entity.PlaySound|PlaySound]]<br />
-[[GAME|QAGAME]] [[Entity]].[[Entity.Remove|Remove]]<br />
-[[GAME|QAGAME]] [[Entity]].[[Entity.RemovePowerups|RemovePowerups]]<br />
-[[GAME|QAGAME]] [[Entity]].[[Entity.RemoveWeapons|RemoveWeapons]]<br />
-[[GAME|QAGAME]] [[Entity]].[[Entity.SendMessage|SendMessage]]<br />
-[[GAME|QAGAME]] [[Entity]].[[Entity.SetAmmo|SetAmmo]]<br />
-[[GAME|QAGAME]] [[Entity]].[[Entity.SetCallback|SetCallback]]<br />
-[[GAME|QAGAME]] [[Entity]].[[Entity.SetInfo|SetInfo]]<br />
-[[GAME|QAGAME]] [[Entity]].[[Entity.SetPos|SetPos]]<br />
-[[GAME|QAGAME]] [[Entity]].[[Entity.SetPowerup|SetPowerup]]<br />
-[[GAME|QAGAME]] [[Entity]].[[Entity.SetVelocity|SetVelocity]]<br />
-[[GAME|QAGAME]] [[Entity]].[[Entity.SetWeapon|SetWeapon]]<br />
-
-==[[concommand]] ([[Library]])==
-[[GAME|QAGAME]] [[concommand]].[[concommand.Add|Add]]<br />
-[[GAME|QAGAME]] [[concommand]].[[concommand.Call|Call]]<br />
-
-==[[coroutine]] ([[Library]])==
-[[GAME|QAGAME]] [[coroutine]].[[coroutine.create|create]]<br />
-[[GAME|QAGAME]] [[coroutine]].[[coroutine.resume|resume]]<br />
-[[GAME|QAGAME]] [[coroutine]].[[coroutine.running|running]]<br />
-[[GAME|QAGAME]] [[coroutine]].[[coroutine.status|status]]<br />
-[[GAME|QAGAME]] [[coroutine]].[[coroutine.wrap|wrap]]<br />
-[[GAME|QAGAME]] [[coroutine]].[[coroutine.yield|yield]]<br />
-
-==[[debug]] ([[Library]])==
-[[GAME|QAGAME]] [[debug]].[[debug.debug|debug]]<br />
-[[GAME|QAGAME]] [[debug]].[[debug.getfenv|getfenv]]<br />
-[[GAME|QAGAME]] [[debug]].[[debug.gethook|gethook]]<br />
-[[GAME|QAGAME]] [[debug]].[[debug.getinfo|getinfo]]<br />
-[[GAME|QAGAME]] [[debug]].[[debug.getlocal|getlocal]]<br />
-[[GAME|QAGAME]] [[debug]].[[debug.getmetatable|getmetatable]]<br />
-[[GAME|QAGAME]] [[debug]].[[debug.getregistry|getregistry]]<br />
-[[GAME|QAGAME]] [[debug]].[[debug.getupvalue|getupvalue]]<br />
-[[GAME|QAGAME]] [[debug]].[[debug.setfenv|setfenv]]<br />
-[[GAME|QAGAME]] [[debug]].[[debug.sethook|sethook]]<br />
-[[GAME|QAGAME]] [[debug]].[[debug.setlocal|setlocal]]<br />
-[[GAME|QAGAME]] [[debug]].[[debug.setmetatable|setmetatable]]<br />
-[[GAME|QAGAME]] [[debug]].[[debug.setupvalue|setupvalue]]<br />
-[[GAME|QAGAME]] [[debug]].[[debug.traceback|traceback]]<br />
-
-==[[entity_tabs]] ([[Library]])==
-
-==[[enum_weaponentities]] ([[Library]])==
-[[GAME|QAGAME]] [[enum_weaponentities]].[[enum_weaponentities.1|1]]<br />
-[[GAME|QAGAME]] [[enum_weaponentities]].[[enum_weaponentities.2|2]]<br />
-[[GAME|QAGAME]] [[enum_weaponentities]].[[enum_weaponentities.3|3]]<br />
-[[GAME|QAGAME]] [[enum_weaponentities]].[[enum_weaponentities.4|4]]<br />
-[[GAME|QAGAME]] [[enum_weaponentities]].[[enum_weaponentities.5|5]]<br />
-[[GAME|QAGAME]] [[enum_weaponentities]].[[enum_weaponentities.6|6]]<br />
-[[GAME|QAGAME]] [[enum_weaponentities]].[[enum_weaponentities.7|7]]<br />
-[[GAME|QAGAME]] [[enum_weaponentities]].[[enum_weaponentities.8|8]]<br />
-[[GAME|QAGAME]] [[enum_weaponentities]].[[enum_weaponentities.9|9]]<br />
-
-==[[game_entities]] ([[Library]])==
-
-==[[hook]] ([[Library]])==
-[[GAME|QAGAME]] [[hook]].[[hook.add|add]]<br />
-[[GAME|QAGAME]] [[hook]].[[hook.hashook|hashook]]<br />
-[[GAME|QAGAME]] [[hook]].[[hook.events|events]]<br />
-
-==[[io]] ([[Library]])==
-[[GAME|QAGAME]] [[io]].[[io.close|close]]<br />
-[[GAME|QAGAME]] [[io]].[[io.flush|flush]]<br />
-[[GAME|QAGAME]] [[io]].[[io.input|input]]<br />
-[[GAME|QAGAME]] [[io]].[[io.lines|lines]]<br />
-[[GAME|QAGAME]] [[io]].[[io.open|open]]<br />
-[[GAME|QAGAME]] [[io]].[[io.output|output]]<br />
-[[GAME|QAGAME]] [[io]].[[io.popen|popen]]<br />
-[[GAME|QAGAME]] [[io]].[[io.read|read]]<br />
-[[GAME|QAGAME]] [[io]].[[io.tmpfile|tmpfile]]<br />
-[[GAME|QAGAME]] [[io]].[[io.type|type]]<br />
-[[GAME|QAGAME]] [[io]].[[io.write|write]]<br />
-[[GAME|QAGAME]] [[io]].[[io.stderr|stderr]]<br />
-[[GAME|QAGAME]] [[io]].[[io.stdin|stdin]]<br />
-[[GAME|QAGAME]] [[io]].[[io.stdout|stdout]]<br />
-
-==[[lfs]] ([[Library]])==
-[[GAME|QAGAME]] [[lfs]].[[lfs.attributes|attributes]]<br />
-[[GAME|QAGAME]] [[lfs]].[[lfs.chdir|chdir]]<br />
-[[GAME|QAGAME]] [[lfs]].[[lfs.currentdir|currentdir]]<br />
-[[GAME|QAGAME]] [[lfs]].[[lfs.dir|dir]]<br />
-[[GAME|QAGAME]] [[lfs]].[[lfs.lock|lock]]<br />
-[[GAME|QAGAME]] [[lfs]].[[lfs.mkdir|mkdir]]<br />
-[[GAME|QAGAME]] [[lfs]].[[lfs.rmdir|rmdir]]<br />
-[[GAME|QAGAME]] [[lfs]].[[lfs.setmode|setmode]]<br />
-[[GAME|QAGAME]] [[lfs]].[[lfs.symlinkattributes|symlinkattributes]]<br />
-[[GAME|QAGAME]] [[lfs]].[[lfs.touch|touch]]<br />
-[[GAME|QAGAME]] [[lfs]].[[lfs.unlock|unlock]]<br />
-
-==[[math]] ([[Library]])==
-[[GAME|QAGAME]] [[math]].[[math.abs|abs]]<br />
-[[GAME|QAGAME]] [[math]].[[math.acos|acos]]<br />
-[[GAME|QAGAME]] [[math]].[[math.asin|asin]]<br />
-[[GAME|QAGAME]] [[math]].[[math.atan|atan]]<br />
-[[GAME|QAGAME]] [[math]].[[math.atan2|atan2]]<br />
-[[GAME|QAGAME]] [[math]].[[math.ceil|ceil]]<br />
-[[GAME|QAGAME]] [[math]].[[math.cos|cos]]<br />
-[[GAME|QAGAME]] [[math]].[[math.cosh|cosh]]<br />
-[[GAME|QAGAME]] [[math]].[[math.deg|deg]]<br />
-[[GAME|QAGAME]] [[math]].[[math.exp|exp]]<br />
-[[GAME|QAGAME]] [[math]].[[math.floor|floor]]<br />
-[[GAME|QAGAME]] [[math]].[[math.fmod|fmod]]<br />
-[[GAME|QAGAME]] [[math]].[[math.frexp|frexp]]<br />
-[[GAME|QAGAME]] [[math]].[[math.ldexp|ldexp]]<br />
-[[GAME|QAGAME]] [[math]].[[math.log|log]]<br />
-[[GAME|QAGAME]] [[math]].[[math.log10|log10]]<br />
-[[GAME|QAGAME]] [[math]].[[math.max|max]]<br />
-[[GAME|QAGAME]] [[math]].[[math.min|min]]<br />
-[[GAME|QAGAME]] [[math]].[[math.mod|mod]]<br />
-[[GAME|QAGAME]] [[math]].[[math.modf|modf]]<br />
-[[GAME|QAGAME]] [[math]].[[math.pow|pow]]<br />
-[[GAME|QAGAME]] [[math]].[[math.rad|rad]]<br />
-[[GAME|QAGAME]] [[math]].[[math.random|random]]<br />
-[[GAME|QAGAME]] [[math]].[[math.randomseed|randomseed]]<br />
-[[GAME|QAGAME]] [[math]].[[math.sin|sin]]<br />
-[[GAME|QAGAME]] [[math]].[[math.sinh|sinh]]<br />
-[[GAME|QAGAME]] [[math]].[[math.sqrt|sqrt]]<br />
-[[GAME|QAGAME]] [[math]].[[math.tan|tan]]<br />
-[[GAME|QAGAME]] [[math]].[[math.tanh|tanh]]<br />
-[[GAME|QAGAME]] [[math]].[[math.huge|huge]]<br />
-[[GAME|QAGAME]] [[math]].[[math.pi|pi]]<br />
-
-==[[os]] ([[Library]])==
-[[GAME|QAGAME]] [[os]].[[os.clock|clock]]<br />
-[[GAME|QAGAME]] [[os]].[[os.date|date]]<br />
-[[GAME|QAGAME]] [[os]].[[os.difftime|difftime]]<br />
-[[GAME|QAGAME]] [[os]].[[os.execute|execute]]<br />
-[[GAME|QAGAME]] [[os]].[[os.exit|exit]]<br />
-[[GAME|QAGAME]] [[os]].[[os.getenv|getenv]]<br />
-[[GAME|QAGAME]] [[os]].[[os.remove|remove]]<br />
-[[GAME|QAGAME]] [[os]].[[os.rename|rename]]<br />
-[[GAME|QAGAME]] [[os]].[[os.setlocale|setlocale]]<br />
-[[GAME|QAGAME]] [[os]].[[os.time|time]]<br />
-[[GAME|QAGAME]] [[os]].[[os.tmpname|tmpname]]<br />
-
-==[[package]] ([[Library]])==
-[[GAME|QAGAME]] [[package]].[[package.loadlib|loadlib]]<br />
-[[GAME|QAGAME]] [[package]].[[package.seeall|seeall]]<br />
-[[GAME|QAGAME]] [[package]].[[package.config|config]]<br />
-[[GAME|QAGAME]] [[package]].[[package.cpath|cpath]]<br />
-[[GAME|QAGAME]] [[package]].[[package.loaded|loaded]]<br />
-[[GAME|QAGAME]] [[package]].[[package.loaders|loaders]]<br />
-[[GAME|QAGAME]] [[package]].[[package.path|path]]<br />
-[[GAME|QAGAME]] [[package]].[[package.preload|preload]]<br />
-
-==[[string]] ([[Library]])==
-[[GAME|QAGAME]] [[string]].[[string.Explode|Explode]]<br />
-[[GAME|QAGAME]] [[string]].[[string.FormattedTime|FormattedTime]]<br />
-[[GAME|QAGAME]] [[string]].[[string.GetExtensionFromFilename|GetExtensionFromFilename]]<br />
-[[GAME|QAGAME]] [[string]].[[string.GetFileFromFilename|GetFileFromFilename]]<br />
-[[GAME|QAGAME]] [[string]].[[string.GetPathFromFilename|GetPathFromFilename]]<br />
-[[GAME|QAGAME]] [[string]].[[string.Implode|Implode]]<br />
-[[GAME|QAGAME]] [[string]].[[string.Left|Left]]<br />
-[[GAME|QAGAME]] [[string]].[[string.Replace|Replace]]<br />
-[[GAME|QAGAME]] [[string]].[[string.Right|Right]]<br />
-[[GAME|QAGAME]] [[string]].[[string.ToMinutesSeconds|ToMinutesSeconds]]<br />
-[[GAME|QAGAME]] [[string]].[[string.ToMinutesSecondsMilliseconds|ToMinutesSecondsMilliseconds]]<br />
-[[GAME|QAGAME]] [[string]].[[string.ToTable|ToTable]]<br />
-[[GAME|QAGAME]] [[string]].[[string.Trim|Trim]]<br />
-[[GAME|QAGAME]] [[string]].[[string.TrimLeft|TrimLeft]]<br />
-[[GAME|QAGAME]] [[string]].[[string.TrimRight|TrimRight]]<br />
-[[GAME|QAGAME]] [[string]].[[string.URLDecode|URLDecode]]<br />
-[[GAME|QAGAME]] [[string]].[[string.URLEncode|URLEncode]]<br />
-[[GAME|QAGAME]] [[string]].[[string.byte|byte]]<br />
-[[GAME|QAGAME]] [[string]].[[string.char|char]]<br />
-[[GAME|QAGAME]] [[string]].[[string.dump|dump]]<br />
-[[GAME|QAGAME]] [[string]].[[string.find|find]]<br />
-[[GAME|QAGAME]] [[string]].[[string.format|format]]<br />
-[[GAME|QAGAME]] [[string]].[[string.gfind|gfind]]<br />
-[[GAME|QAGAME]] [[string]].[[string.gmatch|gmatch]]<br />
-[[GAME|QAGAME]] [[string]].[[string.gsub|gsub]]<br />
-[[GAME|QAGAME]] [[string]].[[string.len|len]]<br />
-[[GAME|QAGAME]] [[string]].[[string.lower|lower]]<br />
-[[GAME|QAGAME]] [[string]].[[string.match|match]]<br />
-[[GAME|QAGAME]] [[string]].[[string.rep|rep]]<br />
-[[GAME|QAGAME]] [[string]].[[string.reverse|reverse]]<br />
-[[GAME|QAGAME]] [[string]].[[string.sub|sub]]<br />
-[[GAME|QAGAME]] [[string]].[[string.upper|upper]]<br />
-
-==[[table]] ([[Library]])==
-[[GAME|QAGAME]] [[table]].[[table.Add|Add]]<br />
-[[GAME|QAGAME]] [[table]].[[table.ClearKeys|ClearKeys]]<br />
-[[GAME|QAGAME]] [[table]].[[table.CollapseKeyValue|CollapseKeyValue]]<br />
-[[GAME|QAGAME]] [[table]].[[table.Copy|Copy]]<br />
-[[GAME|QAGAME]] [[table]].[[table.Count|Count]]<br />
-[[GAME|QAGAME]] [[table]].[[table.DeSanitise|DeSanitise]]<br />
-[[GAME|QAGAME]] [[table]].[[table.ForceInsert|ForceInsert]]<br />
-[[GAME|QAGAME]] [[table]].[[table.HasValue|HasValue]]<br />
-[[GAME|QAGAME]] [[table]].[[table.Inherit|Inherit]]<br />
-[[GAME|QAGAME]] [[table]].[[table.IsSequential|IsSequential]]<br />
-[[GAME|QAGAME]] [[table]].[[table.LowerKeyNames|LowerKeyNames]]<br />
-[[GAME|QAGAME]] [[table]].[[table.Merge|Merge]]<br />
-[[GAME|QAGAME]] [[table]].[[table.Sanitise|Sanitise]]<br />
-[[GAME|QAGAME]] [[table]].[[table.SortByKey|SortByKey]]<br />
-[[GAME|QAGAME]] [[table]].[[table.SortByMember|SortByMember]]<br />
-[[GAME|QAGAME]] [[table]].[[table.ToString|ToString]]<br />
-[[GAME|QAGAME]] [[table]].[[table.concat|concat]]<br />
-[[GAME|QAGAME]] [[table]].[[table.foreach|foreach]]<br />
-[[GAME|QAGAME]] [[table]].[[table.foreachi|foreachi]]<br />
-[[GAME|QAGAME]] [[table]].[[table.getn|getn]]<br />
-[[GAME|QAGAME]] [[table]].[[table.insert|insert]]<br />
-[[GAME|QAGAME]] [[table]].[[table.maxn|maxn]]<br />
-[[GAME|QAGAME]] [[table]].[[table.remove|remove]]<br />
-[[GAME|QAGAME]] [[table]].[[table.setn|setn]]<br />
-[[GAME|QAGAME]] [[table]].[[table.sort|sort]]<br />
-[[GAME|QAGAME]] [[table]].[[table.sortdesc|sortdesc]]<br />
-
-==[[tablex]] ([[Library]])==
-[[GAME|QAGAME]] [[tablex]].[[tablex.Add|Add]]<br />
-[[GAME|QAGAME]] [[tablex]].[[tablex.ClearKeys|ClearKeys]]<br />
-[[GAME|QAGAME]] [[tablex]].[[tablex.CollapseKeyValue|CollapseKeyValue]]<br />
-[[GAME|QAGAME]] [[tablex]].[[tablex.Copy|Copy]]<br />
-[[GAME|QAGAME]] [[tablex]].[[tablex.Count|Count]]<br />
-[[GAME|QAGAME]] [[tablex]].[[tablex.DeSanitise|DeSanitise]]<br />
-[[GAME|QAGAME]] [[tablex]].[[tablex.ForceInsert|ForceInsert]]<br />
-[[GAME|QAGAME]] [[tablex]].[[tablex.HasValue|HasValue]]<br />
-[[GAME|QAGAME]] [[tablex]].[[tablex.Inherit|Inherit]]<br />
-[[GAME|QAGAME]] [[tablex]].[[tablex.IsSequential|IsSequential]]<br />
-[[GAME|QAGAME]] [[tablex]].[[tablex.LowerKeyNames|LowerKeyNames]]<br />
-[[GAME|QAGAME]] [[tablex]].[[tablex.Merge|Merge]]<br />
-[[GAME|QAGAME]] [[tablex]].[[tablex.Sanitise|Sanitise]]<br />
-[[GAME|QAGAME]] [[tablex]].[[tablex.SortByKey|SortByKey]]<br />
-[[GAME|QAGAME]] [[tablex]].[[tablex.SortByMember|SortByMember]]<br />
-[[GAME|QAGAME]] [[tablex]].[[tablex.ToString|ToString]]<br />
-[[GAME|QAGAME]] [[tablex]].[[tablex.concat|concat]]<br />
-[[GAME|QAGAME]] [[tablex]].[[tablex.foreach|foreach]]<br />
-[[GAME|QAGAME]] [[tablex]].[[tablex.foreachi|foreachi]]<br />
-[[GAME|QAGAME]] [[tablex]].[[tablex.getn|getn]]<br />
-[[GAME|QAGAME]] [[tablex]].[[tablex.insert|insert]]<br />
-[[GAME|QAGAME]] [[tablex]].[[tablex.maxn|maxn]]<br />
-[[GAME|QAGAME]] [[tablex]].[[tablex.remove|remove]]<br />
-[[GAME|QAGAME]] [[tablex]].[[tablex.setn|setn]]<br />
-[[GAME|QAGAME]] [[tablex]].[[tablex.sort|sort]]<br />
-[[GAME|QAGAME]] [[tablex]].[[tablex.sortdesc|sortdesc]]<br />
-
-==[[Entity]] ([[Object]])==
-[[GAME|QAGAME]] [[Entity]]:[[Entity.AddEvent|AddEvent]]<br />
-[[GAME|QAGAME]] [[Entity]]:[[Entity.Classname|Classname]]<br />
-[[GAME|QAGAME]] [[Entity]]:[[Entity.Damage|Damage]]<br />
-[[GAME|QAGAME]] [[Entity]]:[[Entity.EntIndex|EntIndex]]<br />
-[[GAME|QAGAME]] [[Entity]]:[[Entity.GetAimVector|GetAimVector]]<br />
-[[GAME|QAGAME]] [[Entity]]:[[Entity.GetInfo|GetInfo]]<br />
-[[GAME|QAGAME]] [[Entity]]:[[Entity.GetMuzzlePos|GetMuzzlePos]]<br />
-[[GAME|QAGAME]] [[Entity]]:[[Entity.GetParent|GetParent]]<br />
-[[GAME|QAGAME]] [[Entity]]:[[Entity.GetPos|GetPos]]<br />
-[[GAME|QAGAME]] [[Entity]]:[[Entity.GetVelocity|GetVelocity]]<br />
-[[GAME|QAGAME]] [[Entity]]:[[Entity.GiveWeapon|GiveWeapon]]<br />
-[[GAME|QAGAME]] [[Entity]]:[[Entity.IsBot|IsBot]]<br />
-[[GAME|QAGAME]] [[Entity]]:[[Entity.IsPlayer|IsPlayer]]<br />
-[[GAME|QAGAME]] [[Entity]]:[[Entity.PlaySound|PlaySound]]<br />
-[[GAME|QAGAME]] [[Entity]]:[[Entity.Remove|Remove]]<br />
-[[GAME|QAGAME]] [[Entity]]:[[Entity.RemovePowerups|RemovePowerups]]<br />
-[[GAME|QAGAME]] [[Entity]]:[[Entity.RemoveWeapons|RemoveWeapons]]<br />
-[[GAME|QAGAME]] [[Entity]]:[[Entity.SendMessage|SendMessage]]<br />
-[[GAME|QAGAME]] [[Entity]]:[[Entity.SetAmmo|SetAmmo]]<br />
-[[GAME|QAGAME]] [[Entity]]:[[Entity.SetCallback|SetCallback]]<br />
-[[GAME|QAGAME]] [[Entity]]:[[Entity.SetInfo|SetInfo]]<br />
-[[GAME|QAGAME]] [[Entity]]:[[Entity.SetPos|SetPos]]<br />
-[[GAME|QAGAME]] [[Entity]]:[[Entity.SetPowerup|SetPowerup]]<br />
-[[GAME|QAGAME]] [[Entity]]:[[Entity.SetVelocity|SetVelocity]]<br />
-[[GAME|QAGAME]] [[Entity]]:[[Entity.SetWeapon|SetWeapon]]<br />
-
-==[[concommand]] ([[Object]])==
-[[GAME|QAGAME]] [[concommand]]:[[concommand.Add|Add]]<br />
-[[GAME|QAGAME]] [[concommand]]:[[concommand.Call|Call]]<br />
-
-==[[coroutine]] ([[Object]])==
-[[GAME|QAGAME]] [[coroutine]]:[[coroutine.create|create]]<br />
-[[GAME|QAGAME]] [[coroutine]]:[[coroutine.resume|resume]]<br />
-[[GAME|QAGAME]] [[coroutine]]:[[coroutine.running|running]]<br />
-[[GAME|QAGAME]] [[coroutine]]:[[coroutine.status|status]]<br />
-[[GAME|QAGAME]] [[coroutine]]:[[coroutine.wrap|wrap]]<br />
-[[GAME|QAGAME]] [[coroutine]]:[[coroutine.yield|yield]]<br />
-
-==[[debug]] ([[Object]])==
-[[GAME|QAGAME]] [[debug]]:[[debug.debug|debug]]<br />
-[[GAME|QAGAME]] [[debug]]:[[debug.getfenv|getfenv]]<br />
-[[GAME|QAGAME]] [[debug]]:[[debug.gethook|gethook]]<br />
-[[GAME|QAGAME]] [[debug]]:[[debug.getinfo|getinfo]]<br />
-[[GAME|QAGAME]] [[debug]]:[[debug.getlocal|getlocal]]<br />
-[[GAME|QAGAME]] [[debug]]:[[debug.getmetatable|getmetatable]]<br />
-[[GAME|QAGAME]] [[debug]]:[[debug.getregistry|getregistry]]<br />
-[[GAME|QAGAME]] [[debug]]:[[debug.getupvalue|getupvalue]]<br />
-[[GAME|QAGAME]] [[debug]]:[[debug.setfenv|setfenv]]<br />
-[[GAME|QAGAME]] [[debug]]:[[debug.sethook|sethook]]<br />
-[[GAME|QAGAME]] [[debug]]:[[debug.setlocal|setlocal]]<br />
-[[GAME|QAGAME]] [[debug]]:[[debug.setmetatable|setmetatable]]<br />
-[[GAME|QAGAME]] [[debug]]:[[debug.setupvalue|setupvalue]]<br />
-[[GAME|QAGAME]] [[debug]]:[[debug.traceback|traceback]]<br />
-
-==[[entity_tabs]] ([[Object]])==
-
-==[[enum_weaponentities]] ([[Object]])==
-
-==[[game_entities]] ([[Object]])==
-
-==[[hook]] ([[Object]])==
-[[GAME|QAGAME]] [[hook]]:[[hook.add|add]]<br />
-[[GAME|QAGAME]] [[hook]]:[[hook.hashook|hashook]]<br />
-
-==[[io]] ([[Object]])==
-[[GAME|QAGAME]] [[io]]:[[io.close|close]]<br />
-[[GAME|QAGAME]] [[io]]:[[io.flush|flush]]<br />
-[[GAME|QAGAME]] [[io]]:[[io.input|input]]<br />
-[[GAME|QAGAME]] [[io]]:[[io.lines|lines]]<br />
-[[GAME|QAGAME]] [[io]]:[[io.open|open]]<br />
-[[GAME|QAGAME]] [[io]]:[[io.output|output]]<br />
-[[GAME|QAGAME]] [[io]]:[[io.popen|popen]]<br />
-[[GAME|QAGAME]] [[io]]:[[io.read|read]]<br />
-[[GAME|QAGAME]] [[io]]:[[io.tmpfile|tmpfile]]<br />
-[[GAME|QAGAME]] [[io]]:[[io.type|type]]<br />
-[[GAME|QAGAME]] [[io]]:[[io.write|write]]<br />
-
-==[[lfs]] ([[Object]])==
-[[GAME|QAGAME]] [[lfs]]:[[lfs.attributes|attributes]]<br />
-[[GAME|QAGAME]] [[lfs]]:[[lfs.chdir|chdir]]<br />
-[[GAME|QAGAME]] [[lfs]]:[[lfs.currentdir|currentdir]]<br />
-[[GAME|QAGAME]] [[lfs]]:[[lfs.dir|dir]]<br />
-[[GAME|QAGAME]] [[lfs]]:[[lfs.lock|lock]]<br />
-[[GAME|QAGAME]] [[lfs]]:[[lfs.mkdir|mkdir]]<br />
-[[GAME|QAGAME]] [[lfs]]:[[lfs.rmdir|rmdir]]<br />
-[[GAME|QAGAME]] [[lfs]]:[[lfs.setmode|setmode]]<br />
-[[GAME|QAGAME]] [[lfs]]:[[lfs.symlinkattributes|symlinkattributes]]<br />
-[[GAME|QAGAME]] [[lfs]]:[[lfs.touch|touch]]<br />
-[[GAME|QAGAME]] [[lfs]]:[[lfs.unlock|unlock]]<br />
-
-==[[math]] ([[Object]])==
-[[GAME|QAGAME]] [[math]]:[[math.abs|abs]]<br />
-[[GAME|QAGAME]] [[math]]:[[math.acos|acos]]<br />
-[[GAME|QAGAME]] [[math]]:[[math.asin|asin]]<br />
-[[GAME|QAGAME]] [[math]]:[[math.atan|atan]]<br />
-[[GAME|QAGAME]] [[math]]:[[math.atan2|atan2]]<br />
-[[GAME|QAGAME]] [[math]]:[[math.ceil|ceil]]<br />
-[[GAME|QAGAME]] [[math]]:[[math.cos|cos]]<br />
-[[GAME|QAGAME]] [[math]]:[[math.cosh|cosh]]<br />
-[[GAME|QAGAME]] [[math]]:[[math.deg|deg]]<br />
-[[GAME|QAGAME]] [[math]]:[[math.exp|exp]]<br />
-[[GAME|QAGAME]] [[math]]:[[math.floor|floor]]<br />
-[[GAME|QAGAME]] [[math]]:[[math.fmod|fmod]]<br />
-[[GAME|QAGAME]] [[math]]:[[math.frexp|frexp]]<br />
-[[GAME|QAGAME]] [[math]]:[[math.ldexp|ldexp]]<br />
-[[GAME|QAGAME]] [[math]]:[[math.log|log]]<br />
-[[GAME|QAGAME]] [[math]]:[[math.log10|log10]]<br />
-[[GAME|QAGAME]] [[math]]:[[math.max|max]]<br />
-[[GAME|QAGAME]] [[math]]:[[math.min|min]]<br />
-[[GAME|QAGAME]] [[math]]:[[math.mod|mod]]<br />
-[[GAME|QAGAME]] [[math]]:[[math.modf|modf]]<br />
-[[GAME|QAGAME]] [[math]]:[[math.pow|pow]]<br />
-[[GAME|QAGAME]] [[math]]:[[math.rad|rad]]<br />
-[[GAME|QAGAME]] [[math]]:[[math.random|random]]<br />
-[[GAME|QAGAME]] [[math]]:[[math.randomseed|randomseed]]<br />
-[[GAME|QAGAME]] [[math]]:[[math.sin|sin]]<br />
-[[GAME|QAGAME]] [[math]]:[[math.sinh|sinh]]<br />
-[[GAME|QAGAME]] [[math]]:[[math.sqrt|sqrt]]<br />
-[[GAME|QAGAME]] [[math]]:[[math.tan|tan]]<br />
-[[GAME|QAGAME]] [[math]]:[[math.tanh|tanh]]<br />
-
-==[[os]] ([[Object]])==
-[[GAME|QAGAME]] [[os]]:[[os.clock|clock]]<br />
-[[GAME|QAGAME]] [[os]]:[[os.date|date]]<br />
-[[GAME|QAGAME]] [[os]]:[[os.difftime|difftime]]<br />
-[[GAME|QAGAME]] [[os]]:[[os.execute|execute]]<br />
-[[GAME|QAGAME]] [[os]]:[[os.exit|exit]]<br />
-[[GAME|QAGAME]] [[os]]:[[os.getenv|getenv]]<br />
-[[GAME|QAGAME]] [[os]]:[[os.remove|remove]]<br />
-[[GAME|QAGAME]] [[os]]:[[os.rename|rename]]<br />
-[[GAME|QAGAME]] [[os]]:[[os.setlocale|setlocale]]<br />
-[[GAME|QAGAME]] [[os]]:[[os.time|time]]<br />
-[[GAME|QAGAME]] [[os]]:[[os.tmpname|tmpname]]<br />
-
-==[[package]] ([[Object]])==
-[[GAME|QAGAME]] [[package]]:[[package.loadlib|loadlib]]<br />
-[[GAME|QAGAME]] [[package]]:[[package.seeall|seeall]]<br />
-
-==[[string]] ([[Object]])==
-[[GAME|QAGAME]] [[string]]:[[string.Explode|Explode]]<br />
-[[GAME|QAGAME]] [[string]]:[[string.FormattedTime|FormattedTime]]<br />
-[[GAME|QAGAME]] [[string]]:[[string.GetExtensionFromFilename|GetExtensionFromFilename]]<br />
-[[GAME|QAGAME]] [[string]]:[[string.GetFileFromFilename|GetFileFromFilename]]<br />
-[[GAME|QAGAME]] [[string]]:[[string.GetPathFromFilename|GetPathFromFilename]]<br />
-[[GAME|QAGAME]] [[string]]:[[string.Implode|Implode]]<br />
-[[GAME|QAGAME]] [[string]]:[[string.Left|Left]]<br />
-[[GAME|QAGAME]] [[string]]:[[string.Replace|Replace]]<br />
-[[GAME|QAGAME]] [[string]]:[[string.Right|Right]]<br />
-[[GAME|QAGAME]] [[string]]:[[string.ToMinutesSeconds|ToMinutesSeconds]]<br />
-[[GAME|QAGAME]] [[string]]:[[string.ToMinutesSecondsMilliseconds|ToMinutesSecondsMilliseconds]]<br />
-[[GAME|QAGAME]] [[string]]:[[string.ToTable|ToTable]]<br />
-[[GAME|QAGAME]] [[string]]:[[string.Trim|Trim]]<br />
-[[GAME|QAGAME]] [[string]]:[[string.TrimLeft|TrimLeft]]<br />
-[[GAME|QAGAME]] [[string]]:[[string.TrimRight|TrimRight]]<br />
-[[GAME|QAGAME]] [[string]]:[[string.URLDecode|URLDecode]]<br />
-[[GAME|QAGAME]] [[string]]:[[string.URLEncode|URLEncode]]<br />
-[[GAME|QAGAME]] [[string]]:[[string.byte|byte]]<br />
-[[GAME|QAGAME]] [[string]]:[[string.char|char]]<br />
-[[GAME|QAGAME]] [[string]]:[[string.dump|dump]]<br />
-[[GAME|QAGAME]] [[string]]:[[string.find|find]]<br />
-[[GAME|QAGAME]] [[string]]:[[string.format|format]]<br />
-[[GAME|QAGAME]] [[string]]:[[string.gfind|gfind]]<br />
-[[GAME|QAGAME]] [[string]]:[[string.gmatch|gmatch]]<br />
-[[GAME|QAGAME]] [[string]]:[[string.gsub|gsub]]<br />
-[[GAME|QAGAME]] [[string]]:[[string.len|len]]<br />
-[[GAME|QAGAME]] [[string]]:[[string.lower|lower]]<br />
-[[GAME|QAGAME]] [[string]]:[[string.match|match]]<br />
-[[GAME|QAGAME]] [[string]]:[[string.rep|rep]]<br />
-[[GAME|QAGAME]] [[string]]:[[string.reverse|reverse]]<br />
-[[GAME|QAGAME]] [[string]]:[[string.sub|sub]]<br />
-[[GAME|QAGAME]] [[string]]:[[string.upper|upper]]<br />
-
-==[[table]] ([[Object]])==
-[[GAME|QAGAME]] [[table]]:[[table.Add|Add]]<br />
-[[GAME|QAGAME]] [[table]]:[[table.ClearKeys|ClearKeys]]<br />
-[[GAME|QAGAME]] [[table]]:[[table.CollapseKeyValue|CollapseKeyValue]]<br />
-[[GAME|QAGAME]] [[table]]:[[table.Copy|Copy]]<br />
-[[GAME|QAGAME]] [[table]]:[[table.Count|Count]]<br />
-[[GAME|QAGAME]] [[table]]:[[table.DeSanitise|DeSanitise]]<br />
-[[GAME|QAGAME]] [[table]]:[[table.ForceInsert|ForceInsert]]<br />
-[[GAME|QAGAME]] [[table]]:[[table.HasValue|HasValue]]<br />
-[[GAME|QAGAME]] [[table]]:[[table.Inherit|Inherit]]<br />
-[[GAME|QAGAME]] [[table]]:[[table.IsSequential|IsSequential]]<br />
-[[GAME|QAGAME]] [[table]]:[[table.LowerKeyNames|LowerKeyNames]]<br />
-[[GAME|QAGAME]] [[table]]:[[table.Merge|Merge]]<br />
-[[GAME|QAGAME]] [[table]]:[[table.Sanitise|Sanitise]]<br />
-[[GAME|QAGAME]] [[table]]:[[table.SortByKey|SortByKey]]<br />
-[[GAME|QAGAME]] [[table]]:[[table.SortByMember|SortByMember]]<br />
-[[GAME|QAGAME]] [[table]]:[[table.ToString|ToString]]<br />
-[[GAME|QAGAME]] [[table]]:[[table.concat|concat]]<br />
-[[GAME|QAGAME]] [[table]]:[[table.foreach|foreach]]<br />
-[[GAME|QAGAME]] [[table]]:[[table.foreachi|foreachi]]<br />
-[[GAME|QAGAME]] [[table]]:[[table.getn|getn]]<br />
-[[GAME|QAGAME]] [[table]]:[[table.insert|insert]]<br />
-[[GAME|QAGAME]] [[table]]:[[table.maxn|maxn]]<br />
-[[GAME|QAGAME]] [[table]]:[[table.remove|remove]]<br />
-[[GAME|QAGAME]] [[table]]:[[table.setn|setn]]<br />
-[[GAME|QAGAME]] [[table]]:[[table.sort|sort]]<br />
-[[GAME|QAGAME]] [[table]]:[[table.sortdesc|sortdesc]]<br />
-
-==[[tablex]] ([[Object]])==
-[[GAME|QAGAME]] [[tablex]]:[[tablex.Add|Add]]<br />
-[[GAME|QAGAME]] [[tablex]]:[[tablex.ClearKeys|ClearKeys]]<br />
-[[GAME|QAGAME]] [[tablex]]:[[tablex.CollapseKeyValue|CollapseKeyValue]]<br />
-[[GAME|QAGAME]] [[tablex]]:[[tablex.Copy|Copy]]<br />
-[[GAME|QAGAME]] [[tablex]]:[[tablex.Count|Count]]<br />
-[[GAME|QAGAME]] [[tablex]]:[[tablex.DeSanitise|DeSanitise]]<br />
-[[GAME|QAGAME]] [[tablex]]:[[tablex.ForceInsert|ForceInsert]]<br />
-[[GAME|QAGAME]] [[tablex]]:[[tablex.HasValue|HasValue]]<br />
-[[GAME|QAGAME]] [[tablex]]:[[tablex.Inherit|Inherit]]<br />
-[[GAME|QAGAME]] [[tablex]]:[[tablex.IsSequential|IsSequential]]<br />
-[[GAME|QAGAME]] [[tablex]]:[[tablex.LowerKeyNames|LowerKeyNames]]<br />
-[[GAME|QAGAME]] [[tablex]]:[[tablex.Merge|Merge]]<br />
-[[GAME|QAGAME]] [[tablex]]:[[tablex.Sanitise|Sanitise]]<br />
-[[GAME|QAGAME]] [[tablex]]:[[tablex.SortByKey|SortByKey]]<br />
-[[GAME|QAGAME]] [[tablex]]:[[tablex.SortByMember|SortByMember]]<br />
-[[GAME|QAGAME]] [[tablex]]:[[tablex.ToString|ToString]]<br />
-[[GAME|QAGAME]] [[tablex]]:[[tablex.concat|concat]]<br />
-[[GAME|QAGAME]] [[tablex]]:[[tablex.foreach|foreach]]<br />
-[[GAME|QAGAME]] [[tablex]]:[[tablex.foreachi|foreachi]]<br />
-[[GAME|QAGAME]] [[tablex]]:[[tablex.getn|getn]]<br />
-[[GAME|QAGAME]] [[tablex]]:[[tablex.insert|insert]]<br />
-[[GAME|QAGAME]] [[tablex]]:[[tablex.maxn|maxn]]<br />
-[[GAME|QAGAME]] [[tablex]]:[[tablex.remove|remove]]<br />
-[[GAME|QAGAME]] [[tablex]]:[[tablex.setn|setn]]<br />
-[[GAME|QAGAME]] [[tablex]]:[[tablex.sort|sort]]<br />
-[[GAME|QAGAME]] [[tablex]]:[[tablex.sortdesc|sortdesc]]<br />
-
-==[[entity_callback_t]] ([[Enum]])==
-[[GAME|QAGAME]] [[entity_callback_t]].[[entity_callback_t.ENTITY_CALLBACK_BLOCKED|ENTITY_CALLBACK_BLOCKED]]<br />
-[[GAME|QAGAME]] [[entity_callback_t]].[[entity_callback_t.ENTITY_CALLBACK_DIE|ENTITY_CALLBACK_DIE]]<br />
-[[GAME|QAGAME]] [[entity_callback_t]].[[entity_callback_t.ENTITY_CALLBACK_PAIN|ENTITY_CALLBACK_PAIN]]<br />
-[[GAME|QAGAME]] [[entity_callback_t]].[[entity_callback_t.ENTITY_CALLBACK_REACHED|ENTITY_CALLBACK_REACHED]]<br />
-[[GAME|QAGAME]] [[entity_callback_t]].[[entity_callback_t.ENTITY_CALLBACK_THINK|ENTITY_CALLBACK_THINK]]<br />
-[[GAME|QAGAME]] [[entity_callback_t]].[[entity_callback_t.ENTITY_CALLBACK_TOUCH|ENTITY_CALLBACK_TOUCH]]<br />
-[[GAME|QAGAME]] [[entity_callback_t]].[[entity_callback_t.ENTITY_CALLBACK_USE|ENTITY_CALLBACK_USE]]<br />
-
-==[[entity_event_t]] ([[Enum]])==
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_NONE|EV_NONE]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_FOOTSTEP|EV_FOOTSTEP]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_FOOTSTEP_METAL|EV_FOOTSTEP_METAL]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_FOOTSPLASH|EV_FOOTSPLASH]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_FOOTWADE|EV_FOOTWADE]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_SWIM|EV_SWIM]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_STEP_4|EV_STEP_4]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_STEP_8|EV_STEP_8]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_STEP_12|EV_STEP_12]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_STEP_16|EV_STEP_16]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_FALL_SHORT|EV_FALL_SHORT]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_FALL_MEDIUM|EV_FALL_MEDIUM]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_FALL_FAR|EV_FALL_FAR]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_JUMP_PAD|EV_JUMP_PAD]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_JUMP|EV_JUMP]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_WATER_TOUCH|EV_WATER_TOUCH]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_WATER_LEAVE|EV_WATER_LEAVE]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_WATER_UNDER|EV_WATER_UNDER]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_WATER_CLEAR|EV_WATER_CLEAR]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_ITEM_PICKUP|EV_ITEM_PICKUP]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_GLOBAL_ITEM_PICKUP|EV_GLOBAL_ITEM_PICKUP]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_NOAMMO|EV_NOAMMO]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_CHANGE_WEAPON|EV_CHANGE_WEAPON]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_FIRE_WEAPON|EV_FIRE_WEAPON]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_USE_ITEM0|EV_USE_ITEM0]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_USE_ITEM1|EV_USE_ITEM1]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_USE_ITEM2|EV_USE_ITEM2]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_USE_ITEM3|EV_USE_ITEM3]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_USE_ITEM4|EV_USE_ITEM4]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_USE_ITEM5|EV_USE_ITEM5]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_USE_ITEM6|EV_USE_ITEM6]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_USE_ITEM7|EV_USE_ITEM7]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_USE_ITEM8|EV_USE_ITEM8]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_USE_ITEM9|EV_USE_ITEM9]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_USE_ITEM10|EV_USE_ITEM10]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_USE_ITEM11|EV_USE_ITEM11]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_USE_ITEM12|EV_USE_ITEM12]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_USE_ITEM13|EV_USE_ITEM13]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_USE_ITEM14|EV_USE_ITEM14]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_USE_ITEM15|EV_USE_ITEM15]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_ITEM_RESPAWN|EV_ITEM_RESPAWN]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_ITEM_POP|EV_ITEM_POP]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_PLAYER_TELEPORT_IN|EV_PLAYER_TELEPORT_IN]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_PLAYER_TELEPORT_OUT|EV_PLAYER_TELEPORT_OUT]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_GRENADE_BOUNCE|EV_GRENADE_BOUNCE]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_GENERAL_SOUND|EV_GENERAL_SOUND]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_GLOBAL_SOUND|EV_GLOBAL_SOUND]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_GLOBAL_TEAM_SOUND|EV_GLOBAL_TEAM_SOUND]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_BULLET_HIT_FLESH|EV_BULLET_HIT_FLESH]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_BULLET_HIT_WALL|EV_BULLET_HIT_WALL]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_MISSILE_HIT|EV_MISSILE_HIT]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_MISSILE_MISS|EV_MISSILE_MISS]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_MISSILE_MISS_METAL|EV_MISSILE_MISS_METAL]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_RAILTRAIL|EV_RAILTRAIL]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_SHOTGUN|EV_SHOTGUN]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_BULLET|EV_BULLET]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_PAIN|EV_PAIN]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_DEATH1|EV_DEATH1]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_DEATH2|EV_DEATH2]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_DEATH3|EV_DEATH3]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_OBITUARY|EV_OBITUARY]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_POWERUP_QUAD|EV_POWERUP_QUAD]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_POWERUP_BATTLESUIT|EV_POWERUP_BATTLESUIT]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_POWERUP_REGEN|EV_POWERUP_REGEN]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_GIB_PLAYER|EV_GIB_PLAYER]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_SCOREPLUM|EV_SCOREPLUM]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_PROXIMITY_MINE_STICK|EV_PROXIMITY_MINE_STICK]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_PROXIMITY_MINE_TRIGGER|EV_PROXIMITY_MINE_TRIGGER]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_KAMIKAZE|EV_KAMIKAZE]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_OBELISKEXPLODE|EV_OBELISKEXPLODE]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_OBELISKPAIN|EV_OBELISKPAIN]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_INVUL_IMPACT|EV_INVUL_IMPACT]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_JUICED|EV_JUICED]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_LIGHTNINGBOLT|EV_LIGHTNINGBOLT]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_DEBUG_LINE|EV_DEBUG_LINE]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_STOPLOOPINGSOUND|EV_STOPLOOPINGSOUND]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_TAUNT|EV_TAUNT]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_TAUNT_YES|EV_TAUNT_YES]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_TAUNT_NO|EV_TAUNT_NO]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_TAUNT_FOLLOWME|EV_TAUNT_FOLLOWME]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_TAUNT_GETFLAG|EV_TAUNT_GETFLAG]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_TAUNT_GUARDBASE|EV_TAUNT_GUARDBASE]]<br />
-[[GAME|QAGAME]] [[entity_event_t]].[[entity_event_t.EV_TAUNT_PATROL|EV_TAUNT_PATROL]]<br />
-
-==[[meansOfDeath_t]] ([[Enum]])==
-[[GAME|QAGAME]] [[meansOfDeath_t]].[[meansOfDeath_t.MOD_UNKNOWN|MOD_UNKNOWN]]<br />
-[[GAME|QAGAME]] [[meansOfDeath_t]].[[meansOfDeath_t.MOD_SHOTGUN|MOD_SHOTGUN]]<br />
-[[GAME|QAGAME]] [[meansOfDeath_t]].[[meansOfDeath_t.MOD_GAUNTLET|MOD_GAUNTLET]]<br />
-[[GAME|QAGAME]] [[meansOfDeath_t]].[[meansOfDeath_t.MOD_MACHINEGUN|MOD_MACHINEGUN]]<br />
-[[GAME|QAGAME]] [[meansOfDeath_t]].[[meansOfDeath_t.MOD_GRENADE|MOD_GRENADE]]<br />
-[[GAME|QAGAME]] [[meansOfDeath_t]].[[meansOfDeath_t.MOD_GRENADE_SPLASH|MOD_GRENADE_SPLASH]]<br />
-[[GAME|QAGAME]] [[meansOfDeath_t]].[[meansOfDeath_t.MOD_ROCKET|MOD_ROCKET]]<br />
-[[GAME|QAGAME]] [[meansOfDeath_t]].[[meansOfDeath_t.MOD_ROCKET_SPLASH|MOD_ROCKET_SPLASH]]<br />
-[[GAME|QAGAME]] [[meansOfDeath_t]].[[meansOfDeath_t.MOD_PLASMA|MOD_PLASMA]]<br />
-[[GAME|QAGAME]] [[meansOfDeath_t]].[[meansOfDeath_t.MOD_PLASMA_SPLASH|MOD_PLASMA_SPLASH]]<br />
-[[GAME|QAGAME]] [[meansOfDeath_t]].[[meansOfDeath_t.MOD_RAILGUN|MOD_RAILGUN]]<br />
-[[GAME|QAGAME]] [[meansOfDeath_t]].[[meansOfDeath_t.MOD_LIGHTNING|MOD_LIGHTNING]]<br />
-[[GAME|QAGAME]] [[meansOfDeath_t]].[[meansOfDeath_t.MOD_BFG|MOD_BFG]]<br />
-[[GAME|QAGAME]] [[meansOfDeath_t]].[[meansOfDeath_t.MOD_BFG_SPLASH|MOD_BFG_SPLASH]]<br />
-[[GAME|QAGAME]] [[meansOfDeath_t]].[[meansOfDeath_t.MOD_WATER|MOD_WATER]]<br />
-[[GAME|QAGAME]] [[meansOfDeath_t]].[[meansOfDeath_t.MOD_SLIME|MOD_SLIME]]<br />
-[[GAME|QAGAME]] [[meansOfDeath_t]].[[meansOfDeath_t.MOD_LAVA|MOD_LAVA]]<br />
-[[GAME|QAGAME]] [[meansOfDeath_t]].[[meansOfDeath_t.MOD_CRUSH|MOD_CRUSH]]<br />
-[[GAME|QAGAME]] [[meansOfDeath_t]].[[meansOfDeath_t.MOD_TELEFRAG|MOD_TELEFRAG]]<br />
-[[GAME|QAGAME]] [[meansOfDeath_t]].[[meansOfDeath_t.MOD_FALLING|MOD_FALLING]]<br />
-[[GAME|QAGAME]] [[meansOfDeath_t]].[[meansOfDeath_t.MOD_SUICIDE|MOD_SUICIDE]]<br />
-[[GAME|QAGAME]] [[meansOfDeath_t]].[[meansOfDeath_t.MOD_TARGET_LASER|MOD_TARGET_LASER]]<br />
-[[GAME|QAGAME]] [[meansOfDeath_t]].[[meansOfDeath_t.MOD_TRIGGER_HURT|MOD_TRIGGER_HURT]]<br />
-[[GAME|QAGAME]] [[meansOfDeath_t]].[[meansOfDeath_t.MOD_GRAPPLE|MOD_GRAPPLE]]<br />
-[[GAME|QAGAME]] [[meansOfDeath_t]].[[meansOfDeath_t.MOD_MAX|MOD_MAX]]<br />
-
-==[[persEnum_t]] ([[Enum]])==
-[[GAME|QAGAME]] [[persEnum_t]].[[persEnum_t.PERS_SCORE|PERS_SCORE]]<br />
-[[GAME|QAGAME]] [[persEnum_t]].[[persEnum_t.PERS_HITS|PERS_HITS]]<br />
-[[GAME|QAGAME]] [[persEnum_t]].[[persEnum_t.PERS_RANK|PERS_RANK]]<br />
-[[GAME|QAGAME]] [[persEnum_t]].[[persEnum_t.PERS_TEAM|PERS_TEAM]]<br />
-[[GAME|QAGAME]] [[persEnum_t]].[[persEnum_t.PERS_SPAWN_COUNT|PERS_SPAWN_COUNT]]<br />
-[[GAME|QAGAME]] [[persEnum_t]].[[persEnum_t.PERS_PLAYEREVENTS|PERS_PLAYEREVENTS]]<br />
-[[GAME|QAGAME]] [[persEnum_t]].[[persEnum_t.PERS_ATTACKER|PERS_ATTACKER]]<br />
-[[GAME|QAGAME]] [[persEnum_t]].[[persEnum_t.PERS_ATTACKEE_ARMOR|PERS_ATTACKEE_ARMOR]]<br />
-[[GAME|QAGAME]] [[persEnum_t]].[[persEnum_t.PERS_KILLED|PERS_KILLED]]<br />
-[[GAME|QAGAME]] [[persEnum_t]].[[persEnum_t.PERS_IMPRESSIVE_COUNT|PERS_IMPRESSIVE_COUNT]]<br />
-[[GAME|QAGAME]] [[persEnum_t]].[[persEnum_t.PERS_EXCELLENT_COUNT|PERS_EXCELLENT_COUNT]]<br />
-[[GAME|QAGAME]] [[persEnum_t]].[[persEnum_t.PERS_DEFEND_COUNT|PERS_DEFEND_COUNT]]<br />
-[[GAME|QAGAME]] [[persEnum_t]].[[persEnum_t.PERS_ASSIST_COUNT|PERS_ASSIST_COUNT]]<br />
-[[GAME|QAGAME]] [[persEnum_t]].[[persEnum_t.PERS_GAUNTLET_FRAG_COUNT|PERS_GAUNTLET_FRAG_COUNT]]<br />
-[[GAME|QAGAME]] [[persEnum_t]].[[persEnum_t.PERS_CAPTURES|PERS_CAPTURES]]<br />
-
-==[[playerinfo_t]] ([[Enum]])==
-[[GAME|QAGAME]] [[playerinfo_t]].[[playerinfo_t.PLAYERINFO_ZERO|PLAYERINFO_ZERO]]<br />
-[[GAME|QAGAME]] [[playerinfo_t]].[[playerinfo_t.PLAYERINFO_NAME|PLAYERINFO_NAME]]<br />
-[[GAME|QAGAME]] [[playerinfo_t]].[[playerinfo_t.PLAYERINFO_HEALTH|PLAYERINFO_HEALTH]]<br />
-[[GAME|QAGAME]] [[playerinfo_t]].[[playerinfo_t.PLAYERINFO_SCORE|PLAYERINFO_SCORE]]<br />
-[[GAME|QAGAME]] [[playerinfo_t]].[[playerinfo_t.PLAYERINFO_MAX|PLAYERINFO_MAX]]<br />
-
-==[[powerup_t]] ([[Enum]])==
-[[GAME|QAGAME]] [[powerup_t]].[[powerup_t.PW_NONE|PW_NONE]]<br />
-[[GAME|QAGAME]] [[powerup_t]].[[powerup_t.PW_QUAD|PW_QUAD]]<br />
-[[GAME|QAGAME]] [[powerup_t]].[[powerup_t.PW_BATTLESUIT|PW_BATTLESUIT]]<br />
-[[GAME|QAGAME]] [[powerup_t]].[[powerup_t.PW_HASTE|PW_HASTE]]<br />
-[[GAME|QAGAME]] [[powerup_t]].[[powerup_t.PW_INVIS|PW_INVIS]]<br />
-[[GAME|QAGAME]] [[powerup_t]].[[powerup_t.PW_REGEN|PW_REGEN]]<br />
-[[GAME|QAGAME]] [[powerup_t]].[[powerup_t.PW_FLIGHT|PW_FLIGHT]]<br />
-[[GAME|QAGAME]] [[powerup_t]].[[powerup_t.PW_REDFLAG|PW_REDFLAG]]<br />
-[[GAME|QAGAME]] [[powerup_t]].[[powerup_t.PW_BLUEFLAG|PW_BLUEFLAG]]<br />
-[[GAME|QAGAME]] [[powerup_t]].[[powerup_t.PW_NUM_POWERUPS|PW_NUM_POWERUPS]]<br />
-
-==[[team_t]] ([[Enum]])==
-[[GAME|QAGAME]] [[team_t]].[[team_t.TEAM_FREE|TEAM_FREE]]<br />
-[[GAME|QAGAME]] [[team_t]].[[team_t.TEAM_RED|TEAM_RED]]<br />
-[[GAME|QAGAME]] [[team_t]].[[team_t.TEAM_BLUE|TEAM_BLUE]]<br />
-[[GAME|QAGAME]] [[team_t]].[[team_t.TEAM_SPECTATOR|TEAM_SPECTATOR]]<br />
-[[GAME|QAGAME]] [[team_t]].[[team_t.TEAM_NUM_TEAMS|TEAM_NUM_TEAMS]]<br />
-
-==[[vector_t]] ([[Enum]])==
-[[GAME|QAGAME]] [[vector_t]].[[vector_t.X|X]]<br />
-[[GAME|QAGAME]] [[vector_t]].[[vector_t.Y|Y]]<br />
-[[GAME|QAGAME]] [[vector_t]].[[vector_t.Z|Z]]<br />
-
-==[[weapon_t]] ([[Enum]])==
-[[GAME|QAGAME]] [[weapon_t]].[[weapon_t.WP_NONE|WP_NONE]]<br />
-[[GAME|QAGAME]] [[weapon_t]].[[weapon_t.WP_GAUNTLET|WP_GAUNTLET]]<br />
-[[GAME|QAGAME]] [[weapon_t]].[[weapon_t.WP_MACHINEGUN|WP_MACHINEGUN]]<br />
-[[GAME|QAGAME]] [[weapon_t]].[[weapon_t.WP_SHOTGUN|WP_SHOTGUN]]<br />
-[[GAME|QAGAME]] [[weapon_t]].[[weapon_t.WP_GRENADE_LAUNCHER|WP_GRENADE_LAUNCHER]]<br />
-[[GAME|QAGAME]] [[weapon_t]].[[weapon_t.WP_ROCKET_LAUNCHER|WP_ROCKET_LAUNCHER]]<br />
-[[GAME|QAGAME]] [[weapon_t]].[[weapon_t.WP_LIGHTNING|WP_LIGHTNING]]<br />
-[[GAME|QAGAME]] [[weapon_t]].[[weapon_t.WP_RAILGUN|WP_RAILGUN]]<br />
-[[GAME|QAGAME]] [[weapon_t]].[[weapon_t.WP_PLASMAGUN|WP_PLASMAGUN]]<br />
-[[GAME|QAGAME]] [[weapon_t]].[[weapon_t.WP_BFG|WP_BFG]]<br />
-[[GAME|QAGAME]] [[weapon_t]].[[weapon_t.WP_GRAPPLING_HOOK|WP_GRAPPLING_HOOK]]<br />
-[[GAME|QAGAME]] [[weapon_t]].[[weapon_t.WP_NUM_WEAPONS|WP_NUM_WEAPONS]]<br />
