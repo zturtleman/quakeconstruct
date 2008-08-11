@@ -454,6 +454,10 @@ void ClientTimerActions( gentity_t *ent, int msec ) {
 	client = ent->client;
 	client->timeResidual += msec;
 
+	if(ent->client->luamaxhealth != 0) {
+		client->ps.stats[STAT_MAX_HEALTH] = ent->client->luamaxhealth;
+	}
+
 	while ( client->timeResidual >= 1000 ) {
 		client->timeResidual -= 1000;
 

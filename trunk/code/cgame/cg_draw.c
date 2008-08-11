@@ -663,6 +663,10 @@ static void CG_DrawStatusBar( void ) {
 		}
 
 	}
+
+	trap_R_SetColor( colors[3] );
+	CG_DrawField(370,10,3,ps->luatest);
+	CG_DrawSmallString(10,10,ps->luatest2,255);
 #ifdef MISSIONPACK
 	//
 	// cubes

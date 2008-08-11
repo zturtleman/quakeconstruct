@@ -812,6 +812,41 @@ int qlua_setcallback(lua_State *L) {
 	return 0;
 }
 
+static int qlua_setmaxhealth(lua_State *L) {
+	gentity_t	*luaentity;
+	int			val=0;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TNUMBER);
+
+	luaentity = lua_toentity(L,1);
+	val = lua_tointeger(L,2);
+	if(luaentity != NULL && luaentity->client) {
+		luaentity->client->ps.luatest = 2;
+		sprintf(luaentity->client->ps.luatest2,"Max Health:");
+		if(val <= 0 && luaentity->client->luamaxhealth != 0) {
+			luaentity->client->ps.stats[STAT_MAX_HEALTH] = luaentity->client->pers.maxHealth;
+			luaentity->client->luamaxhealth = 0;
+		} else {
+			luaentity->client->luamaxhealth = val;
+		}
+	}
+	return 0;
+}
+
+static int qlua_getmaxhealth(lua_State *L) {
+	gentity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL && luaentity->client) {
+		lua_pushinteger(L,luaentity->client->luamaxhealth);
+		return 1;
+	}
+	return 0;
+}
+
 static int Entity_tostring (lua_State *L)
 {
   lua_pushfstring(L, "Entity: %p", lua_touserdata(L, 1));
@@ -848,6 +883,8 @@ static const luaL_reg Entity_methods[] = {
   {"GiveWeapon",	qlua_giveweapon},
   {"SetAmmo",		qlua_setammo},
   {"SetPowerup",	qlua_setpowerup},
+  {"GetMaxHealth",	qlua_getmaxhealth},
+  {"SetMaxHealth",	qlua_setmaxhealth},
   {"RemoveWeapons", qlua_removeweapons},
   {"RemovePowerups",	qlua_removepowerups},
   {"Damage",		qlua_damageplayer},
@@ -951,6 +988,7 @@ int qlua_createEntity(lua_State *L) {
 		ent->target_ent = NULL;
 		ent->s.pos.trType = TR_GRAVITY;
 		ent->s.pos.trTime = level.time;
+		VectorCopy(ent->s.pos.trBase,ent->s.origin2); 
 		qlua_LinkEntity(ent);
 		//strcpy(ent->classname, classname);
 		lua_pushentity(L,ent);
