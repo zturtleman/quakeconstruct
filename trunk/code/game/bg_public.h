@@ -685,9 +685,10 @@ typedef enum {
 	ET_TELEPORT_TRIGGER,
 	ET_INVISIBLE,
 	ET_GRAPPLE,				// grapple hooked on wall
-	ET_TEAM,
+//	ET_TEAM,
+	ET_LUA,
 
-	ET_EVENTS				// any of the EV_* events can be added freestanding
+	ET_EVENTS,				// any of the EV_* events can be added freestanding
 							// by setting eType to ET_EVENTS + eventNum
 							// this avoids having to set eFlags and eventNum
 } entityType_t;
