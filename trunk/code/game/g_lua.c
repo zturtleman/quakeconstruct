@@ -45,13 +45,13 @@ int message(lua_State *L) {
 
 int messageAllPlayers(lua_State *L) {
 	const char *msg = "";
-	int center = 0;
+	qboolean center = 0;
 
 	if(lua_gettop(L) > 0) {
 		msg = lua_tostring(L,1);
-		center = lua_tointeger(L,2);
+		center = lua_toboolean(L,2);
 		if(msg) {
-			if(center) {
+			if(!center) {
 				trap_SendServerCommand( -1, va("print \"%s\"", msg) );
 			} else {
 				trap_SendServerCommand( -1, va("cp \"%s\"",msg) );
@@ -78,6 +78,35 @@ int bitwiseOr(lua_State *L) {
 		a = lua_tointeger(L,1);
 		b = lua_tointeger(L,2);
 		lua_pushinteger(L,a | b);
+		return 1;
+	}
+	return 0;
+}
+
+int bitwiseShift(lua_State *L) {
+	int a,b;
+	if(lua_gettop(L) == 2) {
+		a = lua_tointeger(L,1);
+		b = lua_tointeger(L,2);
+		if(b > 0) {
+			lua_pushinteger(L,a >> b);
+		} else if(b < 0) {
+			b = -b;
+			lua_pushinteger(L,a << b);
+		} else {
+			lua_pushinteger(L,a);
+		}
+		return 1;
+	}
+	return 0;
+}
+
+int bitwiseXor(lua_State *L) {
+	int a,b;
+	if(lua_gettop(L) == 2) {
+		a = lua_tointeger(L,1);
+		b = lua_tointeger(L,2);
+		lua_pushinteger(L,a ^ b);
 		return 1;
 	}
 	return 0;
@@ -116,9 +145,25 @@ void qlua_pcall(lua_State *L, int nargs, int nresults, qboolean washook) {
 		error(L, lua_tostring(L, -1));
 }
 
+int qlua_runstr(lua_State *L) {
+	const char *str = "";
+
+	if(lua_gettop(L) > 0) {
+		if(lua_type(L,1) == LUA_TSTRING) {
+			str = lua_tostring(L,1);
+
+			if(luaL_loadstring(L,str) || lua_pcall(L, 0, 0, 0)) {
+				lua_error(L);
+				return 1;
+			}
+		}
+	}
+	return 0;
+}
+
 qboolean FS_doScript( const char *filename ) {
 	if(luaL_loadfile(L,filename) || lua_pcall(L, 0, 0, 0)) {
-		error(L, lua_tostring(L, -1));
+		return qfalse;
 	}
 
 	/*char		text[20000];
@@ -154,7 +199,10 @@ int qlua_includefile(lua_State *L) {
 
 	if(lua_gettop(L) > 0) {
 		filename = lua_tostring(L,1);
-		FS_doScript(filename);
+		if(!FS_doScript(filename)) {
+			lua_error(L);
+			return 1;
+		}
 	}
 	return 0;
 }
@@ -173,7 +221,10 @@ void InitServerLua( void ) {
 	lua_register(L,"sendToAll",messageAllPlayers);
 	lua_register(L,"bitAnd",bitwiseAnd);
 	lua_register(L,"bitOr",bitwiseOr);
+	lua_register(L,"bitXor",bitwiseXor);
+	lua_register(L,"bitShift",bitwiseShift);
 	lua_register(L,"include",qlua_includefile);
+	lua_register(L,"runString",qlua_runstr);
 
 	G_Printf("CONTENTS_AREAPORTAL = %i\n",CONTENTS_AREAPORTAL);
 	G_Printf("CONTENTS_BODY = %i\n",CONTENTS_BODY);
@@ -210,7 +261,9 @@ void DoLuaInit( void ) {
 	//if(luaL_loadfile(L,"lua/init.lua") || lua_pcall(L, 0, 0, 0)) {
     //    error(L, lua_tostring(L, -1));
 	//}
-	FS_doScript("lua/init.lua");
+	if(!FS_doScript("lua/init.lua")) {
+		error(L, lua_tostring(L, -1));
+	}
 }
 
 void DoLuaIncludes( void ) {
@@ -218,7 +271,9 @@ void DoLuaIncludes( void ) {
 	//if(luaL_loadfile(L,"lua/includes/init.lua") || lua_pcall(L, 0, 0, 0)) {
     //    error(L, lua_tostring(L, -1));
 	//}
-	FS_doScript("lua/includes/init.lua");
+	if(!FS_doScript("lua/includes/init.lua")) {
+		error(L, lua_tostring(L, -1));
+	}
 }
 
 lua_State *GetServerLuaState( void ) {

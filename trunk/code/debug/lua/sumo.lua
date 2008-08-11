@@ -30,13 +30,6 @@ local function PlayerSpawned(cl)
 	stopResetTimer(cl,nil)
 end
 
-local function vtable(v)
-	local t = getmetatable(v)
-	t.x = v:get("x")
-	t.y = v:get("y")
-	t.z = v:get("z")
-end
-
 local function vlen(v)
 	return math.sqrt((v.x*v.x) + (v.y*v.y) + (v.z*v.z))
 end
@@ -64,8 +57,6 @@ end
 local function DamagePush(self,inflictor,attacker,damage,meansOfDeath,dir,point)
 	if(dir) then
 		local pvel = self:GetVelocity()
-		vtable(pvel)
-		vtable(dir)
 		
 		local dmg = damage
 		if(dmg > 10) then dmg = 10 end
@@ -75,9 +66,11 @@ local function DamagePush(self,inflictor,attacker,damage,meansOfDeath,dir,point)
 			nvel = nvel / 2
 		end
 		
-		pvel:set("x",pvel:get("x") + dir.x*nvel)
-		pvel:set("y",pvel:get("y") + dir.y*nvel)
-		pvel:set("z",pvel:get("z") + dir.z*nvel)
+		if(meansOfDeath == MOD_GAUNTLET) then
+			nvel = nvel * 4
+		end
+		
+		pvel = vAdd(pvel,vMul(dir,nvel))
 		
 		self:SetVelocity(pvel)
 	end
@@ -115,7 +108,6 @@ function velTest()
 	for k,v in pairs(GetAllEntities()) do
 		if(v:IsPlayer() and v:GetInfo()["health"] > 0) then
 			local pvel = v:GetVelocity()
-			vtable(pvel)
 			local spd = pvel.z
 			local tab = GetEntityTable(v)
 			
@@ -143,6 +135,6 @@ function velTest()
 	end
 end
 
-hook.add("Think",velTest)
-hook.add("PlayerSpawned",PlayerSpawned)
-hook.add("PlayerDamaged",AuxDamage)
+hook.add("Think","Sumo",velTest)
+hook.add("PlayerSpawned","Sumo",PlayerSpawned)
+hook.add("PlayerDamaged","Sumo",AuxDamage)

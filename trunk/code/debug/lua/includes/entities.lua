@@ -91,9 +91,9 @@ function GetEntityTable(ent)
 end
 
 
-hook.add("EntityLinked",LinkEntity)
-hook.add("EntityUnlinked",UnlinkEntity)
-hook.add("PlayerDisconnected",UnlinkPlayer)
-hook.add("PlayerSpawned",LinkEntity)
+hook.add("EntityLinked","_LinkToLua",LinkEntity)
+hook.add("EntityUnlinked","_UnlinkFromLua",UnlinkEntity)
+hook.add("PlayerDisconnected","_UnlinkFromLua",UnlinkPlayer)
+hook.add("PlayerSpawned","_LinkToLua",LinkEntity)
 
 print("^3Entity code loaded.\n")

@@ -233,6 +233,7 @@ static void CG_Item( centity_t *cent ) {
 	weaponInfo_t	*wi;
 
 	es = &cent->currentState;
+
 	if ( es->modelindex >= bg_numItems ) {
 		CG_Error( "Bad item index %i on entity", es->modelindex );
 	}
@@ -923,6 +924,32 @@ static void CG_TeamBase( centity_t *cent ) {
 #endif
 }
 
+static void CG_LuaEntity( centity_t *cent ) {
+	CG_Printf("Render ET_Lua\n");
+	CG_Missile(cent);
+}
+
+/*
+	refEntity_t			ent;
+	entityState_t		*s1;
+
+	s1 = &cent->currentState;
+
+	// create the render entity
+	memset (&ent, 0, sizeof(ent));
+	VectorCopy( s1->pos.trBase, ent.origin );
+	VectorCopy( s1->pos.trBase, ent.oldorigin );
+	AxisClear( ent.axis );
+
+	ent.reType = RT_SPRITE;
+	ent.radius = 16;
+	ent.rotation = 0;
+	ent.customShader = cgs.media.plasmaBallShader;
+
+	// add to refresh list
+	trap_R_AddRefEntityToScene(&ent);
+*/
+
 /*
 ===============
 CG_AddCEntity
@@ -931,7 +958,7 @@ CG_AddCEntity
 */
 static void CG_AddCEntity( centity_t *cent ) {
 	// event-only entities will have been dealt with already
-	if ( cent->currentState.eType >= ET_EVENTS ) {
+	if ( cent->currentState.eType >= (ET_EVENTS) ) {
 		return;
 	}
 
@@ -976,8 +1003,11 @@ static void CG_AddCEntity( centity_t *cent ) {
 	case ET_GRAPPLE:
 		CG_Grapple( cent );
 		break;
-	case ET_TEAM:
-		CG_TeamBase( cent );
+	//case ET_TEAM:
+		//CG_TeamBase( cent );
+		//break;
+	case ET_LUA:
+		CG_LuaEntity( cent );
 		break;
 	}
 }

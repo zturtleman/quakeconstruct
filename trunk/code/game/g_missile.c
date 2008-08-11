@@ -517,7 +517,7 @@ void G_RunMissile( gentity_t *ent ) {
 			return;
 		}
 		G_MissileImpact( ent, &tr );
-		if ( ent->s.eType != ET_MISSILE ) {
+		if ( ent->s.eType != ET_MISSILE && ent->s.eType != ET_LUA ) {
 			return;		// exploded
 		}
 	}
@@ -532,6 +532,7 @@ void G_RunMissile( gentity_t *ent ) {
 	}
 #endif
 	// check think function after bouncing
+	G_TouchTriggers( ent );
 	G_RunThink( ent );
 }
 

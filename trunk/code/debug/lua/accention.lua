@@ -1,6 +1,6 @@
 --Remove Some Of The Items From The Map
 local function RemoveStuff()
-	local tab = GetAllEntities()
+	local tab = table.Copy(GetAllEntities())
 	for k,v in pairs(tab) do
 		local class = v:Classname()
 		if(string.find(class,"weapon") or string.find(class,"ammo") or string.find(class,"item")) then
@@ -16,7 +16,10 @@ local function Think()
 	for k,v in pairs(tab) do
 		if(v:IsPlayer() and v:GetInfo()["connected"]) then
 			local weap = v:GetInfo()["weapon"]
-			pcall(v.SetAmmo,v,weap,100) --Give The Player Ammo
+			
+			if(v:IsBot()) then
+				pcall(v.SetAmmo,v,weap,100) --Bots need ammo or else they go to gauntlet
+			end
 			
 			if(GetEntityTable(v).dtime and GetEntityTable(v).dtime < CurTime()) then
 				--Gib The Player
@@ -28,6 +31,7 @@ local function Think()
 				if(GetEntityTable(v).adtime < CurTime()) then
 					--Gib The Player
 					v:Damage(nil,nil,1000,12)
+					v:SetInfo(PLAYERINFO_SCORE,v:GetInfo()["score"]+1)
 					GetEntityTable(v).adtime = nil
 				else
 					--Tell The Player He's Gonna Be Gibbed
@@ -82,36 +86,46 @@ local function PlayerSpawned(cl)
 end
 
 local function PlayerKilled(self,inflictor,attacker,damage,meansOfDeath)
-	local weap = attacker:GetInfo()["weapon"]
-	if(attacker:IsPlayer()) then ApplyNextWeap(attacker) end
+	if(attacker != nil) then
+		local weap = attacker:GetInfo()["weapon"]
+		if(attacker:IsPlayer()) then ApplyNextWeap(attacker) end
+	end
+	
 	GetEntityTable(self).dtime = CurTime() + 1
 end
 
 local function PlayerDamaged(self,inflictor,attacker,damage,meansOfDeath)
-	local hp = attacker:GetInfo(attacker)["health"]
-	if(hp) then
-		if(hp < 200) then
-			attacker:SetInfo(PLAYERINFO_HEALTH,hp + damage)
-			hp = attacker:GetInfo()["health"]
-		end
-		if(hp > 200) then
-			attacker:SetInfo(PLAYERINFO_HEALTH,200)
+	if(attacker != nil) then 
+		local hp = attacker:GetInfo(attacker)["health"]
+		if(hp) then
+			if(hp < 200) then
+				attacker:SetInfo(PLAYERINFO_HEALTH,hp + damage)
+				hp = attacker:GetInfo()["health"]
+			end
+			if(hp > 200) then
+				attacker:SetInfo(PLAYERINFO_HEALTH,200)
+			end
 		end
 	end
-	damage = damage * 2
 	if(self:GetInfo()["health"] <= 0) then
 		damage = 0
 	else
 		if(damage > self:GetInfo()["health"]) then
 			damage = self:GetInfo()["health"]
+			return damage
 		end
 	end
+	damage = damage * 2
 	return damage
 end
 
-hook.add("PlayerSpawned",PlayerSpawned)
-hook.add("PlayerJoined",PlayerJoined)
-hook.add("PlayerDamaged",PlayerDamaged)
-hook.add("PlayerKilled",PlayerKilled)
-hook.add("ShouldDropItem",function() return false end)
-hook.add("Think",Think)
+hook.add("PlayerSpawned","Accention",PlayerSpawned)
+hook.add("PlayerJoined","Accention",PlayerJoined)
+hook.add("PlayerDamaged","Accention",PlayerDamaged)
+hook.add("PlayerKilled","Accention",PlayerKilled)
+hook.add("ShouldDropItem","Accention",function() return false end)
+hook.add("Think","Accention",Think)
+
+for k,v in pairs(GetAllPlayers()) do
+	PlayerSpawned(v)
+end
