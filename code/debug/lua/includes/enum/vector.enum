@@ -1,0 +1,5 @@
+typedef enum {
+	X,
+	Y,
+	Z
+} vector_t;
