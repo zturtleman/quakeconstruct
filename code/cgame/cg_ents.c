@@ -925,8 +925,23 @@ static void CG_TeamBase( centity_t *cent ) {
 }
 
 static void CG_LuaEntity( centity_t *cent ) {
-	CG_Printf("Render ET_Lua\n");
-	CG_Missile(cent);
+	refEntity_t			ent;
+	entityState_t		*s1;
+
+	s1 = &cent->currentState;
+
+	// create the render entity
+	memset (&ent, 0, sizeof(ent));
+	ent.reType = RT_SPRITE;
+	VectorCopy( cent->lerpOrigin, ent.origin );
+	ent.radius = 14;
+	ent.customShader = cgs.media.bloodTrailShader;
+	ent.shaderRGBA[0] = 255;
+	ent.shaderRGBA[1] = 255;
+	ent.shaderRGBA[2] = 255;
+	ent.shaderRGBA[3] = 255;
+	ent.rotation = cg.time;
+	trap_R_AddRefEntityToScene(&ent);
 }
 
 /*
