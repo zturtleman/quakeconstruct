@@ -389,6 +389,7 @@ int qlua_getpos(lua_State *L) {
 
 int qlua_setpos(lua_State *L) {
 	gentity_t	*luaentity;
+	vec3_t		origin;
 
 	luaL_checktype(L,1,LUA_TUSERDATA);
 	luaL_checktype(L,2,LUA_TVECTOR);
@@ -398,8 +399,39 @@ int qlua_setpos(lua_State *L) {
 		if(luaentity->client) {
 			lua_tovector(L,2,luaentity->client->ps.origin);
 		} else {
+			BG_EvaluateTrajectory( &luaentity->s.pos, level.time, origin );
 			lua_tovector(L,2,luaentity->s.pos.trBase);
+			luaentity->s.pos.trDuration += (level.time - luaentity->s.pos.trTime);
+			luaentity->s.pos.trTime = level.time;
+			VectorCopy(luaentity->s.pos.trBase, luaentity->r.currentOrigin);
 		}
+		return 1;
+	}
+	return 0;
+}
+
+int qlua_getangles(lua_State *L) {
+	gentity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		lua_pushvector(L,luaentity->s.angles);
+		return 1;
+	}
+	return 0;
+}
+
+int qlua_setangles(lua_State *L) {
+	gentity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TVECTOR);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		lua_tovector(L,2,luaentity->s.angles);
 		return 1;
 	}
 	return 0;
@@ -464,6 +496,8 @@ int qlua_setvel(lua_State *L) {
 	return 0;
 }
 
+
+
 int qlua_aimvec(lua_State *L) {
 	gentity_t	*luaentity;
 
@@ -474,6 +508,58 @@ int qlua_aimvec(lua_State *L) {
 		if(luaentity->client) {
 			lua_pushvector(L,luaentity->client->ps.viewangles);
 			return 1;
+		}
+	}
+	return 0;
+}
+
+int qlua_getotherentity(lua_State *L) {
+	gentity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		if(luaentity->s.otherEntityNum != ENTITYNUM_MAX_NORMAL) {
+			lua_pushentity(L,&g_entities[ luaentity->s.otherEntityNum ]);
+			return 1;
+		}
+	}
+	return 0;
+}
+
+int qlua_getotherentity2(lua_State *L) {
+	gentity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		if(luaentity->s.otherEntityNum2 != ENTITYNUM_MAX_NORMAL) {
+			lua_pushentity(L,&g_entities[ luaentity->s.otherEntityNum2 ]);
+			return 1;
+		}
+	}
+	return 0;
+}
+
+int qlua_gettarget(lua_State *L) {
+	gentity_t	*luaentity;
+	gentity_t	*target;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		if(luaentity->target_ent) {
+			lua_pushentity(L,luaentity->target_ent);
+			return 1;
+		} else if (luaentity->target) {
+			target = G_PickTarget(luaentity->target);
+			if(target) {
+				lua_pushentity(L,target);
+				return 1;
+			}
 		}
 	}
 	return 0;
@@ -749,10 +835,15 @@ static const luaL_reg Entity_methods[] = {
   {"SetInfo",		qlua_setclientinfo},
   {"GetPos",		qlua_getpos},
   {"SetPos",		qlua_setpos},
+  {"GetAngles",		qlua_getangles},
+  {"SetAngles",		qlua_setangles},
   {"GetMuzzlePos",	qlua_getmuzzlepos},
   {"GetAimVector",		qlua_aimvec},
   {"GetVelocity",		qlua_getvel},
   {"SetVelocity",		qlua_setvel},
+  {"GetOtherEntity",	qlua_getotherentity},
+  {"GetOtherEntity2",	qlua_getotherentity},
+  {"GetTarget",			qlua_gettarget},
   {"SetWeapon",		qlua_setweapon},
   {"GiveWeapon",	qlua_giveweapon},
   {"SetAmmo",		qlua_setammo},
@@ -819,9 +910,85 @@ int qlua_createtentity (lua_State *L) {
 	return 0;
 }
 
+int qlua_unlink(lua_State *L) {
+	gentity_t *ent;
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	ent = lua_toentity(L,1);
+	if(ent != NULL) {
+		qlua_UnlinkEntity(ent);
+	}
+	return 0;
+}
+
+int qlua_link(lua_State *L) {
+	gentity_t *ent;
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	ent = lua_toentity(L,1);
+	if(ent != NULL) {
+		qlua_LinkEntity(ent);
+	}
+	return 0;
+}
+
+int qlua_createEntity(lua_State *L) {
+	gentity_t	*ent;
+	const char	*classname;
+
+	luaL_checktype(L,1,LUA_TSTRING);
+	classname = lua_tostring(L,1);
+	if(classname) {
+		ent = G_Spawn();
+		ent->classname = "grenade";
+		ent->s.eType = ET_LUA;
+		ent->r.svFlags = SVF_USE_CURRENT_ORIGIN;
+		ent->s.weapon = WP_GRENADE_LAUNCHER;
+		ent->s.eFlags = EF_BOUNCE_HALF;
+		ent->methodOfDeath = MOD_GRENADE;
+		ent->splashMethodOfDeath = MOD_GRENADE_SPLASH;
+		ent->clipmask = MASK_SHOT;
+		ent->target_ent = NULL;
+		ent->s.pos.trType = TR_GRAVITY;
+		ent->s.pos.trTime = level.time;
+		qlua_LinkEntity(ent);
+		//strcpy(ent->classname, classname);
+		lua_pushentity(L,ent);
+		return 1;
+	}
+	return 0;
+
+	/*bolt->s.eType = ET_MISSILE;
+	bolt->r.svFlags = SVF_USE_CURRENT_ORIGIN;
+	bolt->s.weapon = WP_GRENADE_LAUNCHER;
+	bolt->s.eFlags = EF_BOUNCE_HALF;
+	bolt->r.ownerNum = self->s.number;
+	bolt->parent = self;
+	bolt->damage = 100;
+	bolt->splashDamage = 100;
+	bolt->splashRadius = 150;
+	bolt->methodOfDeath = MOD_GRENADE;
+	bolt->splashMethodOfDeath = MOD_GRENADE_SPLASH;
+	bolt->clipmask = MASK_SHOT;
+	bolt->target_ent = NULL;
+
+	bolt->s.pos.trType = TR_GRAVITY;
+	bolt->s.pos.trTime = level.time - MISSILE_PRESTEP_TIME;		// move a bit on the very first frame
+	VectorCopy( start, bolt->s.pos.trBase );
+	VectorScale( dir, 700, bolt->s.pos.trDelta );
+	SnapVector( bolt->s.pos.trDelta );			// save net bandwidth
+
+	VectorCopy (start, bolt->r.currentOrigin);
+
+	return bolt;*/
+}
+
 void G_InitLuaEnts(lua_State *L) {
 	Entity_register(L);
 	lua_register(L,"CreateTempEntity",qlua_createtentity);
 	//lua_register(L,"GetEntitiesByClass",qlua_getentitiesbyclass);
 	//lua_register(L,"GetAllPlayers",qlua_getallplayers);
+	lua_register(L,"UnlinkEntity",qlua_unlink);
+	lua_register(L,"LinkEntity",qlua_link);
+	lua_register(L,"CreateEntity",qlua_createEntity);
 }

@@ -39,3 +39,7 @@ function vMul(v1,v2)
 	end
 	return out
 end
+
+function Vector(x,y,z)
+	return {x=x,y=y,z=z}
+end

@@ -7,7 +7,9 @@ require "includes/timer"
 require "includes/enum"
 require "includes/commands"
 require "includes/vector"
-require "includes/functiondump"
+--require "includes/functiondump"
+
+print("^5use /load to load a script.\n")
 
 ENTITYNUM_NONE = 1023
 ENTITYNUM_WORLD	= 1022

@@ -12,7 +12,7 @@ end
 
 local function XSide( class, name )
 	
-	return "[[GAME|QAGAME]]"
+	return "[Q3GAME]"
 	
 end
 
@@ -60,7 +60,7 @@ end
 
 local function DoMetaTable( name )
 	
-	OUTPUT = OUTPUT .. "\n\r==[["..name.."]] ([[Object]])==\n\r"
+	OUTPUT = OUTPUT .. "\n\r==["..name.."] ([Object])==\n\r"
 	func = GetFunctions( _G[ name ] )
 	
 	if ( type(_G[ name ]) != "table" ) then
@@ -68,14 +68,14 @@ local function DoMetaTable( name )
 	end
 	
 	for k, v in pairs( func ) do
-		OUTPUT = OUTPUT .. XSide( name, v ) .. " [["..name.."]]:[["..name.."."..v.."|"..v.."]]<br />\n"
+		OUTPUT = OUTPUT .. "|| " .. XSide( name, v ) .. " || ["..name.."]:["..v.."]() ||\n"
 	end
 	
 end
 
 local function DoLibrary( name )
 	
-	OUTPUT = OUTPUT .. "\n\r==[["..name.."]] ([[Library]])==\n\r"
+	OUTPUT = OUTPUT .. "\n\r==["..name.."] ([Library])==\n\r"
 	
 	if ( type(_G[ name ]) != "table" ) then
 		print("Error: _G["..name.."] is not a table!\n")
@@ -83,18 +83,18 @@ local function DoLibrary( name )
 	
 	func = GetFunctions( _G[ name ] )
 	for k, v in pairs( func ) do
-		OUTPUT = OUTPUT .. XSide( name, v ) .. " [["..name.."]].[["..name.."."..v.."|"..v.."]]<br />\n"
+		OUTPUT = OUTPUT .. "|| " .. XSide( name, v ) .. " || ["..name.."].["..v.."] ||\n"
 	end
 	
 	vars = GetVars( _G[ name ] )
 	for k, v in pairs( vars ) do
-		OUTPUT = OUTPUT .. XSide( name, v ) .. " [["..name.."]].[["..name.."."..v.."|"..v.."]]<br />\n"
+		OUTPUT = OUTPUT .. "|| " .. XSide( name, v ) .. " || ["..name.."].["..v.."] ||\n"
 	end
 end
 
 local function DoEnum( name )
 
-	OUTPUT = OUTPUT .. "\n\r==[["..name.."]] ([[Enum]])==\n\r"
+	OUTPUT = OUTPUT .. "\n\r==["..name.."] ([Enum])==\n\r"
 	
 	if ( type(_G[ name ]) != "table" ) then
 		print("Error: _G["..name.."] is not a table!\n")
@@ -102,7 +102,7 @@ local function DoEnum( name )
 	
 	for k, v in pairs( _G[ name ] ) do
 		if(type(v) == "string") then
-			OUTPUT = OUTPUT .. XSide( name, v ) .. " [["..name.."]].[["..name.."."..v.."|"..v.."]]<br />\n"
+			OUTPUT = OUTPUT .. "|| " .. XSide( name, v ) .. " || ["..name.."].["..v.."] ||\n"
 		end
 	end
 	

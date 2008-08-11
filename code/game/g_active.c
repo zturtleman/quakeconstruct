@@ -261,26 +261,25 @@ void	G_TouchTriggers( gentity_t *ent ) {
 	int			touch[MAX_GENTITIES];
 	gentity_t	*hit;
 	trace_t		trace;
-	vec3_t		mins, maxs;
+	vec3_t		mins = {0,0,0}, maxs = {0,0,0};
 	static vec3_t	range = { 40, 40, 52 };
 
-	if ( !ent->client ) {
-		return;
+
+	if(ent->client) {
+		VectorSubtract( ent->client->ps.origin, range, mins );
+		VectorAdd( ent->client->ps.origin, range, maxs );
+
+		num = trap_EntitiesInBox( mins, maxs, touch, MAX_GENTITIES );
+
+		// can't use ent->absmin, because that has a one unit pad
+		VectorAdd( ent->client->ps.origin, ent->r.mins, mins );
+		VectorAdd( ent->client->ps.origin, ent->r.maxs, maxs );
+	} else {
+		VectorAdd( ent->r.currentOrigin, ent->r.mins, mins );
+		VectorAdd( ent->r.currentOrigin, ent->r.maxs, maxs );
+
+		num = trap_EntitiesInBox( mins, maxs, touch, MAX_GENTITIES );
 	}
-
-	// dead clients don't activate triggers!
-	if ( ent->client->ps.stats[STAT_HEALTH] <= 0 ) {
-		return;
-	}
-
-	VectorSubtract( ent->client->ps.origin, range, mins );
-	VectorAdd( ent->client->ps.origin, range, maxs );
-
-	num = trap_EntitiesInBox( mins, maxs, touch, MAX_GENTITIES );
-
-	// can't use ent->absmin, because that has a one unit pad
-	VectorAdd( ent->client->ps.origin, ent->r.mins, mins );
-	VectorAdd( ent->client->ps.origin, ent->r.maxs, maxs );
 
 	for ( i=0 ; i<num ; i++ ) {
 		hit = &g_entities[touch[i]];
@@ -291,26 +290,34 @@ void	G_TouchTriggers( gentity_t *ent ) {
 		if ( !( hit->r.contents & CONTENTS_TRIGGER ) ) {
 			continue;
 		}
+		if ( ent->s.number == hit->s.number ) {
+			continue;
+		}
 
 		// ignore most entities if a spectator
-		if ( ent->client->sess.sessionTeam == TEAM_SPECTATOR ) {
-			if ( hit->s.eType != ET_TELEPORT_TRIGGER &&
-				// this is ugly but adding a new ET_? type will
-				// most likely cause network incompatibilities
-				hit->touch != Touch_DoorTrigger) {
-				continue;
+		if ( ent->client && ent->client->ps.stats[STAT_HEALTH] > 0 ) {
+			if ( ent->client->sess.sessionTeam == TEAM_SPECTATOR ) {
+				if ( hit->s.eType != ET_TELEPORT_TRIGGER &&
+					// this is ugly but adding a new ET_? type will
+					// most likely cause network incompatibilities
+					hit->touch != Touch_DoorTrigger) {
+					continue;
+				}
 			}
 		}
 
 		// use seperate code for determining if an item is picked up
 		// so you don't have to actually contact its bounding box
-		if ( hit->s.eType == ET_ITEM ) {
-			if ( !BG_PlayerTouchesItem( &ent->client->ps, &hit->s, level.time ) ) {
-				continue;
-			}
-		} else {
-			if ( !trap_EntityContact( mins, maxs, hit ) ) {
-				continue;
+
+		if ( ent->client && ent->client->ps.stats[STAT_HEALTH] > 0 ) {
+			if ( hit->s.eType == ET_ITEM ) {
+				if ( !BG_PlayerTouchesItem( &ent->client->ps, &hit->s, level.time ) ) {
+					continue;
+				}
+			} else {
+				if ( !trap_EntityContact( mins, maxs, hit ) ) {
+					continue;
+				}
 			}
 		}
 
@@ -323,7 +330,7 @@ void	G_TouchTriggers( gentity_t *ent ) {
 			qlua_pcall(GetServerLuaState(), 3, 0, qfalse);
 		}
 
-		if ( hit->touch ) {
+		if ( ent->client && ent->client->ps.stats[STAT_HEALTH] > 0 && hit->touch ) {
 			hit->touch (hit, ent, &trace);
 		}
 
@@ -335,14 +342,24 @@ void	G_TouchTriggers( gentity_t *ent ) {
 		}
 
 		if ( ( ent->r.svFlags & SVF_BOT ) ) {
-			if(ent->touch) ent->touch( ent, hit, &trace );
+			if ( ent->client && ent->client->ps.stats[STAT_HEALTH] > 0 && hit->touch ) {
+				if(ent->touch) ent->touch( ent, hit, &trace );
+			}
 		}
+
+/*		if ( ent && ent->classname ) {
+			if ( hit && hit->classname ) {
+				G_Printf("!(Internal) Entities Touching: %s->%s\n",ent->classname,hit->classname);
+			}
+		}*/
 	}
 
 	// if we didn't touch a jump pad this pmove frame
-	if ( ent->client->ps.jumppad_frame != ent->client->ps.pmove_framecount ) {
-		ent->client->ps.jumppad_frame = 0;
-		ent->client->ps.jumppad_ent = 0;
+	if ( ent->client ) {
+		if ( ent->client->ps.jumppad_frame != ent->client->ps.pmove_framecount ) {
+			ent->client->ps.jumppad_frame = 0;
+			ent->client->ps.jumppad_ent = 0;
+		}
 	}
 }
 

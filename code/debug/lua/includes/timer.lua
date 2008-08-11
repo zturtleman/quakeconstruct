@@ -42,6 +42,6 @@ function CheckTimers()
 		end
 	end
 end
-hook.add("Think",CheckTimers)
+hook.add("Think","Timers",CheckTimers)
 
 print("^3Timer code loaded.\n")
