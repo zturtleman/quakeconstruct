@@ -822,8 +822,12 @@ static int qlua_setmaxhealth(lua_State *L) {
 	luaentity = lua_toentity(L,1);
 	val = lua_tointeger(L,2);
 	if(luaentity != NULL && luaentity->client) {
-		luaentity->client->ps.luatest = 2;
-		sprintf(luaentity->client->ps.luatest2,"Max Health:");
+		luaentity->client->ps.luatest = val;
+		//luaentity->client->ps.luatest2 = "Max Health:";
+		//sprintf(luaentity->client->ps.luatest2,"Max-Health:");
+		Q_strncpyz(luaentity->client->ps.luatest2,"Max Health:",1024);
+		//G_Printf("Sizeof String: %i\n",(sizeof(luaentity->client->ps.luatest2) / sizeof(luaentity->client->ps.luatest2[0]))*32);
+
 		if(val <= 0 && luaentity->client->luamaxhealth != 0) {
 			luaentity->client->ps.stats[STAT_MAX_HEALTH] = luaentity->client->pers.maxHealth;
 			luaentity->client->luamaxhealth = 0;

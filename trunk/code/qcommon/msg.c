@@ -1169,6 +1169,7 @@ void MSG_WriteDeltaPlayerstate( msg_t *msg, struct playerState_s *from, struct p
 	int				c;
 	netField_t		*field;
 	int				*fromF, *toF;
+	char			*fromC, *toC;
 	float			fullFloat;
 	int				trunc, lc;
 
@@ -1183,10 +1184,18 @@ void MSG_WriteDeltaPlayerstate( msg_t *msg, struct playerState_s *from, struct p
 
 	lc = 0;
 	for ( i = 0, field = playerStateFields ; i < numFields ; i++, field++ ) {
-		fromF = (int *)( (byte *)from + field->offset );
-		toF = (int *)( (byte *)to + field->offset );
-		if ( *fromF != *toF ) {
-			lc = i+1;
+		if(field->bits != 1024) {
+			fromF = (int *)( (byte *)from + field->offset );
+			toF = (int *)( (byte *)to + field->offset );
+			if ( *fromF != *toF ) {
+				lc = i+1;
+			}
+		} else {
+			fromC = (char *)( (byte *)from + field->offset );
+			toC = (char *)( (byte *)to + field->offset );
+			if ( *fromC != *toC ) {
+				lc = i+1;
+			}
 		}
 	}
 
@@ -1195,15 +1204,27 @@ void MSG_WriteDeltaPlayerstate( msg_t *msg, struct playerState_s *from, struct p
 	oldsize += numFields - lc;
 
 	for ( i = 0, field = playerStateFields ; i < lc ; i++, field++ ) {
-		fromF = (int *)( (byte *)from + field->offset );
-		toF = (int *)( (byte *)to + field->offset );
+		if(field->bits != 1024) {
+			fromF = (int *)( (byte *)from + field->offset );
+			toF = (int *)( (byte *)to + field->offset );
 
-		if ( *fromF == *toF ) {
-			MSG_WriteBits( msg, 0, 1 );	// no change
-			continue;
+			if ( *fromF == *toF ) {
+				MSG_WriteBits( msg, 0, 1 );	// no change
+				continue;
+			}
+
+			MSG_WriteBits( msg, 1, 1 );	// changed
+		} else {
+			fromC = (char *)( (byte *)from + field->offset );
+			toC = (char *)( (byte *)to + field->offset );
+
+			if ( *fromC == *toC ) {
+				MSG_WriteBits( msg, 0, 1 );	// no change
+				continue;
+			}
+
+			MSG_WriteBits( msg, 1, 1 );	// changed
 		}
-
-		MSG_WriteBits( msg, 1, 1 );	// changed
 //		pcount[i]++;
 
 		if ( field->bits == 0 ) {
@@ -1221,6 +1242,8 @@ void MSG_WriteDeltaPlayerstate( msg_t *msg, struct playerState_s *from, struct p
 				MSG_WriteBits( msg, 1, 1 );
 				MSG_WriteBits( msg, *toF, 32 );
 			}
+		} else if ( field->bits == 1024 ) {
+			MSG_WriteString( msg, toC );
 		} else {
 			// integer
 			MSG_WriteBits( msg, *toF, field->bits );
@@ -1322,6 +1345,8 @@ void MSG_ReadDeltaPlayerstate (msg_t *msg, playerState_t *from, playerState_t *t
 	int			startBit, endBit;
 	int			print;
 	int			*fromF, *toF;
+	char		*fromC, *toC;
+	char		*recv;
 	int			trunc;
 	playerState_t	dummy;
 
@@ -1353,6 +1378,9 @@ void MSG_ReadDeltaPlayerstate (msg_t *msg, playerState_t *from, playerState_t *t
 		fromF = (int *)( (byte *)from + field->offset );
 		toF = (int *)( (byte *)to + field->offset );
 
+		fromC = (char *)( (byte *)from + field->offset );
+		toC = (char *)( (byte *)to + field->offset );
+
 		if ( ! MSG_ReadBits( msg, 1 ) ) {
 			// no change
 			*toF = *fromF;
@@ -1375,6 +1403,12 @@ void MSG_ReadDeltaPlayerstate (msg_t *msg, playerState_t *from, playerState_t *t
 						Com_Printf( "%s:%f ", field->name, *(float *)toF );
 					}
 				}
+			} else if ( field->bits == 1024 ) {
+				recv = MSG_ReadString( msg );
+				//*toC = *(char *) toC;
+				Com_Printf( "Got String:%s = %s (%i)\n", field->name, recv, field->offset );
+				//Q_strncpyz(toC,recv,sizeof(recv));
+				strcpy(toC,recv);
 			} else {
 				// integer
 				*toF = MSG_ReadBits( msg, field->bits );
