@@ -469,6 +469,7 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 	const char		*s;
 	int				clientNum;
 	clientInfo_t	*ci;
+	lua_State		*L = GetClientLuaState();
 
 	es = &cent->currentState;
 	event = es->event & ~EV_EVENT_BITS;
@@ -487,6 +488,15 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 		clientNum = 0;
 	}
 	ci = &cgs.clientinfo[ clientNum ];
+
+	qlua_gethook(L, "EventReceived");
+	lua_pushentity(L,cent);
+	lua_pushinteger(L,event);
+	lua_pushvector(L,position);
+	qlua_pcall(L,3,1,qtrue);
+	if(lua_type(L,-1) == LUA_TBOOLEAN && lua_toboolean(L,-1) == qfalse) {
+		return;
+	}
 
 	switch ( event ) {
 	//

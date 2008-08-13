@@ -34,6 +34,8 @@ int forceModelModificationCount = -1;
 void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum );
 void CG_Shutdown( void );
 
+int		qlua_nextarg = 1;
+
 
 /*
 ================
@@ -1856,6 +1858,91 @@ Called after every level change or subsystem restart
 Will perform callbacks to make the loading info screen update.
 =================
 */
+
+int qlua_grabarg(lua_State *L) {
+	char	str[MAX_STRING_TOKENS];
+	trap_Argv( qlua_nextarg, str, sizeof( str ) );
+	lua_pushstring(L,str);
+	qlua_nextarg++;
+
+	return 1;
+}
+
+int qlua_curtime(lua_State *L) {
+	lua_pushnumber(L,cg.time);
+	return 1;
+}
+
+void pushents(lua_State *L) {
+	int numEnts = sizeof(cg_entities) / sizeof(cg_entities[0]);
+	int i=0;
+	int n=0;
+	centity_t	*ent;
+
+	for (i = 0, ent = cg_entities, n = 1;
+			i < numEnts;
+			i++, ent++) {
+
+			qlua_gethook(L,"EntityLinked");
+			lua_pushentity(L,ent);
+			qlua_pcall(L,1,0,qtrue);
+			n++;
+	}
+}
+
+int qlua_loadsound(lua_State *L) {
+	const char *snd;
+
+	if(lua_type(L,1) == LUA_TSTRING) {
+		snd = lua_tostring(L,1);
+		trap_S_RegisterSound( snd, qfalse);
+		return 1;
+	}
+	return 0;
+}
+
+int qlua_loadcustomsound(lua_State *L) {
+	return 0;
+}
+
+int qlua_playsound(lua_State *L) {
+	centity_t *ent;
+	sfxHandle_t	handle;
+	
+	if(lua_type(L,1) == LUA_TUSERDATA && lua_type(L,2) == LUA_TNUMBER) {
+		ent = lua_toentity(L,1);
+		handle = lua_tointeger(L,2);
+	}
+
+	if(ent != NULL && handle > 0) {
+		trap_S_StartSound (NULL, ent->currentState.number, CHAN_AUTO, handle );
+	}
+	return 0;
+}
+
+void CG_InitLua() {
+	lua_State *L = NULL;
+
+	InitClientLua();
+
+	L = GetClientLuaState();
+	
+	CG_InitLuaVector(L);
+	CG_InitLuaEnts(L);
+
+	lua_register(L,"LevelTime",qlua_curtime);
+	lua_register(L,"__loadsound",qlua_loadsound);
+	lua_register(L,"LoadCustomSound",qlua_loadcustomsound);
+	lua_register(L,"PlaySound",qlua_playsound);
+
+	pushents(L);
+
+	DoLuaIncludes();
+
+	DoLuaInit();
+}
+
+
 void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum ) {
 	const char	*s;
 
@@ -1918,6 +2005,8 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum ) {
 
 	cg.loading = qtrue;		// force players to load instead of defer
 
+	CG_InitLua();
+
 	CG_LoadingString( "sounds" );
 
 	CG_RegisterSounds();
@@ -1968,6 +2057,7 @@ Called before every level change or subsystem restart
 =================
 */
 void CG_Shutdown( void ) {
+	CloseClientLua();
 	// some mods may need to do cleanup work here,
 	// like closing files or archiving session data
 }

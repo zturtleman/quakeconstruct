@@ -216,7 +216,14 @@ void	trap_S_Respatialize( int entityNum, const vec3_t origin, vec3_t axis[3], in
 }
 
 sfxHandle_t	trap_S_RegisterSound( const char *sample, qboolean compressed ) {
-	return syscall( CG_S_REGISTERSOUND, sample, compressed );
+	int load = syscall( CG_S_REGISTERSOUND, sample, compressed );
+	lua_State *L = GetClientLuaState();
+	qlua_gethook(L,"SoundLoaded");
+	lua_pushstring(L,sample);
+	lua_pushinteger(L,load);
+	lua_pushboolean(L,compressed);
+	qlua_pcall(L,1,0,qtrue);
+	return load;
 }
 
 void	trap_S_StartBackgroundTrack( const char *intro, const char *loop ) {

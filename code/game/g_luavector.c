@@ -319,7 +319,84 @@ int qlua_trace(lua_State *L) {
 	return 0;
 }
 
+int qlua_AngleVectors(lua_State *L) {
+	vec3_t v,f,r,u;
+	luaL_checktype(L,1,LUA_TVECTOR);
+	lua_tovector(L,1,v);
+
+	v[0] = AngleMod(v[0]);
+	v[1] = AngleMod(v[1]);
+	v[2] = AngleMod(v[2]);
+
+	AngleVectors(v,f,r,u);
+	lua_pushvector(L,f);
+	lua_pushvector(L,r);
+	lua_pushvector(L,u);
+	return 3;
+}
+
+int qlua_VectorNormalize(lua_State *L) {
+	vec3_t v;
+	int	len = 0;
+	luaL_checktype(L,1,LUA_TVECTOR);
+	lua_tovector(L,1,v);
+	len = VectorNormalize(v);
+	lua_pushvector(L,v);
+	lua_pushinteger(L,len);
+	return 2;
+}
+
+int qlua_VectorLength(lua_State *L) {
+	vec3_t v;
+	float len = 0;
+	luaL_checktype(L,1,LUA_TVECTOR);
+	lua_tovector(L,1,v);
+	len = sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
+	lua_pushnumber(L,len);
+	return 1;
+}
+
+int qlua_VectorForward(lua_State *L) {
+	vec3_t v;
+	vec3_t f,r,u;
+
+	luaL_checktype(L,1,LUA_TVECTOR);
+	lua_tovector(L,1,v);
+	AngleVectors(v,f,r,u);
+	lua_pushvector(L,f);
+	return 1;
+}
+
+int qlua_VectorRight(lua_State *L) {
+	vec3_t v;
+	vec3_t axis[3];
+
+	luaL_checktype(L,1,LUA_TVECTOR);
+	lua_tovector(L,1,v);
+	AnglesToAxis(v,axis);
+	lua_pushvector(L,axis[0]);
+	return 1;
+}
+
+int qlua_VectorUp(lua_State *L) {
+	vec3_t v;
+	vec3_t axis[3];
+
+	luaL_checktype(L,1,LUA_TVECTOR);
+	lua_tovector(L,1,v);
+	AnglesToAxis(v,axis);
+	lua_pushvector(L,axis[2]);
+	return 1;
+}
+
 void G_InitLuaVector(lua_State *L) {
 	lua_register(L,"TraceLine",qlua_trace);
+	lua_register(L,"VectorNormalize",qlua_VectorNormalize);
+	lua_register(L,"VectorLength",qlua_VectorLength);
+	lua_register(L,"VectorForward",qlua_VectorForward);
+	lua_register(L,"VectorRight",qlua_VectorRight);
+	lua_register(L,"VectorUp",qlua_VectorUp);
+	lua_register(L,"AngleVectors",qlua_AngleVectors);
+
 	Vector_register(L);
 }
