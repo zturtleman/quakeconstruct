@@ -9,7 +9,6 @@ char *samey2 = "";
 void qlua_clearfunc(lua_State *L, int ref) {
 	if(ref != 0) {
 		lua_unref(L,ref);
-		G_Printf("Cleared Function: %i\n",ref);
 	}
 }
 
@@ -17,14 +16,12 @@ int qlua_storefunc(lua_State *L, int i, int ref) {
 	if(lua_type(L,i) == LUA_TFUNCTION) {
 		if(ref != 0) lua_unref(L,ref);
 		ref = luaL_ref(L, LUA_REGISTRYINDEX);
-		//G_Printf("Stored Function: %i\n",ref);
 	}
 	return ref;
 }
 
 qboolean qlua_getstored(lua_State *L, int ref) {
 	if(ref != 0) {
-		//G_Printf("Called Function: %i\n",ref);
 		lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
 		return qtrue;
 	}
@@ -128,7 +125,7 @@ void error (lua_State *L, const char *fmt, ...) {
 	}
 
 	if(samey < 3) {
-		G_Printf( "%s%s%s\n",S_COLOR_RED,"QLUA_ERROR: ",text );
+		G_Printf( "%s%s%s\n",S_COLOR_RED,"SV_LUA_ERROR: ",text );
 	}
 }
 
@@ -213,6 +210,9 @@ void InitServerLua( void ) {
 	L = lua_open();
 
 	G_Printf("-----Initializing ServerSide Lua-----\n");
+
+	lua_pushboolean(L,1);
+	lua_setglobal(L,"SERVER");
 
 	luaL_openlibs(L);
 	luaopen_lfs(L);

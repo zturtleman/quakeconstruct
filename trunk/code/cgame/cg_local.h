@@ -95,6 +95,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define DEFAULT_REDTEAM_NAME		"Stroggs"
 #define DEFAULT_BLUETEAM_NAME		"Pagans"
 
+#define LUA_TVECTOR				LUA_TTABLE
+
 typedef enum {
 	FOOTSTEP_NORMAL,
 	FOOTSTEP_BOOT,
@@ -1183,6 +1185,35 @@ extern  vmCvar_t		cg_recordSPDemo;
 extern  vmCvar_t		cg_recordSPDemoName;
 extern	vmCvar_t		cg_obeliskRespawnDelay;
 #endif
+
+
+void CG_InitLua( void );
+void InitClientLua( void );
+void CloseClientLua( void );
+void DoLuaInit( void );
+void DoLuaIncludes( void );
+void qlua_pcall(lua_State *L, int nargs, int nresults, qboolean washook);
+void qlua_gethook(lua_State *L, const char *hook);
+lua_State *GetClientLuaState( void );
+
+int qlua_storefunc(lua_State *L, int i, int ref);
+qboolean qlua_getstored(lua_State *L, int ref);
+void qlua_clearfunc(lua_State *L, int ref);
+
+void lua_pushvector(lua_State *L, vec3_t vec);
+void lua_tovector(lua_State *L, int i, vec3_t in);
+
+void lua_pushentity(lua_State *L, centity_t *cl);
+centity_t *lua_toentity(lua_State *L, int i);
+
+void lua_pushsfx(lua_State *L, sfxHandle_t *sfx);
+sfxHandle_t *lua_tosfx(lua_State *L, int i);
+
+void lua_pushtrace(lua_State *L, trace_t results);
+
+void CG_InitLuaVector(lua_State *L);
+void CG_InitLuaEnts(lua_State *L);
+void CG_InitHandles(lua_State *L);
 
 //
 // cg_main.c

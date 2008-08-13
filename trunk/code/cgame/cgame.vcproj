@@ -690,6 +690,18 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\cg_lua.c">
+			</File>
+			<File
+				RelativePath=".\cg_luaentity.c">
+			</File>
+			<File
+				RelativePath=".\cg_luahandles.c">
+			</File>
+			<File
+				RelativePath=".\cg_luavector.c">
+			</File>
+			<File
 				RelativePath="cg_main.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
