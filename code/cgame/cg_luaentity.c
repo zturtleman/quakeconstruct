@@ -27,14 +27,14 @@ centity_t *qlua_getrealentity(centity_t *ent) {
 void lua_pushentity(lua_State *L, centity_t *cl) {
 	centity_t *ent = NULL;
 
-	if(cl == NULL || cl->currentState.number == ENTITYNUM_MAX_NORMAL || (cl->currentState.number == 0)) {
+	if(cl == NULL || cl->currentState.number == ENTITYNUM_MAX_NORMAL || cl->currentState.number < 0) {
 		lua_pushnil(L);
 		return;
 	}
 
 	ent = (centity_t*)lua_newuserdata(L, sizeof(centity_t));
 	memcpy(ent,cl,sizeof(centity_t));
-	
+
 	ent->currentState.number = cl->currentState.number;
 
 	luaL_getmetatable(L, "Entity");
@@ -48,6 +48,7 @@ centity_t *lua_toentity(lua_State *L, int i) {
 	luaentity = qlua_getrealentity(luaentity);
 
 	if (luaentity == NULL) luaL_typerror(L, i, "Entity");
+
 	return luaentity;
 }
 
@@ -124,6 +125,99 @@ int qlua_aimvec(lua_State *L) {
 	return 0;
 }
 
+int qlua_isclient(lua_State *L) {
+	centity_t	*luaentity;
+	centity_t   *cent;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	luaentity = lua_toentity(L,1);
+
+	if(luaentity != NULL) {
+		cent = &cg_entities[luaentity->currentState.clientNum];
+		if(cent != NULL) {
+			lua_pushboolean(L,1);
+		} else {
+			lua_pushboolean(L,0);
+		}
+		return 1;
+	}
+	return 0;
+}
+
+int qlua_isbot(lua_State *L) {
+	centity_t	*luaentity;
+	clientInfo_t	*ci;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		ci = &cgs.clientinfo[ luaentity->currentState.clientNum ];
+		if(ci != NULL && ci->botSkill != 0) {
+			lua_pushboolean(L,1);
+		} else {
+			lua_pushboolean(L,0);
+		}
+		return 1;
+	}
+	return 0;
+}
+
+int qlua_getclientinfo(lua_State *L) {
+	centity_t	*luaentity;
+	clientInfo_t	*ci;
+
+	lua_newtable(L);
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		ci = &cgs.clientinfo[ luaentity->currentState.clientNum ];
+	}
+	if(ci != NULL) {
+		lua_pushstring(L, "name");
+		lua_pushstring(L,ci->name);
+		lua_rawset(L, -3);
+
+		lua_pushstring(L, "health");
+		lua_pushinteger(L,ci->health);
+		lua_rawset(L, -3);
+
+		lua_pushstring(L, "score");
+		lua_pushinteger(L,ci->score);
+		lua_rawset(L, -3);
+
+		lua_pushstring(L, "connected");
+		lua_pushboolean(L,qtrue);
+		lua_rawset(L, -3);
+
+		lua_pushstring(L, "weapon");
+		lua_pushinteger(L,ci->curWeapon);
+		lua_rawset(L, -3);
+
+		lua_pushstring(L, "buttons");
+		lua_pushinteger(L,0);
+		lua_rawset(L, -3);
+
+		lua_pushstring(L, "model");
+		lua_pushstring(L,ci->modelName);
+		lua_rawset(L, -3);
+
+		lua_pushstring(L, "gender");
+		lua_pushinteger(L,ci->gender);
+		lua_rawset(L, -3);
+
+		lua_pushstring(L, "handicap");
+		lua_pushinteger(L,ci->handicap);
+		lua_rawset(L, -3);
+	} else {
+		lua_pushstring(L,"<CLIENT WAS NIL>");
+	}
+	return 1;
+}
+
 int qlua_getotherentity(lua_State *L) {
 	centity_t	*luaentity;
 
@@ -187,9 +281,12 @@ static int Entity_equal (lua_State *L)
 static const luaL_reg Entity_methods[] = {
   {"GetPos",		qlua_getpos},
   {"SetPos",		qlua_setpos},
+  {"GetInfo",		qlua_getclientinfo},
   {"GetOtherEntity",	qlua_getotherentity},
   {"GetOtherEntity2",	qlua_getotherentity},
   {"EntIndex",		qlua_entityid},
+  {"IsBot",			qlua_isbot},
+  {"IsClient",		qlua_isclient},
   {0,0}
 };
 

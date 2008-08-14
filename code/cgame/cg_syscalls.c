@@ -218,11 +218,13 @@ void	trap_S_Respatialize( int entityNum, const vec3_t origin, vec3_t axis[3], in
 sfxHandle_t	trap_S_RegisterSound( const char *sample, qboolean compressed ) {
 	int load = syscall( CG_S_REGISTERSOUND, sample, compressed );
 	lua_State *L = GetClientLuaState();
-	qlua_gethook(L,"SoundLoaded");
-	lua_pushstring(L,sample);
-	lua_pushinteger(L,load);
-	lua_pushboolean(L,compressed);
-	qlua_pcall(L,1,0,qtrue);
+	if(L != NULL) {
+		qlua_gethook(L,"SoundLoaded");
+		lua_pushstring(L,sample);
+		lua_pushinteger(L,load);
+		lua_pushboolean(L,compressed);
+		qlua_pcall(L,3,0,qtrue);
+	}
 	return load;
 }
 
@@ -243,11 +245,29 @@ qhandle_t trap_R_RegisterSkin( const char *name ) {
 }
 
 qhandle_t trap_R_RegisterShader( const char *name ) {
-	return syscall( CG_R_REGISTERSHADER, name );
+	int load = syscall( CG_R_REGISTERSHADER, name );
+	lua_State *L = GetClientLuaState();
+	if(L != NULL) {
+		qlua_gethook(L,"ShaderLoaded");
+		lua_pushstring(L,name);
+		lua_pushinteger(L,load);
+		lua_pushboolean(L,qfalse);
+		qlua_pcall(L,3,0,qtrue);
+	}
+	return load;
 }
 
 qhandle_t trap_R_RegisterShaderNoMip( const char *name ) {
-	return syscall( CG_R_REGISTERSHADERNOMIP, name );
+	int load = syscall( CG_R_REGISTERSHADERNOMIP, name );
+	lua_State *L = GetClientLuaState();
+	if(L != NULL) {
+		qlua_gethook(L,"ShaderLoaded");
+		lua_pushstring(L,name);
+		lua_pushinteger(L,load);
+		lua_pushboolean(L,qtrue);
+		qlua_pcall(L,3,0,qtrue);
+	}
+	return load;
 }
 
 void trap_R_RegisterFont(const char *fontName, int pointSize, fontInfo_t *font) {

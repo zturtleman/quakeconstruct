@@ -132,6 +132,21 @@ static void CG_ParseTeamInfo( void ) {
 	}
 }
 
+static void CG_ParsePlayerInfo( void ) {
+	int		i;
+	int		client;
+	int		numPlayers = atoi( CG_Argv( 1 ) );
+
+	for ( i = 0 ; i < numPlayers ; i++ ) {
+		client = atoi( CG_Argv( i * 5 + 2 ) );
+
+		cgs.clientinfo[ client ].health = atoi( CG_Argv( i * 5 + 3 ) );
+		cgs.clientinfo[ client ].armor = atoi( CG_Argv( i * 5 + 4 ) );
+		cgs.clientinfo[ client ].curWeapon = atoi( CG_Argv( i * 5 + 5 ) );
+		cgs.clientinfo[ client ].powerups = atoi( CG_Argv( i * 5 + 6 ) );
+	}
+}
+
 
 /*
 ================
@@ -438,7 +453,10 @@ static void CG_MapRestart( void ) {
 		CG_Printf( "CG_MapRestart\n" );
 	}
 
-	CG_InitLua();
+	//CG_InitLua();
+
+	//DoLuaIncludes();
+	DoLuaInit();
 
 	CG_InitLocalEntities();
 	CG_InitMarkPolys();
@@ -1052,6 +1070,11 @@ static void CG_ServerCommand( void ) {
 
 	if ( !strcmp( cmd, "tinfo" ) ) {
 		CG_ParseTeamInfo();
+		return;
+	}
+
+	if ( !strcmp( cmd, "playerinfo") ) {
+		CG_ParsePlayerInfo();
 		return;
 	}
 

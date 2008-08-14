@@ -1895,13 +1895,26 @@ int qlua_loadsound(lua_State *L) {
 
 	if(lua_type(L,1) == LUA_TSTRING) {
 		snd = lua_tostring(L,1);
-		trap_S_RegisterSound( snd, qfalse);
+		lua_pushinteger(L,trap_S_RegisterSound( snd, qfalse));
 		return 1;
 	}
 	return 0;
 }
 
 int qlua_loadcustomsound(lua_State *L) {
+	const char *snd;
+	centity_t	*ent;
+	int out = 0;
+
+	if(lua_type(L,1) == LUA_TUSERDATA && lua_type(L,2) == LUA_TSTRING) {
+		ent = lua_toentity(L,1);
+		snd = lua_tostring(L,2);
+		if(snd != NULL && ent != NULL) {
+			out = CG_CustomSound(ent->currentState.clientNum,snd);
+			lua_pushinteger(L,out);
+			return 1;
+		}
+	}
 	return 0;
 }
 
@@ -1912,10 +1925,9 @@ int qlua_playsound(lua_State *L) {
 	if(lua_type(L,1) == LUA_TUSERDATA && lua_type(L,2) == LUA_TNUMBER) {
 		ent = lua_toentity(L,1);
 		handle = lua_tointeger(L,2);
-	}
-
-	if(ent != NULL && handle > 0) {
-		trap_S_StartSound (NULL, ent->currentState.number, CHAN_AUTO, handle );
+		if(ent != NULL && handle > 0) {
+			trap_S_StartSound (NULL, ent->currentState.number, CHAN_AUTO, handle );
+		}
 	}
 	return 0;
 }
@@ -1929,6 +1941,7 @@ void CG_InitLua() {
 	
 	CG_InitLuaVector(L);
 	CG_InitLuaEnts(L);
+	CG_InitLua2D(L);
 
 	lua_register(L,"LevelTime",qlua_curtime);
 	lua_register(L,"__loadsound",qlua_loadsound);
