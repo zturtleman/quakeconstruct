@@ -195,7 +195,9 @@ void CG_DrawStringExt( int x, int y, const char *string, const float *setColor,
 	s = string;
 	xx = x;
 	cnt = 0;
-	trap_R_SetColor( setColor );
+	if(setColor != 0) {
+		trap_R_SetColor( setColor );
+	}
 	while ( *s && cnt < maxChars) {
 		if ( Q_IsColorString( s ) ) {
 			if ( !forceColor ) {

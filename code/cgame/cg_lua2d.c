@@ -1,5 +1,7 @@
 #include "cg_local.h"
 
+vec4_t	lastcolor;
+
 int qlua_setcolor(lua_State *L) {
 	vec4_t	color;
 	
@@ -18,6 +20,9 @@ int qlua_setcolor(lua_State *L) {
 		}
 	}
 	trap_R_SetColor(color);
+
+	VectorCopy(color,lastcolor);
+
 	return 0;
 }
 
@@ -41,9 +46,31 @@ int qlua_rect(lua_State *L) {
 	return 0;
 }
 
+int qlua_text(lua_State *L) {
+	int x,y;
+	int w=CHAR_WIDTH,h=CHAR_HEIGHT;
+	float size = 0;
+	const char *text = "text";
+
+	luaL_checktype(L,1,LUA_TNUMBER);
+	luaL_checktype(L,2,LUA_TNUMBER);
+	luaL_checktype(L,3,LUA_TSTRING);
+
+	x = lua_tointeger(L,1);
+	y = lua_tointeger(L,2);
+	text = lua_tostring(L,3);
+	if(lua_type(L,4) == LUA_TNUMBER) {w = lua_tointeger(L,4);}
+	if(lua_type(L,5) == LUA_TNUMBER) {h = lua_tointeger(L,5);}
+
+	CG_DrawStringExt(x, y, text, 0, qfalse, qfalse, w, h, 0 );
+
+	return 0;
+}
+
 static const luaL_reg Draw_methods[] = {
   {"SetColor",		qlua_setcolor},
   {"Rect",			qlua_rect},
+  {"Text",			qlua_text},
   {0,0}
 };
 

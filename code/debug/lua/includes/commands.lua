@@ -8,6 +8,8 @@ local tostring = tostring
 local GetAllEntities = GetAllEntities
 local runString = runString
 local include = include
+local SERVER = SERVER
+local CH_TAB = "    "
 
 function __concommand(ent,cmd)
 	local args = {}
@@ -34,7 +36,11 @@ function Call(ent,cmd,args)
 			if(ent:EntIndex() == 0 or adminonly != true) then
 				local b, e = pcall(v.func,ent,cmd,args)
 				if(!b) then
-					print("^1CONCOMMAND ERROR: " .. e .. "\n")
+					if(SERVER) then
+						print("^1CONCOMMAND ERROR: " .. e .. "\n")
+					else
+						print("^1CL_CONCOMMAND ERROR: " .. e .. "\n")
+					end
 				end
 			else
 				ent:SendMessage("Silly Goose, you aren't the owner of this server.\n")
@@ -67,17 +73,29 @@ function loadScript(ent,cmd,args)
 		include(args[1])
 		print("^5Loaded Script: " .. args[1] .. "\n")
 	else
-		print("usage: /load <scriptname> ex: /load knockback\n")
+		local ex = "cl_marks"
+		if(SERVER) then ex = "knockback" end
+		print(CH_TAB.."effect: Opens an lua script.\n")
+		print(CH_TAB.."usage: /" .. cmd .. " <scriptname> ex: /" .. cmd .. " " .. ex .. "\n")
 	end
 end
-Add("load",loadScript,true)
+if(SERVER) then
+	Add("load",loadScript,true)
+else
+	Add("load_cl",loadScript,true)
+end
 
 function runlua(ent,cmd,args)
 	if(args[1]) then
 		runString(args[1])
 		print("^5Success\n")
 	else
-		print("usage: /lua <code> ex: /lua test=1\n")
+		print(CH_TAB.."effect: Executes lua code.\n")
+		print(CH_TAB.."usage: /" .. cmd .. " <code> ex: /" .. cmd .. " test=1\n")
 	end
 end
-Add("lua",runlua,true)
+if(SERVER) then
+	Add("lua",runlua,true)
+else
+	Add("lua_cl",runlua,true)
+end

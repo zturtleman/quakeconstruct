@@ -453,10 +453,10 @@ static void CG_MapRestart( void ) {
 		CG_Printf( "CG_MapRestart\n" );
 	}
 
-	//CG_InitLua();
+	CG_InitLua();
 
 	//DoLuaIncludes();
-	DoLuaInit();
+	//DoLuaInit();
 
 	CG_InitLocalEntities();
 	CG_InitMarkPolys();

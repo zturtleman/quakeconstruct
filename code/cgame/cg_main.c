@@ -1859,6 +1859,25 @@ Will perform callbacks to make the loading info screen update.
 =================
 */
 
+qboolean Cmd_Check_Lua( char cmd[] ) {
+	lua_State *L = GetClientLuaState();
+	
+	qlua_nextarg = 1;
+
+	if(L != NULL) {
+		lua_getglobal(L, "__concommand");
+		lua_pushentity(L, &cg_entities[ cg.snap->ps.clientNum ]);
+		lua_pushstring(L, cmd);
+		qlua_pcall(L,1,1,qtrue);
+		if(lua_type(L,-1) == LUA_TBOOLEAN) {
+			if(lua_toboolean(L,-1) != 0) {
+				return qtrue;
+			}
+		}
+	}
+	return qfalse;
+}
+
 int qlua_grabarg(lua_State *L) {
 	char	str[MAX_STRING_TOKENS];
 	trap_Argv( qlua_nextarg, str, sizeof( str ) );
@@ -1947,6 +1966,7 @@ void CG_InitLua() {
 	lua_register(L,"__loadsound",qlua_loadsound);
 	lua_register(L,"LoadCustomSound",qlua_loadcustomsound);
 	lua_register(L,"PlaySound",qlua_playsound);
+	lua_register(L,"grabarg",qlua_grabarg);
 
 	pushents(L);
 

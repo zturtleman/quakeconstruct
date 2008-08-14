@@ -176,6 +176,11 @@ int qlua_includefile(lua_State *L) {
 
 	luaL_checktype(L,1,LUA_TSTRING);
 
+	lua_pushboolean(L,0);
+	lua_setglobal(L,"SERVER");
+	lua_pushboolean(L,1);
+	lua_setglobal(L,"CLIENT");
+
 	if(lua_gettop(L) > 0) {
 		filename = lua_tostring(L,1);
 		if(!FS_doScript(filename)) {
@@ -193,6 +198,8 @@ void InitClientLua( void ) {
 
 	CG_Printf("-----Initializing ClientSide Lua-----\n");
 
+	lua_pushboolean(L,0);
+	lua_setglobal(L,"SERVER");
 	lua_pushboolean(L,1);
 	lua_setglobal(L,"CLIENT");
 
