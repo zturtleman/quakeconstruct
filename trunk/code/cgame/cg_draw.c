@@ -2612,6 +2612,7 @@ Perform all drawing needed to completely fill the screen
 void CG_DrawActive( stereoFrame_t stereoView ) {
 	float		separation;
 	vec3_t		baseOrg;
+	lua_State	*L = GetClientLuaState();
 
 	// optionally draw the info screen instead
 	if ( !cg.snap ) {
@@ -2651,6 +2652,11 @@ void CG_DrawActive( stereoFrame_t stereoView ) {
 		VectorMA( cg.refdef.vieworg, -separation, cg.refdef.viewaxis[1], cg.refdef.vieworg );
 	}
 
+	if(L != NULL) {
+		qlua_gethook(L,"Draw3D");
+		qlua_pcall(L,0,0,qtrue);
+	}
+
 	// draw 3D view
 	trap_R_RenderScene( &cg.refdef );
 
@@ -2660,7 +2666,14 @@ void CG_DrawActive( stereoFrame_t stereoView ) {
 	}
 
 	// draw status bar and other floating elements
- 	CG_Draw2D();
+	CG_Draw2D();
+
+	if(L != NULL) {
+		qlua_gethook(L,"Draw2D");
+		qlua_pcall(L,0,0,qtrue);
+	}
+
+	trap_R_SetColor(g_color_table[ColorIndex(COLOR_WHITE)]);
 }
 
 

@@ -1214,6 +1214,7 @@ void lua_pushtrace(lua_State *L, trace_t results);
 void CG_InitLuaVector(lua_State *L);
 void CG_InitLuaEnts(lua_State *L);
 void CG_InitHandles(lua_State *L);
+void CG_InitLua2D(lua_State *L);
 
 //
 // cg_main.c

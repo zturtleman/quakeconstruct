@@ -1786,6 +1786,42 @@ void G_RunThink (gentity_t *ent) {
 	ent->think (ent);
 }
 
+void PlayerInfoMessage( gentity_t *ent ) {
+	char		entry[1024];
+	char		string[8192];
+	int			stringlength;
+	int			i, j;
+	gentity_t	*player;
+	int			cnt;
+	int			h, a;
+
+	// send the latest information on all clients
+	string[0] = 0;
+	stringlength = 0;
+
+	for (i = 0, cnt = 0; i < g_maxclients.integer && cnt < MAX_CLIENTS; i++) {
+		player = g_entities + i;
+		if (player->inuse) {
+			h = player->client->ps.stats[STAT_HEALTH];
+			a = player->client->ps.stats[STAT_ARMOR];
+			if (h < 0) h = 0;
+			if (a < 0) a = 0;
+
+			Com_sprintf (entry, sizeof(entry),
+				" %i %i %i %i %i",
+				i, h, a, player->client->ps.weapon, player->s.powerups);
+			j = strlen(entry);
+			if (stringlength + j > sizeof(string))
+				break;
+			strcpy (string + stringlength, entry);
+			stringlength += j;
+			cnt++;
+		}
+	}
+
+	trap_SendServerCommand( ent-g_entities, va("playerinfo %i %s", cnt, string) );
+}
+
 /*
 ================
 G_RunFrame
@@ -1879,6 +1915,7 @@ void G_RunFrame( int levelTime ) {
 
 		if ( i < MAX_CLIENTS ) {
 			G_RunClient( ent );
+			PlayerInfoMessage( ent );
 
 			qlua_gethook(L, "ClientThink");
 			lua_pushentity(L, ent);

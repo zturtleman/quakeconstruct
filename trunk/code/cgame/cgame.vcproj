@@ -693,6 +693,9 @@
 				RelativePath=".\cg_lua.c">
 			</File>
 			<File
+				RelativePath=".\cg_lua2d.c">
+			</File>
+			<File
 				RelativePath=".\cg_luaentity.c">
 			</File>
 			<File
