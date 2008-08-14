@@ -515,8 +515,13 @@ Cmd_Argc() / Cmd_Argv()
 qboolean CG_ConsoleCommand( void ) {
 	const char	*cmd;
 	int		i;
+	lua_State *L = GetClientLuaState();
 
 	cmd = CG_Argv(0);
+
+	if(Cmd_Check_Lua(cmd)) {
+		return qtrue;	
+	};
 
 	for ( i = 0 ; i < sizeof( commands ) / sizeof( commands[0] ) ; i++ ) {
 		if ( !Q_stricmp( cmd, commands[i].cmd ) ) {

@@ -1187,6 +1187,7 @@ extern	vmCvar_t		cg_obeliskRespawnDelay;
 #endif
 
 
+qboolean Cmd_Check_Lua( char cmd[] );
 void CG_InitLua( void );
 void InitClientLua( void );
 void CloseClientLua( void );

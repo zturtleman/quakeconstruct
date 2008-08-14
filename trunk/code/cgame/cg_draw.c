@@ -199,7 +199,7 @@ void CG_Text_Paint(float x, float y, float scale, vec4_t color, const char *text
 }
 
 
-#endif
+#endif //OMG THIS TOOK FOREVER TO FIND
 
 /*
 ==============
