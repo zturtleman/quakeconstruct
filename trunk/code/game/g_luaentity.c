@@ -851,6 +851,21 @@ static int qlua_getmaxhealth(lua_State *L) {
 	return 0;
 }
 
+static int qlua_sendstring(lua_State *L) {
+	gentity_t	*luaentity;
+	const char	*str = "";
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TSTRING);
+
+	luaentity = lua_toentity(L,1);
+	str	= lua_tostring(L,2);
+	if(luaentity != NULL && luaentity->client && str != NULL) {
+		trap_SendServerCommand( luaentity->s.number, va("luamsg %s", str) );
+	}
+	return 0;
+}
+
 static int Entity_tostring (lua_State *L)
 {
   lua_pushfstring(L, "Entity: %p", lua_touserdata(L, 1));
@@ -902,6 +917,7 @@ static const luaL_reg Entity_methods[] = {
   {"PlaySound",		qlua_playsound},
   {"GetParent",		qlua_getparent},
   {"SetCallback",	qlua_setcallback},
+  {"SendString",	qlua_sendstring},
   {0,0}
 };
 

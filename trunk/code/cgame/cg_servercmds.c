@@ -147,6 +147,44 @@ static void CG_ParsePlayerInfo( void ) {
 	}
 }
 
+char	*ConcatArgs( int start ) {
+	int		i, c, tlen;
+	static char	line[MAX_STRING_CHARS];
+	int		len;
+	char	arg[MAX_STRING_CHARS];
+
+	len = 0;
+	c = trap_Argc();
+	for ( i = start ; i < c ; i++ ) {
+		trap_Argv( i, arg, sizeof( arg ) );
+		tlen = strlen( arg );
+		if ( len + tlen >= MAX_STRING_CHARS - 1 ) {
+			break;
+		}
+		memcpy( line + len, arg, tlen );
+		len += tlen;
+		if ( i != c - 1 ) {
+			line[len] = ' ';
+			len++;
+		}
+	}
+
+	line[len] = 0;
+
+	return line;
+}
+
+static void CG_ParseLuaMsg( void ) {
+	const char *str = ConcatArgs(1);
+	lua_State *L = GetClientLuaState();
+
+	if(L != NULL && str != NULL) {
+		qlua_gethook(L,"MessageReceived");
+		lua_pushstring(L,str);
+		qlua_pcall(L,1,0,qtrue);
+	}
+}
+
 
 /*
 ================
@@ -1003,6 +1041,11 @@ static void CG_ServerCommand( void ) {
 
 	if ( !cmd[0] ) {
 		// server claimed the command
+		return;
+	}
+
+	if ( !strcmp( cmd, "luamsg" ) ) {
+		CG_ParseLuaMsg();
 		return;
 	}
 

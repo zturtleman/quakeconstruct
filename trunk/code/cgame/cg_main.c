@@ -1859,7 +1859,7 @@ Will perform callbacks to make the loading info screen update.
 =================
 */
 
-qboolean Cmd_Check_Lua( char cmd[] ) {
+qboolean Cmd_Check_Lua( const char cmd[] ) {
 	lua_State *L = GetClientLuaState();
 	
 	qlua_nextarg = 1;

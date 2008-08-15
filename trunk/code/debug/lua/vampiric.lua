@@ -1,13 +1,60 @@
+if(CLIENT) then 
+	local notifyt = 0;
+	local val = 0
+	local y = 0
+	local title = 1
+	
+	local function draw2D()
+		if(notifyt > 0) then
+			draw.SetColor(0,1,0,notifyt)
+			draw.Text(10,100+y,"+" .. val,20,20)
+			if(val <= 0) then
+				notifyt = notifyt - 0.01
+				y = y + 1
+			end
+		else
+			val = 0
+		end
+		if(title > 0) then
+			title = title - 0.002
+			local text = "Vampiric Mod"
+			draw.SetColor(.4,1,.2,title)
+			draw.Text(320-(20*string.len(text)),240-20,text,40,40)			
+		end
+	end
+	hook.add("Draw2D","Vampiric",draw2D)
+
+	local function messagetest(str)
+		local args = string.Explode(" ",str)
+		if(args[1] == "damagegiven") then
+			val = val + tonumber(args[2])
+			notifyt = 1
+			y = 0
+		end
+		if(args[1] == "sub") then
+			val = val - tonumber(args[2])
+		end
+	end
+	hook.add("MessageReceived","Vampiric",messagetest)
+	
+return 
+end
+
+SendScript("lua/vampiric.lua")
+
 local function PlayerDamaged(self,inflictor,attacker,damage,meansOfDeath)
 	if(self != nil and attacker != nil) then
 	if(self == attacker) then return end
 	local atk_tab = GetEntityTable(attacker);
-		local hp = attacker:GetInfo(attacker)["health"]
-		local hp2 = self:GetInfo(attacker)["health"]
+		local hp = attacker:GetInfo()["health"]
+		local hp2 = self:GetInfo()["health"]
 		if(hp and hp2 > 0) then
-			local give = math.ceil(damage/4);
+			if(damage > hp2) then damage = hp2 end
+			local give = math.ceil(damage);
 			atk_tab.give = atk_tab.give or 0
 			atk_tab.give = atk_tab.give + give;
+			attacker:SendString("damagegiven " .. give)
+			atk_tab.wait = 20
 		end
 	end
 end
@@ -31,8 +78,11 @@ local function plThink()
 					v:SetInfo(PLAYERINFO_HEALTH,hp + giverate)
 					hp = v:GetInfo()["health"]
 					tab.give = tab.give - giverate
-					if(tab.give <= 0) then tab.wait = 4 end
+					v:SendString("sub " .. giverate)
+					if(tab.give <= 0) then tab.wait = 10 end
 				else
+					v:SetInfo(PLAYERINFO_HEALTH,300)
+					v:SendString("sub " .. tab.give)
 					tab.give = 0
 					tab.wait = 4
 				end

@@ -10,6 +10,8 @@ function string.ToTable ( str )
 
 end
 
+string.alphabet = string.ToTable( "abcdefghijklmnopqrstuvwxyz")
+
 function string.Explode ( seperator, str )
 
 	if ( seperator == "" ) then
