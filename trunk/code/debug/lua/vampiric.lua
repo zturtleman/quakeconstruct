@@ -1,20 +1,36 @@
 SendScript("lua/vampiric_cl.lua")
 
 local function PlayerDamaged(self,inflictor,attacker,damage,meansOfDeath)
+	local force = nil
 	if(self != nil and attacker != nil) then
 	if(self == attacker) then return end
 	local atk_tab = GetEntityTable(attacker);
+		atk_tab.give = atk_tab.give or 0
 		local hp = attacker:GetInfo()["health"]
 		local hp2 = self:GetInfo()["health"]
+
+		if(hp2 > 0 and (hp2 - damage) <= -40) then
+			local give = 20
+			atk_tab.give = atk_tab.give + give;
+			attacker:SendString("damagegiven " .. give)
+			attacker:SendString("target " .. hp2-damage .. " body")
+			atk_tab.wait = 10
+			force = 1000
+		else
+			atk_tab.wait = 0
+		end
+		
 		if(hp and hp2 > 0) then
 			if(damage > hp2) then damage = hp2 end
 			local give = math.ceil(damage/4);
-			atk_tab.give = atk_tab.give or 0
 			atk_tab.give = atk_tab.give + give;
 			attacker:SendString("damagegiven " .. give)
 			attacker:SendString("target " .. hp2-damage .. " " .. self:GetInfo()["name"])
-			atk_tab.wait = 20
+			atk_tab.wait = atk_tab.wait + 20
 		end
+	end
+	if(force != nil) then
+		return force
 	end
 end
 hook.add("PlayerDamaged","Vampiric",PlayerDamaged)
