@@ -702,6 +702,9 @@
 				RelativePath=".\cg_luahandles.c">
 			</File>
 			<File
+				RelativePath=".\cg_luatabs.c">
+			</File>
+			<File
 				RelativePath=".\cg_luavector.c">
 			</File>
 			<File

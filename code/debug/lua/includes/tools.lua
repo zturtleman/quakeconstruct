@@ -1,5 +1,9 @@
 QLUA_DEBUG = false;
 
+function includesimple(s)
+	include("lua/" .. s .. ".lua")
+end
+
 function CurTime()
 	return LevelTime()/1000
 end

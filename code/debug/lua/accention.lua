@@ -1,4 +1,5 @@
 --Remove Some Of The Items From The Map
+
 local function RemoveStuff()
 	local tab = table.Copy(GetAllEntities())
 	for k,v in pairs(tab) do

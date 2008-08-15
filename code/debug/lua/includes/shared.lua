@@ -1,13 +1,16 @@
-local function includex(s) include("lua/includes/" .. s .. ".lua") end
+local function includex(s) 
+	include("lua/includes/" .. s .. ".lua")
+end
 
+includex("tools")
 includex("extensions/init")
 includex("file")
 includex("hooks")
-includex("tools")
 includex("entities")
 includex("timer")
 includex("enum")
 includex("vector")
+includex("scriptmanager")
 if(CLIENT) then includex("sound") end
 if(CLIENT) then includex("shader") end
 includex("commands")

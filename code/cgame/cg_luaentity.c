@@ -168,8 +168,6 @@ int qlua_getclientinfo(lua_State *L) {
 	centity_t	*luaentity;
 	clientInfo_t	*ci;
 
-	lua_newtable(L);
-
 	luaL_checktype(L,1,LUA_TUSERDATA);
 
 	luaentity = lua_toentity(L,1);
@@ -177,6 +175,8 @@ int qlua_getclientinfo(lua_State *L) {
 		ci = &cgs.clientinfo[ luaentity->currentState.clientNum ];
 	}
 	if(ci != NULL) {
+		lua_newtable(L);
+
 		lua_pushstring(L, "name");
 		lua_pushstring(L,ci->name);
 		lua_rawset(L, -3);

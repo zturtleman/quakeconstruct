@@ -2627,6 +2627,10 @@ void CG_DrawActive( stereoFrame_t stereoView ) {
 		return;
 	}
 
+	if(L != NULL) {
+		CG_PushCGTab(L);
+	}
+
 	switch ( stereoView ) {
 	case STEREO_CENTER:
 		separation = 0;
