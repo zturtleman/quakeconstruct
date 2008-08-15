@@ -1,19 +1,23 @@
 if(CLIENT) then 
 	local notifyt = 0;
+	local notify2 = "";
 	local val = 0
 	local y = 0
 	local title = 1
 	local thp = 0
 	local tname = 0
 	local ttime = 0
+	local gb = 0
 	
 	local function draw2D()
 		if(notifyt > 0) then
 			draw.SetColor(0,1,0,notifyt)
-			draw.Text(10,100+y,"+" .. val,40,20)
+			draw.Text(10,100+y,"+" .. val .. notify2,22,20)
 			if(val <= 0) then
 				notifyt = notifyt - 0.01
 				y = y + 1
+				gb = 0
+				notify2 = ""
 			end
 		else
 			val = 0
@@ -51,6 +55,13 @@ if(CLIENT) then
 			thp = tonumber(args[2])
 			tname = args[3]
 			ttime = 1
+			if(tname == "body") then
+				gb = gb + 1
+				notify2 = " INSTA-GIB BONUS!";
+				if(gb > 1) then
+					notify2 = " INSTA-GIB BONUS x" .. gb;
+				end
+			end
 		end
 	end
 	hook.add("MessageReceived","Vampiric",messagetest)
