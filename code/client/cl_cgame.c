@@ -734,7 +734,7 @@ void CL_InitCGame( void ) {
 		interpret = VMI_COMPILED;
 	}
 	else {
-		interpret = Cvar_VariableValue( "vm_cgame" );
+		interpret = 0;//Cvar_VariableValue( "vm_cgame" );
 	}
 	cgvm = VM_Create( "cgame", CL_CgameSystemCalls, interpret );
 	if ( !cgvm ) {

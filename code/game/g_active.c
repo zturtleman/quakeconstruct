@@ -501,11 +501,13 @@ void ClientTimerActions( gentity_t *ent, int msec ) {
 				}
 				G_AddEvent( ent, EV_POWERUP_REGEN, 0 );
 			}
+			trap_SendServerCommand( -1, va("playerhealth %i %i", ent->s.number, ent->health) );
 #endif
 		} else {
 			// count down health when over max
 			if ( ent->health > client->ps.stats[STAT_MAX_HEALTH] ) {
 				ent->health--;
+				trap_SendServerCommand( -1, va("playerhealth %i %i", ent->s.number, ent->health) );
 			}
 		}
 

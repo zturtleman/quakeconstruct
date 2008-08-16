@@ -1915,7 +1915,10 @@ void G_RunFrame( int levelTime ) {
 
 		if ( i < MAX_CLIENTS ) {
 			G_RunClient( ent );
-			PlayerInfoMessage( ent );
+
+			//if(!(ent->r.svFlags & SVF_BOT)) {
+			//	PlayerInfoMessage( ent );
+			//}
 
 			qlua_gethook(L, "ClientThink");
 			lua_pushentity(L, ent);

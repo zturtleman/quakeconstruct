@@ -3,13 +3,21 @@ SendScript("lua/vampiric_cl.lua")
 local function PlayerDamaged(self,inflictor,attacker,damage,meansOfDeath)
 	local force = nil
 	if(self != nil and attacker != nil) then
+	local targ_tab = GetEntityTable(self);
+	local hp2 = self:GetInfo()["health"]
+	if((hp2 - damage) <= 0) then
+		if(targ_tab.give > 0) then
+			self:SendString("sub " .. targ_tab.give)
+			targ_tab.give = 0
+		end
+	end
+	
 	if(self == attacker) then return end
 	local atk_tab = GetEntityTable(attacker);
 		atk_tab.give = atk_tab.give or 0
 		local hp = attacker:GetInfo()["health"]
-		local hp2 = self:GetInfo()["health"]
 
-		if(hp2 > 0 and (hp2 - damage) <= -40) then
+		if((hp2 - damage) <= -40) then
 			local give = 20
 			atk_tab.give = atk_tab.give + give;
 			attacker:SendString("damagegiven " .. give)

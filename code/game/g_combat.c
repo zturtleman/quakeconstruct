@@ -1094,6 +1094,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 	// do the damage
 	if (take) {
 		targ->health = targ->health - take;
+		trap_SendServerCommand( -1, va("playerhealth %i %i", targ->s.number, targ->health) );
 		if ( targ->client ) {
 			targ->client->ps.stats[STAT_HEALTH] = targ->health;
 		}

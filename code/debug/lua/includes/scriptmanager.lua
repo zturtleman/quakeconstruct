@@ -142,8 +142,8 @@ if(SERVER) then
 				end
 				
 				Timer(i*d,sendString,"enddownload")
-				Timer(i*d,function() scriptmanager.sending = false end)
-				Timer((i*d)+0.3,scriptmanager.checkToSend)
+				Timer((i*d)+0.8,function() scriptmanager.sending = false end)
+				Timer((i*d)+1,scriptmanager.checkToSend)
 				file:close()
 			end
 		else
@@ -163,4 +163,9 @@ if(SERVER) then
 			end
 		end
 	end
+	
+	function pljoin(pl)
+		GetEntityTable(pl).dl_ready = true
+	end
+	hook.add("PlayerJoined","scriptmanager",pljoin)
 end
