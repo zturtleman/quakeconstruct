@@ -1152,7 +1152,7 @@ void CL_InitUI( void ) {
 		interpret = VMI_COMPILED;
 	}
 	else {
-		interpret = Cvar_VariableValue( "vm_ui" );
+		interpret = 0; //Cvar_VariableValue( "vm_ui" );
 	}
 	uivm = VM_Create( "ui", CL_UISystemCalls, interpret );
 	if ( !uivm ) {

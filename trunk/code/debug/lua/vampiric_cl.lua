@@ -11,7 +11,7 @@ if(CLIENT) then
 	
 	local function draw2D()
 		if(notifyt > 0) then
-			draw.SetColor(0,1,0,notifyt)
+			draw.SetColor(math.abs(math.sin(CurTime()*10)),math.abs(math.cos(CurTime()*10)),0,notifyt)
 			draw.Text(10,100+y,"+" .. val .. notify2,22,20)
 			if(val <= 0) then
 				notifyt = notifyt - 0.01

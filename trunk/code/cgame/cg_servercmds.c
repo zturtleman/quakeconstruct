@@ -1121,6 +1121,11 @@ static void CG_ServerCommand( void ) {
 		return;
 	}
 
+	if ( !strcmp( cmd, "playerhealth") ) {
+		//PARSE THIS!
+		return;
+	}
+
 	if ( !strcmp( cmd, "map_restart" ) ) {
 		CG_MapRestart();
 		return;
