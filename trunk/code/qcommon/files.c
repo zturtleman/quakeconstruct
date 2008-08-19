@@ -2745,8 +2745,8 @@ static void FS_Startup( const char *gameName ) {
 
 	fs_debug = Cvar_Get( "fs_debug", "0", 0 );
 	fs_copyfiles = Cvar_Get( "fs_copyfiles", "0", CVAR_INIT );
-	fs_cdpath = Cvar_Get ("fs_cdpath", "..", CVAR_INIT ); //Sys_DefaultCDPath()
-	fs_basepath = Cvar_Get ("fs_basepath", "baseq3", CVAR_INIT ); //Sys_DefaultInstallPath()
+	fs_cdpath = Cvar_Get ("fs_cdpath", "..", CVAR_INIT ); //Sys_DefaultCDPath() 
+	fs_basepath = Cvar_Get ("fs_basepath", Sys_DefaultInstallPath(), CVAR_INIT ); //Sys_DefaultInstallPath()
 	fs_basegame = Cvar_Get ("fs_basegame", "", CVAR_INIT );
   homePath = Sys_DefaultHomePath();
   if (!homePath || !homePath[0]) {
@@ -2754,7 +2754,7 @@ static void FS_Startup( const char *gameName ) {
 	}
   homePath = fs_basepath->string;
 	fs_homepath = Cvar_Get ("fs_homepath", homePath, CVAR_INIT );
-	fs_gamedirvar = Cvar_Get ("fs_game", "", CVAR_INIT|CVAR_SYSTEMINFO );
+	fs_gamedirvar = Cvar_Get ("fs_game", "qconstruct", CVAR_INIT|CVAR_SYSTEMINFO );
 	fs_restrict = Cvar_Get ("fs_restrict", "", CVAR_INIT );
 
 	// add search path elements in reverse priority order

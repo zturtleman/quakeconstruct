@@ -1482,9 +1482,10 @@ void CG_DrawWeaponSelect( void ) {
 		return;
 	}
 	trap_R_SetColor( color );
+	if(!CG_ShouldDraw("HUD_WEAPONSELECT")) return;
 
 	// showing weapon select clears pickup item display, but not the blend blob
-	cg.itemPickupTime = 0;
+	// cg.itemPickupTime = 0;
 
 	// count the number of weapons owned
 	bits = cg.snap->ps.stats[ STAT_WEAPONS ];

@@ -8,6 +8,9 @@ local texture = LoadShader("bloodMark");
 
 local lastHP = 0
 local i = 400
+local wasDamage = false
+local lastDX = 0
+local lastDY = 0
 
 local function reset()
 	t = 0
@@ -19,51 +22,84 @@ local function newMark(x,y,dmg)
 	table.insert(marks,{x=x,y=y,dmg=dmg,alpha=1})
 end
 
+local function clamp(v,min,max)
+	return math.max(math.min(v,max),min)
+end
+
 local function damaged(amt)
-	print("Damage\n")
 	if(amt < 10) then
 		amt = amt + math.random(0,10)
 	end
-	newMark(math.random(0,640),math.random(0,480),amt)
+	local scrw = 640
+	local scrh = 480
+	local dx = (_CG.damageX+1)*scrw/2
+	local dy = (_CG.damageY+1)*scrh/2
+	
+	if(lastDX == _CG.damageX and lastDY == _CG.damageY) then
+		dx = scrw/2
+		dy = scrh
+		amt = amt * 2
+	else
+		dx = dx + math.random(-20,20)
+		dy = dy + math.random(-20,20)
+	end
+	
+	lastDX = _CG.damageX
+	lastDY = _CG.damageY
+	
+	dx = clamp(dx,0,scrw)
+	dy = clamp(dy,0,scrh)
+	
+	newMark(dx,dy,amt)
 end
 
 function MarkTest(dmg)
 	damaged(dmg)
 end
 
-local function drawMarks()
+local function drawMarks(inf)
 	for k,v in pairs(marks) do
 		local a = v.dmg / 20
 		
 		local size = (a*320) + 120
 		
-		draw.SetColor(1,1,1,v.alpha)
+		draw.SetColor(1,1,1,v.alpha/1.4)
 		draw.Rect(v.x-(size/2),v.y-(size/2),size,size,texture)
 		
-		v.alpha = v.alpha - 0.002
-		v.dmg = v.dmg + 0.007
-		v.y = v.y + 0.03
-		if(v.dmg < 10) then
-		v.alpha = v.alpha - 0.002
+		if(inf > 0) then
+			v.alpha = v.alpha - 0.002
+			v.dmg = v.dmg + 0.007
+			v.y = v.y + 0.03
+			if(v.dmg < 10) then
+			v.alpha = v.alpha - 0.002
+			end
+		else
+			v.alpha = 1
 		end
 		if(v.alpha < 0) then
-			table.remove(marks,k)
+			v.remove = true
 		end
+	end
+	for k,v in pairs(table.Copy(marks)) do
+		if(v.remove) then table.remove(marks,k) end
 	end
 end
 
 local function draw2D()
 	local inf = LocalPlayer():GetInfo()["health"];
 	local dhp = lastHP - inf
+	if(inf > 0 and lastHP <= 0) then reset() end
+	lastHP = inf
 	
-	if(dhp > 1) then
+	if(dhp > 1 or (wasDamage and dhp > 0)) then
 		damaged(dhp)
+		wasDamage = false
 	end
 	
 	local hp = math.min(math.max(inf + 20,1),100)
 	local hpx = 1 - (hp/100)
 	
-	if(t > 0) then t = t - 0.006 end
+	if(t > 0) then t = t - 0.004 end
 	--if(t < hpx) then t = hpx end
 	
 	local d = 2-t;
@@ -74,21 +110,13 @@ local function draw2D()
 		if(i < 2000) then i = i + 0.4 end
 	end
 	
-	if(inf > 0 and lastHP <= 0) then reset() end
+	drawMarks(inf)
 	
-	drawMarks()
+	--draw.SetColor(1,1,1,t/2)
+	--draw.Rect(-i,-i,640+i*2,480+i*2,texture)
 	
-	draw.SetColor(1,1,1,t)
-	draw.Rect(-i,-i,640+i*2,480+i*2,texture)
-	
-	lastHP = inf
 end
 hook.add("Draw2D","marks",draw2D)
-
-local function draw3D()
-
-end
-hook.add("Draw3D","marks",draw3D)
 
 function event(entity,event,pos)
 	--print("Got Event: " .. EnumToString(entity_event_t,event) .. "\n")
@@ -96,8 +124,9 @@ function event(entity,event,pos)
 		--local sound = LoadSound("sound/items/s_health.wav")
 		--PlaySound(entity,sound)
 	end
-	if(event == EV_PAIN) then
-		draw2D()
+	if(event == EV_PAIN and entity == LocalPlayer()) then
+		wasDamage = true
+		--draw2D()
 	end
 end
 hook.add("EventReceived","marks",event)

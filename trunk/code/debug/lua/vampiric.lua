@@ -5,7 +5,7 @@ local function PlayerDamaged(self,inflictor,attacker,damage,meansOfDeath)
 	if(self != nil and attacker != nil) then
 	local targ_tab = GetEntityTable(self);
 	local hp2 = self:GetInfo()["health"]
-	if((hp2 - damage) <= 0) then
+	if((hp2 - damage) <= 0 and targ_tab != nil) then
 		if(targ_tab.give > 0) then
 			self:SendString("sub " .. targ_tab.give)
 			targ_tab.give = 0

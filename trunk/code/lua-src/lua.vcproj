@@ -107,6 +107,9 @@
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
 			<File
+				RelativePath=".\des56.c">
+			</File>
+			<File
 				RelativePath=".\lapi.c">
 			</File>
 			<File
@@ -123,6 +126,9 @@
 			</File>
 			<File
 				RelativePath=".\ldebug.c">
+			</File>
+			<File
+				RelativePath=".\ldes56.c">
 			</File>
 			<File
 				RelativePath=".\ldo.c">
@@ -197,6 +203,12 @@
 				RelativePath=".\lzio.c">
 			</File>
 			<File
+				RelativePath=".\md5.c">
+			</File>
+			<File
+				RelativePath=".\md5lib.c">
+			</File>
+			<File
 				RelativePath=".\print.c">
 			</File>
 		</Filter>
@@ -204,6 +216,9 @@
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
+			<File
+				RelativePath=".\des56.h">
+			</File>
 			<File
 				RelativePath=".\lapi.h">
 			</File>
@@ -215,6 +230,9 @@
 			</File>
 			<File
 				RelativePath=".\ldebug.h">
+			</File>
+			<File
+				RelativePath=".\ldes56.h">
 			</File>
 			<File
 				RelativePath=".\ldo.h">
@@ -275,6 +293,9 @@
 			</File>
 			<File
 				RelativePath=".\lzio.h">
+			</File>
+			<File
+				RelativePath=".\md5.h">
 			</File>
 		</Filter>
 		<Filter

@@ -1,5 +1,6 @@
 #include "cg_local.h"
 #include "../lua-src/lfs.c"
+#include "../lua-src/md5.c"
 
 lua_State *L;
 
@@ -191,6 +192,43 @@ int qlua_includefile(lua_State *L) {
 	return 0;
 }
 
+int qlua_sendstring(lua_State *L) {
+	const char *str = "";
+
+	luaL_checkstring(L,1);
+	str = lua_tostring(L,1);
+	trap_SendClientCommand( va("luamsg %s",str) );
+
+	return 0;
+}
+/*
+int qlua_md5(lua_State *L) {
+	char *out = "";
+	const char *in = "";
+	int size = 16;
+
+	luaL_checkstring(L,1);
+	in = lua_tostring(L,1);
+
+	if(lua_type(L,2) == LUA_TNUMBER) {
+		size = lua_tointeger(L,2);
+		if(size < 16) size = 16;
+	}
+	
+	md5(in,size,out);
+
+	lua_pushstring(L,out);
+	return 1;
+}*/
+
+int qlua_md5 (lua_State *L) {
+  char buff[16];
+  size_t l;
+  const char *message = luaL_checklstring(L, 1, &l);
+  md5(message, l, buff);
+  lua_pushlstring(L, buff, 16L);
+  return 1;
+}
 
 void InitClientLua( void ) {
 	CloseClientLua();
@@ -213,6 +251,9 @@ void InitClientLua( void ) {
 	lua_register(L,"bitShift",bitwiseShift);
 	lua_register(L,"include",qlua_includefile);
 	lua_register(L,"runString",qlua_runstr);
+	lua_register(L,"SendString",qlua_sendstring);
+	lua_register(L,"MD5",qlua_md5);
+
 
 	CG_Printf("----------------Done-----------------\n");
 }

@@ -34,15 +34,18 @@ int qlua_rect(lua_State *L) {
 	luaL_checktype(L,2,LUA_TNUMBER);
 	luaL_checktype(L,3,LUA_TNUMBER);
 	luaL_checktype(L,4,LUA_TNUMBER);
-	luaL_checktype(L,5,LUA_TNUMBER);
 
 	x = lua_tointeger(L,1);
 	y = lua_tointeger(L,2);
 	w = lua_tointeger(L,3);
 	h = lua_tointeger(L,4);
-	shader = lua_tointeger(L,5);
 
-	CG_DrawPic( x, y, w, h, shader );
+	if(lua_type(L,5) == LUA_TNUMBER) {
+		shader = lua_tointeger(L,5);
+		CG_DrawPic( x, y, w, h, shader );
+	} else {
+		CG_FillRect( x, y, w, h, lastcolor );
+	}
 	return 0;
 }
 

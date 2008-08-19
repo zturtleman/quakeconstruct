@@ -71,10 +71,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   you will have to add your own version for support in the VM.
 
  **********************************************************************/
-
+/*
 #include "../lua-src/lua.h"
 #include "../lua-src/lauxlib.h"
-#include "../lua-src/lualib.h"
+#include "../lua-src/lualib.h"*/
 
 #ifdef Q3_VM
 
@@ -1210,8 +1210,8 @@ typedef struct playerState_s {
 	int			generic1;
 	int			loopSound;
 	int			jumppad_ent;	// jumppad entity hit this frame
-	int			luatest;
-	char		luatest2[1024];
+//	int			luatest;
+//	char		luatest2[1024];
 
 	// not communicated over the net at all
 	int			ping;			// server to game info for scoreboard

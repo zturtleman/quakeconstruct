@@ -25,6 +25,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "../game/bg_public.h"
 #include "cg_public.h"
 
+#include "../lua-src/lua.h"
+#include "../lua-src/lauxlib.h"
+#include "../lua-src/lualib.h"
+
 
 // The entire cgame module is unloaded and reloaded on each level change,
 // so there is NO persistant data between levels on the client side.
@@ -323,6 +327,7 @@ typedef struct {
 	vec3_t			color1;
 	vec3_t			color2;
 
+	int				ammo;
 	int				score;			// updated by score servercmds
 	int				location;		// location index for team mode
 	int				health;			// you only get this info about your teammates
@@ -1218,6 +1223,9 @@ void CG_InitLuaVector(lua_State *L);
 void CG_InitLuaEnts(lua_State *L);
 void CG_InitHandles(lua_State *L);
 void CG_InitLua2D(lua_State *L);
+void CG_InitLuaUtil(lua_State *L);
+
+qboolean CG_ShouldDraw(const char *name);
 
 //
 // cg_main.c

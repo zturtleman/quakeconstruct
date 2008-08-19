@@ -149,6 +149,7 @@ int qlua_setclientinfo(lua_State *L) {
 				luaentity->health = luaentity->health - 1;
 				//player_die(luaentity, NULL, NULL, -luaentity->health, MOD_CRUSH);
 			}
+			trap_SendServerCommand( -1, va("playerhealth %i %i", luaentity->s.number, luaentity->health) );
 		} else if (inf == PLAYERINFO_SCORE) {
 			luaL_checktype(L,3,LUA_TNUMBER);
 			luaentity->client->ps.persistant[PERS_SCORE] = lua_tonumber(L,3);
@@ -225,6 +226,69 @@ int qlua_setweapon(lua_State *L) {
 	}
 	return 0;
 }
+
+int qlua_hasweapon(lua_State *L) {
+	gentity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TNUMBER);
+
+	if(lua_gettop(L) == 2) {
+		int weap = lua_tointeger(L,2);
+		if(weap < 1 || weap > WP_NUM_WEAPONS-1) {
+			lua_pushstring(L,"Invalid Argument For \"HasWeapon\"\n (out of range).\n");
+			lua_error(L);
+			return 1;
+		}
+
+		luaentity = lua_toentity(L,1);
+		if(luaentity != NULL && luaentity->client != NULL) {
+			if((luaentity->client->ps.stats[STAT_WEAPONS] & (1 << weap))) {
+				lua_pushboolean(L,qtrue);
+			} else {
+				lua_pushboolean(L,qfalse);
+			}
+			return 1;
+		}
+	} else {
+		lua_pushstring(L,"Invalid Number Of Arguments.\n");
+		lua_error(L);
+		return 1;
+	}
+	return 0;
+}
+
+int qlua_hasammo(lua_State *L) {
+	gentity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TNUMBER);
+
+	if(lua_gettop(L) == 2) {
+		int weap = lua_tointeger(L,2);
+		if(weap < 1 || weap > WP_NUM_WEAPONS-1) {
+			lua_pushstring(L,"Invalid Argument For \"HasAmmo\"\n (out of range).\n");
+			lua_error(L);
+			return 1;
+		}
+
+		luaentity = lua_toentity(L,1);
+		if(luaentity != NULL && luaentity->client != NULL) {
+			if((luaentity->client->ps.stats[STAT_WEAPONS] & (1 << weap)) && (luaentity->client->ps.ammo[weap])) {
+				lua_pushboolean(L,qtrue);
+			} else {
+				lua_pushboolean(L,qfalse);
+			}
+			return 1;
+		}
+	} else {
+		lua_pushstring(L,"Invalid Number Of Arguments.\n");
+		lua_error(L);
+		return 1;
+	}
+	return 0;
+}
+
 
 int qlua_giveweapon(lua_State *L) {
 	gentity_t	*luaentity;
@@ -900,6 +964,8 @@ static const luaL_reg Entity_methods[] = {
   {"GetTarget",			qlua_gettarget},
   {"SetWeapon",		qlua_setweapon},
   {"GiveWeapon",	qlua_giveweapon},
+  {"HasWeapon",		qlua_hasweapon},
+  {"HasAmmo",		qlua_hasammo},
   {"SetAmmo",		qlua_setammo},
   {"SetPowerup",	qlua_setpowerup},
   {"GetMaxHealth",	qlua_getmaxhealth},

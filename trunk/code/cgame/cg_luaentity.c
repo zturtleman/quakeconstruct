@@ -173,6 +173,12 @@ int qlua_getclientinfo(lua_State *L) {
 	luaentity = lua_toentity(L,1);
 	if(luaentity != NULL) {
 		ci = &cgs.clientinfo[ luaentity->currentState.clientNum ];
+		if(luaentity->currentState.clientNum == cg.snap->ps.clientNum) {
+			ci->health = cg.snap->ps.stats[STAT_HEALTH];
+			ci->armor = cg.snap->ps.stats[STAT_ARMOR];
+			ci->curWeapon = cg.snap->ps.weapon;
+			ci->ammo = cg.snap->ps.ammo[ci->curWeapon];
+		}
 	}
 	if(ci != NULL) {
 		lua_newtable(L);
@@ -183,6 +189,14 @@ int qlua_getclientinfo(lua_State *L) {
 
 		lua_pushstring(L, "health");
 		lua_pushinteger(L,ci->health);
+		lua_rawset(L, -3);
+
+		lua_pushstring(L, "armor");
+		lua_pushinteger(L,ci->armor);
+		lua_rawset(L, -3);
+
+		lua_pushstring(L, "ammo");
+		lua_pushinteger(L,ci->ammo);
 		lua_rawset(L, -3);
 
 		lua_pushstring(L, "score");

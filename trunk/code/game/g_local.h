@@ -26,6 +26,11 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "bg_public.h"
 #include "g_public.h"
 
+#include "../lua-src/lua.h"
+#include "../lua-src/lauxlib.h"
+#include "../lua-src/lualib.h"
+
+
 //==================================================================
 
 // the "gameversion" client command will print this plus compile date

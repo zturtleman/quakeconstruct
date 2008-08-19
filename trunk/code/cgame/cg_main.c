@@ -1961,6 +1961,7 @@ void CG_InitLua() {
 	CG_InitLuaVector(L);
 	CG_InitLuaEnts(L);
 	CG_InitLua2D(L);
+	CG_InitLuaUtil(L);
 
 	lua_register(L,"LevelTime",qlua_curtime);
 	lua_register(L,"__loadsound",qlua_loadsound);
