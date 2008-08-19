@@ -83,6 +83,9 @@ if(CLIENT) then
 		end
 	end
 	hook.add("MessageReceived","scriptmanager",messagetest)
+	
+	SendString("ready")
+	
 	--self.VAriblae
 end
 if(SERVER) then
@@ -205,6 +208,7 @@ if(SERVER) then
 	end
 	
 	function scriptmanager.checkPlayers(script)
+		print("Check Players\n")
 		if(script != nil) then
 			for k,v in pairs(GetAllPlayers()) do
 				if(!v:IsBot()) then
@@ -214,7 +218,9 @@ if(SERVER) then
 		else
 			for k,v in pairs(GetAllPlayers()) do
 				if(!v:IsBot()) then
+					print(#masterqueue .. " scripts.\n")
 					for _,script in pairs(masterqueue) do
+						print("Check Script: " .. script .. "\n")
 						scriptmanager.getHash(v,script)
 					end
 				end
@@ -236,13 +242,21 @@ if(SERVER) then
 		end
 	end
 	
+	function plready(pl)
+		if(GetEntityTable(pl) != nil and GetEntityTable(pl).dl_init == nil) then
+			GetEntityTable(pl).dl_ready = true
+			GetEntityTable(pl).dl_queue = {}
+			GetEntityTable(pl).dl_hashtable = {}
+			GetEntityTable(pl).dl_connected = true
+			GetEntityTable(pl).dl_phc = 0
+			GetEntityTable(pl).dl_init = true
+			print("Player Ready\n")
+			scriptmanager.checkPlayers()
+		end
+	end
+	
 	function pljoin(pl)
-		GetEntityTable(pl).dl_ready = true
-		GetEntityTable(pl).dl_queue = {}
-		GetEntityTable(pl).dl_hashtable = {}
-		GetEntityTable(pl).dl_connected = true
-		GetEntityTable(pl).dl_phc = 0
-		scriptmanager.checkPlayers()
+		--plready(pl)
 	end
 	hook.add("PlayerJoined","scriptmanager",pljoin)
 	
@@ -262,6 +276,9 @@ if(SERVER) then
 				scriptmanager.checkToSend(pl)
 			end
 			return
+		end
+		if(args[1] == "ready") then
+			plready(pl)
 		end
 	end
 	hook.add("MessageReceived","scriptmanager",messagetest)

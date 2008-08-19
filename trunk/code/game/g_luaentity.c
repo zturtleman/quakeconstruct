@@ -1,7 +1,6 @@
 #include "g_local.h"
 
 gentity_t *qlua_getrealentity(gentity_t *ent) {
-	gentity_t	*realent = NULL;
 	gentity_t	*tent = NULL;
 	int numEnts = sizeof(g_entities) / sizeof(g_entities[0]);
 	int i=0;
@@ -19,6 +18,13 @@ gentity_t *qlua_getrealentity(gentity_t *ent) {
 			n++;
 		}
 	}
+
+	tent = g_entities + ent->s.number;
+	if(tent != NULL) {
+		tent->classname = "player";
+		return tent;
+	}
+
 	G_Printf("Unable To Find Entity: %i\n", ent->s.number);
 	
 	return NULL;
