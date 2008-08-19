@@ -304,6 +304,7 @@ int Pickup_Health (gentity_t *ent, gentity_t *other) {
 		other->health = max;
 	}
 	other->client->ps.stats[STAT_HEALTH] = other->health;
+	trap_SendServerCommand( -1, va("playerhealth %i %i", other->s.number, other->health) );
 
 	if ( ent->item->quantity == 100 ) {		// mega health respawns slow
 		return RESPAWN_MEGAHEALTH;

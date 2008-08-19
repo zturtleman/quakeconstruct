@@ -42,6 +42,19 @@ char systemChat[256];
 char teamChat1[256];
 char teamChat2[256];
 
+qboolean CG_ShouldDraw(const char *name) {
+	lua_State *L = GetClientLuaState();
+	if(L != NULL && name != NULL) {
+		qlua_gethook(L,"ShouldDraw");
+		lua_pushstring(L,name);
+		qlua_pcall(L,1,1,qtrue);
+		if(lua_type(L,-1) == LUA_TBOOLEAN && lua_toboolean(L,-1) == qfalse) {
+			return qfalse;
+		}
+	}
+	return qtrue;
+}
+
 #ifdef MISSIONPACK
 
 int CG_Text_Width(const char *text, float scale, int limit) {
@@ -544,6 +557,10 @@ static void CG_DrawStatusBar( void ) {
 		return;
 	}
 
+	if( !CG_ShouldDraw("HUD_STATUSBAR") ) {
+		return;
+	}
+
 	// draw the team background
 	CG_DrawTeamBackground( 0, 420, 640, 60, 0.33f, cg.snap->ps.persistant[PERS_TEAM] );
 
@@ -553,7 +570,7 @@ static void CG_DrawStatusBar( void ) {
 	VectorClear( angles );
 
 	// draw any 3D icons first, so the changes back to 2D are minimized
-	if ( cent->currentState.weapon && cg_weapons[ cent->currentState.weapon ].ammoModel ) {
+	if ( cent->currentState.weapon && cg_weapons[ cent->currentState.weapon ].ammoModel && CG_ShouldDraw("HUD_STATUSBAR_AMMO")) {
 		origin[0] = 70;
 		origin[1] = 0;
 		origin[2] = 0;
@@ -562,7 +579,9 @@ static void CG_DrawStatusBar( void ) {
 					   cg_weapons[ cent->currentState.weapon ].ammoModel, 0, origin, angles );
 	}
 
-	CG_DrawStatusBarHead( 185 + CHAR_WIDTH*3 + TEXT_ICON_SPACE );
+	if(CG_ShouldDraw("HUD_STATUSBAR_HEALTH")) {
+		CG_DrawStatusBarHead( 185 + CHAR_WIDTH*3 + TEXT_ICON_SPACE );
+	}
 
 	if( cg.predictedPlayerState.powerups[PW_REDFLAG] ) {
 		CG_DrawStatusBarFlag( 185 + CHAR_WIDTH*3 + TEXT_ICON_SPACE + ICON_SIZE, TEAM_RED );
@@ -572,7 +591,7 @@ static void CG_DrawStatusBar( void ) {
 		CG_DrawStatusBarFlag( 185 + CHAR_WIDTH*3 + TEXT_ICON_SPACE + ICON_SIZE, TEAM_FREE );
 	}
 
-	if ( ps->stats[ STAT_ARMOR ] ) {
+	if ( ps->stats[ STAT_ARMOR ] && CG_ShouldDraw("HUD_STATUSBAR_ARMOR") ) {
 		origin[0] = 90;
 		origin[1] = 0;
 		origin[2] = -10;
@@ -597,7 +616,7 @@ static void CG_DrawStatusBar( void ) {
 	//
 	// ammo
 	//
-	if ( cent->currentState.weapon ) {
+	if ( cent->currentState.weapon && CG_ShouldDraw("HUD_STATUSBAR_AMMO")) {
 		value = ps->ammo[cent->currentState.weapon];
 		if ( value > -1 ) {
 			if ( cg.predictedPlayerState.weaponstate == WEAPON_FIRING
@@ -631,29 +650,31 @@ static void CG_DrawStatusBar( void ) {
 	//
 	// health
 	//
-	value = ps->stats[STAT_HEALTH];
-	if ( value > 100 ) {
-		trap_R_SetColor( colors[3] );		// white
-	} else if (value > 25) {
-		trap_R_SetColor( colors[0] );	// green
-	} else if (value > 0) {
-		color = (cg.time >> 8) & 1;	// flash
-		trap_R_SetColor( colors[color] );
-	} else {
-		trap_R_SetColor( colors[1] );	// red
-	}
+	if(CG_ShouldDraw("HUD_STATUSBAR_HEALTH")) {
+		value = ps->stats[STAT_HEALTH];
+		if ( value > 100 ) {
+			trap_R_SetColor( colors[3] );		// white
+		} else if (value > 25) {
+			trap_R_SetColor( colors[0] );	// green
+		} else if (value > 0) {
+			color = (cg.time >> 8) & 1;	// flash
+			trap_R_SetColor( colors[color] );
+		} else {
+			trap_R_SetColor( colors[1] );	// red
+		}
 
-	// stretch the health up when taking damage
-	CG_DrawField ( 185, 432, 3, value);
-	CG_ColorForHealth( hcolor );
-	trap_R_SetColor( hcolor );
+		// stretch the health up when taking damage
+		CG_DrawField ( 185, 432, 3, value);
+		CG_ColorForHealth( hcolor );
+		trap_R_SetColor( hcolor );
+	}
 
 
 	//
 	// armor
 	//
 	value = ps->stats[STAT_ARMOR];
-	if (value > 0 ) {
+	if (value > 0 && CG_ShouldDraw("HUD_STATUSBAR_ARMOR")) {
 		trap_R_SetColor( colors[0] );
 		CG_DrawField (370, 432, 3, value);
 		trap_R_SetColor( NULL );
@@ -1361,7 +1382,7 @@ static int CG_DrawPickupItem( int y ) {
 	y -= ICON_SIZE;
 
 	value = cg.itemPickup;
-	if ( value ) {
+	if ( value && CG_ShouldDraw("HUD_PICKUP") ) {
 		fadeColor = CG_FadeColor( cg.itemPickupTime, 3000 );
 		if ( fadeColor ) {
 			CG_RegisterItemVisuals( value );
@@ -1423,6 +1444,10 @@ static void CG_DrawTeamInfo( void ) {
 		return; // disabled
 
 	if (cgs.teamLastChatPos != cgs.teamChatPos) {
+		if( !CG_ShouldDraw("HUD_TEAM") ) {
+			return;
+		}
+
 		if (cg.time - cgs.teamChatMsgTimes[cgs.teamLastChatPos % chatHeight] > cg_teamChatTime.integer) {
 			cgs.teamLastChatPos++;
 		}
@@ -1483,7 +1508,7 @@ static void CG_DrawHoldableItem( void ) {
 	int		value;
 
 	value = cg.snap->ps.stats[STAT_HOLDABLE_ITEM];
-	if ( value ) {
+	if ( value && CG_ShouldDraw("HUD_HOLDABLE")) {
 		CG_RegisterItemVisuals( value );
 		CG_DrawPic( 640-ICON_SIZE, (SCREEN_HEIGHT-ICON_SIZE)/2, ICON_SIZE, ICON_SIZE, cg_items[ value ].icon );
 	}
@@ -1559,6 +1584,10 @@ static void CG_DrawReward( void ) {
 
 	count = cg.rewardCount[0] - count*10;		// number of small rewards to draw
 	*/
+
+	if( !CG_ShouldDraw("HUD_REWARD") ) {
+		return;
+	}
 
 	if ( cg.rewardCount[0] >= 10 ) {
 		y = 56;
@@ -2043,6 +2072,10 @@ static void CG_DrawCrosshairNames( void ) {
 		return;
 	}
 
+	if( !CG_ShouldDraw("HUD_CROSSHAIR_NAMES") ) {
+		return;
+	}
+
 	name = cgs.clientinfo[ cg.crosshairClientNum ].name;
 #ifdef MISSIONPACK
 	color[3] *= 0.5f;
@@ -2096,6 +2129,11 @@ static void CG_DrawVote(void) {
 	if ( sec < 0 ) {
 		sec = 0;
 	}
+
+	if( !CG_ShouldDraw("HUD_VOTE") ) {
+		return;
+	}
+
 #ifdef MISSIONPACK
 	s = va("VOTE(%i):%s yes:%i no:%i", sec, cgs.voteString, cgs.voteYes, cgs.voteNo);
 	CG_DrawSmallString( 0, 58, s, 1.0F );
@@ -2137,6 +2175,11 @@ static void CG_DrawTeamVote(void) {
 	if ( sec < 0 ) {
 		sec = 0;
 	}
+
+	if( !CG_ShouldDraw("HUD_VOTE") ) {
+		return;
+	}
+
 	s = va("TEAMVOTE(%i):%s yes:%i no:%i", sec, cgs.teamVoteString[cs_offset],
 							cgs.teamVoteYes[cs_offset], cgs.teamVoteNo[cs_offset] );
 	CG_DrawSmallString( 0, 90, s, 1.0F );
@@ -2280,6 +2323,10 @@ static void CG_DrawAmmoWarning( void ) {
 	}
 
 	if ( !cg.lowAmmoWarning ) {
+		return;
+	}
+
+	if( !CG_ShouldDraw("HUD_AMMOWARNING") ) {
 		return;
 	}
 
@@ -2514,7 +2561,7 @@ static void CG_Draw2D( void ) {
 		return;
 	}
 
-	if ( cg.snap->ps.pm_type == PM_INTERMISSION ) {
+	if ( cg.snap->ps.pm_type == PM_INTERMISSION && CG_ShouldDraw("HUD_INTERMISSION") ) {
 		CG_DrawIntermission();
 		return;
 	}
@@ -2525,8 +2572,8 @@ static void CG_Draw2D( void ) {
 	}
 */
 	if ( cg.snap->ps.persistant[PERS_TEAM] == TEAM_SPECTATOR ) {
-		CG_DrawSpectator();
-		CG_DrawCrosshair();
+		if(CG_ShouldDraw("HUD_SPECTATOR")) CG_DrawSpectator();
+		if(CG_ShouldDraw("HUD_CROSSHAIR")) CG_DrawCrosshair();
 		CG_DrawCrosshairNames();
 	} else {
 		// don't draw any status if dead or the scoreboard is being explicitly shown
@@ -2546,9 +2593,9 @@ static void CG_Draw2D( void ) {
 #ifdef MISSIONPACK
 			CG_DrawProxWarning();
 #endif      
-			CG_DrawCrosshair();
+			if(CG_ShouldDraw("HUD_CROSSHAIR")) CG_DrawCrosshair();
 			CG_DrawCrosshairNames();
-			CG_DrawWeaponSelect();
+			if(CG_ShouldDraw("HUD_WEAPONSELECT")) CG_DrawWeaponSelect();
 
 #ifndef MISSIONPACK
 			CG_DrawHoldableItem();
@@ -2670,7 +2717,9 @@ void CG_DrawActive( stereoFrame_t stereoView ) {
 	}
 
 	// draw status bar and other floating elements
-	CG_Draw2D();
+	//if(CG_ShouldDraw("HUD")) {
+		CG_Draw2D();
+	//}
 
 	if(L != NULL) {
 		qlua_gethook(L,"Draw2D");

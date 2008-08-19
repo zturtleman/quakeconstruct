@@ -519,6 +519,11 @@ qboolean CG_ConsoleCommand( void ) {
 
 	cmd = CG_Argv(0);
 
+	if(Q_stricmp(cmd,"luamsg") == 0) {
+		CG_Printf("^1Cannot Use This As A Console Command.\n");
+		return qtrue;
+	}
+
 	if(Cmd_Check_Lua(cmd)) {
 		return qtrue;	
 	};

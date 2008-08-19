@@ -7,7 +7,7 @@ if(CLIENT) then
 	local thp = 0
 	local tname = 0
 	local ttime = 0
-	local gb = 0
+	local gb = 0		
 	
 	local function draw2D()
 		if(notifyt > 0) then

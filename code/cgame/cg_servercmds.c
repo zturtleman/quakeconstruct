@@ -1123,6 +1123,7 @@ static void CG_ServerCommand( void ) {
 
 	if ( !strcmp( cmd, "playerhealth") ) {
 		//PARSE THIS!
+		cgs.clientinfo[ atoi(CG_Argv(1)) ].health = atoi(CG_Argv(2));
 		return;
 	}
 

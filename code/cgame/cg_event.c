@@ -404,9 +404,18 @@ A new item was picked up this frame
 ================
 */
 static void CG_ItemPickup( int itemNum ) {
+	lua_State *L = GetClientLuaState();
+
 	cg.itemPickup = itemNum;
 	cg.itemPickupTime = cg.time;
 	cg.itemPickupBlendTime = cg.time;
+
+	if(L != NULL) {
+		qlua_gethook(L,"ItemPickup");
+		lua_pushinteger(L,itemNum);
+		qlua_pcall(L,1,0,qtrue);
+	}
+	
 	// see if it should be the grabbed weapon
 	if ( bg_itemlist[itemNum].giType == IT_WEAPON ) {
 		// select it immediately

@@ -705,6 +705,9 @@
 				RelativePath=".\cg_luatabs.c">
 			</File>
 			<File
+				RelativePath=".\cg_luautil.c">
+			</File>
+			<File
 				RelativePath=".\cg_luavector.c">
 			</File>
 			<File

@@ -14,6 +14,12 @@ function debugprint(msg)
 	end
 end
 
+function hexFormat(k)
+	return string.gsub(k, ".", function (c)
+	return string.format("%02x", string.byte(c))
+	end)
+end
+
 function DamageInfo(self,inflictor,attacker,damage,meansOfDeath,killed)
 	local m = "Damaged"
 	if(killed) then m = "Killed" end

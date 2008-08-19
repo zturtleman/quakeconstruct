@@ -1590,6 +1590,20 @@ void Cmd_Stats_f( gentity_t *ent ) {
 */
 }
 
+static void CG_ParseLuaMsg( int clientNum ) {
+	const char *str = ConcatArgs(1);
+	gentity_t  *ent = g_entities + clientNum;
+
+	lua_State *L = GetServerLuaState();
+
+	if(L != NULL && str != NULL && ent != NULL) {
+		qlua_gethook(L,"MessageReceived");
+		lua_pushstring(L,str);
+		lua_pushentity(L,ent);
+		qlua_pcall(L,2,0,qtrue);
+	}
+}
+
 /*
 =================
 ClientCommand
@@ -1606,6 +1620,10 @@ void ClientCommand( int clientNum ) {
 
 	trap_Argv( 0, cmd, sizeof( cmd ) );
 
+	if (Q_stricmp (cmd, "luamsg" ) == 0) {
+		CG_ParseLuaMsg(clientNum);
+		return;
+	}
 	if (Q_stricmp (cmd, "say") == 0) {
 		Cmd_Say_f (ent, SAY_ALL, qfalse);
 		return;

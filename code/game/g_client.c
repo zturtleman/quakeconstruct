@@ -1266,6 +1266,8 @@ void ClientSpawn(gentity_t *ent) {
 	// clear entity state values
 	BG_PlayerStateToEntityState( &client->ps, &ent->s, qtrue );
 
+	trap_SendServerCommand( -1, va("playerhealth %i %i", ent->s.number, ent->health) );
+
 	qlua_gethook(GetServerLuaState(), "PlayerSpawned");
 	lua_pushentity(GetServerLuaState(),ent);
 	qlua_pcall(GetServerLuaState(),1,0,qtrue);
