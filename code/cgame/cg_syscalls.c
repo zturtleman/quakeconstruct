@@ -470,3 +470,7 @@ qboolean trap_GetEntityToken( char *buffer, int bufferSize ) {
 qboolean trap_R_inPVS( const vec3_t p1, const vec3_t p2 ) {
 	return syscall( CG_R_INPVS, p1, p2 );
 }
+
+void trap_LockMouse( qboolean lock ) {
+	syscall( CG_LOCKMOUSE, lock );
+}

@@ -1074,6 +1074,19 @@ void CL_KeyEvent (int key, qboolean down, unsigned time) {
 		return;
 	}
 
+	if(cgvm != NULL && (cls.keyCatchers & KEYCATCH_CONSOLE) == 0) {
+		if((cls.keyCatchers & KEYCATCH_UI) == 0) {
+			if((cls.keyCatchers & KEYCATCH_MESSAGE) == 0) {
+				VM_Call( cgvm, CG_KEY_EVENT, key, down ); //CGAME KEYEVENTS FOR LUA
+			}
+		}
+	}
+
+
+	if ( key == K_MOUSE1 && lockmouse && down ) {
+		return;
+	}
+
 
 	// keys can still be used for bound actions
 	if ( down && ( key < 128 || key == K_MOUSE1 ) && ( clc.demoplaying || cls.state == CA_CINEMATIC ) && !cls.keyCatchers) {
@@ -1130,7 +1143,7 @@ void CL_KeyEvent (int key, qboolean down, unsigned time) {
 		if ( cls.keyCatchers & KEYCATCH_UI && uivm ) {
 			VM_Call( uivm, UI_KEY_EVENT, key, down );
 		} else if ( cls.keyCatchers & KEYCATCH_CGAME && cgvm ) {
-			VM_Call( cgvm, CG_KEY_EVENT, key, down );
+			//VM_Call( cgvm, CG_KEY_EVENT, key, down );
 		} 
 
 		return;

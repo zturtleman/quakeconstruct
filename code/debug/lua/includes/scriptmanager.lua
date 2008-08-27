@@ -22,14 +22,14 @@ if(CLIENT) then
 	local function messagetest(str)
 		local args = string.Explode(" ",str)
 		if(args[1] == "loadscript") then
-			includesimple(args[2])
+			includesimple("downloads/" .. args[2])
 			return
 		end
 		if(args[1] == "begindownload") then
 			DL_FILENAME = args[2];
 			DL_SIZE = tonumber(args[3])
 			DL_CONTENTS = ""
-			print("Download Started: " .. DL_FILENAME .. "\n")
+			debugprint("Download Started: " .. DL_FILENAME .. "\n")
 			return
 		end
 		if(args[1] == "downloadline") then
@@ -39,16 +39,20 @@ if(CLIENT) then
 			return
 		end
 		if(args[1] == "enddownload") then
+			if(DL_FILENAME == "") then return end
 			local rez = "lua/downloads/" .. DL_FILENAME
-			print("Download Finished: " .. rez .. "\n")
+			debugprint("Download Finished: " .. rez .. "\n")
 			
 			local file = io.open(rez,"w")
-			file:write(DL_CONTENTS)
-			file:close()
-			
-			local b,e = pcall(include,rez)
-			if(!b) then
-				print("^1Script Manager Error: " .. e .. "\n")
+			if(file != nil) then
+				file:write(DL_CONTENTS)
+				file:close()
+				local b,e = pcall(include,rez)
+				if(!b) then
+					debugprint("^1Script Manager Error (Script Execution): " .. e .. "\n")
+				end
+			else
+				debugprint("^1Script Manager Error (Script Copy): Unable to write file: " .. rez .. "\n")
 			end
 			
 			DL_FILENAME = ""
@@ -68,12 +72,12 @@ if(CLIENT) then
 		end
 		if(args[1] == "getHash") then
 			if(args[2] != nil) then
-				print("Cl_File: " .. args[2] .. "\n")
+				debugprint("Cl_File: " .. args[2] .. "\n")
 				
 				local md5sum = fileMD5("lua/downloads/" .. args[2])
 				md5sum = hexFormat(md5sum)
 				
-				print("Cl_Hash: " .. md5sum .. "\n")
+				debugprint("Cl_Hash: " .. md5sum .. "\n")
 				SendString("md5hash " .. args[2] .. " " .. md5sum)
 			end
 			return
@@ -120,16 +124,18 @@ if(SERVER) then
 		local myqueue = scriptmanager.getQueue(pl)
 		for k,v in pairs(masterqueue) do
 			local c = cleanse(v)
-			print("Check Master: " .. v .. "\n")
+			debugprint("Check Master: " .. v .. "\n")
 			if(!table.HasValue(myqueue,v)) then
 				if(GetEntityTable(pl).dl_hashtable[c] != nil) then
 					local md5sum = fileMD5(v)
 					md5sum = hexFormat(md5sum)
 					if(GetEntityTable(pl).dl_hashtable[c] != md5sum) then
-						print("Player Queued: " .. c .. "\n")
+						debugprint("Player Queued: " .. c .. "\n")
 						table.insert(myqueue,v)
 					else
-						print("Player Has Valid Copy\n")
+						debugprint("Player Has Valid Copy\n")
+						local n = string.sub(c,0,string.len(c)-4)
+						pl:SendString("loadscript " .. n)
 					end
 				end
 			end
@@ -176,7 +182,7 @@ if(SERVER) then
 	function scriptmanager.sendIt(pl,script)
 		local d = 0.08
 		if(fileExists(script)) then
-			print("Sending Script: " .. script .. "\n")
+			debugprint("Sending Script: " .. script .. "\n")
 			file = io.open(script, "r")
 			if(file != nil) then
 				local lines = 0
@@ -192,39 +198,41 @@ if(SERVER) then
 				
 				local i = 1
 				for line in file:lines() do
-					line = string.Replace(line, "\"", "'")
+					line = string.Replace(line, "\"", "\'")
 					Timer(i*d,pl.SendString,pl,"downloadline " .. line)
 					i=i+1
 				end
 				
-				Timer(i*d,sendString,"enddownload")
+				Timer((i*d)+0.8,sendString,"enddownload")
 				Timer((i*d)+0.8,scriptmanager.ready,pl,true)
 				Timer((i*d)+1,scriptmanager.checkToSend,pl)
 				file:close()
 			end
 		else
-			print("Script Not Found: " .. script .. "\n")
+			debugprint("Script Not Found: " .. script .. "\n")
 		end	
 	end
-	
-	function scriptmanager.checkPlayers(script)
-		print("Check Players\n")
+
+	function scriptmanager.checkPlayer(pl,script)
+		debugprint("Check Players: " .. #GetAllPlayers() .. "\n")
 		if(script != nil) then
-			for k,v in pairs(GetAllPlayers()) do
-				if(!v:IsBot()) then
-					scriptmanager.getHash(v,script)
-				end
+			if(!pl:IsBot()) then
+				scriptmanager.getHash(pl,script)
 			end
 		else
-			for k,v in pairs(GetAllPlayers()) do
-				if(!v:IsBot()) then
-					print(#masterqueue .. " scripts.\n")
-					for _,script in pairs(masterqueue) do
-						print("Check Script: " .. script .. "\n")
-						scriptmanager.getHash(v,script)
-					end
+			if(!pl:IsBot()) then
+				debugprint(#masterqueue .. " scripts.\n")
+				for _,script in pairs(masterqueue) do
+					debugprint("Check Script: " .. script .. "\n")
+					scriptmanager.getHash(pl,script)
 				end
 			end
+		end
+	end
+	
+	function scriptmanager.checkAllPlayers(script)
+		for k,v in pairs(GetAllPlayers()) do
+			scriptmanager.checkPlayer(v,script)
 		end
 	end
 
@@ -233,11 +241,11 @@ if(SERVER) then
 			if(fileExists(script)) then
 				if(!table.HasValue(masterqueue,script)) then
 					table.insert(masterqueue,script)
-					print("Script Added To Queue: " .. script .. "\n")
+					debugprint("Script Added To Queue: " .. script .. "\n")
 				end
-				scriptmanager.checkPlayers(script)
+				scriptmanager.checkAllPlayers(script)
 			else
-				print("Script Not Found: " .. script .. "\n")
+				debugprint("Script Not Found: " .. script .. "\n")
 			end
 		end
 	end
@@ -250,8 +258,8 @@ if(SERVER) then
 			GetEntityTable(pl).dl_connected = true
 			GetEntityTable(pl).dl_phc = 0
 			GetEntityTable(pl).dl_init = true
-			print("Player Ready\n")
-			scriptmanager.checkPlayers()
+			debugprint("Player Ready\n")
+			scriptmanager.checkPlayer(pl)
 		end
 	end
 	
@@ -266,12 +274,12 @@ if(SERVER) then
 			local filename = args[2];
 			local hash = args[3];
 			if(hash == nil) then hash = "" end
-			print("Got MD5Hash[" .. filename .. "]: " .. hash .. "\n")
+			debugprint("Got MD5Hash[" .. filename .. "]: " .. hash .. "\n")
 			GetEntityTable(pl).dl_hashtable[filename] = hash
 			GetEntityTable(pl).dl_phc = GetEntityTable(pl).dl_phc - 1
 			if(GetEntityTable(pl).dl_phc <= 0) then
 				GetEntityTable(pl).dl_phc = 0
-				print("Got All MD5Hash... Starting Downloads\n")
+				debugprint("Got All MD5Hash... Starting Downloads\n")
 				scriptmanager.copyMasterQueue(pl)
 				scriptmanager.checkToSend(pl)
 			end
@@ -283,3 +291,4 @@ if(SERVER) then
 	end
 	hook.add("MessageReceived","scriptmanager",messagetest)
 end
+print("^3Script Manager System Loaded.\n")

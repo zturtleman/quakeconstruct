@@ -202,6 +202,7 @@ int qlua_includefile(lua_State *L) {
 
 	if(lua_gettop(L) > 0) {
 		filename = lua_tostring(L,1);
+
 		if(!FS_doScript(filename)) {
 			lua_error(L);
 			return 1;

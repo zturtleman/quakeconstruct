@@ -43,7 +43,17 @@ function parseEnumerationSet(file)
 				line = killWhiteSpace(line)
 				if not (line == "") then
 					line = string.Replace(line, ",", "")
-					table.insert(enumcontents,line)
+					line = string.Replace(line, " ", "")
+					local t = {}
+					local name = line
+					local eq = string.find(line,"=")
+					if(eq) then
+						local num = string.sub(line,eq+1,string.len(line))
+						name = string.sub(line,0,eq-1)
+						t.forcevalue = tonumber(num)
+					end
+					t.name = name
+					table.insert(enumcontents,t)
 				end
 			end
 		end
@@ -56,25 +66,44 @@ for k,v in pairs(enumfiles) do
 	print("^3Found Enumeration Set '" .. v .. "'.\n")
 	parseEnumerationSet(v)
 end
+--parseEnumerationSet("lua/includes/enum/input.enum")
 
 local count = 0
+local val = 0
+local forced = 0
 for n,e in pairs(enum) do
 	print("^3Enumerated '" .. n .. "'.\n")
-	for k,v in pairs(e) do 
-		_G[v] = k-1
+	for k,v in pairs(e) do
+		--print(v.name)
+		local value = val
+		value = value + forced
+		if(v.forcevalue) then
+			forced = v.forcevalue
+			val = 0
+			--print(" " .. v.forcevalue .. "\n")
+		else
+			--print(" " .. value .. "\n")
+		end
+		_G[v.name] = value
+		v.value = value
 		count = count + 1
+		val = val + 1
 	end
 	e.IsEnumeration = true
-	_G[n] = e--enumstrings[n]
+	_G[n] = e
+	forced = 0
+	val = 0
 end
 
 function EnumToString(set,val)
 	if not(set == nil) then
 		if(type(set) == "table") then
 			for k,v in pairs(set) do
-				if(k == (val+1)) then
-					if(type(v) == "string") then
-						return v
+				if(type(v) == "table") then
+					if(val == v.value) then
+						if(type(v.name) == "string") then
+							return v.name
+						end
 					end
 				end
 			end

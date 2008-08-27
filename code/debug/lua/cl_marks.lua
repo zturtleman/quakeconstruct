@@ -4,22 +4,27 @@ local soundtest = "";
 local t = 0
 local marks = {}
 
-local texture = LoadShader("bloodMark");
+local texture = LoadShader("bloodTrail"); --bloodMark
 
 local lastHP = 0
-local i = 400
+local i = 200
 local wasDamage = false
 local lastDX = 0
 local lastDY = 0
 
 local function reset()
 	t = 0
-	i = 400
+	i = 200
 	marks = {}
 end
 
 local function newMark(x,y,dmg)
-	table.insert(marks,{x=x,y=y,dmg=dmg,alpha=1})
+	local al = .7
+	if(dmg > 70) then dmg = 70 end
+	
+	if(#marks > 5 and dmg < 15) then al = .4 end
+	
+	table.insert(marks,{x=x,y=y,dmg=dmg,alpha=al})
 end
 
 local function clamp(v,min,max)
@@ -36,13 +41,13 @@ local function damaged(amt)
 	local dy = (_CG.damageY+1)*scrh/2
 	
 	if(lastDX == _CG.damageX and lastDY == _CG.damageY) then
-		dx = scrw/2
-		dy = scrh
+		--dx = scrw/2
+		--dy = scrh
 		amt = amt * 2
-	else
-		dx = dx + math.random(-20,20)
-		dy = dy + math.random(-20,20)
 	end
+	
+	dx = dx + math.random(-40,40)
+	dy = dy + math.random(-40,40)
 	
 	lastDX = _CG.damageX
 	lastDY = _CG.damageY
@@ -61,9 +66,9 @@ local function drawMarks(inf)
 	for k,v in pairs(marks) do
 		local a = v.dmg / 20
 		
-		local size = (a*320) + 120
+		local size = (a*220) + 120
 		
-		draw.SetColor(1,1,1,v.alpha/1.4)
+		draw.SetColor(1,1,1,v.alpha)
 		draw.Rect(v.x-(size/2),v.y-(size/2),size,size,texture)
 		
 		if(inf > 0) then
@@ -99,21 +104,21 @@ local function draw2D()
 	local hp = math.min(math.max(inf + 20,1),100)
 	local hpx = 1 - (hp/100)
 	
-	if(t > 0) then t = t - 0.004 end
-	--if(t < hpx) then t = hpx end
+	t = 0
+	if(t < hpx) then t = hpx end
 	
 	local d = 2-t;
 	local d2 = t;
 	
 	if(inf <= 0) then 
-		t = .9
+		t = 0
 		if(i < 2000) then i = i + 0.4 end
 	end
 	
 	drawMarks(inf)
 	
-	--draw.SetColor(1,1,1,t/2)
-	--draw.Rect(-i,-i,640+i*2,480+i*2,texture)
+	draw.SetColor(1,1,1,t/1.6)
+	draw.Rect(-i,-i,640+i*2,480+i*2,texture)
 	
 end
 hook.add("Draw2D","marks",draw2D)

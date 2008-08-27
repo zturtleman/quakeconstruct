@@ -19,15 +19,17 @@ int qlua_setcolor(lua_State *L) {
 			}
 		}
 	}
-	trap_R_SetColor(color);
-
 	VectorCopy(color,lastcolor);
+	lastcolor[3] = color[3];
+
+	trap_R_SetColor(color);
 
 	return 0;
 }
 
 int qlua_rect(lua_State *L) {
 	int x,y,w,h;
+
 	qhandle_t shader;
 
 	luaL_checktype(L,1,LUA_TNUMBER);
@@ -65,7 +67,7 @@ int qlua_text(lua_State *L) {
 	if(lua_type(L,4) == LUA_TNUMBER) {w = lua_tointeger(L,4);}
 	if(lua_type(L,5) == LUA_TNUMBER) {h = lua_tointeger(L,5);}
 
-	CG_DrawStringExt(x, y, text, 0, qfalse, qfalse, w, h, 0 );
+	CG_DrawStringExt(x, y, text, lastcolor, qfalse, qfalse, w, h, 0 );
 
 	return 0;
 }

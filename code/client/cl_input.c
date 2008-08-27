@@ -25,6 +25,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 unsigned	frame_msec;
 int			old_com_frameTime;
+qboolean	lockmouse = qfalse;
 
 /*
 ===============================================================================
@@ -258,6 +259,9 @@ void IN_CenterView (void) {
 	cl.viewangles[PITCH] = -SHORT2ANGLE(cl.snap.ps.delta_angles[PITCH]);
 }
 
+void IN_LockMouse(qboolean b) {
+	lockmouse = b;
+}
 
 //==========================================================================
 
@@ -351,13 +355,21 @@ CL_MouseEvent
 =================
 */
 void CL_MouseEvent( int dx, int dy, int time ) {
+	if(cgvm != NULL) {
+		VM_Call (cgvm, CG_MOUSE_EVENT, dx, dy);
+	}
 	if ( cls.keyCatchers & KEYCATCH_UI ) {
 		VM_Call( uivm, UI_MOUSE_EVENT, dx, dy );
 	} else if (cls.keyCatchers & KEYCATCH_CGAME) {
-		VM_Call (cgvm, CG_MOUSE_EVENT, dx, dy);
+		//VM_Call (cgvm, CG_MOUSE_EVENT, dx, dy);
 	} else {
-		cl.mouseDx[cl.mouseIndex] += dx;
-		cl.mouseDy[cl.mouseIndex] += dy;
+		if(!lockmouse) {
+			cl.mouseDx[cl.mouseIndex] += dx;
+			cl.mouseDy[cl.mouseIndex] += dy;
+		} else {
+			cl.mouseDx[cl.mouseIndex] = 0;
+			cl.mouseDy[cl.mouseIndex] = 0;
+		}
 	}
 }
 
@@ -541,7 +553,9 @@ usercmd_t CL_CreateCmd( void ) {
 	CL_KeyMove( &cmd );
 
 	// get basic movement from mouse
-	CL_MouseMove( &cmd );
+	if(!lockmouse) {
+		CL_MouseMove( &cmd );
+	}
 
 	// get basic movement from joystick
 	CL_JoystickMove( &cmd );

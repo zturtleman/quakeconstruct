@@ -16,7 +16,6 @@ local weaponKnockback = {
 local function FiredWeapon(player,weapon,delay,pos,angle)
 	if(!player:IsBot()) then
 		local angle = VectorForward(angle)
-		local wname = EnumToString(weapon_t,weapon)
 		
 		local vec = player:GetVelocity()
 		local vx = vec.x

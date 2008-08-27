@@ -65,12 +65,14 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 		return CG_LastAttacker();
 	case CG_KEY_EVENT:
 		CG_KeyEvent(arg0, arg1);
+		//CG_Printf("Key Event %i,%i\n",arg0,arg1);
 		return 0;
 	case CG_MOUSE_EVENT:
 #ifdef MISSIONPACK
 		cgDC.cursorx = cgs.cursorX;
 		cgDC.cursory = cgs.cursorY;
 #endif
+		//CG_Printf("Mouse Event %i,%i\n",arg0,arg1);
 		CG_MouseEvent(arg0, arg1);
 		return 0;
 	case CG_EVENT_HANDLING:
@@ -1925,14 +1927,22 @@ int qlua_loadcustomsound(lua_State *L) {
 	centity_t	*ent;
 	int out = 0;
 
-	if(lua_type(L,1) == LUA_TUSERDATA && lua_type(L,2) == LUA_TSTRING) {
+	if(lua_type(L,1) == LUA_TUSERDATA) {
 		ent = lua_toentity(L,1);
-		snd = lua_tostring(L,2);
-		if(snd != NULL && ent != NULL) {
-			out = CG_CustomSound(ent->currentState.clientNum,snd);
-			lua_pushinteger(L,out);
-			return 1;
+		if(lua_type(L,2) == LUA_TSTRING) {
+			snd = lua_tostring(L,2);
 		}
+	} else {
+		ent = &cg_entities[ cg.snap->ps.clientNum ];	
+		if(lua_type(L,1) == LUA_TSTRING) {
+			snd = lua_tostring(L,1);
+		}
+	}
+
+	if(snd != NULL && ent != NULL) {
+		out = CG_CustomSound(ent->currentState.clientNum,snd);
+		lua_pushinteger(L,out);
+		return 1;
 	}
 	return 0;
 }
@@ -1941,12 +1951,20 @@ int qlua_playsound(lua_State *L) {
 	centity_t *ent;
 	sfxHandle_t	handle;
 	
-	if(lua_type(L,1) == LUA_TUSERDATA && lua_type(L,2) == LUA_TNUMBER) {
+	if(lua_type(L,1) == LUA_TUSERDATA) {
 		ent = lua_toentity(L,1);
-		handle = lua_tointeger(L,2);
-		if(ent != NULL && handle > 0) {
-			trap_S_StartSound (NULL, ent->currentState.number, CHAN_AUTO, handle );
+		if(lua_type(L,2) == LUA_TNUMBER) {
+			handle = lua_tointeger(L,2);
 		}
+	} else {
+		ent = &cg_entities[ cg.snap->ps.clientNum ];	
+		if(lua_type(L,1) == LUA_TNUMBER) {
+			handle = lua_tointeger(L,1);
+		}
+	}
+
+	if(ent != NULL && handle > 0) {
+		trap_S_StartSound (NULL, ent->currentState.number, CHAN_AUTO, handle );
 	}
 	return 0;
 }
@@ -2113,9 +2131,23 @@ void CG_EventHandling(int type) {
 
 
 void CG_KeyEvent(int key, qboolean down) {
+	lua_State *L = GetClientLuaState();
+	if(L != NULL) {
+		qlua_gethook(L,"KeyEvent");
+		lua_pushinteger(L,key);
+		lua_pushboolean(L,down);
+		qlua_pcall(L,2,0,qtrue);
+	}
 }
 
 void CG_MouseEvent(int x, int y) {
+	lua_State *L = GetClientLuaState();
+	if(L != NULL) {
+		qlua_gethook(L,"MouseEvent");
+		lua_pushinteger(L,x);
+		lua_pushinteger(L,y);
+		qlua_pcall(L,2,0,qtrue);
+	}
 }
 #endif
 

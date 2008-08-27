@@ -613,6 +613,9 @@ int CL_CgameSystemCalls( int *args ) {
     return 0;
   case CG_KEY_GETKEY:
 		return Key_GetKey( VMA(1) );
+  case CG_LOCKMOUSE:
+	    IN_LockMouse( args[1] );
+		return 0;
 
 
 
