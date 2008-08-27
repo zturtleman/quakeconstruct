@@ -1672,7 +1672,7 @@ qboolean	trap_Key_IsDown( int keynum );
 int			trap_Key_GetCatcher( void );
 void		trap_Key_SetCatcher( int catcher );
 int			trap_Key_GetKey( const char *binding );
-
+void		trap_LockMouse( qboolean lock );
 
 typedef enum {
   SYSTEM_PRINT,

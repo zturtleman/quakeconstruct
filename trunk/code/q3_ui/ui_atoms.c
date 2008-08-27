@@ -854,6 +854,15 @@ UI_KeyEvent
 */
 void UI_KeyEvent( int key, int down ) {
 	sfxHandle_t		s;
+	/*lua_State		*L = GetClientLuaState();
+
+	if(L != NULL) {
+		qlua_gethook(L,"KeyEvent");
+		lua_pushinteger(L,key);
+		lua_pushinteger(L,down);
+		lua_pushinteger(L,FADE_TIME);
+		qlua_pcall(L,2,0,qtrue);
+	}*/
 
 	if (!uis.activemenu) {
 		return;
@@ -870,6 +879,8 @@ void UI_KeyEvent( int key, int down ) {
 
 	if ((s > 0) && (s != menu_null_sound))
 		trap_S_StartLocalSound( s, CHAN_LOCAL_SOUND );
+
+
 }
 
 /*

@@ -1,6 +1,8 @@
 --require("cl_marks")
 --require("cl_cgtab")
 --self.VAriblae
+require "cl_menu"
+require "cl_testmenu"
 
 local function md5test(p,c,a)
 	if(a[1] != nil and type(a[1]) == "string") then

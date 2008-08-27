@@ -184,6 +184,7 @@ int qlua_includefile(lua_State *L) {
 
 	if(lua_gettop(L) > 0) {
 		filename = lua_tostring(L,1);
+
 		if(!FS_doScript(filename)) {
 			lua_error(L);
 			return 1;
@@ -199,6 +200,20 @@ int qlua_sendstring(lua_State *L) {
 	str = lua_tostring(L,1);
 	trap_SendClientCommand( va("luamsg %s",str) );
 
+	return 0;
+}
+
+int qlua_concommand(lua_State *L) {
+	const char *str = "";
+
+	luaL_checkstring(L,1);
+	str = lua_tostring(L,1);
+
+	if(Q_stricmp(str,"luamsg") != 0) {
+		trap_SendClientCommand( str );
+	} else {
+		CG_Printf("^1Cannot Use This As A Console Command.\n");
+	}
 	return 0;
 }
 /*
@@ -252,6 +267,7 @@ void InitClientLua( void ) {
 	lua_register(L,"include",qlua_includefile);
 	lua_register(L,"runString",qlua_runstr);
 	lua_register(L,"SendString",qlua_sendstring);
+	lua_register(L,"ConsoleCommand",qlua_concommand);
 	lua_register(L,"MD5",qlua_md5);
 
 

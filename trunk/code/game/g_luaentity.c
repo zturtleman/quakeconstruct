@@ -155,7 +155,7 @@ int qlua_setclientinfo(lua_State *L) {
 				luaentity->health = luaentity->health - 1;
 				//player_die(luaentity, NULL, NULL, -luaentity->health, MOD_CRUSH);
 			}
-			trap_SendServerCommand( -1, va("playerhealth %i %i", luaentity->s.number, luaentity->health) );
+			//trap_SendServerCommand( -1, va("playerhealth %i %i", luaentity->s.number, luaentity->health) );
 		} else if (inf == PLAYERINFO_SCORE) {
 			luaL_checktype(L,3,LUA_TNUMBER);
 			luaentity->client->ps.persistant[PERS_SCORE] = lua_tonumber(L,3);

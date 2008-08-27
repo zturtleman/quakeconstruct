@@ -30,9 +30,10 @@ function dirtree(dir)
   end
 end
 
-function findFileByType(n)
+function findFileByType(n,base)
+	base = base or "."
 	local tab = {}
-	for filename, attr in dirtree(".") do
+	for filename, attr in dirtree(base) do
 		if not(attr.mode == "directory") then
 			if(string.GetExtensionFromFilename(filename) == string.GetExtensionFromFilename("." .. n)) then
 				local f = string.sub(filename,3,string.len(filename))
@@ -43,8 +44,9 @@ function findFileByType(n)
 	return tab
 end
 
-function fileExists(n)
-	local tab = findFileByType(string.GetExtensionFromFilename(n))
+function fileExists(n,base)
+	base = base or "."
+	local tab = findFileByType(string.GetExtensionFromFilename(n),base)
 	for k,v in pairs(tab) do
 		if(v == n) then
 			return true

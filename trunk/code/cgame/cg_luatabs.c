@@ -60,6 +60,7 @@ void CG_PushCGTab(lua_State *L) {
 	setTableInt(L,"itemPickup", cg.itemPickup);
 	setTableInt(L,"itemPickupTime", cg.itemPickupTime);
 	setTableInt(L,"weapon", cg.snap->ps.weapon);
+
 	setTableTable(L,"stats", cg.snap->ps.stats, STAT_MAX_HEALTH+1);
 	setTableTable(L,"pers", cg.snap->ps.persistant, PERS_CAPTURES+1);
 	setTableTable(L,"ammo", cg.snap->ps.ammo, WP_NUM_WEAPONS);

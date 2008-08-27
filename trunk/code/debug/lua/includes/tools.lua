@@ -1,5 +1,26 @@
 QLUA_DEBUG = false;
 
+function killGaps(line)
+	line = string.Replace(line," ","")
+	line = string.Replace(line,"\t","")
+	return line
+end
+
+function fixcolorstring(s)
+	while true do
+		local pos = string.find(s, '^', 0, true)
+
+		if (pos == nil) then
+			break
+		end	
+		
+		local left = string.sub(s, 1, pos-1)
+		local right = string.sub(s, pos + 2)
+		s = left .. right
+	end
+	return s
+end
+
 function includesimple(s)
 	include("lua/" .. s .. ".lua")
 end
@@ -38,3 +59,5 @@ function DamageInfo(self,inflictor,attacker,damage,meansOfDeath,killed)
 end
 
 POWERUP_FOREVER = 10000*10000
+
+print("^3Tools loaded.\n")

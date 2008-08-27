@@ -23,15 +23,16 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #ifndef __UI_LOCAL_H__
 #define __UI_LOCAL_H__
 
-#include "../game/q_shared.h"
-#include "../cgame/tr_types.h"
+#include "../cgame/cg_local.h"
+//#include "../game/q_shared.h"
+//#include "../cgame/tr_types.h"
 //NOTE: include the ui_public.h from the new UI
 #include "../ui/ui_public.h" // bk001205 - yes, do have to use this
 //redefine to old API version
 #undef UI_API_VERSION
 #define UI_API_VERSION	4
 #include "keycodes.h"
-#include "../game/bg_public.h"
+//#include "../game/bg_public.h"
 
 typedef void (*voidfunc_f)(void);
 
@@ -451,7 +452,7 @@ extern void DriverInfo_Cache( void );
 //
 
 //FIXME ripped from cg_local.h
-typedef struct {
+/*typedef struct {
 	int			oldFrame;
 	int			oldFrameTime;		// time when ->oldFrame was exactly on
 
@@ -468,7 +469,7 @@ typedef struct {
 	int			animationNumber;	// may include ANIM_TOGGLEBIT
 	animation_t	*animation;
 	int			animationTime;		// time when the first frame of the animation will be exact
-} lerpFrame_t;
+} lerpFrame_t;*/
 
 typedef struct {
 	// model info

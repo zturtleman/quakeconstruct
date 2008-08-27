@@ -82,12 +82,18 @@ int qlua_getweaponname(lua_State *L) {
 	return 1;
 }
 
+int qlua_lockmouse (lua_State *L) {
+	luaL_checktype(L,LUA_TBOOLEAN,1);
+	trap_LockMouse(lua_toboolean(L,1));
+	return 0;
+}
 
 static const luaL_reg Util_methods[] = {
   {"GetItemIcon",	qlua_getitemicon},
   {"GetItemName",	qlua_getitemname},
   {"GetWeaponIcon",	qlua_getweaponicon},
   {"GetWeaponName",	qlua_getweaponname},
+  {"LockMouse",		qlua_lockmouse},
   {0,0}
 };
 

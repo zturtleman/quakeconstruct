@@ -46,6 +46,7 @@ INGAME MENU
 #define ID_QUIT					17
 #define ID_RESUME				18
 #define ID_TEAMORDERS			19
+#define ID_LUA					20
 
 
 typedef struct {
@@ -62,6 +63,7 @@ typedef struct {
 	menutext_s		teamorders;
 	menutext_s		quit;
 	menutext_s		resume;
+	menutext_s		lua;
 } ingamemenu_t;
 
 static ingamemenu_t	s_ingame;
@@ -127,6 +129,10 @@ void InGame_Event( void *ptr, int notification ) {
 		UI_ConfirmMenu( "EXIT GAME?",  (voidfunc_f)NULL, InGame_QuitAction );
 		break;
 
+	case ID_LUA:
+
+		break;
+
 	case ID_SERVERINFO:
 		UI_ServerInfoMenu();
 		break;
@@ -187,6 +193,24 @@ void InGame_MenuInit( void ) {
 	s_ingame.team.string				= "START";
 	s_ingame.team.color					= color_red;
 	s_ingame.team.style					= UI_CENTER|UI_SMALLFONT;
+
+
+
+	y += INGAME_MENU_VERTICAL_SPACING;
+	s_ingame.lua.generic.type			= MTYPE_PTEXT;
+	s_ingame.lua.generic.flags		= QMF_CENTER_JUSTIFY|QMF_PULSEIFFOCUS;
+	s_ingame.lua.generic.x			= 320;
+	s_ingame.lua.generic.y			= y;
+	s_ingame.lua.generic.id			= ID_LUA;
+	s_ingame.lua.generic.callback		= InGame_Event; 
+	s_ingame.lua.string				= "LUA";
+	s_ingame.lua.color				= color_red;
+	s_ingame.lua.style				= UI_CENTER|UI_SMALLFONT;
+	if( !trap_Cvar_VariableValue( "sv_running" ) ) {
+		s_ingame.lua.generic.flags |= QMF_GRAYED;
+	}
+
+
 
 	y += INGAME_MENU_VERTICAL_SPACING;
 	s_ingame.addbots.generic.type		= MTYPE_PTEXT;
@@ -309,6 +333,7 @@ void InGame_MenuInit( void ) {
 
 	Menu_AddItem( &s_ingame.menu, &s_ingame.frame );
 	Menu_AddItem( &s_ingame.menu, &s_ingame.team );
+	Menu_AddItem( &s_ingame.menu, &s_ingame.lua );
 	Menu_AddItem( &s_ingame.menu, &s_ingame.addbots );
 	Menu_AddItem( &s_ingame.menu, &s_ingame.removebots );
 	Menu_AddItem( &s_ingame.menu, &s_ingame.teamorders );
