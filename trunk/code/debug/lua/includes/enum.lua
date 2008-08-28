@@ -21,6 +21,26 @@ function killWhiteSpace(line)
 	return ""
 end
 
+function toNextChar(str)
+	local tab = string.ToTable ( str )
+	for k,v in pairs(tab) do
+		if(v != " ") then
+			return k
+		end
+	end
+	return nil
+end
+
+function toNextSpace(str)
+	local tab = string.ToTable ( str )
+	for k,v in pairs(tab) do
+		if(v == " ") then
+			return k
+		end
+	end
+	return nil
+end
+
 function parseEnumerationSet(file)
 	local ef = io.input(file)
 	local inEnum = false
@@ -32,6 +52,30 @@ function parseEnumerationSet(file)
 		line = string.Trim(line)
 		if(string.find(line,"enum {")) then
 			inEnum = true
+		elseif(string.find(line,"#define")) then
+			local name = ""
+			line = string.sub(line,8)
+			line = string.Replace(line,"\t"," ")
+			local com = string.find(line,"//")
+			if(com) then
+				line = string.sub(line,0,com-1)
+			end
+			local first = toNextChar(line)
+			if(first) then
+				line = string.sub(line,first,string.len(line))
+				local sec = toNextSpace(line)
+				name = string.sub(line,0,sec-1)
+				local rem = string.sub(line,sec,string.len(line))
+				val = string.Replace(rem," ","")
+			end
+			local n = tonumber(val)
+			if(n != nil) then
+				_G[name] = n
+			else
+				val = string.Replace(val,"\"","")
+				val = string.Replace(val,"'","")
+				_G[name] = val
+			end
 		elseif(string.find(line,"}")) then
 			inEnum = false
 			line = string.Replace(line, ";", "")

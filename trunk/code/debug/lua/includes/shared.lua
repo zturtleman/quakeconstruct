@@ -18,6 +18,7 @@ includex("vector")
 includex("scriptmanager")
 if(CLIENT) then includex("sound") end
 if(CLIENT) then includex("shader") end
+if(CLIENT) then includex("model") end
 if(CLIENT) then includex("input") end
 includex("commands")
 includex("packs")

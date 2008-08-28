@@ -88,12 +88,31 @@ int qlua_lockmouse (lua_State *L) {
 	return 0;
 }
 
+int qlua_loadskin(lua_State *L) {
+	const char *filename = "";
+	int out = 0;
+
+	luaL_checkstring(L,1);
+	filename = lua_tostring(L,1);
+	out = trap_R_RegisterSkin( filename );
+
+	if (!out) {
+		Com_Printf( "Skin load failure: %s\n", filename );
+	} else {
+		lua_pushinteger(L,out);
+		return 1;
+	}
+
+	return 0;
+}
+
 static const luaL_reg Util_methods[] = {
   {"GetItemIcon",	qlua_getitemicon},
   {"GetItemName",	qlua_getitemname},
   {"GetWeaponIcon",	qlua_getweaponicon},
   {"GetWeaponName",	qlua_getweaponname},
   {"LockMouse",		qlua_lockmouse},
+  {"LoadSkin",		qlua_loadskin},
   {0,0}
 };
 

@@ -1978,7 +1978,9 @@ void CG_InitLua() {
 	
 	CG_InitLuaVector(L);
 	CG_InitLuaEnts(L);
+	CG_InitLuaREnts(L);
 	CG_InitLua2D(L);
+	CG_InitLua3D(L);
 	CG_InitLuaUtil(L);
 
 	lua_register(L,"LevelTime",qlua_curtime);
@@ -1990,8 +1992,6 @@ void CG_InitLua() {
 	pushents(L);
 
 	DoLuaIncludes();
-
-	DoLuaInit();
 }
 
 
@@ -2099,6 +2099,12 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum ) {
 	CG_ShaderStateChanged();
 
 	trap_S_ClearLoopingSounds( qtrue );
+	DoLuaInit();
+
+	if(GetClientLuaState()) {
+		qlua_gethook(GetClientLuaState(),"Loaded");
+		qlua_pcall(GetClientLuaState(),0,0,qtrue);
+	}
 }
 
 /*

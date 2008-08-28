@@ -650,6 +650,7 @@ This will usually be deferred to a safe time
 ===================
 */
 static void CG_LoadClientInfo( clientInfo_t *ci ) {
+	lua_State	*L = GetClientLuaState();
 	const char	*dir, *fallback;
 	int			i, modelloaded;
 	const char	*s;
@@ -732,6 +733,14 @@ static void CG_LoadClientInfo( clientInfo_t *ci ) {
 			&& cg_entities[i].currentState.eType == ET_PLAYER ) {
 			CG_ResetPlayerEntity( &cg_entities[i] );
 		}
+	}
+
+	L = GetClientLuaState();
+	if(L != NULL) {
+		qlua_gethook(L,"ClientInfoLoaded");
+		CG_PushClientInfoTab(L,ci);
+		lua_pushentity(L,&cg_entities[clientNum]);
+		qlua_pcall(L,2,0,qtrue);
 	}
 }
 
@@ -876,6 +885,7 @@ CG_NewClientInfo
 ======================
 */
 void CG_NewClientInfo( int clientNum ) {
+	lua_State	 *L;
 	clientInfo_t *ci;
 	clientInfo_t newInfo;
 	const char	*configstring;
@@ -1051,6 +1061,14 @@ void CG_NewClientInfo( int clientNum ) {
 	// replace whatever was there with the new one
 	newInfo.infoValid = qtrue;
 	*ci = newInfo;
+
+	L = GetClientLuaState();
+	if(L != NULL) {
+		qlua_gethook(L,"ClientInfoChanged");
+		CG_PushClientInfoTab(L,&newInfo);
+		lua_pushentity(L,&cg_entities[clientNum]);
+		qlua_pcall(L,2,0,qtrue);
+	}
 }
 
 

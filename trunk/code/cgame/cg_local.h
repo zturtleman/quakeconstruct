@@ -1195,6 +1195,7 @@ extern	vmCvar_t		cg_obeliskRespawnDelay;
 qboolean Cmd_Check_Lua( const char cmd[] );
 void CG_PushCGTab(lua_State *L);
 void CG_ApplyCGTab(lua_State *L);
+void CG_PushClientInfoTab(lua_State *L, clientInfo_t *ci);
 void CG_InitLua( void );
 void InitClientLua( void );
 void CloseClientLua( void );
@@ -1214,6 +1215,9 @@ void lua_tovector(lua_State *L, int i, vec3_t in);
 void lua_pushentity(lua_State *L, centity_t *cl);
 centity_t *lua_toentity(lua_State *L, int i);
 
+void lua_pushrefentity(lua_State *L, refEntity_t *cl);
+refEntity_t *lua_torefentity(lua_State *L, int i);
+
 void lua_pushsfx(lua_State *L, sfxHandle_t *sfx);
 sfxHandle_t *lua_tosfx(lua_State *L, int i);
 
@@ -1221,8 +1225,10 @@ void lua_pushtrace(lua_State *L, trace_t results);
 
 void CG_InitLuaVector(lua_State *L);
 void CG_InitLuaEnts(lua_State *L);
+void CG_InitLuaREnts(lua_State *L);
 void CG_InitHandles(lua_State *L);
 void CG_InitLua2D(lua_State *L);
+void CG_InitLua3D(lua_State *L);
 void CG_InitLuaUtil(lua_State *L);
 
 qboolean CG_ShouldDraw(const char *name);

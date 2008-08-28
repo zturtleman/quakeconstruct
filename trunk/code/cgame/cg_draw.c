@@ -2702,19 +2702,18 @@ void CG_DrawActive( stereoFrame_t stereoView ) {
 	if ( separation != 0 ) {
 		VectorMA( cg.refdef.vieworg, -separation, cg.refdef.viewaxis[1], cg.refdef.vieworg );
 	}
-
-	if(L != NULL) {
-		qlua_gethook(L,"Draw3D");
-		qlua_pcall(L,0,0,qtrue);
-	}
-
-	// draw 3D view
 	trap_R_RenderScene( &cg.refdef );
 
 	// restore original viewpoint if running stereo
 	if ( separation != 0 ) {
 		VectorCopy( baseOrg, cg.refdef.vieworg );
 	}
+
+	// draw 3D view
+	if(L != NULL) {
+		qlua_gethook(L,"Draw3D");
+		qlua_pcall(L,0,0,qtrue);
+	}	
 
 	// draw status bar and other floating elements
 	//if(CG_ShouldDraw("HUD")) {

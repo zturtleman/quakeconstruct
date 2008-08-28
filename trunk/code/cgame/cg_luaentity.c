@@ -173,61 +173,15 @@ int qlua_getclientinfo(lua_State *L) {
 	luaentity = lua_toentity(L,1);
 	if(luaentity != NULL) {
 		ci = &cgs.clientinfo[ luaentity->currentState.clientNum ];
-		if(luaentity->currentState.clientNum == cg.snap->ps.clientNum) {
-			ci->health = cg.snap->ps.stats[STAT_HEALTH];
-			ci->armor = cg.snap->ps.stats[STAT_ARMOR];
-			ci->curWeapon = cg.snap->ps.weapon;
-			ci->ammo = cg.snap->ps.ammo[ci->curWeapon];
+		if(luaentity->currentState.clientNum == cg.clientNum) {
+			if(cg.snap && cg.snap->ps.commandTime != 0) {
+				ci->health = cg.snap->ps.stats[STAT_HEALTH];
+				ci->armor = cg.snap->ps.stats[STAT_ARMOR];
+				ci->curWeapon = cg.snap->ps.weapon;
+				ci->ammo = cg.snap->ps.ammo[ci->curWeapon];
+			}
 		}
-	}
-	if(ci != NULL) {
-		lua_newtable(L);
-
-		lua_pushstring(L, "name");
-		lua_pushstring(L,ci->name);
-		lua_rawset(L, -3);
-
-		lua_pushstring(L, "health");
-		lua_pushinteger(L,ci->health);
-		lua_rawset(L, -3);
-
-		lua_pushstring(L, "armor");
-		lua_pushinteger(L,ci->armor);
-		lua_rawset(L, -3);
-
-		lua_pushstring(L, "ammo");
-		lua_pushinteger(L,ci->ammo);
-		lua_rawset(L, -3);
-
-		lua_pushstring(L, "score");
-		lua_pushinteger(L,ci->score);
-		lua_rawset(L, -3);
-
-		lua_pushstring(L, "connected");
-		lua_pushboolean(L,qtrue);
-		lua_rawset(L, -3);
-
-		lua_pushstring(L, "weapon");
-		lua_pushinteger(L,ci->curWeapon);
-		lua_rawset(L, -3);
-
-		lua_pushstring(L, "buttons");
-		lua_pushinteger(L,0);
-		lua_rawset(L, -3);
-
-		lua_pushstring(L, "model");
-		lua_pushstring(L,ci->modelName);
-		lua_rawset(L, -3);
-
-		lua_pushstring(L, "gender");
-		lua_pushinteger(L,ci->gender);
-		lua_rawset(L, -3);
-
-		lua_pushstring(L, "handicap");
-		lua_pushinteger(L,ci->handicap);
-		lua_rawset(L, -3);
-	} else {
-		lua_pushstring(L,"<CLIENT WAS NIL>");
+		CG_PushClientInfoTab(L,ci);
 	}
 	return 1;
 }
@@ -350,9 +304,12 @@ int qlua_link(lua_State *L) {
 }
 
 int qlua_localplayer(lua_State *L) {
-	centity_t ent = cg_entities[ cg.snap->ps.clientNum ];
-	lua_pushentity(L, &ent);
-	return 1;
+	centity_t *ent = &cg_entities[ cg.clientNum ];
+	if(ent != NULL) {
+		lua_pushentity(L, ent);
+		return 1;
+	}
+	return 0;
 }
 
 void CG_InitLuaEnts(lua_State *L) {
