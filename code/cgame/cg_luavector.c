@@ -51,9 +51,9 @@ void lua_pushvector(lua_State *L, vec3_t vec) {
 
 void lua_tovector(lua_State *L, int i, vec3_t in) {
 	//vec3_t	out;
-	int x = -1;
-	int y = -1;
-	int z = -1;
+	float x = -1;
+	float y = -1;
+	float z = -1;
 	
 	//G_Printf("Got A Good Table.\n");
 

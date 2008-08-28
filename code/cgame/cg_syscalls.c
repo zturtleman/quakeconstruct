@@ -237,7 +237,15 @@ void	trap_R_LoadWorldMap( const char *mapname ) {
 }
 
 qhandle_t trap_R_RegisterModel( const char *name ) {
-	return syscall( CG_R_REGISTERMODEL, name );
+	int load = syscall( CG_R_REGISTERMODEL, name );
+	lua_State *L = GetClientLuaState();
+	if(L != NULL) {
+		qlua_gethook(L,"ModelLoaded");
+		lua_pushstring(L,name);
+		lua_pushinteger(L,load);
+		qlua_pcall(L,2,0,qtrue);
+	}
+	return load;
 }
 
 qhandle_t trap_R_RegisterSkin( const char *name ) {
