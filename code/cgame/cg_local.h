@@ -263,6 +263,12 @@ typedef struct localEntity_s {
 	struct localEntity_s	*prev, *next;
 	leType_t		leType;
 	int				leFlags;
+	int				id;
+
+	int				lua_bounce;
+	int				lua_think;
+	int				lua_die;
+	float			lua_nextThink;
 
 	int				startTime;
 	int				endTime;
@@ -1193,6 +1199,7 @@ extern	vmCvar_t		cg_obeliskRespawnDelay;
 
 
 qboolean Cmd_Check_Lua( const char cmd[] );
+void CG_Lock3D(qboolean b);
 void CG_PushCGTab(lua_State *L);
 void CG_ApplyCGTab(lua_State *L);
 void CG_PushClientInfoTab(lua_State *L, clientInfo_t *ci);
@@ -1218,6 +1225,9 @@ centity_t *lua_toentity(lua_State *L, int i);
 void lua_pushrefentity(lua_State *L, refEntity_t *cl);
 refEntity_t *lua_torefentity(lua_State *L, int i);
 
+void lua_pushlocalentity(lua_State *L, localEntity_t *cl);
+localEntity_t *lua_tolocalentity(lua_State *L, int i);
+
 void lua_pushsfx(lua_State *L, sfxHandle_t *sfx);
 sfxHandle_t *lua_tosfx(lua_State *L, int i);
 
@@ -1226,12 +1236,15 @@ void lua_pushtrace(lua_State *L, trace_t results);
 void CG_InitLuaVector(lua_State *L);
 void CG_InitLuaEnts(lua_State *L);
 void CG_InitLuaREnts(lua_State *L);
+void CG_InitLuaLEnts(lua_State *L);
 void CG_InitHandles(lua_State *L);
 void CG_InitLua2D(lua_State *L);
 void CG_InitLua3D(lua_State *L);
 void CG_InitLuaUtil(lua_State *L);
 
 qboolean CG_ShouldDraw(const char *name);
+
+localEntity_t CG_GetLocalEntityList( void );
 
 //
 // cg_main.c

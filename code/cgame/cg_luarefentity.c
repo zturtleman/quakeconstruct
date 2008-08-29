@@ -17,9 +17,11 @@ void lua_pushrefentity(lua_State *L, refEntity_t *cl) {
 }
 
 refEntity_t *lua_torefentity(lua_State *L, int i) {
-	refEntity_t	*luaentity;
+	refEntity_t	*luaentity = NULL;
+
 	luaL_checktype(L,i,LUA_TUSERDATA);
-	luaentity = (refEntity_t *)lua_touserdata(L, i);
+
+	luaentity = (refEntity_t *)luaL_checkudata(L, i, "RefEntity");//lua_touserdata(L, i);
 
 	if (luaentity == NULL) luaL_typerror(L, i, "RefEntity");
 
@@ -230,7 +232,7 @@ int qlua_rsetskin(lua_State *L) {
 	luaL_checktype(L,2,LUA_TNUMBER);
 
 	luaentity = lua_torefentity(L,1);
-	if(luaentity != NULL && lua_tointeger(L,2) != 0) {
+	if(luaentity != NULL && lua_tointeger(L,2) > -1) {
 		luaentity->customSkin = lua_tointeger(L,2);
 	}
 	return 0;
@@ -427,7 +429,17 @@ int REntity_register (lua_State *L) {
 
 int qlua_createrefentity (lua_State *L) {
 	refEntity_t		ent;
+	refEntity_t		*ent2;
 	
+	if(lua_type(L,1) == LUA_TUSERDATA) {
+		ent2 = lua_torefentity(L,1);
+		if(ent2 != NULL) {
+			memcpy(&ent,ent2,sizeof(refEntity_t));
+			lua_pushrefentity(L,&ent);
+			return 1;
+		}
+	}
+
 	memset( &ent, 0, sizeof( ent ) );
 	
 	AxisClear( ent.axis );

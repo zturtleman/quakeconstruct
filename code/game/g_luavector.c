@@ -319,6 +319,17 @@ int qlua_trace(lua_State *L) {
 	return 0;
 }
 
+int qlua_VectorToAngles(lua_State *L) {
+	vec3_t v,angles;
+
+	luaL_checktype(L,1,LUA_TVECTOR);
+	lua_tovector(L,1,v);
+
+	vectoangles(v,angles);
+	lua_pushvector(L,angles);
+	return 1;
+}
+
 int qlua_AngleVectors(lua_State *L) {
 	vec3_t v,f,r,u;
 	luaL_checktype(L,1,LUA_TVECTOR);
@@ -391,6 +402,7 @@ int qlua_VectorUp(lua_State *L) {
 
 void G_InitLuaVector(lua_State *L) {
 	lua_register(L,"TraceLine",qlua_trace);
+	lua_register(L,"VectorToAngles",qlua_VectorToAngles);
 	lua_register(L,"VectorNormalize",qlua_VectorNormalize);
 	lua_register(L,"VectorLength",qlua_VectorLength);
 	lua_register(L,"VectorForward",qlua_VectorForward);

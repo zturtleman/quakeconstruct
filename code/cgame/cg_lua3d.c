@@ -1,5 +1,7 @@
 #include "cg_local.h"
 
+qboolean lock = qfalse;
+
 float qlua_pullfloat(lua_State *L, char *str, qboolean req, float def) {
 	float v = def;
 	lua_pushstring(L,str);
@@ -31,6 +33,12 @@ int qlua_renderscene(lua_State *L) {
 	float x,y,w,h;
 	int a = 1;
 	int top = lua_gettop(L);
+
+	if(lock) {
+		lua_pushstring(L,"RefDefs Locked Durring 3D hook.\n");
+		lua_error(L);
+		return 1;		
+	}
 
 	memset( &refdef, 0, sizeof( refdef ) );
 
@@ -67,7 +75,7 @@ int qlua_renderscene(lua_State *L) {
 		trap_R_RenderScene( &refdef );
 		return 0;
 	} else {
-		lua_pushstring(L,"RefDef Fail\n");
+		lua_pushstring(L,"RefDef Failed\n");
 		lua_error(L);
 		return 1;
 	}
@@ -77,6 +85,12 @@ int qlua_renderscene(lua_State *L) {
 }
 
 int qlua_createscene(lua_State *L) {
+	if(lock) {
+		lua_pushstring(L,"RefDefs Locked Durring 3D hook.\n");
+		lua_error(L);
+		return 1;		
+	}
+
 	trap_R_ClearScene();
 	return 0;
 }
@@ -114,4 +128,8 @@ int qlua_loadmodel(lua_State *L) {
 void CG_InitLua3D(lua_State *L) {
 	luaL_openlib(L, "render", Render_methods, 0);
 	lua_register(L, "__loadmodel", qlua_loadmodel);
+}
+
+void CG_Lock3D(qboolean b) {
+	lock = b;
 }

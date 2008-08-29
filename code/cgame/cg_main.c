@@ -1949,6 +1949,7 @@ int qlua_loadcustomsound(lua_State *L) {
 
 int qlua_playsound(lua_State *L) {
 	centity_t *ent;
+	vec3_t	origin;
 	sfxHandle_t	handle;
 	
 	if(lua_type(L,1) == LUA_TUSERDATA) {
@@ -1956,6 +1957,15 @@ int qlua_playsound(lua_State *L) {
 		if(lua_type(L,2) == LUA_TNUMBER) {
 			handle = lua_tointeger(L,2);
 		}
+	} else if(lua_type(L,1) == LUA_TVECTOR) {
+		if(lua_type(L,2) == LUA_TNUMBER) {
+			handle = lua_tointeger(L,2);
+			lua_tovector(L,1,origin);
+			if(handle > 0) {
+				trap_S_StartSound( origin, ENTITYNUM_WORLD, CHAN_AUTO, handle );
+			}
+		}
+		return 0;
 	} else {
 		ent = &cg_entities[ cg.snap->ps.clientNum ];	
 		if(lua_type(L,1) == LUA_TNUMBER) {
@@ -1979,6 +1989,7 @@ void CG_InitLua() {
 	CG_InitLuaVector(L);
 	CG_InitLuaEnts(L);
 	CG_InitLuaREnts(L);
+	CG_InitLuaLEnts(L);
 	CG_InitLua2D(L);
 	CG_InitLua3D(L);
 	CG_InitLuaUtil(L);
@@ -2099,8 +2110,10 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum ) {
 	CG_ShaderStateChanged();
 
 	trap_S_ClearLoopingSounds( qtrue );
+	if(GetClientLuaState()) {
+		CG_PushCGTab(GetClientLuaState());
+	}
 	DoLuaInit();
-
 	if(GetClientLuaState()) {
 		qlua_gethook(GetClientLuaState(),"Loaded");
 		qlua_pcall(GetClientLuaState(),0,0,qtrue);
