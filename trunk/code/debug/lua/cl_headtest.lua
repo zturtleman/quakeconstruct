@@ -95,7 +95,13 @@ local function draw2D()
 	end
 	ref:SetAngles(angles)
 	ref:Render()
-	render.RenderScene(x,y,size,size)
+	
+	local refdef = {}
+	refdef.x = x
+	refdef.y = y
+	refdef.width = size
+	refdef.height = size
+	render.RenderScene(refdef)
 end
 hook.add("Draw2D","cl_init",draw2D)
 

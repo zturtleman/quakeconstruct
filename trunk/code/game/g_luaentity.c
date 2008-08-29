@@ -30,36 +30,6 @@ gentity_t *qlua_getrealentity(gentity_t *ent) {
 	return NULL;
 }
 
-int qlua_getnextid() {
-	gentity_t	*tent = NULL;
-	int numEnts = sizeof(g_entities) / sizeof(g_entities[0]);
-	int i=0;
-	int n=0;
-	int id=0;
-	int bad=0;
-	int chk=0;
-
-	for (chk = 0; chk < numEnts; chk++) {
-		for (i = 0, tent = g_entities, n = 1;
-				i < level.num_entities;
-				i++, tent++) {
-			if (tent->classname) {
-				if(tent->entid == id) {
-					bad = 1;
-				}
-				n++;
-			}
-		}
-		if(bad == 1) {
-			id++;
-			bad = 0;
-		} else {
-			return id;
-		}
-	}
-	return id;
-}
-
 //lua_pushlightuserdata(L,cl);
 void lua_pushentity(lua_State *L, gentity_t *cl) {
 	gentity_t *ent = NULL;

@@ -24,7 +24,7 @@ function hud_drawFlashes()
 	end
 end
 
-function hud_field(y,v,num,m,color,size)
+function hud_field(x,y,v,num,m,color,size)
 	draw.SetColor(color[1],color[2],color[3],color[4])
 	if(num) then
 		local blink = (math.fmod(CurTime(),.4) > .2)
@@ -46,6 +46,6 @@ function hud_field(y,v,num,m,color,size)
 	if(m != nil) then str = m .. ": " .. v end
 	local nx = 10 + size*string.len(str)
 	
-	draw.Text(10,y,str,size,size)
+	draw.Text(x,y,str,size,size)
 	return y
 end

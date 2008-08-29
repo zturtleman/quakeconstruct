@@ -50,6 +50,9 @@ void	CG_InitLocalEntities( void ) {
 	}
 }
 
+localEntity_t CG_GetLocalEntityList( void ) {
+	return cg_activeLocalEntities;
+}
 
 /*
 ==================
@@ -60,6 +63,20 @@ void CG_FreeLocalEntity( localEntity_t *le ) {
 	if ( !le->prev ) {
 		CG_Error( "CG_FreeLocalEntity: not active" );
 	}
+
+	if(qlua_getstored(GetClientLuaState(), le->lua_die)) {
+		lua_pushlocalentity(GetClientLuaState(), le);
+		qlua_pcall(GetClientLuaState(), 1, 0, qfalse);
+	}
+
+	le->id = 0;
+	qlua_clearfunc(GetClientLuaState(),le->lua_die);
+	qlua_clearfunc(GetClientLuaState(),le->lua_bounce);
+	qlua_clearfunc(GetClientLuaState(),le->lua_think);
+
+	le->lua_die = 0;
+	le->lua_think = 0;
+	le->lua_bounce = 0;
 
 	// remove from the doubly linked active list
 	le->prev->next = le->next;
@@ -234,6 +251,12 @@ void CG_ReflectVelocity( localEntity_t *le, trace_t *trace ) {
 		le->pos.trType = TR_STATIONARY;
 	} else {
 
+	}
+
+	if(qlua_getstored(GetClientLuaState(), le->lua_bounce)) {
+		lua_pushlocalentity(GetClientLuaState(), le);
+		lua_pushtrace(GetClientLuaState(), *trace);
+		qlua_pcall(GetClientLuaState(), 2, 0, qfalse);
 	}
 }
 
@@ -823,6 +846,14 @@ void CG_AddLocalEntities( void ) {
 			CG_FreeLocalEntity( le );
 			continue;
 		}
+
+		if(le->lua_nextThink < cg.time) {
+			if(qlua_getstored(GetClientLuaState(), le->lua_think)) {
+				lua_pushlocalentity(GetClientLuaState(), le);
+				qlua_pcall(GetClientLuaState(), 1, 0, qfalse);
+			}
+		}
+
 		switch ( le->leType ) {
 		default:
 			CG_Error( "Bad leType: %i", le->leType );

@@ -705,6 +705,9 @@
 				RelativePath=".\cg_luahandles.c">
 			</File>
 			<File
+				RelativePath=".\cg_lualocalentity.c">
+			</File>
+			<File
 				RelativePath=".\cg_luarefentity.c">
 			</File>
 			<File

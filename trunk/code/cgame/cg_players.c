@@ -736,7 +736,7 @@ static void CG_LoadClientInfo( clientInfo_t *ci ) {
 	}
 
 	L = GetClientLuaState();
-	if(L != NULL) {
+	if(L != NULL && clientNum >= 0 && &cg_entities[clientNum] != NULL) {
 		qlua_gethook(L,"ClientInfoLoaded");
 		CG_PushClientInfoTab(L,ci);
 		lua_pushentity(L,&cg_entities[clientNum]);

@@ -44,7 +44,7 @@ void lua_pushentity(lua_State *L, centity_t *cl) {
 centity_t *lua_toentity(lua_State *L, int i) {
 	centity_t	*luaentity;
 	luaL_checktype(L,i,LUA_TUSERDATA);
-	luaentity = (centity_t *)lua_touserdata(L, i);
+	luaentity = (centity_t *)luaL_checkudata(L, i, "Entity");
 	luaentity = qlua_getrealentity(luaentity);
 
 	if (luaentity == NULL) luaL_typerror(L, i, "Entity");
@@ -216,6 +216,21 @@ int qlua_getotherentity2(lua_State *L) {
 	return 0;
 }
 
+int qlua_getbytedir(lua_State *L) {
+	centity_t	*luaentity;
+	vec3_t		dir;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		ByteToDir( luaentity->currentState.eventParm, dir );
+		lua_pushvector(L,dir);
+		return 1;
+	}
+	return 0;
+}
+
 int qlua_entityid(lua_State *L) {
 	centity_t	*luaentity;
 
@@ -252,6 +267,7 @@ static const luaL_reg Entity_methods[] = {
   {"GetInfo",		qlua_getclientinfo},
   {"GetOtherEntity",	qlua_getotherentity},
   {"GetOtherEntity2",	qlua_getotherentity},
+  {"GetByteDir",		qlua_getbytedir},
   {"EntIndex",		qlua_entityid},
   {"IsBot",			qlua_isbot},
   {"IsClient",		qlua_isclient},

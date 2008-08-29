@@ -1,7 +1,7 @@
 local models = {}
 
 local function loaded(str,i)
-	--print("Loaded Model: " .. str .. " | " .. i .. "\n")
+	print("Loaded Model: " .. str .. " | " .. i .. "\n")
 	if(i != 0) then
 		table.insert(models,{str,i})
 	end
