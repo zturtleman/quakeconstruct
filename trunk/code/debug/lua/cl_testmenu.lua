@@ -96,7 +96,7 @@ function menutest.main()
 	currmenu = "main"
 	altmenu.textSize(10,12)
 	altmenu.clearButtons()
-	altmenu.addButton("^1Suicide",function() ConsoleCommand("kill") end)
+	--altmenu.addButton("^1Suicide",function() ConsoleCommand("kill") end)
 	altmenu.addButton("Speech Menu",menutest.speech)
 	altmenu.addButton("Cheats",menutest.cheats)
 	altmenu.addButton("Client Scripts",menutest.scripts,"client","./lua",0,10)

@@ -36,8 +36,10 @@ local function PlayerDamaged(self,inflictor,attacker,damage,meansOfDeath)
 			if(damage > hp2) then damage = hp2 end
 			local give = math.ceil(damage/4);
 			atk_tab.give = atk_tab.give + give;
-			attacker:SendString("damagegiven " .. give)
-			attacker:SendString("target " .. hp2-damage .. " " .. self:GetInfo()["name"])
+			if(!attacker:IsBot()) then
+				attacker:SendString("damagegiven " .. give)
+				attacker:SendString("target " .. hp2-damage .. " " .. self:GetInfo()["name"])
+			end
 			atk_tab.wait = atk_tab.wait + 20
 		end
 	end
@@ -65,11 +67,15 @@ local function plThink()
 					v:SetInfo(PLAYERINFO_HEALTH,hp + giverate)
 					hp = v:GetInfo()["health"]
 					tab.give = tab.give - giverate
-					v:SendString("sub " .. giverate)
+					if(!v:IsBot()) then
+						v:SendString("sub " .. giverate)
+					end
 					if(tab.give <= 0) then tab.wait = 10 end
 				else
 					v:SetInfo(PLAYERINFO_HEALTH,300)
-					v:SendString("sub " .. tab.give)
+					if(!v:IsBot()) then
+						v:SendString("sub " .. tab.give)
+					end
 					tab.give = 0
 					tab.wait = 4
 				end
