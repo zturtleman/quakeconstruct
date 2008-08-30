@@ -45,7 +45,7 @@ centity_t *lua_toentity(lua_State *L, int i) {
 	centity_t	*luaentity;
 	luaL_checktype(L,i,LUA_TUSERDATA);
 	luaentity = (centity_t *)luaL_checkudata(L, i, "Entity");
-	luaentity = qlua_getrealentity(luaentity);
+	//luaentity = qlua_getrealentity(luaentity);
 
 	if (luaentity == NULL) luaL_typerror(L, i, "Entity");
 
@@ -127,18 +127,18 @@ int qlua_aimvec(lua_State *L) {
 
 int qlua_isclient(lua_State *L) {
 	centity_t	*luaentity;
-	centity_t   *cent;
+	clientInfo_t	*ci;
 
 	luaL_checktype(L,1,LUA_TUSERDATA);
 
 	luaentity = lua_toentity(L,1);
 
 	if(luaentity != NULL) {
-		cent = &cg_entities[luaentity->currentState.clientNum];
-		if(cent != NULL) {
-			lua_pushboolean(L,1);
-		} else {
+		ci = &cgs.clientinfo[ luaentity->currentState.clientNum ];
+		if(ci != NULL && ci->botSkill != 0) {
 			lua_pushboolean(L,0);
+		} else {
+			lua_pushboolean(L,1);
 		}
 		return 1;
 	}
@@ -254,7 +254,9 @@ static int Entity_equal (lua_State *L)
 	centity_t *e1 = lua_toentity(L,1);
 	centity_t *e2 = lua_toentity(L,2);
 	if(e1 != NULL && e2 != NULL) {
-		lua_pushboolean(L, (e1->currentState.number == e2->currentState.number));
+		//CG_Printf("EQ CHECK: %i %i\n",e1->currentState.clientNum,e2->currentState.clientNum);
+		lua_pushboolean(L, (e1->currentState.clientNum == e2->currentState.clientNum) &&
+		(e1->currentState.number == e2->currentState.number));
 	} else {
 		lua_pushboolean(L, 0);
 	}
