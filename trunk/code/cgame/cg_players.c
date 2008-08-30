@@ -737,6 +737,8 @@ static void CG_LoadClientInfo( clientInfo_t *ci ) {
 
 	L = GetClientLuaState();
 	if(L != NULL && clientNum >= 0 && &cg_entities[clientNum] != NULL) {
+		//CG_Printf("ClientID: %i\n",clientNum);
+		//cg_entities[clientNum].currentState.clientNum = clientNum;
 		qlua_gethook(L,"ClientInfoLoaded");
 		CG_PushClientInfoTab(L,ci);
 		lua_pushentity(L,&cg_entities[clientNum]);
