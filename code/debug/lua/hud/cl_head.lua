@@ -19,7 +19,7 @@ ref2:SetShader(blood1)
 function positionHead()
 	mins,maxs = render.ModelBounds(ref:GetModel())
 
-	headOrigin.x = 2.2 * ( maxs.x - mins.x);
+	headOrigin.x = 2.5 * ( maxs.x - mins.x);
 	headOrigin.y = 0.5 * ( mins.y + maxs.y );
 	headOrigin.z = -0.5 * ( mins.z + maxs.z );
 end
@@ -33,7 +33,7 @@ local headEndPitch = 0
 local headStartTime = 0
 local headEndTime = 0
 local deadFrac = 0
-local dz = -1 + (2*math.random())
+local dz = math.random(-1,1)
 function drawHead(x,y,ICON_SIZE,hp)
 	local frac = 0
 	local size = 0
@@ -109,7 +109,7 @@ function drawHead(x,y,ICON_SIZE,hp)
 		deadFrac = deadFrac + 0.008
 		if(deadFrac > 1) then deadFrac = 1 end
 	else
-		dz = -1 + (2*math.random())
+		dz = math.random(-1,1)
 		deadFrac = 0
 	end
 
@@ -147,6 +147,10 @@ function drawHead(x,y,ICON_SIZE,hp)
 	ref2:SetShader(blood2)
 	ref2:Render()
 	
+	if(hp < 100 and hp > 0) then
+		angles.x = angles.x + (1-(hp/100))*20
+	end
+	
 	local forward = VectorForward(angles)
 	
 	local refdef = {}
@@ -164,13 +168,18 @@ function drawHead(x,y,ICON_SIZE,hp)
 	render.RenderScene(refdef)
 end
 
-local function newClientInfo(newinfo)
-	head = newinfo.headModel
-	skin = newinfo.headSkin
-	ref:SetModel(head)
-	ref:SetSkin(skin)
-	ref2:SetModel(head)
-	
-	positionHead()
+local function newClientInfo(newinfo,entity)
+	if(entity:IsClient()) then
+		if(entity == LocalPlayer()) then
+			print("Conditions Passed\n")
+			head = newinfo.headModel
+			skin = newinfo.headSkin
+			ref:SetModel(head)
+			ref:SetSkin(skin)
+			ref2:SetModel(head)
+			
+			positionHead()
+		end
+	end
 end
-hook.add("ClientInfoLoaded","cl_init",newClientInfo)
+hook.add("ClientInfoLoaded","cl_head",newClientInfo)
