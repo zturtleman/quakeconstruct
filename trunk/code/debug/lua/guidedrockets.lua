@@ -6,7 +6,7 @@ local function Guided()
 		local parent = v:GetParent()
 		local tab = GetEntityTable(v)
 		
-		if(parent) then
+		if(parent && parent:IsBot() == false) then
 			if(parent:GetInfo()["health"] <= 0) then
 				tab.disarmed = true
 			end

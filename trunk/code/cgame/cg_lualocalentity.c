@@ -571,5 +571,5 @@ void CG_InitLuaLEnts(lua_State *L) {
 	//lua_register(L,"GetEntitiesByClass",qlua_getentitiesbyclass);
 	//lua_register(L,"GetAllPlayers",qlua_getallplayers);
 	lua_register(L,"LocalEntity",qlua_createlocalentity);
-	lua_register(L,"AddLocalEntity",qlua_addlocalentity);
+	//lua_register(L,"AddLocalEntity",qlua_addlocalentity);
 }

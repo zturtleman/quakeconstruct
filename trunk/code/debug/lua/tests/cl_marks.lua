@@ -19,10 +19,10 @@ local function reset()
 end
 
 local function newMark(x,y,dmg)
-	local al = .7
+	local al = .5
 	if(dmg > 70) then dmg = 70 end
 	
-	if(#marks > 5 and dmg < 15) then al = .4 end
+	if(#marks > 5 and dmg < 15) then al = .25 end
 	
 	table.insert(marks,{x=x,y=y,dmg=dmg,alpha=al})
 end

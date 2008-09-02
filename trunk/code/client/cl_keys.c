@@ -1077,7 +1077,7 @@ void CL_KeyEvent (int key, qboolean down, unsigned time) {
 	if(cgvm != NULL && (cls.keyCatchers & KEYCATCH_CONSOLE) == 0) {
 		if((cls.keyCatchers & KEYCATCH_UI) == 0) {
 			if((cls.keyCatchers & KEYCATCH_MESSAGE) == 0) {
-				VM_Call( cgvm, CG_KEY_EVENT, key, down ); //CGAME KEYEVENTS FOR LUA
+				if(VM_Call( cgvm, CG_KEY_EVENT, key, down )) return; //CGAME KEYEVENTS FOR LUA
 			}
 		}
 	}

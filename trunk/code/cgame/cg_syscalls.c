@@ -336,6 +336,15 @@ void	trap_R_RemapShader( const char *oldShader, const char *newShader, const cha
 	syscall( CG_R_REMAP_SHADER, oldShader, newShader, timeOffset );
 }
 
+//Mask Functions
+void	trap_R_BeginMask( float x, float y, float w, float h ) {
+	syscall( CG_R_BEGINMASK, PASSFLOAT(x), PASSFLOAT(y), PASSFLOAT(w), PASSFLOAT(h) );
+}
+
+void	trap_R_EndMask( void ) {
+	syscall( CG_R_ENDMASK );
+}
+
 void		trap_GetGlconfig( glconfig_t *glconfig ) {
 	syscall( CG_GETGLCONFIG, glconfig );
 }

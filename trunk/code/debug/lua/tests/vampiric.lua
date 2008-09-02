@@ -1,4 +1,4 @@
-SendScript("lua/cl_vampiric.lua")
+SendScript("lua/tests/cl_vampiric.lua")
 
 local function PlayerDamaged(self,inflictor,attacker,damage,meansOfDeath)
 	local force = nil

@@ -123,6 +123,7 @@ for n,e in pairs(enum) do
 		value = value + forced
 		if(v.forcevalue) then
 			forced = v.forcevalue
+			value = forced
 			val = 0
 			--print(" " .. v.forcevalue .. "\n")
 		else
