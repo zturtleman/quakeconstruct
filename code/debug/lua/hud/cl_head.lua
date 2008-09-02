@@ -172,8 +172,9 @@ local function newClientInfo(newinfo,entity)
 	if(entity:IsClient()) then
 		if(entity == LocalPlayer()) then
 			print("Conditions Passed\n")
-			head = newinfo.headModel
-			skin = newinfo.headSkin
+			local inf = LocalPlayer():GetInfo()
+			head = inf.headModel
+			skin = inf.headSkin
 			ref:SetModel(head)
 			ref:SetSkin(skin)
 			ref2:SetModel(head)

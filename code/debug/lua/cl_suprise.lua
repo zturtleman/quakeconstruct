@@ -97,7 +97,7 @@ local function event(entity,event,pos,dir)
 			origin.x = origin.x + math.random(-10,10)
 			origin.y = origin.y + math.random(-10,10)
 			origin.z = origin.z + math.random(0,5)
-			newParticle(pos,Vector(0,0,1),gibs[math.random(1,#gibs)],.5)
+			newParticle(pos,Vector(0,0,1),gibs[math.random(1,#gibs)],2.5)
 		end
 		return false
 	end

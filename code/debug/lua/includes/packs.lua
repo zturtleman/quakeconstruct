@@ -77,11 +77,11 @@ function packlib.ParsePack(pack)
 			print("^1Unable to load pack: invalid type, specify \"game\" or \"lib\"\n")
 			return 
 		end
-		if(fileExists(dir .. "/cl_init.lua",dir) and CLIENT) then
-			include(dir .. "/cl_init.lua",dir)
+		if(fileExists(dir .. "/cl_init.lua") and CLIENT) then
+			include(dir .. "/cl_init.lua")
 		end
-		if(fileExists(dir .. "/init.lua",dir) and SERVER) then
-			include(dir .. "/init.lua",dir)
+		if(fileExists(dir .. "/init.lua") and SERVER) then
+			include(dir .. "/init.lua")
 		end
 		return ptab
 	else

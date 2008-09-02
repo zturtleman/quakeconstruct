@@ -582,6 +582,12 @@ int CL_CgameSystemCalls( int *args ) {
 		return 0;
 	case CG_R_LERPTAG:
 		return re.LerpTag( VMA(1), args[2], args[3], args[4], VMF(5), VMA(6) );
+	case CG_R_BEGINMASK:
+		re.BeginMask( VMF(1), VMF(2), VMF(3), VMF(4) );
+		return 0;
+	case CG_R_ENDMASK:
+		re.EndMask();
+		return 0;
 	case CG_GETGLCONFIG:
 		CL_GetGlconfig( VMA(1) );
 		return 0;

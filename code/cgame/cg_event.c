@@ -504,7 +504,7 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 	lua_pushvector(L,position);
 	lua_pushvector(L,dir);
 	qlua_pcall(L,4,1,qtrue);
-	if(lua_type(L,-1) == LUA_TBOOLEAN && lua_toboolean(L,-1) == qfalse) {
+	if(lua_type(L,-1) == LUA_TBOOLEAN && lua_toboolean(L,-1)) {
 		return;
 	}
 

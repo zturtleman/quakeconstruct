@@ -2726,7 +2726,11 @@ void CG_DrawActive( stereoFrame_t stereoView ) {
 	if(L != NULL) {
 		qlua_gethook(L,"Draw2D");
 		qlua_pcall(L,0,0,qtrue);
+
+		qlua_gethook(L,"Think");
+		qlua_pcall(L,0,0,qtrue);
 	}
+	CG_KillMasks();
 
 	trap_R_SetColor(g_color_table[ColorIndex(COLOR_WHITE)]);
 }

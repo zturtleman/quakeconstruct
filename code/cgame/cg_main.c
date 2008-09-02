@@ -64,9 +64,8 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 	case CG_LAST_ATTACKER:
 		return CG_LastAttacker();
 	case CG_KEY_EVENT:
-		CG_KeyEvent(arg0, arg1);
+		return CG_KeyEvent(arg0, arg1);
 		//CG_Printf("Key Event %i,%i\n",arg0,arg1);
-		return 0;
 	case CG_MOUSE_EVENT:
 #ifdef MISSIONPACK
 		cgDC.cursorx = cgs.cursorX;
@@ -2149,14 +2148,17 @@ void CG_EventHandling(int type) {
 
 
 
-void CG_KeyEvent(int key, qboolean down) {
+qboolean CG_KeyEvent(int key, qboolean down) {
 	lua_State *L = GetClientLuaState();
 	if(L != NULL) {
 		qlua_gethook(L,"KeyEvent");
 		lua_pushinteger(L,key);
 		lua_pushboolean(L,down);
-		qlua_pcall(L,2,0,qtrue);
+		qlua_pcall(L,2,1,qtrue);
+		if(lua_type(L,-1) == LUA_TBOOLEAN)
+			return lua_toboolean(L,-1);
 	}
+	return qfalse;
 }
 
 void CG_MouseEvent(int x, int y) {

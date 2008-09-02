@@ -1199,6 +1199,7 @@ extern	vmCvar_t		cg_obeliskRespawnDelay;
 
 
 qboolean Cmd_Check_Lua( const char cmd[] );
+void CG_KillMasks( void );
 void CG_Lock3D(qboolean b);
 void CG_PushCGTab(lua_State *L);
 void CG_ApplyCGTab(lua_State *L);
@@ -1262,7 +1263,7 @@ void CG_UpdateCvars( void );
 int CG_CrosshairPlayer( void );
 int CG_LastAttacker( void );
 void CG_LoadMenus(const char *menuFile);
-void CG_KeyEvent(int key, qboolean down);
+qboolean CG_KeyEvent(int key, qboolean down);
 void CG_MouseEvent(int x, int y);
 void CG_EventHandling(int type);
 void CG_RankRunFrame( void );
@@ -1645,6 +1646,8 @@ void		trap_R_ModelBounds( clipHandle_t model, vec3_t mins, vec3_t maxs );
 int			trap_R_LerpTag( orientation_t *tag, clipHandle_t mod, int startFrame, int endFrame, 
 					   float frac, const char *tagName );
 void		trap_R_RemapShader( const char *oldShader, const char *newShader, const char *timeOffset );
+void		trap_R_BeginMask( float x, float y, float w, float h );
+void		trap_R_EndMask( void );
 
 // The glconfig_t will not change during the life of a cgame.
 // If it needs to change, the entire cgame will be restarted, because

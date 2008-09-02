@@ -1,6 +1,7 @@
 #include "cg_local.h"
 
 vec4_t	lastcolor;
+qboolean	maskOn = qfalse;
 
 int qlua_setcolor(lua_State *L) {
 	vec4_t	color;
@@ -24,6 +25,35 @@ int qlua_setcolor(lua_State *L) {
 
 	trap_R_SetColor(color);
 
+	return 0;
+}
+
+int qlua_maskrect(lua_State *L) {
+	float x,y,w,h;
+
+	luaL_checktype(L,1,LUA_TNUMBER);
+	luaL_checktype(L,2,LUA_TNUMBER);
+	luaL_checktype(L,3,LUA_TNUMBER);
+	luaL_checktype(L,4,LUA_TNUMBER);
+
+	x = lua_tonumber(L,1);
+	y = lua_tonumber(L,2);
+	w = lua_tonumber(L,3);
+	h = lua_tonumber(L,4);
+
+	x *= cgs.screenXScale;
+	y *= cgs.screenYScale;
+	w *= cgs.screenXScale;
+	h *= cgs.screenYScale;
+
+	trap_R_BeginMask(x,y,w,h);
+	maskOn = qtrue;
+	return 0;
+}
+
+int qlua_endmask(lua_State *L) {
+	trap_R_EndMask();
+	maskOn = qfalse;
 	return 0;
 }
 
@@ -76,6 +106,8 @@ static const luaL_reg Draw_methods[] = {
   {"SetColor",		qlua_setcolor},
   {"Rect",			qlua_rect},
   {"Text",			qlua_text},
+  {"EndMask",		qlua_endmask},
+  {"MaskRect",		qlua_maskrect},
   {0,0}
 };
 
@@ -94,6 +126,11 @@ int qlua_loadshader(lua_State *L) {
 		return 1;
 	}
 	return 0;
+}
+
+void CG_KillMasks() {
+	trap_R_EndMask();
+	maskOn = qfalse;
 }
 
 void CG_InitLua2D(lua_State *L) {

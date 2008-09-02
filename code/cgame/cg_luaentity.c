@@ -45,7 +45,7 @@ centity_t *lua_toentity(lua_State *L, int i) {
 	centity_t	*luaentity;
 	luaL_checktype(L,i,LUA_TUSERDATA);
 	luaentity = (centity_t *)luaL_checkudata(L, i, "Entity");
-	//luaentity = qlua_getrealentity(luaentity);
+	luaentity = qlua_getrealentity(luaentity);
 
 	if (luaentity == NULL) luaL_typerror(L, i, "Entity");
 

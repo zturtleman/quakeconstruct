@@ -515,7 +515,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 		lua_pushinteger(L,meansOfDeath);
 		qlua_pcall(L,5,1,qtrue);
 		if(lua_type(L,-1) == LUA_TBOOLEAN)
-			doObituary = lua_toboolean(L,-1);
+			doObituary = !lua_toboolean(L,-1);
 	}
 
 	// broadcast the death event to everyone
