@@ -1,4 +1,4 @@
-local packlib = {}
+packlib = {}
 packlib.packs = {}
 
 local function gapFix(str)
@@ -32,6 +32,9 @@ function packlib.CreatePack(file)
 	o['PACK_AUTHOR'] = "n/a"
 	o['PACK_DESCRIPTION'] = "n/a"
 	o['PACK_MODE'] = "invalid"
+	o['PACK_NAME'] = killGaps(string.sub(string.GetFileFromFilename(o['PACK_DIR']),2))
+	o['PACK_NAME'] = string.lower(o['PACK_NAME'])
+	
 	o.include = function(self,name)
 		P = table.Copy(self)
 		P['PACK_DIR'] = fileDir(fileDir(file) .. "/" .. name)
@@ -48,6 +51,16 @@ function packlib.LoadPacks()
 	for k,v in pairs(packs) do
 		local t = packlib.CreatePack(v)
 		table.insert(packlib.packs,t)
+	end
+	packlib.ParseAll()
+end
+
+function packlib.Inits(dir)
+	if(CLIENT and fileExists(dir .. "/cl_init.lua")) then
+		include(dir .. "/cl_init.lua")
+	end
+	if(SERVER and fileExists(dir .. "/init.lua")) then
+		include(dir .. "/init.lua")
 	end
 end
 
@@ -72,17 +85,12 @@ function packlib.ParsePack(pack)
 		local mode = pack['PACK_MODE']
 		local name = pack['PACK_DESCRIPTION']
 		if(name == "n/a") then name = dir end
-		print("Loading Pack: '" .. name .. "'\n")
+		print("Loading Pack: '" .. name .. "' - " .. pack['PACK_NAME'] .. "\n")
 		if(mode != "lib" and mode != "game") then 
 			print("^1Unable to load pack: invalid type, specify \"game\" or \"lib\"\n")
 			return 
 		end
-		if(fileExists(dir .. "/cl_init.lua") and CLIENT) then
-			include(dir .. "/cl_init.lua")
-		end
-		if(fileExists(dir .. "/init.lua") and SERVER) then
-			include(dir .. "/init.lua")
-		end
+		packlib.Inits(dir)
 		return ptab
 	else
 		print("^1There was an error loading the pack.\n")
@@ -96,5 +104,21 @@ function packlib.ParseAll()
 	end
 end
 
+function packlib.ReloadPack(pname)
+	for k,v in pairs(packlib.packs) do
+		if(v['PACK_NAME'] == string.lower(pname)) then
+			packlib.Inits(v['PACK_DIR'])
+		end
+	end
+end
+
+local function cc(p,c,a)
+	if(a[1] != nil) then
+		packlib.ReloadPack(a[1])
+	else
+		print("Please specify a pack.\n")
+	end
+end
+concommand.Add("ReloadPack",cc)
+
 packlib.LoadPacks()
-packlib.ParseAll()

@@ -34,6 +34,11 @@ local headStartTime = 0
 local headEndTime = 0
 local deadFrac = 0
 local dz = math.random(-1,1)
+local timex = 0
+local lct = CurTime()
+local mvz = 0
+local nalpha = 0
+local calpha = 0
 function drawHead(x,y,ICON_SIZE,hp)
 	local frac = 0
 	local size = 0
@@ -66,13 +71,17 @@ function drawHead(x,y,ICON_SIZE,hp)
 			headStartTime = headEndTime;
 			headEndTime = ltime + 100 + math.random() * 2000;
 
+			local hpx = (math.min(math.max(hp/100,.1),1))
+			
 			if(deadFrac > 0) then
 				headStartTime = ltime;
 				headEndTime = ltime + 50 + math.random() * 500;
+			else
+				headEndTime = headEndTime + (1-hpx)*800
 			end
 			
-			headEndYaw = 180 + 20 * math.cos( math.random()*math.pi );
-			headEndPitch = 5 * math.cos( math.random()*math.pi );
+			headEndYaw = 180 + (20 * math.cos( math.random()*math.pi ))*hpx;
+			headEndPitch = (5 * math.cos( math.random()*math.pi ))*hpx;
 			
 			if(deadFrac > 0) then
 				headEndYaw = 180 + 60 * math.cos( math.random()*math.pi );
@@ -114,16 +123,16 @@ function drawHead(x,y,ICON_SIZE,hp)
 	end
 
 	local hpx = (1-(math.min(math.max(hp/100,0),1)/5)) - 0.3
-	if(hp >= 100) then 
+	if(hpx < 0) then 
 		hpx = 0
 	end
-	ref2:SetColor(1,1,1,hpx)	
+	nalpha = hpx
 	if(delta < DAMAGE_TIME or hp <= 0) then
 		local i = hpx + ((1-(delta/DAMAGE_TIME))/18)
 		if(i < hpx) then i=hpx end
 		if(i > 1) then i=1 end
-		ref2:SetColor(1,1,1,i)
-		if(hp <= 0) then ref2:SetColor(1,1,1,1) end
+		nalpha = i
+		if(hp <= 0) then nalpha = 1 end
 		if(hp <= -40) then
 			if(ref:GetModel() != skull) then
 				ref:SetModel(skull)
@@ -141,14 +150,27 @@ function drawHead(x,y,ICON_SIZE,hp)
 	ref:SetPos(Vector(0,headOrigin.y,headOrigin.z))
 	ref2:SetPos(Vector(0,headOrigin.y,headOrigin.z))
 	
+	calpha = calpha + (nalpha - calpha)*.01
+	if(calpha < 0.5) then calpha = 0.5 end
+	
 	ref:Render()
+	ref2:SetColor(1,1,1,calpha)
 	ref2:SetShader(blood1)
 	ref2:Render()
 	ref2:SetShader(blood2)
 	ref2:Render()
 	
-	if(hp < 100 and hp > 0) then
-		angles.x = angles.x + (1-(hp/100))*20
+	if(hp > 100) then hp = 100 end
+	if(hp > 0) then
+		local hp2 = (1-(hp/200))
+		timex = timex + (CurTime() - lct) * ((hp2) * math.random(20,30)/5)
+		
+		angles.x = angles.x + (1-(hp/100))*30
+
+		angles.x = angles.x + math.cos(timex)*(1-(hp/70))*6
+		angles.z = angles.z + math.sin(timex/3)*(1-(hp/70))*4
+		
+		mvz = math.cos(timex)*(1-(hp/100))*.7
 	end
 	
 	local forward = VectorForward(angles)
@@ -164,8 +186,11 @@ function drawHead(x,y,ICON_SIZE,hp)
 	aim = VectorToAngles(aim)
 	aim.z = angles.z
 	
+	refdef.origin.z = refdef.origin.z + mvz
+	
 	refdef.angles = aim
 	render.RenderScene(refdef)
+	lct = CurTime()
 end
 
 local function newClientInfo(newinfo,entity)

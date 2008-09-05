@@ -57,27 +57,38 @@ int qlua_endmask(lua_State *L) {
 	return 0;
 }
 
-int qlua_rect(lua_State *L) {
-	int x,y,w,h;
+float quickfloat(lua_State *L, int i, float def) {
+	if(lua_type(L,i) == LUA_TNUMBER) def = lua_tonumber(L,i);
+	return def;
+}
 
-	qhandle_t shader;
+int qlua_rect(lua_State *L) {
+	float x,y,w,h,s,t,s2,t2;
+
+	qhandle_t shader = cgs.media.whiteShader;
 
 	luaL_checktype(L,1,LUA_TNUMBER);
 	luaL_checktype(L,2,LUA_TNUMBER);
 	luaL_checktype(L,3,LUA_TNUMBER);
 	luaL_checktype(L,4,LUA_TNUMBER);
 
-	x = lua_tointeger(L,1);
-	y = lua_tointeger(L,2);
-	w = lua_tointeger(L,3);
-	h = lua_tointeger(L,4);
+	x = lua_tonumber(L,1);
+	y = lua_tonumber(L,2);
+	w = lua_tonumber(L,3);
+	h = lua_tonumber(L,4);
 
 	if(lua_type(L,5) == LUA_TNUMBER) {
 		shader = lua_tointeger(L,5);
-		CG_DrawPic( x, y, w, h, shader );
-	} else {
-		CG_FillRect( x, y, w, h, lastcolor );
 	}
+	
+	s = quickfloat(L,6,0);
+	t = quickfloat(L,7,0);
+	s2 = quickfloat(L,8,1);
+	t2 = quickfloat(L,9,1);
+
+	CG_AdjustFrom640( &x, &y, &w, &h );
+	trap_R_DrawStretchPic( x, y, w, h, s, t, s2, t2, shader );
+
 	return 0;
 }
 

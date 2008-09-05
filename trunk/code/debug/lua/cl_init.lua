@@ -5,7 +5,20 @@ require "cl_menu"
 require "cl_testmenu"
 
 local test = false
-local startTime = CurTime()
+local startTime = os.time()
+
+local function drawTimer()
+	local t = (os.time() - startTime)
+	local seconds = math.floor(t) % 60
+	local minutes = math.floor(t/60) % 60
+	local hours = math.floor(t/3600)
+	if(seconds < 10) then seconds = "0" .. seconds end
+	if(minutes < 10) then minutes = "0" .. minutes end
+	local txt = hours .. ":" .. minutes .. ":" .. seconds
+	draw.SetColor(1,0.6,0.3,1)
+	draw.Text(10,60,txt,12,12)
+end
+hook.add("Draw2D","timertest",drawTimer)
 
 local function ef_drawtext(x,y,txt,size,mask)
 	local tab = string.ToTable(txt)
@@ -56,9 +69,27 @@ end
 hook.add("KeyEvent","cl_init",keyed)
 
 
-local panel = UI_Create("panel")
+EnableCursor(true)
+local panel = UI_Create("frame")
 if(panel != nil) then
+	panel.name = "base"
 	panel:SetPos(100,100)
-	panel:SetSize(100,100)
+	panel:SetSize(140,100)
+	panel:SetTitle("Test Panel")
+	panel:ConstrainToScreen(true)
 end
-Timer(5,panel.Remove,panel)
+--Timer(12,panel.Remove,panel)
+
+local panel3 = UI_Create("dragbutton",panel)
+if(panel3 != nil) then
+	panel3.name = "base->inset->button"
+	panel3:SetPos(0,0)
+	panel3:SetSize(30,30)
+	panel3:SetText("test")
+	panel3:ScaleToContents()
+	panel3:ConstrainToParent(true)
+end
+
+--[[panel.Think = function(self)
+	self:SetPos(GetMouseX(),GetMouseY())
+end]]
