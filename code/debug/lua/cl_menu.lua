@@ -10,8 +10,6 @@ local s_menu_fail = LoadSound("sound/misc/menu4.wav")
 
 local mx = 0
 local my = 0
-local mouseOn = false
-local mouseDown = false
 local buttons = {}
 local mFade = 0
 local lastbtn = -1
@@ -67,7 +65,7 @@ local function drawButtons(x,y,tw,th,maxw)
 		local lw = maxw --tw*string.len(fixcolorstring(v.name))
 		local lx = x
 		if(mx > lx and my > y and mx < lx + lw and my < y + th) then
-			if(v.moused != 1 and !mouseDown) then
+			if(v.moused != 1 and !MouseDown()) then
 				v.moused = 1
 				if(lastbtn != k) then
 					PlaySound(s_menu_item)
@@ -80,7 +78,7 @@ local function drawButtons(x,y,tw,th,maxw)
 				lastbtn = -1
 			end
 		end
-		if(v.moused == 1 and mouseDown) then
+		if(v.moused == 1 and MouseDown()) then
 			v.moused = 2
 		end
 		if(v.moused == 1) then
@@ -126,7 +124,9 @@ local function drawMenu()
 end
 
 local function draw2d()
-	if(mouseOn) then
+	mx = GetXMouse()
+	my = GetYMouse()
+	if(MouseFocused()) then
 		ctrails()
 		drawMenu()
 		draw.SetColor(1,1,1,1)
@@ -142,7 +142,7 @@ local function draw2d()
 end
 hook.add("Draw2D","cl_menu",draw2d)
 hook.add("MouseDown","cl_menu",function()
-	if(!mouseOn) then return end
+	if(!MouseFocused()) then return end
 	for k,v in pairs(buttons) do
 		local text = v.name
 		local func = v.func
@@ -174,30 +174,17 @@ end
 hook.add("MouseEvent","cl_menu",moused)
 
 local function keyed(key,state)
-	if(key == K_MOUSE1) then
-		if(state == false) then
-			if(mouseDown != state) then
-				mouseDown = state
-			end
-		else
-			if(mouseDown != state) then
-				mouseDown = state
-			end
-		end
-	end
 	if(key == K_ALT) then
 		if(state == false) then
-			if(mouseOn) then
-				util.LockMouse(false)
-				mouseOn = false
+			if(MouseFocused()) then
+				EnableCursor(false)
 				CallHook("AltMenuClose")
 				if(#buttons == 0) then return end
 				PlaySound(s_menu_close)
 			end
 		else
-			if(!mouseOn) then
-				util.LockMouse(true)
-				mouseOn = true
+			if(!MouseFocused()) then
+				EnableCursor(true)
 				mx = 320
 				my = 240
 				CallHook("AltMenuOpen")
