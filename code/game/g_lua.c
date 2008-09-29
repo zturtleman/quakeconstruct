@@ -1,3 +1,4 @@
+#include <windows.h>
 #include "g_local.h"
 #include "../lua-src/lfs.c"
 #include "../lua-src/md5.c"
@@ -6,6 +7,26 @@ lua_State *L;
 
 int samey = 0;
 char *samey2 = "";
+
+int qlua_ticks(lua_State *L) {
+	LARGE_INTEGER tick;   // A point in time
+
+	// what time is it?
+	QueryPerformanceCounter(&tick);
+
+	lua_pushnumber(L,tick.QuadPart);
+	return 1;
+}
+
+int qlua_ticksPerSecond(lua_State *L) {
+	LARGE_INTEGER ticksPerSecond;
+
+	// get the high resolution counter's accuracy
+	QueryPerformanceFrequency(&ticksPerSecond);
+
+	lua_pushnumber(L,ticksPerSecond.QuadPart);
+	return 1;
+}
 
 void qlua_clearfunc(lua_State *L, int ref) {
 	if(ref != 0) {
@@ -254,6 +275,9 @@ void InitServerLua( void ) {
 
 	luaL_openlibs(L);
 	luaopen_lfs(L);
+
+	lua_register(L,"ticks",qlua_ticks);
+	lua_register(L,"ticksPerSecond",qlua_ticksPerSecond);
 
 	lua_register(L,"print",message);
 	lua_register(L,"sendToAll",messageAllPlayers);

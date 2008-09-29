@@ -6,6 +6,14 @@ function killGaps(line)
 	return line
 end
 
+function ProfileFunction(func,...)
+	local tps = ticksPerSecond()
+	local s = ticks() / 1000
+	pcall(func,arg)
+	local e = ticks() / 1000
+	return e - s
+end
+
 function fixcolorstring(s)
 	while true do
 		local pos = string.find(s, '^', 0, true)
