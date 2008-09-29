@@ -53,6 +53,15 @@ end
 
 local currentInit = nil
 
+function UI_EnableCursor(b)
+	local hold = false
+	for k,v in pairs(UI_Active) do
+		if(v.catchm and v.removeme == false) then hold = true end
+	end
+	if(b != true and hold) then return end
+	EnableCursor(b)
+end
+
 function UI_Create(name,parent,force)
 	if(currentInit == name) then
 		UI_ERROR("A " .. name .. " attempted to create itself in it's 'Initialize' function.")
@@ -65,21 +74,32 @@ function UI_Create(name,parent,force)
 		setmetatable(o,tab)
 		tab.__index = tab
 		
-		o.ID = nxtID
-		nxtID = nxtID + 1
+		o.ID = tostring(nxtID)
 		
 		if(parent != nil) then
 			if(parent:GetContentPane() != nil and !force) then
 				parent = parent:GetContentPane()
 			end
 			o.parent = parent
+			o.ID = parent.ID .. o.parent.cc
+			o.parent.cc = o.parent.cc + 1
+		end
+		
+		local level = string.len(o.ID)
+		if(level == 1) then
+			nxtID = nxtID + 1
 		end
 		
 		currentInit = name
 		o:Initialize()
 		currentInit = nil
 		
+		print("Create ID: " .. o.ID .. " -> " .. level .. "\n")
+		
 		table.insert(UI_Active,o)
+		
+		o:DoLayout()
+		
 		return o
 	end
 end
@@ -167,8 +187,8 @@ local function checkRemove(v)
 	if(v.removeme) then
 		for _,other in pairs(UI_Active) do
 			if(other != v) then
-				if(other:GetParent() == v and other.removeme != true) then 
-					other:Remove() 
+				if(other:GetParent() == v and other.removeme != true) then
+					other:Remove()
 					didrmv = true
 				end
 			end
@@ -180,14 +200,14 @@ local function draw()
 	checkMouse()
 	table.sort(UI_Active,function(a,b) return a.ID < b.ID end)
 	for k,v in pairs(UI_Active) do
-		if(v:IsVisible()) then
+		if(v:IsVisible() and v:ShouldDraw()) then
 			v:MaskMe()
 			v:Draw()
 			v:EndMask()
 		end
 	end
 	for k,v in pairs(UI_Active) do
-		if(v:IsVisible()) then
+		if(v:IsVisible() and v:ShouldDraw()) then
 			if(v.parent and v.parent.valid != true) then
 				v:DoLayout()
 				v.parent.valid = true

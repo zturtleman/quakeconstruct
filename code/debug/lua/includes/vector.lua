@@ -43,3 +43,7 @@ end
 function Vector(x,y,z)
 	return {x=x,y=y,z=z}
 end
+
+function Vectorv(tab)
+	return {x=tab.x,y=tab.y,z=tab.z}
+end

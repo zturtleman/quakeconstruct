@@ -1220,6 +1220,8 @@ void qlua_clearfunc(lua_State *L, int ref);
 void lua_pushvector(lua_State *L, vec3_t vec);
 void lua_tovector(lua_State *L, int i, vec3_t in);
 
+int lua_torefdef(lua_State *L, int idx, refdef_t *refdef);
+
 void lua_pushentity(lua_State *L, centity_t *cl);
 centity_t *lua_toentity(lua_State *L, int i);
 
@@ -1524,6 +1526,11 @@ void CG_Respawn( void );
 void CG_TransitionPlayerState( playerState_t *ps, playerState_t *ops );
 void CG_CheckChangedPredictableEvents( playerState_t *ps );
 
+
+//
+// cg_view.c
+//
+void CG_ProjectVector( refdef_t refdef, vec3_t in, vec3_t out );
 
 //===============================================
 

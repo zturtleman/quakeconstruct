@@ -15,6 +15,8 @@ includex("entities")
 includex("timer")
 includex("enum")
 includex("vector")
+includex("matrix")
+includex("angles")
 includex("scriptmanager")
 if(CLIENT) then includex("sound") end
 if(CLIENT) then includex("shader") end

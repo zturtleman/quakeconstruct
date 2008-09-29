@@ -46,6 +46,27 @@ void setTableTable(lua_State *L, char *str, int tab[], int size) {
 	lua_rawset(L, -3);
 }
 
+void setTableRefDef(lua_State *L, char *str, refdef_t refdef) {
+	int tabid;
+	lua_pushstring(L, str);
+	lua_createtable(L,8,0);
+	tabid = lua_gettop(L);
+	
+	setTableFloat(L,"x",refdef.x);
+	setTableFloat(L,"y",refdef.y);
+	setTableFloat(L,"width",refdef.width);
+	setTableFloat(L,"height",refdef.height);
+	setTableFloat(L,"fov_x",refdef.fov_x);
+	setTableFloat(L,"fov_y",refdef.fov_y);
+	setTableVector(L,"origin",refdef.vieworg);
+	setTableVector(L,"angles",refdef.viewaxis[0]);
+
+	setTableVector(L,"forward",refdef.viewaxis[0]);
+	setTableVector(L,"right",refdef.viewaxis[1]);
+	setTableVector(L,"up",refdef.viewaxis[2]);
+	lua_rawset(L, -3);
+}
+
 void getTableVector(lua_State *L, char *str, vec3_t v) {
 	lua_pushstring(L, str);
 	lua_gettable(L, -2);
@@ -71,6 +92,7 @@ void CG_PushCGTab(lua_State *L) {
 	setTableFloat(L,"fov_y",cg.refdef.fov_y);
 	setTableInt(L,"itemPickup", cg.itemPickup);
 	setTableInt(L,"itemPickupTime", cg.itemPickupTime);
+	setTableRefDef(L,"refdef",cg.refdef);
 
 	if(cg.snap != NULL) {
 		setTableInt(L,"weapon", cg.snap->ps.weapon);

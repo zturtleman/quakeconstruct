@@ -189,7 +189,10 @@ function drawHead(x,y,ICON_SIZE,hp)
 	refdef.origin.z = refdef.origin.z + mvz
 	
 	refdef.angles = aim
-	render.RenderScene(refdef)
+	local b, e = pcall(render.RenderScene,refdef)
+	if(!b) then
+		print("^1" .. e .. "\n")
+	end
 	lct = CurTime()
 end
 

@@ -22,12 +22,13 @@ function hook.remove(event,name)
 	end
 end
 
-function hook.add(event,name,func)
+function hook.add(event,name,func,priority)
+	priority = priority or 0
 	if(event != nil and name != nil and func != nil) then
-		local tab = {func=func,name=name}
+		local tab = {func=func,name=name,priority=priority}
 		hook.events[event] = hook.events[event] or {}
 		if not (hook.replacehook(tab,event)) then
-			table.insert(hook.events[event],{func=func,name=name})
+			table.insert(hook.events[event],tab)
 		end
 	else
 		event = tostring(event) or "Unknown Event"
@@ -50,6 +51,7 @@ end
 function CallHook(event,...)
 	if(hook.events[event] == nil) then return end
 	local retVal = nil
+	table.sort(hook.events[event],function(a,b) return a.priority < b.priority end)
 	for k,v in pairs(hook.events[event]) do
 		local fname = v.name
 		if (hook.debugflags[event] == true) then debugprint("Calling Function: " .. fname .. "\n") end

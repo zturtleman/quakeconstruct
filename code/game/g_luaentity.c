@@ -365,6 +365,22 @@ int qlua_setpowerup(lua_State *L) {
 	return 1;
 }
 
+int qlua_setspeed(lua_State *L) {
+	gentity_t	*luaentity;
+	float spd = 0;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checknumber(L,2);
+
+	spd = lua_tonumber(L,2);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL && luaentity->client != NULL && spd >= 0) {
+		luaentity->client->ps.speed = g_speed.value * spd;
+	}
+	return 0;
+}
+
 
 int qlua_setammo(lua_State *L) {
 	gentity_t	*luaentity;
@@ -960,6 +976,7 @@ static const luaL_reg Entity_methods[] = {
   {"GetParent",		qlua_getparent},
   {"SetCallback",	qlua_setcallback},
   {"SendString",	qlua_sendstring},
+  {"SetSpeed",		qlua_setspeed},
   {0,0}
 };
 

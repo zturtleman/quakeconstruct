@@ -39,8 +39,8 @@ function Panel:Think()
 		
 		--Smooth out the movement
 		self:SetPos(
-			self.x + (nx - self.x)*.2, 
-			self.y + (ny - self.y)*.2)
+			self.x + (nx - self.x)*.4, 
+			self.y + (ny - self.y)*.4)
 	end
 	
 	self:Affect(dx,dy)
