@@ -137,6 +137,10 @@ function Panel:GetParent()
 	return self.parent
 end
 
+function Panel:SetParent(p)
+	self.parent = p
+end
+
 function Panel:SetPos(x,y)
 	self.x = x
 	self.y = y
@@ -170,6 +174,18 @@ end
 
 function Panel:GetPos()
 	return self:GetX(), self:GetY()
+end
+
+function Panel:GetLocalX()
+	return self.x
+end
+
+function Panel:GetLocalY()
+	return self.y
+end
+
+function Panel:GetLocalPos()
+	return self:GetLocalX(), self:GetLocalY()
 end
 
 function Panel:SetSize(w,h)
@@ -242,6 +258,7 @@ function Panel:CatchKeyboard(b)
 end
 
 function Panel:GetContentPane() return nil end
+function Panel:OnChildAdded(panel) end
 function Panel:MouseOver() return self.__mouseInside end
 function Panel:MouseDown() return self.__wasPressed end
 function Panel:MousePressed(x,y) end

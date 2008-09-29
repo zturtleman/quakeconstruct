@@ -62,7 +62,45 @@ function UI_EnableCursor(b)
 	EnableCursor(b)
 end
 
+local function doPanel(o,parent,force)
+	o.ID = tostring(nxtID)
+	o.isPanel = true
+	
+	if(parent != nil) then
+		local rparent = parent
+		if(parent:GetContentPane() != nil and !force) then
+			parent = parent:GetContentPane()
+		end
+		o.parent = parent
+		o.ID = parent.ID .. o.parent.cc
+		o.parent.cc = o.parent.cc + 1
+		rparent:OnChildAdded(o)
+	end
+	
+	local level = string.len(o.ID)
+	if(level == 1) then
+		nxtID = nxtID + 1
+	end
+	
+	currentInit = name
+	o:Initialize()
+	currentInit = nil
+	
+	print("Create ID: " .. o.ID .. " -> " .. level .. "\n")
+end
+
 function UI_Create(name,parent,force)
+	if(type(name) == "table" and name.isPanel) then
+		local n = table.Copy(name)
+		
+		doPanel(n,parent,force)
+		
+		table.insert(UI_Active,n)
+		
+		n:DoLayout()
+		
+		return n
+	end
 	if(currentInit == name) then
 		UI_ERROR("A " .. name .. " attempted to create itself in it's 'Initialize' function.")
 		return nil
@@ -74,27 +112,7 @@ function UI_Create(name,parent,force)
 		setmetatable(o,tab)
 		tab.__index = tab
 		
-		o.ID = tostring(nxtID)
-		
-		if(parent != nil) then
-			if(parent:GetContentPane() != nil and !force) then
-				parent = parent:GetContentPane()
-			end
-			o.parent = parent
-			o.ID = parent.ID .. o.parent.cc
-			o.parent.cc = o.parent.cc + 1
-		end
-		
-		local level = string.len(o.ID)
-		if(level == 1) then
-			nxtID = nxtID + 1
-		end
-		
-		currentInit = name
-		o:Initialize()
-		currentInit = nil
-		
-		print("Create ID: " .. o.ID .. " -> " .. level .. "\n")
+		doPanel(o,parent,force)
 		
 		table.insert(UI_Active,o)
 		
@@ -211,6 +229,7 @@ local function draw()
 			if(v.parent and v.parent.valid != true) then
 				v:DoLayout()
 				v.parent.valid = true
+				v.parent:Think()
 			end
 			v:Think()
 			checkRemove(v)
