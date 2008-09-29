@@ -42,8 +42,8 @@ function Panel:SetTitle(t)
 end
 
 function Panel:AlignContentPane()
-	self.contentPane:SetPos(2,12)
-	self.contentPane:SetSize(self:GetWidth()-4,self:GetHeight()-20)
+	self.contentPane:SetPos(2,15)
+	self.contentPane:SetSize(self:GetWidth()-4,self:GetHeight()-30)
 end
 
 function Panel:GetContentPane()
@@ -51,14 +51,14 @@ function Panel:GetContentPane()
 end
 
 function Panel:PositionBar()
-	self.dragbar:SetPos(0,0)
-	self.dragbar:SetSize(self:GetWidth(),12)
-	self.close:SetSize(20,12)
+	self.dragbar:SetPos(2,2)
+	self.dragbar:SetSize(self:GetWidth() - 4,10)
+	self.close:SetSize(20,10)
 	
-	self.dragbar2:SetPos(self:GetWidth() - self.dragbar2:GetWidth(),
-						 self:GetHeight() - self.dragbar2:GetHeight())
+	self.dragbar2:SetPos(self:GetWidth() - self.dragbar2:GetWidth() - 2,
+						 self:GetHeight() - self.dragbar2:GetHeight() - 2)
 						 
-	self.close:SetPos(self:GetWidth() - self.close:GetWidth(),0)
+	self.close:SetPos(self:GetWidth() - self.close:GetWidth() - 2,2)
 end
 
 function Panel:SetSize(w,h)

@@ -2,8 +2,11 @@ UI_Components = {}
 UI_Active = {}
 local toRegister = 0
 local nxtID = 0
+local white = LoadShader("white")
 
 P:include("cursor.lua")
+
+local letters = string.alphabet
 
 function UI_ERROR(txt)
 	print("^1UI ERROR: " .. txt .. "\n")
@@ -62,8 +65,48 @@ function UI_EnableCursor(b)
 	EnableCursor(b)
 end
 
+local function getNewId()
+	local incr = 0
+	for i=0, (#letters*2) + 10 do
+		local f = false
+		for k,v in pairs(UI_Active) do
+			if(string.len(v.ID) == 1) then
+				if(v.rlID == incr) then 
+					f = true
+					break 
+				end
+			end
+		end
+		if(f == false) then
+			return incr
+		else
+			incr = incr + 1
+		end
+	end
+end
+
+local function correctId(id)
+	if(id >= 10) then
+		local i = id - 9
+		if(i > #letters) then
+			i = i - #letters
+			if(i > #letters) then
+				i=1
+				id = 0
+			end			
+			return string.upper(letters[i])
+		else
+			return letters[i]
+		end
+	end
+	return id
+end
+
 local function doPanel(o,parent,force)
-	o.ID = tostring(nxtID)
+	local id = getNewId()
+	o.rlID = id
+	o.ID = tostring(correctId(id))
+	
 	o.isPanel = true
 	
 	if(parent != nil) then
@@ -72,7 +115,7 @@ local function doPanel(o,parent,force)
 			parent = parent:GetContentPane()
 		end
 		o.parent = parent
-		o.ID = parent.ID .. o.parent.cc
+		o.ID = parent.ID .. correctId(o.parent.cc)
 		o.parent.cc = o.parent.cc + 1
 		rparent:OnChildAdded(o)
 	end
@@ -89,6 +132,10 @@ local function doPanel(o,parent,force)
 	print("Create ID: " .. o.ID .. " -> " .. level .. "\n")
 end
 
+function PaintSort()
+	table.sort(UI_Active,function(a,b) return a.ID < b.ID end)
+end
+
 function UI_Create(name,parent,force)
 	if(type(name) == "table" and name.isPanel) then
 		local n = table.Copy(name)
@@ -98,6 +145,8 @@ function UI_Create(name,parent,force)
 		table.insert(UI_Active,n)
 		
 		n:DoLayout()
+		
+		PaintSort()
 		
 		return n
 	end
@@ -112,11 +161,14 @@ function UI_Create(name,parent,force)
 		setmetatable(o,tab)
 		tab.__index = tab
 		
+		o.type = name
 		doPanel(o,parent,force)
 		
 		table.insert(UI_Active,o)
 		
 		o:DoLayout()
+		
+		PaintSort()
 		
 		return o
 	end
@@ -133,8 +185,7 @@ end
 loadComponents()
 
 local function panelCollide(p,x,y)
-	local px,py = p:GetPos()
-	local pw,ph = p:GetSize()
+	local px,py,pw,ph = p:GetMaskedRect()
 	if(x > px and x < px + pw and y > py and y < py + ph) then
 		return true
 	else
@@ -145,14 +196,15 @@ end
 local function mDown()
 	local mx = GetMouseX()
 	local my = GetMouseY()
-	table.sort(UI_Active,function(a,b) return a.ID > b.ID end)
-	for k,v in pairs(UI_Active) do
+	for i=0, #UI_Active-1 do
+		local v = UI_Active[#UI_Active - i]
 		if(v:IsVisible() and panelCollide(v,mx,my) and v.__wasPressed != true) then
 			v:MousePressed(mx,my)
 			v.__wasPressed = true
 			return
 		end
 	end
+	PaintSort()
 end
 hook.add("MouseDown","uimouse",mDown)
 
@@ -175,16 +227,20 @@ hook.add("MouseUp","uimouse",mUp)
 local function checkMouse()
 	local mx = GetMouseX()
 	local my = GetMouseY()
-	table.sort(UI_Active,function(a,b) return a.ID > b.ID end)
-	for k,v in pairs(UI_Active) do
+	--table.sort(UI_Active,function(a,b) return a.ID > b.ID end)
+	for i=0, #UI_Active-1 do
+		local v = UI_Active[#UI_Active - i]
 		v.__mouseInside = false
 	end
-	for k,v in pairs(UI_Active) do
+	for i=0, #UI_Active-1 do
+		local v = UI_Active[#UI_Active - i]
 		if(v:IsVisible() and panelCollide(v,mx,my)) then
 			v.__mouseInside = true
+			PaintSort()
 			return
 		end
 	end
+	--PaintSort()
 end
 
 local function garbageCollect()
@@ -198,6 +254,7 @@ local function garbageCollect()
 		while(UI_Active[1] != nil and UI_Active[1].rmvx == 1) do
 			table.remove(UI_Active,1)
 		end
+		PaintSort()
 	end
 end
 
@@ -214,9 +271,15 @@ local function checkRemove(v)
 	end
 end
 
-local function draw()
+local thinktime = 0
+local drawtime = 0
+local sorttime = 0
+local collect = false
+
+local function drawx()
 	checkMouse()
-	table.sort(UI_Active,function(a,b) return a.ID < b.ID end)
+
+	t = ticks()
 	for k,v in pairs(UI_Active) do
 		if(v:IsVisible() and v:ShouldDraw()) then
 			v:MaskMe()
@@ -224,6 +287,10 @@ local function draw()
 			v:EndMask()
 		end
 	end
+	t = (ticks()) - t
+	drawtime = t
+	
+	t = ticks()
 	for k,v in pairs(UI_Active) do
 		if(v:IsVisible() and v:ShouldDraw()) then
 			if(v.parent and v.parent.valid != true) then
@@ -234,8 +301,22 @@ local function draw()
 			v:Think()
 			checkRemove(v)
 		end
+		if(v.rmvx) then collect = true end
 	end
+	t = (ticks()) - t
+	thinktime = t
 	
-	garbageCollect()
+	if(collect) then
+		garbageCollect()
+	end
 end
-hook.add("Draw2D","uidraw",draw)
+
+local function profd()
+	local dtime = ProfileFunction(drawx)
+	draw.SetColor(1,1,1,1)
+	draw.Text(0,300,"TotalTime: " .. dtime,12,12)
+	draw.Text(0,312,"ThinkTime: " .. thinktime,12,12)
+	draw.Text(0,324,"DrawTime: " .. drawtime,12,12)
+	draw.Text(0,336,"SortTime: " .. sorttime,12,12)
+end
+hook.add("Draw2D","uidraw",profd)

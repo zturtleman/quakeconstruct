@@ -7,7 +7,7 @@ Panel.w = 0
 Panel.h = 0
 Panel.bgcolor = {0.5,0.5,0.5,1}
 Panel.fgcolor = {1,1,1,1}
-Panel.shader = LoadShader("flareShader")
+Panel.shader = LoadShader("softcursor")
 Panel.pset = false
 Panel.visible = true
 Panel.constToParent = false
@@ -49,7 +49,7 @@ function Panel:DrawBackground()
 	self:DoBGColor()
 	draw.Rect(x,y,self.w,self.h)
 	
-	coloradjust(self.bgcolor,.1)
+	--[[coloradjust(self.bgcolor,.1)
 	draw.Rect(x,y,self.w,2)
 	
 	coloradjust(self.bgcolor,.07)
@@ -59,13 +59,13 @@ function Panel:DrawBackground()
 	draw.Rect(x,y+(self.h-2),self.w,2)
 	
 	coloradjust(self.bgcolor,-.1)
-	draw.Rect(x,y,2,self.h)
+	draw.Rect(x,y,2,self.h)]]
 	
 	--if(self:MouseOver()) then
 		--draw.Rect(x,y,self.w,self.h)
 	--end
 	
-	--drawNSBox(100,100,10,10,2,self.shader)
+	--drawNSBox(x,y,self.w,self.h,5,self.shader)
 end
 
 function Panel:SetDelegate(d)
@@ -79,12 +79,46 @@ end
 function Panel:MaskMe()
 	local par = self:GetDelegate()
 	if(par) then
-		draw.MaskRect(
-		par:GetX(),
-		par:GetY(),
-		par:GetWidth(),
-		par:GetHeight())
+		if(self:TouchingEdges(par)) then
+			draw.MaskRect(
+			par:GetX(),
+			par:GetY(),
+			par:GetWidth(),
+			par:GetHeight())
+		end
 	end
+end
+
+function Panel:GetMaskedRect()
+	local par = self:GetDelegate()
+	local x,y = self:GetPos()
+	local w,h = self:GetSize()
+	
+	if(par) then
+		if(x < par:GetX()) then x = par:GetX() end
+		if(y < par:GetY()) then y = par:GetY() end
+		
+		local pw = par:GetX() + par:GetWidth()
+		local ph = par:GetY() + par:GetHeight()
+		
+		if(x + w > pw) then w = pw - x end
+		if(y + h > ph) then h = ph - y end
+	end
+	
+	return x,y,w,h
+end
+
+function Panel:TouchingEdges(par)
+	if(self.x < par:GetX()) then return true end
+	if(self.y < par:GetY()) then return true end
+	
+	if(self:GetX() + self.w > par:GetX() + par:GetWidth()) then 
+		return true
+	end
+	if(self:GetY() + self.h > par:GetX() + par:GetHeight()) then 
+		return true
+	end
+	return false
 end
 
 function Panel:OutsidePanel(par)

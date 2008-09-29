@@ -9,20 +9,30 @@ function Panel:Initialize()
 	self.np = 1
 	self.canvas = UI_Create("panel",self)
 	self.scrollbar = UI_Create("scrollbar",self)
-	self.scrollbar:SetSize(10,10)
+	self.scrollbar:SetSize(12,12)
 	self.scrollbar.OnScroll = function(sb,v)
 		self.canvas.y = -(self.canvas:GetHeight() - self:GetHeight())*v
 	end
 	
 	self.canvas:SetSize(0,0)
 	
-	local btn = UI_Create("button")
-	btn:SetPos(0,20)
-	btn:SetSize(100,20)
-	btn:SetText("'Ello!")
+	--local btn = UI_Create("button")
+	--btn:SetPos(0,20)
+	--btn:SetSize(100,20)
+	--btn:SetText("'Ello!")
 	
-	for i=0, 12 do
-		self:AddPanel(btn,true)
+	--for i=0, 12 do
+		--self:AddPanel(btn,true)
+	--end
+	--Timer(4,self.Clear,self)
+end
+
+function Panel:Clear()
+	self.canvas:SetSize(0,0)
+	self.scrollbar:SetRange(0)
+	self.scrollbar:DoLayout()
+	for k,v in pairs(self.panes) do
+		v[1]:Remove()
 	end
 end
 
@@ -50,7 +60,9 @@ function Panel:OnRemove()
 end
 
 function Panel:DoLayout()
-	self:Expand()
+	if(self:GetParent()) then
+		self:Expand()
+	end
 	self.canvas:SetSize(self:GetWidth(),self.canvas:GetHeight())
 	self.scrollbar:DoLayout()
 	
