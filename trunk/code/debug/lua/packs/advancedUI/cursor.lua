@@ -5,4 +5,4 @@ local function draw2d()
 		draw.Rect(GetXMouse()-5,GetYMouse()-5,10,10)
 	end
 end
-hook.add("Draw2D","UIcursor",draw2d)
+hook.add("Draw2D","UIcursor",draw2d,999)

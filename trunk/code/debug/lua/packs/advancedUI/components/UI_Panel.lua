@@ -5,8 +5,8 @@ Panel.x = 0
 Panel.y = 0
 Panel.w = 0
 Panel.h = 0
-Panel.bgcolor = {0.5,0.5,0.5,.8}
-Panel.fgcolor = {1,1,1,.8}
+Panel.bgcolor = {0.5,0.5,0.5,1}
+Panel.fgcolor = {1,1,1,1}
 Panel.shader = LoadShader("flareShader")
 Panel.pset = false
 Panel.visible = true
@@ -14,25 +14,52 @@ Panel.constToParent = false
 Panel.valid = true
 Panel.removeme = false
 Panel.rmvx = 0
+Panel.catchm = false
+Panel.catchk = false
+Panel.cc = 0
+Panel.delegate = nil
+
+local function qcolor(tab)
+	draw.SetColor(tab[1],tab[2],tab[3],tab[4])
+end
+
+local function coloradjust(tab,amt)
+	local out = {}
+	for k,v in pairs(tab) do
+		out[k] = math.min(math.max(v + amt,0),1)
+	end
+	out[4] = tab[4]/2
+	qcolor(out)
+end
 
 function Panel:Initialize()
 
 end
 
 function Panel:DoFGColor()
-	local b = self.fgcolor
-	draw.SetColor(b[1],b[2],b[3],b[4])
+	qcolor(self.fgcolor)
 end
 
 function Panel:DoBGColor()
-	local b = self.bgcolor
-	draw.SetColor(b[1],b[2],b[3],b[4])
+	qcolor(self.bgcolor)
 end
 
 function Panel:DrawBackground()
 	local x,y = self:GetPos()
 	self:DoBGColor()
 	draw.Rect(x,y,self.w,self.h)
+	
+	coloradjust(self.bgcolor,.1)
+	draw.Rect(x,y,self.w,2)
+	
+	coloradjust(self.bgcolor,.07)
+	draw.Rect(x+(self.w-2),y,2,self.h)
+	
+	coloradjust(self.bgcolor,-.07)
+	draw.Rect(x,y+(self.h-2),self.w,2)
+	
+	coloradjust(self.bgcolor,-.1)
+	draw.Rect(x,y,2,self.h)
 	
 	--if(self:MouseOver()) then
 		--draw.Rect(x,y,self.w,self.h)
@@ -41,14 +68,44 @@ function Panel:DrawBackground()
 	--drawNSBox(100,100,10,10,2,self.shader)
 end
 
+function Panel:SetDelegate(d)
+	self.delegate = d
+end
+
+function Panel:GetDelegate()
+	return self.delegate or self.parent
+end
+
 function Panel:MaskMe()
-	if(self.parent) then
+	local par = self:GetDelegate()
+	if(par) then
 		draw.MaskRect(
-		self.parent:GetX(),
-		self.parent:GetY(),
-		self.parent:GetWidth(),
-		self.parent:GetHeight())
+		par:GetX(),
+		par:GetY(),
+		par:GetWidth(),
+		par:GetHeight())
 	end
+end
+
+function Panel:OutsidePanel(par)
+	if(par == nil) then return false end
+	if(self:GetX() + self.w < par:GetX() or self:GetX() - self.w > par:GetX() + par:GetWidth()) then
+		return true
+	end
+	if(self:GetY() + self.h < par:GetY() or self:GetY() - self.h > par:GetY() + par:GetHeight()) then
+		return true
+	end
+	return false
+end
+
+function Panel:OutsideDelegate()
+	local par = self:GetDelegate()
+	return self:OutsidePanel(par)
+end
+
+function Panel:ShouldDraw()
+	if(self:OutsideDelegate()) then return false end
+	return true
 end
 
 function Panel:Draw()
@@ -118,7 +175,6 @@ end
 function Panel:SetSize(w,h)
 	self.w = w
 	self.h = h
-	self:DoLayout()
 	self:InvalidateLayout()
 end
 
@@ -129,16 +185,60 @@ function Panel:GetSize()
 	return self:GetWidth(), self:GetHeight()
 end
 
+function Panel:Center()
+	local sw = 640
+	local sh = 480
+	local mw = self:GetWidth()
+	local mh = self:GetHeight()
+	local w = self.w
+	local h = self.h
+	local par = self:GetParent()
+	
+	if(par != nil) then
+		sw = par:GetWidth()
+		sh = par:GetHeight()
+	end
+	
+	self:SetPos((sw/2) - mw/2,(sh/2) - mh/2)
+end
+
+function Panel:Expand()
+	self:SetPos(0,0)
+	self:SetSize(648,480)
+	
+	local par = self:GetParent()
+	
+	if(par != nil) then
+		self:SetSize(par:GetWidth(),par:GetHeight())
+	end	
+end
+
 function Panel:OnRemove() end
 
 function Panel:Remove()
 	self:OnRemove()
 	self.removeme = true
 	self.rmvx = 1
+	if(self.parent) then
+		self.parent.cc = self.parent.cc - 1
+	end
+	if(self.catchm) then
+		UI_EnableCursor(false)
+	end
+	self.catchm = false
 end
 
 function Panel:SetVisible(b)
 	self.visible = b
+end
+
+function Panel:CatchMouse(b)
+	self.catchm = b
+	UI_EnableCursor(b)
+end
+
+function Panel:CatchKeyboard(b)
+	self.catchk = b
 end
 
 function Panel:GetContentPane() return nil end
@@ -154,13 +254,14 @@ function Panel:InvalidateLayout()
 end
 
 function Panel:IsVisible()
-	if(self.parent) then
-		return self.parent:IsVisible()
-	end
+	--if(self.parent) then
+		--return self.parent:IsVisible()
+	--end
 	return self.visible
 end
 
 function Panel:ScaleToContents() end
+
 
 function Panel.__eq(p1,p2)
 	return p1.ID == p2.ID

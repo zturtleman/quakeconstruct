@@ -16,11 +16,11 @@ function Panel:Initialize()
 	end
 	
 	self.dragbar2 = UI_Create("dragbutton",self,true)
-	self.dragbar2:SetSize(10,10)
+	self.dragbar2:SetSize(12,10)
 	self.dragbar2:LockCenter(true)
 	self.dragbar2.Affect = function(db,dx,dy)
-		db.x = db.x + dx
-		db.y = db.y + dy
+		--db.x = db.x + dx
+		--db.y = db.y + dy
 	
 		if(db.x < self.dragbar:TextWidth() + 5) then
 			db.x = self.dragbar:TextWidth() + 5
@@ -29,7 +29,8 @@ function Panel:Initialize()
 			db.y = 20
 		end
 	
-		self:SetSize(db.x+10,db.y+10)
+		self:SetSize(db.x+12,db.y+10)
+		self:InvalidateLayout()
 	end
 	
 	self:PositionBar()
@@ -42,7 +43,7 @@ end
 
 function Panel:AlignContentPane()
 	self.contentPane:SetPos(2,12)
-	self.contentPane:SetSize(self:GetWidth()-4,self:GetHeight()-14)
+	self.contentPane:SetSize(self:GetWidth()-4,self:GetHeight()-20)
 end
 
 function Panel:GetContentPane()

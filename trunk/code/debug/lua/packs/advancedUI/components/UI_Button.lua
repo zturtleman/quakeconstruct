@@ -1,19 +1,31 @@
 local Panel = {}
 
+local function coloradjust(tab,amt)
+	local out = {}
+	for k,v in pairs(tab) do
+		out[k] = math.min(math.max(v + amt,0),1)
+	end
+	return out
+end
+
 function Panel:DoClick() end
 
 function Panel:DrawBackground()
-	local b = self.bgcolor
-	local x,y = self:GetPos()
-	draw.SetColor(b[1],b[2],b[3],b[4])
+	local nbg = {self.bgcolor[1],self.bgcolor[2],self.bgcolor[3],self.bgcolor[4]}
 	
 	if(self:MouseOver()) then
-		draw.SetColor(.1,.3,1,1)
+		self.bgcolor = coloradjust(nbg,.2)
 	end
 	if(self:MouseDown()) then
-		draw.SetColor(1,.3,.1,1)
+		self.bgcolor = coloradjust(nbg,-.2)
 	end
-	draw.Rect(x,y,self.w,self.h)
+	
+	UI_Components["panel"].DrawBackground(self)
+	
+	self.bgcolor[1] = nbg[1]
+	self.bgcolor[2] = nbg[2]
+	self.bgcolor[3] = nbg[3]
+	self.bgcolor[4] = nbg[4]
 end
 
 function Panel:MouseReleased()

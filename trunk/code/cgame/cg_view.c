@@ -874,3 +874,12 @@ void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demo
 
 }
 
+void CG_ProjectVector( refdef_t refdef, vec3_t in, vec3_t out ) {
+	float distanceToCamera = (refdef.width / 2) / tan(refdef.fov_x/2);
+
+	out[0] = distanceToCamera * in[0] / -in[2];
+	out[1] = distanceToCamera * in[1] / -in[2];
+
+	out[0] = in[0] + (refdef.x + refdef.width / 2);
+	out[1] = -in[1] + (refdef.y + refdef.height / 2);
+}

@@ -324,6 +324,26 @@ int qlua_VectorToAngles(lua_State *L) {
 	return 1;
 }
 
+int qlua_VectorRotate(lua_State *L) {
+	vec3_t in,out;
+	vec3_t axis[3];
+
+	luaL_checktype(L,1,LUA_TVECTOR);
+	luaL_checktype(L,2,LUA_TVECTOR);
+	luaL_checktype(L,3,LUA_TVECTOR);
+	luaL_checktype(L,4,LUA_TVECTOR);
+
+	lua_tovector(L,1,in);
+	lua_tovector(L,2,axis[0]);
+	lua_tovector(L,3,axis[1]);
+	lua_tovector(L,4,axis[2]);
+
+	VectorRotate(in,axis,out);
+
+	lua_pushvector(L,out);
+	return 1;
+}
+
 int qlua_AngleVectors(lua_State *L) {
 	vec3_t v,f,r,u;
 	luaL_checktype(L,1,LUA_TVECTOR);
@@ -394,6 +414,40 @@ int qlua_VectorUp(lua_State *L) {
 	return 1;
 }
 
+int qlua_ProjectVector(lua_State *L) {
+	vec3_t in;
+	vec3_t out;
+	refdef_t		refdef;
+	
+	memset( &refdef, 0, sizeof( refdef ) );
+	lua_torefdef(L,1,&refdef);
+
+	luaL_checktype(L,2,LUA_TVECTOR);
+	lua_tovector(L,2,in);
+	
+	CG_ProjectVector(refdef,in,out);
+
+	lua_pushvector(L,out);
+	return 1;
+}
+
+int qlua_ProjectToPlane(lua_State *L) {
+	vec3_t dst,src,plane;
+
+	luaL_checktype(L,1,LUA_TVECTOR);
+	luaL_checktype(L,2,LUA_TVECTOR);
+	luaL_checktype(L,3,LUA_TVECTOR);
+	
+	lua_tovector(L,1,src);
+	lua_tovector(L,2,plane);
+	lua_tovector(L,3,dst);
+
+	ProjectPointOnPlane(dst,src,plane);
+
+	lua_pushvector(L,dst);
+	return 1;
+}
+
 void CG_InitLuaVector(lua_State *L) {
 	lua_register(L,"TraceLine",qlua_trace);
 	lua_register(L,"VectorToAngles",qlua_VectorToAngles);
@@ -403,6 +457,9 @@ void CG_InitLuaVector(lua_State *L) {
 	lua_register(L,"VectorRight",qlua_VectorRight);
 	lua_register(L,"VectorUp",qlua_VectorUp);
 	lua_register(L,"AngleVectors",qlua_AngleVectors);
+	lua_register(L,"ProjectVector",qlua_ProjectVector);
+	lua_register(L,"ProjectOnPlane",qlua_ProjectToPlane);
+	lua_register(L,"VectorRotate",qlua_VectorRotate);
 
 	Vector_register(L);
 }
