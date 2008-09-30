@@ -8,6 +8,7 @@ function Panel:Initialize()
 	self.panes = {}
 	self.np = 1
 	self.canvas = UI_Create("panel",self)
+	self.canvas.Draw = function() end
 	self.scrollbar = UI_Create("scrollbar",self)
 	self.scrollbar:SetSize(12,12)
 	self.scrollbar.OnScroll = function(sb,v)
@@ -26,6 +27,8 @@ function Panel:Initialize()
 	--end
 	--Timer(4,self.Clear,self)
 end
+
+function Panel:Draw() end
 
 function Panel:Clear()
 	self.canvas:SetSize(0,0)
@@ -63,7 +66,7 @@ function Panel:DoLayout()
 	if(self:GetParent()) then
 		self:Expand()
 	end
-	self.canvas:SetSize(self:GetWidth(),self.canvas:GetHeight())
+	self.canvas:SetSize(self:GetWidth() - self.scrollbar:GetWidth(),self.canvas:GetHeight())
 	self.scrollbar:DoLayout()
 	
 	if(self.canvas:GetHeight() > self:GetHeight()) then

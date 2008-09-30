@@ -204,7 +204,6 @@ local function mDown()
 			return
 		end
 	end
-	PaintSort()
 end
 hook.add("MouseDown","uimouse",mDown)
 
@@ -236,7 +235,6 @@ local function checkMouse()
 		local v = UI_Active[#UI_Active - i]
 		if(v:IsVisible() and panelCollide(v,mx,my)) then
 			v.__mouseInside = true
-			PaintSort()
 			return
 		end
 	end
@@ -244,6 +242,7 @@ local function checkMouse()
 end
 
 local function garbageCollect()
+	local rm = 0
 	if(#UI_Active > 0) then
 		table.sort(UI_Active,function(a,b) return a.rmvx > b.rmvx end)
 		if(UI_Active[1] == nil) then
@@ -253,9 +252,11 @@ local function garbageCollect()
 		
 		while(UI_Active[1] != nil and UI_Active[1].rmvx == 1) do
 			table.remove(UI_Active,1)
+			rm = rm + 1
 		end
 		PaintSort()
 	end
+	print("^2Garbage Collected -> " .. rm .. "\n")
 end
 
 local function checkRemove(v)
@@ -271,27 +272,37 @@ local function checkRemove(v)
 	end
 end
 
+function UI_RemovePanel(v)
+	checkRemove(v)
+end
+
 local thinktime = 0
 local drawtime = 0
-local sorttime = 0
+local mcount = 0
 local collect = false
 
 local function drawx()
 	checkMouse()
 
+	mcount = 0
 	t = ticks()
-	for k,v in pairs(UI_Active) do
+	for i=1, #UI_Active do
+		local v = UI_Active[i]
 		if(v:IsVisible() and v:ShouldDraw()) then
-			v:MaskMe()
+			local m = v:MaskMe()
 			v:Draw()
-			v:EndMask()
+			if(m) then
+				draw.EndMask()
+				mcount = mcount + 1
+			end
 		end
 	end
 	t = (ticks()) - t
 	drawtime = t
 	
 	t = ticks()
-	for k,v in pairs(UI_Active) do
+	for i=0, #UI_Active-1 do
+		local v = UI_Active[#UI_Active - i]
 		if(v:IsVisible() and v:ShouldDraw()) then
 			if(v.parent and v.parent.valid != true) then
 				v:DoLayout()
@@ -299,15 +310,15 @@ local function drawx()
 				v.parent:Think()
 			end
 			v:Think()
-			checkRemove(v)
 		end
-		if(v.rmvx) then collect = true end
+		if(v.rmvx == 1) then collect = true end
 	end
 	t = (ticks()) - t
 	thinktime = t
 	
 	if(collect) then
 		garbageCollect()
+		collect = false
 	end
 end
 
@@ -317,6 +328,6 @@ local function profd()
 	draw.Text(0,300,"TotalTime: " .. dtime,12,12)
 	draw.Text(0,312,"ThinkTime: " .. thinktime,12,12)
 	draw.Text(0,324,"DrawTime: " .. drawtime,12,12)
-	draw.Text(0,336,"SortTime: " .. sorttime,12,12)
+	draw.Text(0,336,"MaskCount: " .. mcount,12,12)
 end
 hook.add("Draw2D","uidraw",profd)

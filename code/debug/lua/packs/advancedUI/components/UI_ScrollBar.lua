@@ -76,6 +76,10 @@ function Panel:DoLayout()
 	if(self:BarScale() < 1) then
 		self.dragbar:SetVisible(true)
 		self.dragbar:SetSize(self.dragbar:GetWidth(),self:GetHeight()*self:BarScale())
+		if(self.dragbar:GetHeight() < 10) then
+			self.dragbar:SetSize(self.dragbar:GetWidth(),10)
+		end
+		
 		self:OnScroll(self:Value())
 	else
 		self.dragbar:SetVisible(false)

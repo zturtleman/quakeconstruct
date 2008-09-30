@@ -22,11 +22,11 @@ function Panel:Initialize()
 		--db.x = db.x + dx
 		--db.y = db.y + dy
 	
-		if(db.x < self.dragbar:TextWidth() + 5) then
-			db.x = self.dragbar:TextWidth() + 5
+		if(db.x < 20) then
+			db.x = 20
 		end
-		if(db.y < 20) then 
-			db.y = 20
+		if(db.y < 25) then 
+			db.y = 25
 		end
 	
 		self:SetSize(db.x+12,db.y+10)
