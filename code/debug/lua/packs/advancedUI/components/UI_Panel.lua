@@ -18,6 +18,7 @@ Panel.catchm = false
 Panel.catchk = false
 Panel.cc = 0
 Panel.delegate = nil
+Panel.lastsize = {0,0}
 
 local function qcolor(tab)
 	draw.SetColor(tab[1],tab[2],tab[3],tab[4])
@@ -224,9 +225,14 @@ function Panel:GetLocalPos()
 end
 
 function Panel:SetSize(w,h)
-	self.w = w
-	self.h = h
-	self:InvalidateLayout()
+	if(w < 0) then w = 0 end
+	if(h < 0) then h = 0 end
+	if(self.lastsize[1] != w or self.lastsize[2] != h) then 
+		self.w = w
+		self.h = h
+		self:InvalidateLayout()
+		self.lastsize = {w,h}
+	end
 end
 
 function Panel:GetWidth() return self.w end
@@ -282,11 +288,16 @@ end
 
 function Panel:SetVisible(b)
 	self.visible = b
+	if(self.catchm) then
+		UI_EnableCursor(self.visible)
+	end
 end
 
 function Panel:CatchMouse(b)
 	self.catchm = b
-	UI_EnableCursor(b)
+	if(self:IsVisible()) then 
+		UI_EnableCursor(b)
+	end
 end
 
 function Panel:CatchKeyboard(b)
@@ -318,10 +329,13 @@ function Panel:InvalidateLayout()
 end
 
 function Panel:IsVisible()
-	--if(self.parent) then
-		--return self.parent:IsVisible()
-	--end
-	return self.visible
+	if(self.visible) then
+		if(self.parent) then
+			return self.parent:IsVisible()
+		end
+		return true
+	end
+	return false
 end
 
 function Panel:ScaleToContents() end

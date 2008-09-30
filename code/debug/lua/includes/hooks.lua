@@ -4,13 +4,19 @@ if(!hook) then
 	hook.debugflags = {}
 end
 
+function hook.sort()
+	table.sort(hook.events[event],function(a,b) return a.priority < b.priority end)
+end
+
 function hook.replacehook(tab,event)
 	for k,v in pairs(hook.events[event]) do
 		if(v.name == tab.name) then 
 			hook.events[event][k] = tab
-			return true 
+			hook.sort()
+			return true
 		end
 	end
+	hook.sort()
 	return false
 end
 
@@ -20,6 +26,7 @@ function hook.remove(event,name)
 			table.remove(hook.events[event],k)
 		end
 	end
+	hook.sort()
 end
 
 function hook.add(event,name,func,priority)
@@ -34,6 +41,7 @@ function hook.add(event,name,func,priority)
 		event = tostring(event) or "Unknown Event"
 		error("Unable to add hook: " .. event .. ".\n")
 	end
+	hook.sort()
 end
 
 function hook.debug(event,b)
@@ -51,7 +59,6 @@ end
 function CallHook(event,...)
 	if(hook.events[event] == nil) then return end
 	local retVal = nil
-	table.sort(hook.events[event],function(a,b) return a.priority < b.priority end)
 	for k,v in pairs(hook.events[event]) do
 		local fname = v.name
 		if (hook.debugflags[event] == true) then debugprint("Calling Function: " .. fname .. "\n") end

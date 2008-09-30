@@ -59,7 +59,7 @@ local currentInit = nil
 function UI_EnableCursor(b)
 	local hold = false
 	for k,v in pairs(UI_Active) do
-		if(v.catchm and v.removeme == false) then hold = true end
+		if(v.catchm and v.removeme == false and v:IsVisible()) then hold = true end
 	end
 	if(b != true and hold) then return end
 	EnableCursor(b)
@@ -280,6 +280,7 @@ local thinktime = 0
 local drawtime = 0
 local mcount = 0
 local collect = false
+local layoutvalidate = {}
 
 local function drawx()
 	checkMouse()
@@ -306,8 +307,10 @@ local function drawx()
 		if(v:IsVisible() and v:ShouldDraw()) then
 			if(v.parent and v.parent.valid != true) then
 				v:DoLayout()
-				v.parent.valid = true
-				v.parent:Think()
+				v:InvalidateLayout()
+				if(!table.HasValue(layoutvalidate,v.parent)) then
+					table.insert(layoutvalidate,v.parent)
+				end
 			end
 			v:Think()
 		end
@@ -315,6 +318,14 @@ local function drawx()
 	end
 	t = (ticks()) - t
 	thinktime = t
+	
+	if(#layoutvalidate > 0) then
+		for k,v in pairs(layoutvalidate) do
+			v.valid = true
+			--v:Think()
+		end
+		layoutvalidate = {}
+	end
 	
 	if(collect) then
 		garbageCollect()
@@ -325,9 +336,9 @@ end
 local function profd()
 	local dtime = ProfileFunction(drawx)
 	draw.SetColor(1,1,1,1)
-	draw.Text(0,300,"TotalTime: " .. dtime,12,12)
-	draw.Text(0,312,"ThinkTime: " .. thinktime,12,12)
-	draw.Text(0,324,"DrawTime: " .. drawtime,12,12)
-	draw.Text(0,336,"MaskCount: " .. mcount,12,12)
+	draw.Text(0,100,"TotalTime: " .. dtime,12,12)
+	draw.Text(0,112,"ThinkTime: " .. thinktime,12,12)
+	draw.Text(0,124,"DrawTime: " .. drawtime,12,12)
+	draw.Text(0,136,"MaskCount: " .. mcount,12,12)
 end
 hook.add("Draw2D","uidraw",profd)

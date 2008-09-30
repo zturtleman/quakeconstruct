@@ -9,9 +9,10 @@ function Panel:Initialize()
 	self.dragbar:SetSize(self:GetWidth(),50)
 	self.dragbar.bgcolor = {.7,.7,.7,1}
 	self.dragbar:SetPos(0,0)
-	self.dragbar:LockCenter(true)
+	self.dragbar:LockCenter(false)
 	self.dragbar:ConstrainToParent(true)
 	self.dragbar.Affect = function(db,dx,dy)
+		db.y = db.y + dy
 		if(db.y < 0) then 
 			db.y = 0
 		end

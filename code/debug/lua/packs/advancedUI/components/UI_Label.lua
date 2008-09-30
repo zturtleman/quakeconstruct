@@ -1,6 +1,7 @@
 local Panel = {}
 Panel.text = ""
 Panel.textsize = 10
+Panel.align = 0
 
 function Panel:Initialize()
 
@@ -24,6 +25,18 @@ function Panel:GetTextSize()
 	return self.textsize
 end
 
+function Panel:TextAlignLeft()
+	self.align = 1
+end
+
+function Panel:TextAlignRight()
+	self.align = 2
+end
+
+function Panel:TextAlignCenter()
+	self.align = 0
+end
+
 function Panel:MaskMe()
 	local par = self:GetDelegate()
 	if(par) then
@@ -42,16 +55,20 @@ function Panel:MaskMe()
 	return false
 end
 
+function Panel:StrLen()
+	return string.len(fixcolorstring(self.text))
+end
+
 function Panel:ScaleToContents()
 	local ts = self.textsize
-	local sw = (ts * string.len(self.text)) + 10
+	local sw = (ts * self:StrLen()) + 10
 	local sh = ts + 10
 	self:SetSize(sw,sh)
 end
 
 function Panel:TextWidth()
 	local ts = self.textsize
-	local sw = (ts * string.len(self.text))
+	local sw = (ts * self:StrLen())
 	return sw
 end
 
@@ -60,8 +77,16 @@ function Panel:Draw()
 	local x,y = self:GetPos()
 	self:DrawBackground()
 	
-	x = x + (self.w/2) - (ts * string.len(self.text))/2
-	y = y + (self.h/2) - (ts/2)
+	y = y + (self.h/2) - (ts/2)	
+	
+	if(self.align == 0) then
+		x = x + (self.w/2) - (ts * self:StrLen())/2
+	elseif(self.align == 2) then
+		x = x + (self.w) - (ts * self:StrLen())
+		x = x - 2
+	else
+		x = x + 2
+	end
 	
 	self:DoFGColor()
 	draw.Text(x,y,self.text,ts,ts)
