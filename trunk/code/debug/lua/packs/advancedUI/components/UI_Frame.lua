@@ -30,11 +30,14 @@ function Panel:Initialize()
 		end
 	
 		self:SetSize(db.x+12,db.y+10)
-		self:InvalidateLayout()
 	end
 	
 	self:PositionBar()
 	self:AlignContentPane()
+end
+
+function Panel:EnableCloseButton(b)
+	self.close:SetVisible(b)
 end
 
 function Panel:SetTitle(t)
