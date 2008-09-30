@@ -7,7 +7,7 @@ Panel.w = 0
 Panel.h = 0
 Panel.bgcolor = {0.5,0.5,0.5,1}
 Panel.fgcolor = {1,1,1,1}
-Panel.shader = LoadShader("softcursor")
+Panel.shader = LoadShader("9slice1")
 Panel.pset = false
 Panel.visible = true
 Panel.constToParent = false
@@ -47,7 +47,7 @@ end
 function Panel:DrawBackground()
 	local x,y = self:GetPos()
 	self:DoBGColor()
-	draw.Rect(x,y,self.w,self.h)
+	--draw.Rect(x,y,self.w,self.h)
 	
 	--[[coloradjust(self.bgcolor,.1)
 	draw.Rect(x,y,self.w,2)
@@ -65,7 +65,7 @@ function Panel:DrawBackground()
 		--draw.Rect(x,y,self.w,self.h)
 	--end
 	
-	--drawNSBox(x,y,self.w,self.h,5,self.shader)
+	drawNSBox(x,y,self.w,self.h,5,self.shader)
 end
 
 function Panel:SetDelegate(d)
@@ -79,14 +79,19 @@ end
 function Panel:MaskMe()
 	local par = self:GetDelegate()
 	if(par) then
+		local w,h = par:GetSize()
+		if(w < 0) then w = 0 end
+		if(h < 0) then h = 0 end
 		if(self:TouchingEdges(par)) then
 			draw.MaskRect(
 			par:GetX(),
 			par:GetY(),
-			par:GetWidth(),
-			par:GetHeight())
+			w,
+			h)
+			return true
 		end
 	end
+	return false
 end
 
 function Panel:GetMaskedRect()
@@ -109,13 +114,13 @@ function Panel:GetMaskedRect()
 end
 
 function Panel:TouchingEdges(par)
-	if(self.x < par:GetX()) then return true end
-	if(self.y < par:GetY()) then return true end
+	if(self:GetX() < par:GetX()) then return true end
+	if(self:GetY() < par:GetY()) then return true end
 	
-	if(self:GetX() + self.w > par:GetX() + par:GetWidth()) then 
+	if(self.x + self.w > par.x + par:GetWidth()) then 
 		return true
 	end
-	if(self:GetY() + self.h > par:GetX() + par:GetHeight()) then 
+	if(self.y + self.h > par.x + par:GetHeight()) then 
 		return true
 	end
 	return false
@@ -149,10 +154,6 @@ end
 
 function Panel:ConstrainToParent(b)
 	self.constToParent = b
-end
-
-function Panel:EndMask()
-	draw.EndMask()
 end
 
 function Panel:Think()
@@ -276,6 +277,7 @@ function Panel:Remove()
 		UI_EnableCursor(false)
 	end
 	self.catchm = false
+	UI_RemovePanel(self)
 end
 
 function Panel:SetVisible(b)
@@ -299,6 +301,17 @@ function Panel:MousePressed(x,y) end
 function Panel:MouseReleased(x,y) end
 function Panel:MouseReleasedOutside(x,y) end
 function Panel:DoLayout() end
+
+function Panel:Valid()
+	if(self.valid) then
+		if(self.parent) then
+			return self.parent:Valid()
+		else
+			return true
+		end
+	end
+	return false
+end
 
 function Panel:InvalidateLayout()
 	self.valid = false
