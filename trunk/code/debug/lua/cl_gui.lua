@@ -1,76 +1,63 @@
-if(mainpanel != nil) then
-	mainpanel:Remove()
-	mainpanel = nil
+local function absvec(v)
+	return Vector(math.abs(v.x),math.abs(v.y),math.abs(v.z))
 end
 
-mainpanel = UI_Create("panel")
-mainpanel:SetSize(640,480)
-mainpanel:SetPos(0,0)
-mainpanel.bgcolor = {0,0,0,.15}
-mainpanel:SetVisible(false)
-mainpanel:CatchMouse(true)
+local function positionModel(ref)
+	mins,maxs = render.ModelBounds(ref:GetModel())
 
-local template = UI_Create("button")
-template:Remove()
+	return vMul(vSub(maxs,absvec(mins)),-.5)
+end
 
-local function MakeFrame()
-	local panel = UI_Create("frame",mainpanel)
-	if(panel != nil) then
-		panel.name = "base"
-		panel:SetPos(10,10)
-		panel:SetSize(200,120)
-		panel:SetTitle("A Neat ListPane")
-		panel:Center()
-	end
+local function refSize(ref)
+	mins,maxs = render.ModelBounds(ref:GetModel())
+	
+	return VectorLength(vMul(vSub(maxs,mins),2))
+end
 
-	local panel2 = UI_Create("listpane",panel)
-	if(panel2 != nil) then
-		panel2.name = "base->listpane"
-		panel2:SetSize(100,100)
-		panel2:DoLayout()
-		
-		template:SetPos(0,20)
-		template:SetSize(100,14)
-		template:SetTextSize(12)		
-		template:SetText("Test1")
-		panel2:AddPanel(template,true)
-		
-		template:SetText("Test2")
-		panel2:AddPanel(template,true)
 
-		template:SetSize(100,24)
-		template:SetText("Test3")
-		panel2:AddPanel(template,true)
-		
-		template:SetSize(100,34)
-		template:SetText("Test4")
-		panel2:AddPanel(template,true)
-		
-		--[[btn:SetSize(100,14)
-		btn:SetText("Close")
-		btn.DoClick = function(btn)
-			panel:SetVisible(false)
+function MakeModelFrame(mdl)
+	if(MDL_VIEWPANE == nil) then
+		MDL_VIEWPANE = UI_Create("frame")
+		if(MDL_VIEWPANE != nil) then
+			MDL_VIEWPANE:SetSize(100,100)
+			MDL_VIEWPANE:Center()
+			MDL_VIEWPANE:CatchMouse(true)
+			MDL_VIEWPANE.OnRemove = function(self)
+				MDL_VIEWPANE = nil
+			end
 		end
-		panel2:AddPanel(btn,true)]]
 	end
-end
-
-local btn = UI_Create("button",mainpanel)
-btn:SetPos(10,10)
-btn:SetSize(150,20)
-btn:SetTextSize(10)
-btn:SetText("Create Frame")
-btn.DoClick = function(b)
-	MakeFrame()
-end
-
-local function keyed(key,state)
-	if(key == K_ALT) then
-		if(state == true) then
-			mainpanel:SetVisible(true)
-		else
-			mainpanel:SetVisible(false)
+	
+	if(MDL_MODEL == nil and MDL_VIEWPANE != nil) then
+		local test = UI_Create("modelpane",MDL_VIEWPANE)
+		if(test != nil) then
+			local inf = LocalPlayer():GetInfo()
+			test:SetModel(LoadModel(mdl))
+			test:SetSkin(0)
+			local pl = "models/players"
+			if(string.sub(mdl,0,string.len(pl)) == pl) then
+				test:SetSkin(1)
+				print("SetSkin\n")
+			end
+			test:SetCamOrigin(Vector(45,0,0))
+			test.PositionModel = function(self,ref)
+				ref:SetPos(positionModel(ref))
+				
+				local dist = refSize(ref)
+				self:SetCamOrigin(Vector(math.cos(self.rot/57.3)*dist,-math.sin(self.rot/57.3)*dist,0))
+			end
+			test.OnRemove = function(self)
+				MDL_MODEL = nil
+			end
+		end
+		MDL_MODEL = test
+	else
+		MDL_MODEL:SetModel(LoadModel(mdl))
+		MDL_MODEL:SetSkin(0)		
+		local pl = "models/players"
+		if(string.sub(mdl,0,string.len(pl)) == pl) then
+			MDL_MODEL:SetSkin(1)
+			print("SetSkin\n")
 		end
 	end
 end
-hook.add("KeyEvent","UImenutest",keyed)
