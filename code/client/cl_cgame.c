@@ -452,6 +452,8 @@ int CL_CgameSystemCalls( int *args ) {
 	case CG_FS_WRITE:
 		FS_Write( VMA(1), args[2], args[3] );
 		return 0;
+	case CG_FS_GETFILELIST:
+		return FS_GetFileList(VMA(1), VMA(2), VMA(3), args[4]);
 	case CG_FS_FCLOSEFILE:
 		FS_FCloseFile( args[1] );
 		return 0;

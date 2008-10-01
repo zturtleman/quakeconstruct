@@ -48,7 +48,6 @@ end
 function Panel:DrawBackground()
 	local x,y = self:GetPos()
 	self:DoBGColor()
-	--draw.Rect(x,y,self.w,self.h)
 	
 	--[[coloradjust(self.bgcolor,.1)
 	draw.Rect(x,y,self.w,2)
@@ -67,6 +66,7 @@ function Panel:DrawBackground()
 	--end
 	
 	drawNSBox(x,y,self.w,self.h,5,self.shader)
+	RECT_DRAW = RECT_DRAW + 9
 end
 
 function Panel:SetDelegate(d)
@@ -274,8 +274,6 @@ function Panel:OnRemove() end
 
 function Panel:Remove()
 	self:OnRemove()
-	self.removeme = true
-	self.rmvx = 1
 	if(self.parent) then
 		self.parent.cc = self.parent.cc - 1
 	end
@@ -342,7 +340,12 @@ function Panel:ScaleToContents() end
 
 
 function Panel.__eq(p1,p2)
-	return p1.ID == p2.ID
+	--Quick and dirty fixes here, beware.
+	return (p1.ID == p2.ID) and 
+	(p1:GetX() == p2:GetX()) and 
+	(p1:GetY() == p2:GetY()) and
+	(p1:GetWidth() == p2:GetWidth()) and
+	(p1:GetHeight() == p2:GetHeight())
 end
 
 registerComponent(Panel,"panel")

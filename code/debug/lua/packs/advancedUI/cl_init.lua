@@ -129,7 +129,7 @@ local function doPanel(o,parent,force)
 	o:Initialize()
 	currentInit = nil
 	
-	print("Create ID: " .. o.ID .. " -> " .. level .. "\n")
+	--print("Create ID: " .. o.ID .. " -> " .. level .. "\n")
 end
 
 function PaintSort()
@@ -261,9 +261,11 @@ end
 
 local function checkRemove(v)
 	if(v.removeme) then
-		for _,other in pairs(UI_Active) do
+		for i=0, #UI_Active-1 do
+			local other = UI_Active[#UI_Active - i]
 			if(other != v) then
 				if(other:GetParent() == v and other.removeme != true) then
+					if(other.name != nil) then print("Removed: " .. other.name .. "\n") end
 					other:Remove()
 					didrmv = true
 				end
@@ -273,51 +275,61 @@ local function checkRemove(v)
 end
 
 function UI_RemovePanel(v)
+	v.removeme = true
+	v.rmvx = 1
+	if(v.name != nil) then print("Removed: " .. v.name .. "\n") end
 	checkRemove(v)
 end
 
-local thinktime = 0
 local drawtime = 0
 local mcount = 0
 local collect = false
 local layoutvalidate = {}
+local tickdelay = ticks()
+local thinks = 0
 
 local function drawx()
 	checkMouse()
-
+	
 	mcount = 0
-	t = ticks()
-	for i=1, #UI_Active do
-		local v = UI_Active[i]
-		if(v:IsVisible() and v:ShouldDraw()) then
-			local m = v:MaskMe()
-			v:Draw()
-			if(m) then
-				draw.EndMask()
-				mcount = mcount + 1
-			end
-		end
-	end
-	t = (ticks()) - t
-	drawtime = t
+	thinks = 0
+	
+	RECT_DRAW = 0
 	
 	t = ticks()
-	for i=0, #UI_Active-1 do
-		local v = UI_Active[#UI_Active - i]
-		if(v:IsVisible() and v:ShouldDraw()) then
-			if(v.parent and v.parent.valid != true) then
-				v:DoLayout()
-				v:InvalidateLayout()
-				if(!table.HasValue(layoutvalidate,v.parent)) then
-					table.insert(layoutvalidate,v.parent)
+	if(#UI_Active > 0) then
+		for i=0, #UI_Active-1 do
+			local v = UI_Active[i+1]
+			if(v:IsVisible() and v:ShouldDraw()) then
+				local m = v:MaskMe()
+				v:Draw()
+				if(m) then
+					draw.EndMask()
+					mcount = mcount + 1
 				end
 			end
-			v:Think()
+		
+			v = UI_Active[#UI_Active - i]
+			if(v:IsVisible() and v:ShouldDraw()) then
+				thinks = thinks + 1
+				if(v.parent and v.parent.valid != true) then
+					v:DoLayout()
+					v:InvalidateLayout()
+					if(!table.HasValue(layoutvalidate,v.parent)) then
+						table.insert(layoutvalidate,v.parent)
+					end
+				end
+				v:Think()
+			end
+			if(v.rmvx == 1) then collect = true end
 		end
-		if(v.rmvx == 1) then collect = true end
 	end
 	t = (ticks()) - t
-	thinktime = t
+	
+	if(ticks() > tickdelay + 500000) then
+		drawtime = t
+		tickdelay = ticks()
+	end
 	
 	if(#layoutvalidate > 0) then
 		for k,v in pairs(layoutvalidate) do
@@ -337,8 +349,9 @@ local function profd()
 	local dtime = ProfileFunction(drawx)
 	draw.SetColor(1,1,1,1)
 	draw.Text(0,100,"TotalTime: " .. dtime,12,12)
-	draw.Text(0,112,"ThinkTime: " .. thinktime,12,12)
+	draw.Text(0,112,"Rects: " .. RECT_DRAW,12,12)
 	draw.Text(0,124,"DrawTime: " .. drawtime,12,12)
 	draw.Text(0,136,"MaskCount: " .. mcount,12,12)
+	draw.Text(0,148,"Thinks: " .. thinks,12,12)
 end
 hook.add("Draw2D","uidraw",profd)

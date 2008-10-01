@@ -20,7 +20,6 @@ template:Remove()
 if(altmenuframe != nil) then altmenuframe:Remove()
 	altmenuframe = nil
 end
-print("main\n")
 altmenuframe = UI_Create("frame")
 
 local panel = altmenuframe
@@ -34,7 +33,6 @@ if(panel != nil) then
 	panel:EnableCloseButton(false)
 end
 
-print("main->sub1\n")
 local subpane = UI_Create("panel",panel)
 if(subpane != nil) then
 	--subpane.Draw = function() end --Don't draw this one
@@ -44,7 +42,6 @@ if(subpane != nil) then
 	end
 end
 
-print("main->sub2\n")
 local subpane2 = UI_Create("panel",panel)
 if(subpane2 != nil) then
 	--subpane2.Draw = function() end --Don't draw this one
@@ -54,7 +51,6 @@ if(subpane2 != nil) then
 	end
 end
 
-print("main->sub2->back\n")
 local back = UI_Create("button",subpane2)
 if(back != nil) then
 	back.DoLayout = function(self)
@@ -64,7 +60,6 @@ if(back != nil) then
 	back:SetVisible(false)
 end
 
-print("main->sub1->list\n")
 local panel2 = UI_Create("listpane",subpane)
 if(panel2 != nil) then
 	panel2.name = "base->listpane"
@@ -91,7 +86,6 @@ function altmenu.setBack(func,...)
 end
 
 function altmenu.addButton(name,func,...)
-	print("main->sub1->list->button\n")
 	template:SetText(name)
 	template.DoClick = function(btn)
 		pcall(func,unpack(arg))

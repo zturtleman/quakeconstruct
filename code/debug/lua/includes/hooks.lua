@@ -4,7 +4,7 @@ if(!hook) then
 	hook.debugflags = {}
 end
 
-function hook.sort()
+function hook.sort(event)
 	table.sort(hook.events[event],function(a,b) return a.priority < b.priority end)
 end
 
@@ -12,11 +12,11 @@ function hook.replacehook(tab,event)
 	for k,v in pairs(hook.events[event]) do
 		if(v.name == tab.name) then 
 			hook.events[event][k] = tab
-			hook.sort()
+			hook.sort(event)
 			return true
 		end
 	end
-	hook.sort()
+	hook.sort(event)
 	return false
 end
 
@@ -26,7 +26,7 @@ function hook.remove(event,name)
 			table.remove(hook.events[event],k)
 		end
 	end
-	hook.sort()
+	hook.sort(event)
 end
 
 function hook.add(event,name,func,priority)
@@ -41,7 +41,7 @@ function hook.add(event,name,func,priority)
 		event = tostring(event) or "Unknown Event"
 		error("Unable to add hook: " .. event .. ".\n")
 	end
-	hook.sort()
+	hook.sort(event)
 end
 
 function hook.debug(event,b)

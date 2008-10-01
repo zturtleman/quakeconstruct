@@ -83,10 +83,10 @@ int qlua_renderscene(lua_State *L) {
 	error = lua_torefdef(L, 1, &refdef);
 	if(error == 1) {
 		trap_R_ClearScene();
-		CG_Printf("Scene Failed\n");
+		//CG_Printf("Scene Failed\n");
 	} else {
 		trap_R_RenderScene( &refdef );
-		CG_Printf("Rendered Scene: %f, %f, %f, %f\n",refdef.x,refdef.y,refdef.width,refdef.height);
+		//CG_Printf("Rendered Scene: %f, %f, %f, %f\n",refdef.x,refdef.y,refdef.width,refdef.height);
 	}
 	return error;
 }

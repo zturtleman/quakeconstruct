@@ -94,6 +94,10 @@ void	trap_FS_Write( const void *buffer, int len, fileHandle_t f ) {
 	syscall( CG_FS_WRITE, buffer, len, f );
 }
 
+int trap_FS_GetFileList(  const char *path, const char *extension, char *listbuf, int bufsize ) {
+	return syscall( CG_FS_GETFILELIST, path, extension, listbuf, bufsize );
+}
+
 void	trap_FS_FCloseFile( fileHandle_t f ) {
 	syscall( CG_FS_FCLOSEFILE, f );
 }

@@ -28,6 +28,36 @@ int qlua_ticksPerSecond(lua_State *L) {
 	return 1;
 }
 
+int qlua_packList(lua_State *L) {
+	int		numfiles;
+	char	filelist[4096];
+	char*	fileptr;
+	int		i;
+	int		filelen;
+	const char *path = "";
+	const char *ext = "";
+
+	luaL_checkstring(L,1);
+	luaL_checkstring(L,2);
+
+	path = lua_tostring(L,1);
+	ext = lua_tostring(L,2);
+
+	lua_newtable(L);
+	numfiles = trap_FS_GetFileList( path, ext, filelist, 4096 );
+	fileptr  = filelist;
+	for (i=0; i<numfiles; i++,fileptr+=filelen+1)
+	{
+		filelen = strlen(fileptr);
+
+		lua_pushinteger(L, i);
+		lua_pushstring(L, fileptr);
+		lua_rawset(L, -3);
+	}
+
+	return 1;
+}
+
 void qlua_clearfunc(lua_State *L, int ref) {
 	if(ref != 0) {
 		lua_unref(L,ref);
@@ -283,6 +313,7 @@ void InitClientLua( void ) {
 	lua_register(L,"ticks",qlua_ticks);
 	lua_register(L,"ticksPerSecond",qlua_ticksPerSecond);
 
+	lua_register(L,"packList",qlua_packList);
 	lua_register(L,"print",message);
 	lua_register(L,"bitAnd",bitwiseAnd);
 	lua_register(L,"bitOr",bitwiseOr);
