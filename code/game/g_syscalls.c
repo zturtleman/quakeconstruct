@@ -788,3 +788,27 @@ int trap_PC_ReadToken( int handle, pc_token_t *pc_token ) {
 int trap_PC_SourceFileAndLine( int handle, char *filename, int *line ) {
 	return syscall( BOTLIB_PC_SOURCE_FILE_AND_LINE, handle, filename, line );
 }
+
+void trap_N_CreateMessage( msg_t *msg, int client ) {
+	syscall( TRAP_N_CREATE, msg, client );
+}
+
+void trap_N_SendMessage( msg_t *msg, int client ) {
+	syscall( TRAP_N_SENDMESSAGE, msg, client );
+}
+
+void trap_N_WriteShort( msg_t *msg, int in ) {
+	syscall( TRAP_N_WRITESHORT, msg, in );
+}
+
+void trap_N_WriteLong( msg_t *msg, int in ) {
+	syscall( TRAP_N_WRITELONG, msg, in );
+}
+
+void trap_N_WriteString( msg_t *msg, const char *str ) {
+	syscall( TRAP_N_WRITESTRING, msg, str );
+}
+
+void trap_N_WriteFloat( msg_t *msg, float f ) {
+	syscall( TRAP_N_WRITEFLOAT, msg, &f );
+}

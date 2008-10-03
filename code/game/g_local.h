@@ -434,6 +434,20 @@ typedef struct {
 #endif
 } level_locals_t;
 
+//Hxrmn says: Message structure for VMs
+
+typedef struct {
+	qboolean	allowoverflow;	// if false, do a Com_Error
+	qboolean	overflowed;		// set to true if the buffer size failed (with allowoverflow set)
+	qboolean	oob;			// set to true if the buffer size failed (with allowoverflow set)
+	byte	*data;
+	int		maxsize;
+	int		cursize;
+	int		readcount;
+	int		bit;				// for bitwise reads and writes
+} msg_t;
+
+void G_InitLuaMessages(lua_State *L);
 void InitServerLua( void );
 void CloseServerLua( void );
 void DoLuaInit( void );
@@ -1024,5 +1038,11 @@ void	trap_BotResetWeaponState(int weaponstate);
 
 int		trap_GeneticParentsAndChildSelection(int numranks, float *ranks, int *parent1, int *parent2, int *child);
 
-void	trap_SnapVector( float *v );
+void	trap_N_CreateMessage( msg_t *msg, int client );
+void	trap_N_SendMessage( msg_t *msg, int client );
+void	trap_N_WriteShort( msg_t *msg, int in );
+void	trap_N_WriteLong( msg_t *msg, int in );
+void	trap_N_WriteString( msg_t *msg, const char *str );
+void	trap_N_WriteFloat( msg_t *msg, float f );
 
+void	trap_SnapVector( float *v );

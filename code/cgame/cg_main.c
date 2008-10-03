@@ -77,6 +77,10 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 	case CG_EVENT_HANDLING:
 		CG_EventHandling(arg0);
 		return 0;
+	case CG_LUA_MSG:
+		//Handle Messages. -Hxrmn
+		qlua_HandleMessage();
+		return 0;
 	default:
 		CG_Error( "vmMain: unknown command %i", command );
 		break;
@@ -1992,6 +1996,7 @@ void CG_InitLua() {
 	CG_InitLua2D(L);
 	CG_InitLua3D(L);
 	CG_InitLuaUtil(L);
+	CG_InitLuaMessages(L);
 
 	lua_register(L,"LevelTime",qlua_curtime);
 	lua_register(L,"__loadsound",qlua_loadsound);

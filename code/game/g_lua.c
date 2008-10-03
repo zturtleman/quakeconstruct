@@ -261,6 +261,18 @@ int qlua_md5 (lua_State *L) {
   return 1;
 }
 
+int SendTest(lua_State *L) {
+	msg_t msg;
+
+	luaL_checkint(L,1);
+
+	trap_N_CreateMessage(&msg, 0);
+	trap_N_WriteLong(&msg,lua_tointeger(L,1));
+	trap_N_SendMessage(&msg, 0);
+	
+	return 0;
+}
+
 
 void InitServerLua( void ) {
 	CloseServerLua();
@@ -288,6 +300,7 @@ void InitServerLua( void ) {
 	lua_register(L,"include",qlua_includefile);
 	lua_register(L,"runString",qlua_runstr);
 	lua_register(L,"MD5",qlua_md5);
+	lua_register(L,"SendTest",SendTest);
 
 	G_Printf("CONTENTS_AREAPORTAL = %i\n",CONTENTS_AREAPORTAL);
 	G_Printf("CONTENTS_BODY = %i\n",CONTENTS_BODY);

@@ -708,6 +708,9 @@
 				RelativePath=".\cg_lualocalentity.c">
 			</File>
 			<File
+				RelativePath=".\cg_luamessages.c">
+			</File>
+			<File
 				RelativePath=".\cg_luarefentity.c">
 			</File>
 			<File

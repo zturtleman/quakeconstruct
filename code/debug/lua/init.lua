@@ -10,3 +10,11 @@ print(encoded .. "\n")
 
 local decoded = base64.dec(encoded)
 print(decoded .. "\n")
+
+function makeMessage()
+	local msg = Message()
+	message.WriteLong(msg,128)
+	message.WriteString(msg,"HxrmnRocks")
+	SendDataMessage(msg)
+end
+concommand.Add("msgtest",makeMessage)

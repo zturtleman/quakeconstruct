@@ -648,6 +648,11 @@ void CL_ParseServerMessage( msg_t *msg ) {
 		case svc_download:
 			CL_ParseDownload( msg );
 			break;
+		case svc_lua:
+			//Make Lua VMCall Here. -Hxrmn
+			CL_SetLuaMessage(msg);
+			VM_Call (cgvm, CG_LUA_MSG);
+			break;
 		}
 	}
 }
