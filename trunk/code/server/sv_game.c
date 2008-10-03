@@ -298,6 +298,17 @@ static int	FloatAsInt( float f ) {
 	return temp.i;
 }
 
+void MakeMsg(msg_t *msg, client_t *client) {
+	byte		data[MAX_MSGLEN];
+
+	MSG_Init( msg, data, sizeof(data) );
+
+	msg->allowoverflow = qtrue;
+
+	MSG_WriteLong( msg, client->lastClientCommand );
+	MSG_WriteByte( msg, svc_lua );
+}
+
 /*
 ====================
 SV_GameSystemCalls
@@ -315,6 +326,7 @@ The module is making a system call
 #define	VMF(x)	((float *)args)[x]
 
 int SV_GameSystemCalls( int *args ) {
+	float *ptrf;
 	switch( args[0] ) {
 	case G_PRINT:
 		Com_Printf( "%s", VMA(1) );
@@ -860,6 +872,32 @@ int SV_GameSystemCalls( int *args ) {
 	case TRAP_CEIL:
 		return FloatAsInt( ceil( VMF(1) ) );
 
+	case TRAP_N_CREATE:
+		if ( args[2] < 0 || args[2] >= sv_maxclients->integer ) {
+			Com_Error( ERR_DROP, "TRAP_N_SENDMESSAGE: bad clientNum:%i", args[2] );
+		}
+		MakeMsg( VMA(1), &svs.clients[args[2]] );
+		return 0;
+	
+	case TRAP_N_SENDMESSAGE:
+		if ( args[2] < 0 || args[2] >= sv_maxclients->integer ) {
+			Com_Error( ERR_DROP, "TRAP_N_SENDMESSAGE: bad clientNum:%i", args[2] );
+		}
+		SV_SendMessageToClient( VMA(1), &svs.clients[args[2]] );
+		return 0;
+
+	case TRAP_N_WRITESHORT:
+		MSG_WriteShort( VMA(1), args[2] );
+		return 0;
+	case TRAP_N_WRITELONG:
+		MSG_WriteLong( VMA(1), args[2] );
+		return 0;
+	case TRAP_N_WRITESTRING:
+		MSG_WriteString( VMA(1), VMA(2) );
+		return 0;
+	case TRAP_N_WRITEFLOAT:
+		ptrf = VMA(2);
+		MSG_WriteFloat( VMA(1), *ptrf );
 
 	default:
 		Com_Error( ERR_DROP, "Bad game system trap: %i", args[0] );

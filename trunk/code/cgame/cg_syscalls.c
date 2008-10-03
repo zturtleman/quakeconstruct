@@ -495,3 +495,25 @@ qboolean trap_R_inPVS( const vec3_t p1, const vec3_t p2 ) {
 void trap_LockMouse( qboolean lock ) {
 	syscall( CG_LOCKMOUSE, lock );
 }
+
+int trap_N_ReadShort() {
+	return syscall( CG_N_READSHORT );
+}
+
+int trap_N_ReadLong() {
+	return syscall( CG_N_READLONG );
+}
+
+char *trap_N_ReadString() {
+	char str[MAX_STRING_CHARS];
+	char *out = "";
+	syscall( CG_N_READSTRING, (char *)str );
+	out = (char *)str;
+	return out;
+}
+
+float trap_N_ReadFloat() {
+	float *f = 0;
+	syscall( CG_N_READFLOAT, f );
+	return *f;
+}

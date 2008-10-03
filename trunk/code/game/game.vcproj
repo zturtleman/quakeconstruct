@@ -1277,6 +1277,9 @@
 				RelativePath=".\g_luaentity.c">
 			</File>
 			<File
+				RelativePath=".\g_luamessages.c">
+			</File>
+			<File
 				RelativePath=".\g_luavector.c">
 			</File>
 			<File

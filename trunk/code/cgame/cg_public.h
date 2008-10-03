@@ -186,7 +186,16 @@ typedef enum {
 	CG_TESTPRINTINT,
 	CG_TESTPRINTFLOAT,
 	CG_ACOS,
-	CG_LOCKMOUSE
+	CG_LOCKMOUSE,
+
+	CG_N_READSHORT,
+	CG_N_READLONG,
+	CG_N_READANGLE16,
+	CG_N_READSTRING,
+	CG_N_READBIGSTRING,
+	CG_N_READFLOAT,
+	CG_N_READDATA,
+
 } cgameImport_t;
 
 
@@ -235,8 +244,10 @@ typedef enum {
 
 	CG_MOUSE_EVENT,
 //	void	(*CG_MouseEvent)( int dx, int dy );
-	CG_EVENT_HANDLING
+	CG_EVENT_HANDLING,
 //	void (*CG_EventHandling)(int type);
+	
+	CG_LUA_MSG
 } cgameExport_t;
 
 //----------------------------------------------

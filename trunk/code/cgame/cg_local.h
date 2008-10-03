@@ -1205,6 +1205,7 @@ void CG_PushCGTab(lua_State *L);
 void CG_ApplyCGTab(lua_State *L);
 void CG_PushClientInfoTab(lua_State *L, clientInfo_t *ci);
 void CG_InitLua( void );
+void CG_InitLuaMessages(lua_State *L);
 void InitClientLua( void );
 void CloseClientLua( void );
 void DoLuaInit( void );
@@ -1272,6 +1273,7 @@ void CG_RankRunFrame( void );
 void CG_SetScoreSelection(void *menu);
 score_t *CG_GetSelectedScore();
 void CG_BuildSpectatorString();
+void qlua_HandleMessage();
 
 
 //
@@ -1703,6 +1705,11 @@ int			trap_Key_GetCatcher( void );
 void		trap_Key_SetCatcher( int catcher );
 int			trap_Key_GetKey( const char *binding );
 void		trap_LockMouse( qboolean lock );
+
+int			trap_N_ReadShort();
+int			trap_N_ReadLong();
+char		*trap_N_ReadString();
+float		trap_N_ReadFloat();
 
 typedef enum {
   SYSTEM_PRINT,

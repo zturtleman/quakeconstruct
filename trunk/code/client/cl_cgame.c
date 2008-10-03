@@ -31,6 +31,12 @@ extern qboolean loadCamera(const char *name);
 extern void startCamera(int time);
 extern qboolean getCameraInfo(int time, vec3_t *origin, vec3_t *angles);
 
+msg_t *message;
+
+void CL_SetLuaMessage( msg_t *msg ) {
+	message = msg;
+}
+
 /*
 ====================
 CL_GetGameState
@@ -404,7 +410,6 @@ static int	FloatAsInt( float f ) {
 
 	return temp;
 }
-
 /*
 ====================
 CL_CgameSystemCalls
@@ -415,6 +420,8 @@ The cgame module is making a system call
 #define	VMA(x) VM_ArgPtr(args[x])
 #define	VMF(x)	((float *)args)[x]
 int CL_CgameSystemCalls( int *args ) {
+	float *ptrf;
+
 	switch( args[0] ) {
 	case CG_PRINT:
 		Com_Printf( "%s", VMA(1) );
@@ -624,8 +631,17 @@ int CL_CgameSystemCalls( int *args ) {
   case CG_LOCKMOUSE:
 	    IN_LockMouse( args[1] );
 		return 0;
-
-
+  case CG_N_READSHORT:
+		return MSG_ReadShort(message);
+  case CG_N_READLONG:
+		return MSG_ReadLong(message);
+  case CG_N_READSTRING:
+		strcpy(VMA(1), MSG_ReadString(message));
+		return 0;
+  case CG_N_READFLOAT:
+	    ptrf = VMA(1);
+		*ptrf = MSG_ReadFloat(message);
+		return 0;
 
 	case CG_MEMSET:
 		Com_Memset( VMA(1), args[2], args[3] );
