@@ -4,7 +4,11 @@ ROCKET_VELOCITY = 700
 local function Guided()
 	for k,v in pairs(GetEntitiesByClass("rocket")) do
 		local parent = v:GetParent()
-		local tab = GetEntityTable(v)
+		local tab = v:GetTable()
+		--[[if(tab.disarmed != true) then
+			tab.disarmed = true
+			print("Rocket Disarmed\n")
+		end]]
 		
 		if(parent && parent:IsBot() == false) then
 			if(parent:GetInfo()["health"] <= 0) then

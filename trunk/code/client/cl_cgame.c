@@ -636,7 +636,7 @@ int CL_CgameSystemCalls( int *args ) {
   case CG_N_READLONG:
 		return MSG_ReadLong(message);
   case CG_N_READSTRING:
-		strcpy(VMA(1), MSG_ReadString(message));
+		Q_strncpyz(VMA(1), MSG_ReadString(message), args[2]);
 		return 0;
   case CG_N_READFLOAT:
 	    ptrf = VMA(1);

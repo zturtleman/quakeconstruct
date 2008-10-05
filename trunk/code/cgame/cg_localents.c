@@ -26,7 +26,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "cg_local.h"
 
-#define	MAX_LOCAL_ENTITIES	512
+#define	MAX_LOCAL_ENTITIES	2048
 localEntity_t	cg_localEntities[MAX_LOCAL_ENTITIES];
 localEntity_t	cg_activeLocalEntities;		// double linked list
 localEntity_t	*cg_freeLocalEntities;		// single linked list
@@ -268,6 +268,15 @@ CG_AddFragment
 void CG_AddFragment( localEntity_t *le ) {
 	vec3_t	newOrigin;
 	trace_t	trace;
+	float col;
+
+	col = ( le->endTime - cg.time ) * le->lifeRate;
+	col *= 0xff;
+
+	le->refEntity.shaderRGBA[0] = le->color[0] * col;
+	le->refEntity.shaderRGBA[1] = le->color[1] * col;
+	le->refEntity.shaderRGBA[2] = le->color[2] * col;
+	le->refEntity.shaderRGBA[3] = le->color[3] * col;
 
 	if ( le->pos.trType == TR_STATIONARY ) {
 		// sink into the ground if near the removal time
@@ -355,6 +364,9 @@ CG_AddFadeRGB
 void CG_AddFadeRGB( localEntity_t *le ) {
 	refEntity_t *re;
 	float c;
+	vec3_t origin;
+
+	BG_EvaluateTrajectory( &le->pos, cg.time, origin );
 
 	re = &le->refEntity;
 
@@ -365,6 +377,8 @@ void CG_AddFadeRGB( localEntity_t *le ) {
 	re->shaderRGBA[1] = le->color[1] * c;
 	re->shaderRGBA[2] = le->color[2] * c;
 	re->shaderRGBA[3] = le->color[3] * c;
+
+	VectorCopy(origin,re->origin);
 
 	trap_R_AddRefEntityToScene( re );
 }

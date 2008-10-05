@@ -511,6 +511,7 @@ void G_FreeEntity( gentity_t *ed ) {
 	qlua_clearfunc(GetServerLuaState(), ed->lua_think);
 	qlua_clearfunc(GetServerLuaState(), ed->lua_touch);
 	qlua_clearfunc(GetServerLuaState(), ed->lua_use);
+	qlua_clearfunc(GetServerLuaState(), ed->lua_persistanttable);
 
 	if ( ed->neverFree ) {
 		return;

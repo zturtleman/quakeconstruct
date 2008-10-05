@@ -305,7 +305,7 @@ void MakeMsg(msg_t *msg, client_t *client) {
 
 	msg->allowoverflow = qtrue;
 
-	MSG_WriteLong( msg, client->lastClientCommand );
+	MSG_WriteLong( msg, client->lastClientCommand ); //client->lastClientCommand
 	MSG_WriteByte( msg, svc_lua );
 }
 
@@ -898,6 +898,7 @@ int SV_GameSystemCalls( int *args ) {
 	case TRAP_N_WRITEFLOAT:
 		ptrf = VMA(2);
 		MSG_WriteFloat( VMA(1), *ptrf );
+		return 0;
 
 	default:
 		Com_Error( ERR_DROP, "Bad game system trap: %i", args[0] );

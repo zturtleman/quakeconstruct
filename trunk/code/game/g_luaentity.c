@@ -3,7 +3,7 @@
 gentity_t *qlua_getrealentity(gentity_t *ent) {
 	gentity_t	*tent = NULL;
 	int numEnts = sizeof(g_entities) / sizeof(g_entities[0]);
-	int i=0;
+	/*int i=0;
 	int n=0;
 
 	for (i = 0, tent = g_entities, n = 1;
@@ -25,10 +25,55 @@ gentity_t *qlua_getrealentity(gentity_t *ent) {
 		return tent;
 	}
 
-	G_Printf("Unable To Find Entity: %i\n", ent->s.number);
+	G_Printf("Unable To Find Entity: %i\n", ent->s.number);*/
+
+	if ( !ent || ent->s.number < 0 || ent->s.number > numEnts ) {
+		G_Printf("Invalid Entity: %i\n", ent->s.number);
+	} else {
+		tent = &g_entities[ent->s.number];
+		if(tent != NULL) {
+			return tent;
+		}
+	}
 	
 	return NULL;
 }
+
+void lua_entitytab(lua_State *L, gentity_t *ent) {
+	if(ent->lua_persistanttable == 0) {
+		lua_newtable(L);
+		ent->lua_persistanttable = qlua_storefunc(L,lua_gettop(L),0);
+	}
+}
+
+int lua_getentitytable(lua_State *L) {
+	gentity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		if(qlua_getstored(L,luaentity->lua_persistanttable)) {
+			return 1;
+		}
+	}
+	return 0;
+}
+
+/*int lua_setentitytable(lua_State *L) {
+	gentity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TTABLE);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		lua_gettable(L,2);
+		luaentity->lua_persistanttable = qlua_storefunc(L,lua_gettop(L),0);
+		return 1;
+	}
+	return 0;
+}*/
 
 //lua_pushlightuserdata(L,cl);
 void lua_pushentity(lua_State *L, gentity_t *cl) {
@@ -38,6 +83,8 @@ void lua_pushentity(lua_State *L, gentity_t *cl) {
 		lua_pushnil(L);
 		return;
 	}
+
+	lua_entitytab(L, cl);
 
 	ent = (gentity_t*)lua_newuserdata(L, sizeof(gentity_t));
 	memcpy(ent,cl,sizeof(gentity_t));
@@ -924,8 +971,12 @@ static int qlua_sendstring(lua_State *L) {
 
 static int Entity_tostring (lua_State *L)
 {
-  lua_pushfstring(L, "Entity: %p", lua_touserdata(L, 1));
-  return 1;
+	gentity_t *e1 = lua_toentity(L,1);
+	if(e1 != NULL) {
+		lua_pushstring(L,e1->classname);
+		return 1;
+	}
+	return 0;
 }
 
 static int Entity_equal (lua_State *L)
@@ -938,6 +989,36 @@ static int Entity_equal (lua_State *L)
 		lua_pushboolean(L, 0);
 	}
   return 1;
+}
+
+static int Entity_table (lua_State *L) {
+	//gentity_t *ent = lua_toentity(L,1);
+	const char *in = lua_tostring(L,2);
+	G_Printf("TableIn\n");
+	if(in != NULL) {
+		G_Printf("Getting: %s\n",in);
+		lua_gettable(L,1);
+		lua_pushstring(L,in);
+		lua_rawget(L, -2);
+		return 1;
+	}
+	return 0;
+}
+
+static int Entity_tableset (lua_State *L) {
+	gentity_t *ent = lua_toentity(L,1);
+	const char *in = lua_tostring(L,2);
+	if(ent != NULL) {
+		if(qlua_getstored(L,ent->lua_persistanttable)) {
+			if(in != NULL) {
+				lua_pushstring(L,in);
+				lua_pushvalue(L,3);
+				lua_rawset(L, -3);
+			}
+			return 1;
+		}
+	}
+	return 0;
 }
 
 static const luaL_reg Entity_methods[] = {
@@ -977,12 +1058,15 @@ static const luaL_reg Entity_methods[] = {
   {"SetCallback",	qlua_setcallback},
   {"SendString",	qlua_sendstring},
   {"SetSpeed",		qlua_setspeed},
+  {"GetTable",		lua_getentitytable},
   {0,0}
 };
 
 static const luaL_reg Entity_meta[] = {
   {"__tostring", Entity_tostring},
   {"__eq", Entity_equal},
+  {"__index", Entity_table},
+  {"__newindex", Entity_tableset},
   {0, 0}
 };
 

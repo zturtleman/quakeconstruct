@@ -35,9 +35,21 @@ void qlua_clearfunc(lua_State *L, int ref) {
 }
 
 int qlua_storefunc(lua_State *L, int i, int ref) {
-	if(lua_type(L,i) == LUA_TFUNCTION) {
+	if(lua_type(L,i) == LUA_TFUNCTION || lua_type(L,i) == LUA_TTABLE) {
 		if(ref != 0) lua_unref(L,ref);
 		ref = luaL_ref(L, LUA_REGISTRYINDEX);
+	}
+	return ref;
+}
+
+int qlua_storefunconce(lua_State *L, int i, int ref) {
+	if(lua_type(L,i) == LUA_TFUNCTION || lua_type(L,i) == LUA_TTABLE) {
+		if(ref == 0) {
+			G_Printf("Ref Complete\n");
+			ref = luaL_ref(L, LUA_REGISTRYINDEX);
+		} else {
+			G_Printf("Already Stored In Lua\n");
+		}
 	}
 	return ref;
 }
