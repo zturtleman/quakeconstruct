@@ -155,6 +155,7 @@ struct gentity_s {
 	int			lua_use;
 	int			lua_pain;
 	int			lua_die;
+	int			lua_persistanttable;
 
 	int			pain_debounce_time;
 	int			fly_sound_debounce_time;	// wind tunnel
@@ -447,6 +448,11 @@ typedef struct {
 	int		bit;				// for bitwise reads and writes
 } msg_t;
 
+typedef struct {
+	msg_t	*msg;
+	int		clientnum;
+} luamsg_t;
+
 void G_InitLuaMessages(lua_State *L);
 void InitServerLua( void );
 void CloseServerLua( void );
@@ -467,6 +473,7 @@ void lua_tovector(lua_State *L, int i, vec3_t in);
 void lua_pushtrace(lua_State *L, trace_t results);
 
 int qlua_storefunc(lua_State *L, int i, int ref);
+int qlua_storefunconce(lua_State *L, int i, int ref);
 qboolean qlua_getstored(lua_State *L, int ref);
 void qlua_clearfunc(lua_State *L, int ref);
 

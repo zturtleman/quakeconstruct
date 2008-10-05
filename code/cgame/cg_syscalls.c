@@ -505,15 +505,16 @@ int trap_N_ReadLong() {
 }
 
 char *trap_N_ReadString() {
-	char str[MAX_STRING_CHARS];
-	char *out = "";
-	syscall( CG_N_READSTRING, (char *)str );
-	out = (char *)str;
-	return out;
+	char * str = (char*)calloc(MAX_STRING_CHARS, sizeof(char));
+	syscall( CG_N_READSTRING, str, MAX_STRING_CHARS * sizeof(char) );
+	return str;
 }
 
 float trap_N_ReadFloat() {
-	float *f = 0;
+	float out = 0;
+	float * f = malloc(sizeof(float));
 	syscall( CG_N_READFLOAT, f );
-	return *f;
+	out = *f;
+	free(f);
+	return out;
 }

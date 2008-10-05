@@ -419,6 +419,7 @@ Touch_Item
 void Touch_Item (gentity_t *ent, gentity_t *other, trace_t *trace) {
 	int			respawn;
 	qboolean	predict;
+	lua_State   *L = GetServerLuaState();
 
 	if (!other->client)
 		return;
@@ -428,6 +429,20 @@ void Touch_Item (gentity_t *ent, gentity_t *other, trace_t *trace) {
 	// the same pickup rules are used for client side and server side
 	if ( !BG_CanItemBeGrabbed( g_gametype.integer, &ent->s, &other->client->ps ) ) {
 		return;
+	}
+
+	if(L != NULL) {
+		qlua_gethook(L, "ItemPickup");
+		lua_pushentity(L, ent);
+		lua_pushentity(L, other);
+		lua_pushtrace(L, *trace);
+		lua_pushinteger(L, ent->item->giType);
+		qlua_pcall(L,4,1,qtrue);
+		if(lua_type(L,-1) == LUA_TBOOLEAN) {
+			if(lua_toboolean(L,-1) == 0) {
+				return;
+			}
+		}
 	}
 
 	G_LogPrintf( "Item: %i %s\n", other->s.number, ent->item->classname );

@@ -1,8 +1,13 @@
-entity_tabs = {}
 game_entities = {}
 
 local function addEnt(ent)
+	for k,v in pairs(game_entities) do
+		if(v:EntIndex() == ent:EntIndex()) then
+			return false
+		end
+	end
 	table.insert(game_entities,ent)
+	return true
 	--table.sort(game_entities,function(a,b) return a:Classname() < b:Classname() end)
 end
 
@@ -45,70 +50,52 @@ end
 local function UnlinkEntity(ent)
 	if(ent == nil) then return end
 	local index = ent:EntIndex()
-		if(ent:IsPlayer() == false) then
-			if(entity_tabs[index+1] != nil) then
-				entity_tabs[index+1] = nil
-				removeEnt(ent)
-			end
-			if(ent:Classname() != nil) then
-				debugprint("^2QLUA Entity Unlinked: " .. index .. " | " .. ent:Classname() .. "\n")
-			else
-				debugprint("^2QLUA Entity Unlinked: " .. index .. "\n")
-			end
+	if(ent:IsPlayer() == false) then
+		removeEnt(ent)
+		if(ent:Classname() != nil) then
+			debugprint("^2QLUA Entity Unlinked: " .. index .. " | " .. ent:Classname() .. "\n")
 		else
-			if(entity_tabs[index+1] != nil) then
-				entity_tabs[index+1].wasUnlinked = true
-			end
-			if(ent:Classname() != nil) then
-				debugprint("Entity Unlinked: " .. index .. " | " .. ent:Classname() .. "\n")
-			else
-				debugprint("Entity Unlinked: " .. index .. "\n")
-			end
+			debugprint("^2QLUA Entity Unlinked: " .. index .. "\n")
 		end
+	else
+		if(ent:Classname() != nil) then
+			debugprint("Entity Unlinked: " .. index .. " | " .. ent:Classname() .. "\n")
+		else
+			debugprint("Entity Unlinked: " .. index .. "\n")
+		end
+	end
+	debugprint("NumLinks: " .. #game_entities .. "\n")
 end
 
 local function UnlinkPlayer(ent)
 	if(ent == nil) then return end
 	local index = ent:EntIndex()
-		if(ent:IsPlayer() == true) then
-			if(entity_tabs[index+1] != nil) then
-				entity_tabs[index+1] = nil
-				removeEnt(ent)
-			end
-			if(ent:Classname() != nil) then
-				debugprint("^2QLUA Entity Unlinked: " .. index .. " | " .. ent:Classname() .. "\n")
-			else
-				debugprint("^2QLUA Entity Unlinked: " .. index .. "\n")
-			end
+	if(ent:IsPlayer() == true) then
+		removeEnt(ent)
+		if(ent:Classname() != nil) then
+			debugprint("^2QLUA Entity Unlinked: " .. index .. " | " .. ent:Classname() .. "\n")
+		else
+			debugprint("^2QLUA Entity Unlinked: " .. index .. "\n")
 		end
+	end
 end
 
 local function LinkEntity(ent)
 	if(ent == nil) then return end
 	local index = ent:EntIndex()
-		if(entity_tabs[index+1] == nil) then
-			entity_tabs[index+1] = {}
-			addEnt(ent)
-			if(ent:Classname() != nil) then
-				debugprint("^2QLUA Entity Linked: " .. index .. " | " .. ent:Classname() .. "\n")
-			else
-				debugprint("^2QLUA Entity Linked: " .. index .. "\n")
-			end
-		elseif(entity_tabs[index+1].wasUnlinked) then
-			entity_tabs[index+1].wasUnlinked = false
-			if(ent:Classname() != nil) then
-				debugprint("Entity Linked: " .. index .. " | " .. ent:Classname() .. "\n")
-			else
-				debugprint("Entity Linked: " .. index .. "\n")
-			end
-		end
+	if(!addEnt(ent)) then return end
+	if(ent:Classname() != nil) then
+		debugprint("^2QLUA Entity Linked: " .. index .. " | " .. ent:Classname() .. "\n")
+	else
+		debugprint("^2QLUA Entity Linked: " .. index .. "\n")
+	end
+	debugprint("NumLinks: " .. #game_entities .. "\n")
 end
 
 function GetEntityTable(ent)
-	LinkEntity(ent)
-	local index = ent:EntIndex()
-	if(index != nil) then
-		return entity_tabs[index+1]
+	if(ent != nil) then
+		print("^3'GetEntityTable' is depricated. Use Entity:GetTable() instead.\n")
+		return ent:GetTable()
 	end
 end
 
