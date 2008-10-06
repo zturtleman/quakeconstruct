@@ -22,6 +22,7 @@ if(CLIENT) then includex("sound") end
 if(CLIENT) then includex("shader") end
 if(CLIENT) then includex("model") end
 if(CLIENT) then includex("input") end
+if(CLIENT) then includex("sprite") end
 includex("commands")
 includex("packs")
 --require "includes/functiondump"

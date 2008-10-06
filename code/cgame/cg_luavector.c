@@ -448,6 +448,19 @@ int qlua_ProjectToPlane(lua_State *L) {
 	return 1;
 }
 
+int qlua_DotProduct(lua_State *L) {
+	vec3_t dst,src;
+
+	luaL_checktype(L,1,LUA_TVECTOR);
+	luaL_checktype(L,2,LUA_TVECTOR);
+
+	lua_tovector(L,1,src);
+	lua_tovector(L,2,dst);
+
+	lua_pushnumber(L,DotProduct(src,dst));
+	return 1;
+}
+
 void CG_InitLuaVector(lua_State *L) {
 	lua_register(L,"TraceLine",qlua_trace);
 	lua_register(L,"VectorToAngles",qlua_VectorToAngles);
@@ -460,6 +473,7 @@ void CG_InitLuaVector(lua_State *L) {
 	lua_register(L,"ProjectVector",qlua_ProjectVector);
 	lua_register(L,"ProjectOnPlane",qlua_ProjectToPlane);
 	lua_register(L,"VectorRotate",qlua_VectorRotate);
+	lua_register(L,"DotProduct",qlua_DotProduct);
 
 	Vector_register(L);
 }
