@@ -86,23 +86,50 @@ local function readVector()
 	return vec
 end
 
+local function bool(i)
+	if(i != 0) then 
+		return true 
+	else 
+		return false 
+	end
+end
+
+local function ParseDamage()
+	local attacker = nil
+	local pos = Vector(0,0,0)
+	local dmg = message.ReadLong()
+	local death = message.ReadLong()
+	if(message.ReadShort() != 0) then
+		attacker = message.ReadString()
+		pos = readVector()
+	end
+	local localattacker = bool(message.ReadShort())
+	local localself = bool(message.ReadShort())
+	CallHook("Damaged",attacker,pos,dmg,death,localself,localattacker)
+	attacker = attacker or ""
+	print("Attacked: " .. dmg .. " " .. EnumToString(meansOfDeath_t,death) .. " " .. attacker .. "\n")
+end
+
 function HandleMessage()
 	local msgid = message.ReadLong()
 	if(msgid == 1) then
 		local str = message.ReadString()
 		local float = message.ReadFloat()
 		local float2 = message.ReadFloat()
-		print("Got Long: " .. long .. "\n")
+		local short = message.ReadShort()
 		print("Got String: " .. base64.dec(str) .. "\n")
 		print("Got Float: " .. float .. "\n")
 		print("Got Float2: " .. float2 .. "\n")
-	else
+		print("Got Short: " .. short .. "\n")
+	elseif(msgid == 2) then
 		local class = message.ReadString()
 		local pos = readVector()
 		local vel = readVector()
 		local itemid = message.ReadLong()
 		
 		ItemPickup(class,pos,vel,itemid)
+	elseif(msgid == 3) then
+		ParseDamage()
 	end
 end
 hook.add("HandleMessage","cl_init",HandleMessage)
