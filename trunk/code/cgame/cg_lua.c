@@ -296,6 +296,15 @@ int qlua_md5 (lua_State *L) {
   return 1;
 }
 
+int qlua_servertime (lua_State *L) {
+	if(cg.snap != NULL && cg.snap->serverTime) {
+		lua_pushinteger(L,cg.snap->serverTime);
+	} else {
+		lua_pushinteger(L,0);
+	}
+	return 1;
+}
+
 void InitClientLua( void ) {
 	CloseClientLua();
 	L = lua_open();
@@ -324,6 +333,7 @@ void InitClientLua( void ) {
 	lua_register(L,"SendString",qlua_sendstring);
 	lua_register(L,"ConsoleCommand",qlua_concommand);
 	lua_register(L,"MD5",qlua_md5);
+	lua_register(L,"ServerTime",qlua_servertime);
 
 
 	CG_Printf("----------------Done-----------------\n");

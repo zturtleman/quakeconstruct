@@ -28,6 +28,32 @@ refEntity_t *lua_torefentity(lua_State *L, int i) {
 	return luaentity;
 }
 
+int qlua_rpositionontag(lua_State *L) {
+	refEntity_t	*ent;
+	refEntity_t	*other;
+	char *str;
+	qboolean norot = qfalse;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TUSERDATA);
+	luaL_checktype(L,3,LUA_TSTRING);
+
+	ent = lua_torefentity(L,1);
+	other = lua_torefentity(L,2);
+	str = (char *)lua_tostring(L,3);
+
+	if(lua_type(L,4) == LUA_TBOOLEAN) {
+		norot = lua_toboolean(L,4);
+	}
+
+	if(norot) {
+		CG_PositionEntityOnTag(ent,other,other->hModel,str);
+	} else {
+		CG_PositionRotatedEntityOnTag(ent,other,other->hModel,str);
+	}
+	return 0;
+}
+
 int qlua_rgetpos(lua_State *L) {
 	refEntity_t	*luaentity;
 	vec3_t		origin;
@@ -401,6 +427,7 @@ static const luaL_reg REntity_methods[] = {
   {"SetRotation",	qlua_rsetrotation},
   {"Scale",			qlua_rsetscale},
   {"Render",		qlua_rrender},
+  {"PositionOnTag",	qlua_rpositionontag},
   {0,0}
 };
 

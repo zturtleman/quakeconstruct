@@ -1,10 +1,10 @@
 #include "cg_local.h"
 
 centity_t *qlua_getrealentity(centity_t *ent) {
-	centity_t	*realent = NULL;
+	//centity_t	*realent = NULL;
 	centity_t	*tent = NULL;
 	int numEnts = sizeof(cg_entities) / sizeof(cg_entities[0]);
-	int i=0;
+	/*int i=0;
 	int n=0;
 
 	for (i = 0, tent = cg_entities, n = 1;
@@ -17,9 +17,39 @@ centity_t *qlua_getrealentity(centity_t *ent) {
 			}
 			n++;
 	}
-	CG_Printf("Unable To Find Entity: %i\n", ent->currentState.number);
+	CG_Printf("Unable To Find Entity: %i\n", ent->currentState.number);*/
+
+	if ( !ent || ent->currentState.number < 0 || ent->currentState.number > numEnts ) {
+		CG_Printf("Invalid Entity: %i\n", ent->currentState.number);
+	} else {
+		tent = &cg_entities[ent->currentState.number];
+		if(tent != NULL) {
+			return tent;
+		}
+	}
 	
 	return NULL;
+}
+
+void lua_cgentitytab(lua_State *L, centity_t *ent) {
+	if(ent->luatable == 0) {
+		lua_newtable(L);
+		ent->luatable = qlua_storefunc(L,lua_gettop(L),0);
+	}
+}
+
+int lua_cggetentitytable(lua_State *L) {
+	centity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		if(qlua_getstored(L,luaentity->luatable)) {
+			return 1;
+		}
+	}
+	return 0;
 }
 
 
@@ -31,6 +61,8 @@ void lua_pushentity(lua_State *L, centity_t *cl) {
 		lua_pushnil(L);
 		return;
 	}
+
+	lua_cgentitytab(L,cl);
 
 	ent = (centity_t*)lua_newuserdata(L, sizeof(centity_t));
 	memcpy(ent,cl,sizeof(centity_t));
@@ -273,6 +305,7 @@ static const luaL_reg Entity_methods[] = {
   {"EntIndex",		qlua_entityid},
   {"IsBot",			qlua_isbot},
   {"IsClient",		qlua_isclient},
+  {"GetTable",		lua_cggetentitytable},
   {0,0}
 };
 
@@ -322,7 +355,7 @@ int qlua_link(lua_State *L) {
 }
 
 int qlua_localplayer(lua_State *L) {
-	centity_t *ent = &cg_entities[ cg.clientNum ];
+	centity_t *ent = &cg.predictedPlayerEntity;//&cg_entities[ cg.clientNum ];
 	if(ent != NULL) {
 		lua_pushentity(L, ent);
 		return 1;
