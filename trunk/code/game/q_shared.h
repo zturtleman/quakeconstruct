@@ -20,6 +20,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
 //
+
 #ifndef __Q_SHARED_H
 #define __Q_SHARED_H
 
@@ -71,10 +72,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   you will have to add your own version for support in the VM.
 
  **********************************************************************/
-/*
-#include "../lua-src/lua.h"
-#include "../lua-src/lauxlib.h"
-#include "../lua-src/lualib.h"*/
 
 #ifdef Q3_VM
 
@@ -100,6 +97,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #endif
 
+
+#include "../lua-src/lua.h"
+#include "../lua-src/lauxlib.h"
+#include "../lua-src/lualib.h"
 
 // this is the define for determining if we have an asm version of a C function
 #if (defined _M_IX86 || defined __i386__) && !defined __sun__  && !defined __LCC__
@@ -1432,5 +1433,13 @@ typedef enum _flag_status {
 #define CDKEY_LEN 16
 #define CDCHKSUM_LEN 2
 
+//LUA
+#define LUA_TVECTOR				LUA_TTABLE
+
+void lua_pushvector(lua_State *L, vec3_t vec);
+void lua_tovector(lua_State *L, int i, vec3_t in);
+
+void SH_InitLua(lua_State *L);
+void SH_InitLuaVector(lua_State *L);
 
 #endif	// __Q_SHARED_H
