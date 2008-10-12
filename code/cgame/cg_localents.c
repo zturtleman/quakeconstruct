@@ -366,8 +366,6 @@ void CG_AddFadeRGB( localEntity_t *le ) {
 	float c;
 	vec3_t origin;
 
-	BG_EvaluateTrajectory( &le->pos, cg.time, origin );
-
 	re = &le->refEntity;
 
 	c = ( le->endTime - cg.time ) * le->lifeRate;
@@ -378,7 +376,10 @@ void CG_AddFadeRGB( localEntity_t *le ) {
 	re->shaderRGBA[2] = le->color[2] * c;
 	re->shaderRGBA[3] = le->color[3] * c;
 
-	VectorCopy(origin,re->origin);
+	if(le->pos.trType != TR_STATIONARY) {
+		BG_EvaluateTrajectory( &le->pos, cg.time, origin );
+		VectorCopy(origin,re->origin);
+	}
 
 	trap_R_AddRefEntityToScene( re );
 }

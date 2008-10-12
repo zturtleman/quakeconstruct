@@ -3,6 +3,7 @@
 --self.VAriblae
 include("lua/cl_menu2.lua")
 include("lua/cl_testmenu2.lua")
+include("lua/cl_turrets.lua")
 
 local gibs = {
 	LoadModel("models/gibs/abdomen.md3"),
@@ -132,4 +133,4 @@ function HandleMessage()
 		ParseDamage()
 	end
 end
-hook.add("HandleMessage","cl_init",HandleMessage)
+--hook.add("HandleMessage","cl_init",HandleMessage)

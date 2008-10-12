@@ -11,15 +11,6 @@ typedef enum {
 } leType_t;
 
 typedef enum {
-	TR_STATIONARY,
-	TR_INTERPOLATE,				// non-parametric, but interpolate between snapshots
-	TR_LINEAR,
-	TR_LINEAR_STOP,
-	TR_SINE,					// value = base + sin( time / duration ) * delta
-	TR_GRAVITY
-} trType_t;
-
-typedef enum {
 	LOCALENTITY_CALLBACK_THINK,
 	LOCALENTITY_CALLBACK_TOUCH,
 	LOCALENTITY_CALLBACK_DIE,

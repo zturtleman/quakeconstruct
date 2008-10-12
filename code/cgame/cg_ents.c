@@ -925,13 +925,13 @@ static void CG_TeamBase( centity_t *cent ) {
 }
 
 static void CG_LuaEntity( centity_t *cent ) {
-	refEntity_t			ent;
-	entityState_t		*s1;
+	//refEntity_t			ent;
+	//entityState_t		*s1;
 
-	s1 = &cent->currentState;
+	//s1 = &cent->currentState;
 
 	// create the render entity
-	memset (&ent, 0, sizeof(ent));
+	/*memset (&ent, 0, sizeof(ent));
 	ent.reType = RT_SPRITE;
 	VectorCopy( cent->lerpOrigin, ent.origin );
 	ent.radius = 14;
@@ -941,7 +941,16 @@ static void CG_LuaEntity( centity_t *cent ) {
 	ent.shaderRGBA[2] = 255;
 	ent.shaderRGBA[3] = 255;
 	ent.rotation = cg.time;
-	trap_R_AddRefEntityToScene(&ent);
+	trap_R_AddRefEntityToScene(&ent);*/
+
+	//CG_Printf("Got Class: %s\n",cent->currentState.luaname);
+
+	if(GetClientLuaState() != NULL) {
+		qlua_gethook(GetClientLuaState(), "DrawCustomEntity");
+		lua_pushentity(GetClientLuaState(), cent);
+		lua_pushstring(GetClientLuaState(), cent->currentState.luaname);
+		qlua_pcall(GetClientLuaState(), 2, 0, qtrue);
+	}
 }
 
 /*
