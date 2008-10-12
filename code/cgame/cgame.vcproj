@@ -717,6 +717,9 @@
 				RelativePath=".\cg_luatabs.c">
 			</File>
 			<File
+				RelativePath=".\cg_luatrajectory.c">
+			</File>
+			<File
 				RelativePath=".\cg_luautil.c">
 			</File>
 			<File

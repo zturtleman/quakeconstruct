@@ -458,6 +458,7 @@ void G_InitLua() {
 
 	L = GetServerLuaState();
 	
+	//SH_InitLua(L);
 	G_InitLuaEnts(L);
 	G_InitLuaVector(L);
 	G_InitLuaMessages(L);

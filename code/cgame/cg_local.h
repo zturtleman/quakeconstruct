@@ -25,9 +25,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "../game/bg_public.h"
 #include "cg_public.h"
 
-#include "../lua-src/lua.h"
-#include "../lua-src/lauxlib.h"
-#include "../lua-src/lualib.h"
+//#include "../lua-src/lua.h"
+//#include "../lua-src/lauxlib.h"
+//#include "../lua-src/lualib.h"
 
 
 // The entire cgame module is unloaded and reloaded on each level change,
@@ -98,8 +98,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define DEFAULT_REDTEAM_NAME		"Stroggs"
 #define DEFAULT_BLUETEAM_NAME		"Pagans"
-
-#define LUA_TVECTOR				LUA_TTABLE
 
 typedef enum {
 	FOOTSTEP_NORMAL,
@@ -1222,8 +1220,8 @@ int qlua_storefunc(lua_State *L, int i, int ref);
 qboolean qlua_getstored(lua_State *L, int ref);
 void qlua_clearfunc(lua_State *L, int ref);
 
-void lua_pushvector(lua_State *L, vec3_t vec);
-void lua_tovector(lua_State *L, int i, vec3_t in);
+/*void lua_pushvector(lua_State *L, vec3_t vec);
+void lua_tovector(lua_State *L, int i, vec3_t in);*/
 
 int lua_torefdef(lua_State *L, int idx, refdef_t *refdef);
 

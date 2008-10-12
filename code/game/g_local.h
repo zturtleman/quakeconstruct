@@ -26,9 +26,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "bg_public.h"
 #include "g_public.h"
 
-#include "../lua-src/lua.h"
+/*#include "../lua-src/lua.h"
 #include "../lua-src/lauxlib.h"
-#include "../lua-src/lualib.h"
+#include "../lua-src/lualib.h"*/
 
 
 //==================================================================
@@ -58,8 +58,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define FL_NO_BOTS				0x00002000	// spawn point not for bot use
 #define FL_NO_HUMANS			0x00004000	// spawn point just for bots
 #define FL_FORCE_GESTURE		0x00008000	// force gesture on client
-
-#define LUA_TVECTOR				LUA_TTABLE
 
 // movers are things like doors, plats, buttons, etc
 typedef enum {
@@ -467,8 +465,8 @@ lua_State *GetServerLuaState( void );
 void lua_pushentity(lua_State *L, gentity_t *cl);
 gentity_t *lua_toentity(lua_State *L, int i);
 
-void lua_pushvector(lua_State *L, vec3_t vec);
-void lua_tovector(lua_State *L, int i, vec3_t in);
+/*void lua_pushvector(lua_State *L, vec3_t vec);
+void lua_tovector(lua_State *L, int i, vec3_t in);*/
 
 void lua_pushtrace(lua_State *L, trace_t results);
 
