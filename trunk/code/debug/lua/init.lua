@@ -5,6 +5,8 @@
 --SendScript("lua/vampiric_cl.lua")
 --SendScript("lua/includes/scriptmanager.lua")
 
+require "turrets"
+
 function makeMessage()
 	for k,v in pairs(GetEntitiesByClass("player")) do
 		local msg = Message(v)
@@ -41,7 +43,7 @@ function ItemPickup(item, other, trace, itemid)
 	end
 	--return false
 end
-hook.add("ItemPickup","init",ItemPickup)
+--hook.add("ItemPickup","init",ItemPickup)
 
 local function PlayerDamaged(self,inflictor,attacker,damage,meansOfDeath)
 	for k,v in pairs(GetEntitiesByClass("player")) do
@@ -73,4 +75,4 @@ local function PlayerDamaged(self,inflictor,attacker,damage,meansOfDeath)
 	end
 end
 
-hook.add("PlayerDamaged","Accention",PlayerDamaged)
+--hook.add("PlayerDamaged","Accention",PlayerDamaged)

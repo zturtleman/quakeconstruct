@@ -458,7 +458,6 @@ void G_InitLua() {
 
 	L = GetServerLuaState();
 	
-	//SH_InitLua(L);
 	G_InitLuaEnts(L);
 	G_InitLuaVector(L);
 	G_InitLuaMessages(L);
@@ -1774,6 +1773,7 @@ void G_RunThink (gentity_t *ent) {
 		return;
 	}
 
+	ent->nextthink = 0;
 	if (ent->lua_think != 0) {
 		if(qlua_getstored(GetServerLuaState(), ent->lua_think)) {
 			lua_pushentity(GetServerLuaState(), ent);
@@ -1781,11 +1781,13 @@ void G_RunThink (gentity_t *ent) {
 		}
 	}
 	
-	ent->nextthink = 0;
 	if (!ent->think) {
-		G_Error ( "NULL ent->think");
+		if (ent->lua_think == 0) {
+			G_Error ( "NULL ent->think");
+		}
+	} else {
+		ent->think (ent);
 	}
-	ent->think (ent);
 }
 
 void PlayerInfoMessage( gentity_t *ent ) {
@@ -1902,6 +1904,7 @@ void G_RunFrame( int levelTime ) {
 
 		if ( ent->s.eType == ET_LUA ) {
 			G_RunMissile( ent );
+			G_RunThink( ent );
 			continue; //qlua_LinkEntity( ent );
 		}
 

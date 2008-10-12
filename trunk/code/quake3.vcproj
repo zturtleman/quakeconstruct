@@ -108,7 +108,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="winmm.lib wsock32.lib lua.lib"
+				AdditionalDependencies="winmm.lib wsock32.lib"
 				OutputFile=".\Debug/qconstruct.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"
@@ -1899,12 +1899,6 @@
 						PreprocessorDefinitions=""
 						BrowseInformation="1"/>
 				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\shared\sh_lua.c">
-			</File>
-			<File
-				RelativePath=".\shared\sh_luavector.c">
 			</File>
 			<File
 				RelativePath="client\snd_adpcm.c">

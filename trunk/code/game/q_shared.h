@@ -98,9 +98,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #endif
 
 
-#include "../lua-src/lua.h"
+/*#include "../lua-src/lua.h"
 #include "../lua-src/lauxlib.h"
-#include "../lua-src/lualib.h"
+#include "../lua-src/lualib.h"*/
 
 // this is the define for determining if we have an asm version of a C function
 #if (defined _M_IX86 || defined __i386__) && !defined __sun__  && !defined __LCC__
@@ -1329,6 +1329,8 @@ typedef struct entityState_s {
 	int		torsoAnim;		// mask off ANIM_TOGGLEBIT
 
 	int		generic1;
+
+	char	luaname[1024];
 } entityState_t;
 
 typedef enum {
@@ -1434,12 +1436,12 @@ typedef enum _flag_status {
 #define CDCHKSUM_LEN 2
 
 //LUA
-#define LUA_TVECTOR				LUA_TTABLE
+//#define LUA_TVECTOR				LUA_TTABLE
 
-void lua_pushvector(lua_State *L, vec3_t vec);
+/*void lua_pushvector(lua_State *L, vec3_t vec);
 void lua_tovector(lua_State *L, int i, vec3_t in);
 
 void SH_InitLua(lua_State *L);
-void SH_InitLuaVector(lua_State *L);
+void SH_InitLuaVector(lua_State *L);*/
 
 #endif	// __Q_SHARED_H

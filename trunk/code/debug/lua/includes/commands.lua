@@ -53,10 +53,10 @@ end
 
 function Add(cmd,func,adminonly)
 	if(type(cmd) == "string" and type(func) == "function") then
-		if(ccmds[cmd] == nil) then
-			ccmds[cmd] = {}
-			table.insert(ccmds[cmd],{func=func,adminonly=adminonly})
-		end
+		--if(ccmds[cmd] == nil) then
+		ccmds[cmd] = {}
+		--end
+		table.insert(ccmds[cmd],{func=func,adminonly=adminonly})
 	end
 end
 

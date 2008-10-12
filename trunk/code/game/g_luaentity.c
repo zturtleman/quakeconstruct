@@ -1021,6 +1021,74 @@ static int Entity_tableset (lua_State *L) {
 	return 0;
 }
 
+int lua_setclipmask(lua_State *L) {
+	gentity_t	*luaentity;
+	int mask = 0;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TNUMBER);
+
+	luaentity = lua_toentity(L,1);
+	mask	= lua_tonumber(L,2);
+	if(luaentity != NULL) {
+		luaentity->clipmask = mask;
+	}
+	return 0;
+}
+
+int lua_gettr(lua_State *L) {
+	gentity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		lua_pushinteger(L,luaentity->s.pos.trType);
+		return 1;
+	}
+	return 0;
+}
+
+int lua_settr(lua_State *L) {
+	gentity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TNUMBER);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		luaentity->s.pos.trType = lua_tointeger(L,2);
+	}
+	return 0;
+}
+
+int lua_getnextthink(lua_State *L) {
+	gentity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		lua_pushinteger(L,luaentity->nextthink);
+		return 1;
+	}
+	return 0;
+}
+
+int lua_setnextthink(lua_State *L) {
+	gentity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TNUMBER);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		luaentity->nextthink = lua_tointeger(L,2);
+	}
+	return 0;
+}
+
+
 static const luaL_reg Entity_methods[] = {
   {"GetInfo",		qlua_getclientinfo},
   {"SetInfo",		qlua_setclientinfo},
@@ -1059,6 +1127,11 @@ static const luaL_reg Entity_methods[] = {
   {"SendString",	qlua_sendstring},
   {"SetSpeed",		qlua_setspeed},
   {"GetTable",		lua_getentitytable},
+  {"SetClipMask",	lua_setclipmask},
+  {"GetTrType",		lua_gettr},
+  {"SetTrType",		lua_settr},
+  {"GetNextThink",	lua_getnextthink},
+  {"SetNextThink",	lua_setnextthink},
   {0,0}
 };
 
@@ -1139,18 +1212,21 @@ int qlua_createEntity(lua_State *L) {
 	luaL_checktype(L,1,LUA_TSTRING);
 	classname = lua_tostring(L,1);
 	if(classname) {
+		if(strlen(classname) > 200) {
+			lua_pushstring(L,"Classname Too Long!\n");
+			lua_error(L);
+			return 1;
+		}
 		ent = G_Spawn();
-		ent->classname = "grenade";
 		ent->s.eType = ET_LUA;
 		ent->r.svFlags = SVF_USE_CURRENT_ORIGIN;
-		ent->s.weapon = WP_GRENADE_LAUNCHER;
-		ent->s.eFlags = EF_BOUNCE_HALF;
-		ent->methodOfDeath = MOD_GRENADE;
-		ent->splashMethodOfDeath = MOD_GRENADE_SPLASH;
+		ent->s.weapon = WP_NONE;
 		ent->clipmask = MASK_SHOT;
 		ent->target_ent = NULL;
 		ent->s.pos.trType = TR_GRAVITY;
 		ent->s.pos.trTime = level.time;
+		strcpy(ent->s.luaname, classname);
+		ent->classname = "luaentity";
 		VectorCopy(ent->s.pos.trBase,ent->s.origin2); 
 		qlua_LinkEntity(ent);
 		//strcpy(ent->classname, classname);

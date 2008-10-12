@@ -46,6 +46,11 @@ static void CG_ResetEntity( centity_t *cent ) {
 	if ( cent->currentState.eType == ET_PLAYER ) {
 		CG_ResetPlayerEntity( cent );
 	}
+
+	if(cent->luatablecent != 0) {
+		CG_Printf("Reset LuaTable: %i\n",cent->luatablecent);
+		cent->luatablecent = 0;
+	}
 }
 
 /*

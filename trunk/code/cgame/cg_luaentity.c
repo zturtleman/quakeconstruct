@@ -1,6 +1,6 @@
 #include "cg_local.h"
 
-centity_t *qlua_getrealentity(centity_t *ent) {
+centity_t *qlua_getrealentity(int entnum) {
 	//centity_t	*realent = NULL;
 	centity_t	*tent = NULL;
 	int numEnts = sizeof(cg_entities) / sizeof(cg_entities[0]);
@@ -19,10 +19,10 @@ centity_t *qlua_getrealentity(centity_t *ent) {
 	}
 	CG_Printf("Unable To Find Entity: %i\n", ent->currentState.number);*/
 
-	if ( !ent || ent->currentState.number < 0 || ent->currentState.number > numEnts ) {
-		CG_Printf("Invalid Entity: %i\n", ent->currentState.number);
+	if ( entnum < 0 || entnum > numEnts ) {
+		CG_Printf("Invalid Entity: %i\n", entnum);
 	} else {
-		tent = &cg_entities[ent->currentState.number];
+		tent = &cg_entities[entnum];
 		if(tent != NULL) {
 			return tent;
 		}
@@ -32,9 +32,12 @@ centity_t *qlua_getrealentity(centity_t *ent) {
 }
 
 void lua_cgentitytab(lua_State *L, centity_t *ent) {
-	if(ent->luatable == 0) {
+	if(ent->luatablecent == 0) {
 		lua_newtable(L);
-		ent->luatable = qlua_storefunc(L,lua_gettop(L),0);
+		ent->luatablecent = qlua_storefunc(L,lua_gettop(L),0);
+		//CG_Printf("Stored Table At %i\n",ent->luatablecent);
+	} else {
+		//CG_Printf("Didn't Store Table At %i\n",ent->luatablecent);
 	}
 }
 
@@ -45,7 +48,8 @@ int lua_cggetentitytable(lua_State *L) {
 
 	luaentity = lua_toentity(L,1);
 	if(luaentity != NULL) {
-		if(qlua_getstored(L,luaentity->luatable)) {
+		//CG_Printf("ReCalled Table At %i\n",luaentity->luatablecent);
+		if(qlua_getstored(L,luaentity->luatablecent)) {
 			return 1;
 		}
 	}
@@ -77,7 +81,7 @@ centity_t *lua_toentity(lua_State *L, int i) {
 	centity_t	*luaentity;
 	luaL_checktype(L,i,LUA_TUSERDATA);
 	luaentity = (centity_t *)luaL_checkudata(L, i, "Entity");
-	luaentity = qlua_getrealentity(luaentity);
+	luaentity = qlua_getrealentity(luaentity->currentState.number);
 
 	if (luaentity == NULL) luaL_typerror(L, i, "Entity");
 
@@ -298,6 +302,8 @@ static int Entity_equal (lua_State *L)
 static const luaL_reg Entity_methods[] = {
   {"GetPos",		qlua_getpos},
   {"SetPos",		qlua_setpos},
+  {"GetAngles",		qlua_getangles},
+  {"SetAngles",		qlua_setangles},
   {"GetInfo",		qlua_getclientinfo},
   {"GetOtherEntity",	qlua_getotherentity},
   {"GetOtherEntity2",	qlua_getotherentity},
@@ -363,6 +369,19 @@ int qlua_localplayer(lua_State *L) {
 	return 0;
 }
 
+int qlua_entbyindex(lua_State *L) {
+	centity_t *ent;
+
+	luaL_checktype(L,1,LUA_TNUMBER);
+
+	ent = qlua_getrealentity(lua_tonumber(L,1));
+	if(ent != NULL) {
+		lua_pushentity(L,ent);
+		return 1;
+	}
+	return 0;
+}
+
 void CG_InitLuaEnts(lua_State *L) {
 	Entity_register(L);
 	//lua_register(L,"GetEntitiesByClass",qlua_getentitiesbyclass);
@@ -370,4 +389,5 @@ void CG_InitLuaEnts(lua_State *L) {
 	lua_register(L,"LocalPlayer",qlua_localplayer);
 	lua_register(L,"UnlinkEntity",qlua_unlink);
 	lua_register(L,"LinkEntity",qlua_link);
+	lua_register(L,"GetEntityByIndex",qlua_entbyindex);
 }

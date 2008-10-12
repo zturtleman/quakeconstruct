@@ -835,7 +835,8 @@ netField_t	entityStateFields[] =
 { NETF(angles2[0]), 0 },
 { NETF(angles2[2]), 0 },
 { NETF(constantLight), 32 },
-{ NETF(frame), 16 }
+{ NETF(frame), 16 },
+{ NETF(luaname), 1024 },
 };
 
 
@@ -863,6 +864,7 @@ void MSG_WriteDeltaEntity( msg_t *msg, struct entityState_s *from, struct entity
 	int			trunc;
 	float		fullFloat;
 	int			*fromF, *toF;
+	char		*fromC, *toC;
 
 	numFields = sizeof(entityStateFields)/sizeof(entityStateFields[0]);
 
@@ -870,7 +872,7 @@ void MSG_WriteDeltaEntity( msg_t *msg, struct entityState_s *from, struct entity
 	// the "number" field is not part of the field list
 	// if this assert fails, someone added a field to the entityState_t
 	// struct without updating the message fields
-	assert( numFields + 1 == sizeof( *from )/4 );
+	//assert( numFields + 1 == sizeof( *from )/4 );
 
 	// a NULL to is a delta remove message
 	if ( to == NULL ) {
@@ -889,10 +891,18 @@ void MSG_WriteDeltaEntity( msg_t *msg, struct entityState_s *from, struct entity
 	lc = 0;
 	// build the change vector as bytes so it is endien independent
 	for ( i = 0, field = entityStateFields ; i < numFields ; i++, field++ ) {
-		fromF = (int *)( (byte *)from + field->offset );
-		toF = (int *)( (byte *)to + field->offset );
-		if ( *fromF != *toF ) {
-			lc = i+1;
+		if(field->bits != 1024) {
+			fromF = (int *)( (byte *)from + field->offset );
+			toF = (int *)( (byte *)to + field->offset );
+			if ( *fromF != *toF ) {
+				lc = i+1;
+			}
+		} else {
+			fromC = (char *)( (byte *)from + field->offset );
+			toC = (char *)( (byte *)to + field->offset );
+			if ( *fromC != *toC ) {
+				lc = i+1;
+			}
 		}
 	}
 
@@ -920,9 +930,18 @@ void MSG_WriteDeltaEntity( msg_t *msg, struct entityState_s *from, struct entity
 		fromF = (int *)( (byte *)from + field->offset );
 		toF = (int *)( (byte *)to + field->offset );
 
-		if ( *fromF == *toF ) {
-			MSG_WriteBits( msg, 0, 1 );	// no change
-			continue;
+		if(field->bits != 1024) {
+			if ( *fromF == *toF ) {
+				MSG_WriteBits( msg, 0, 1 );	// no change
+				continue;
+			}
+		} else	{
+			fromC = (char *)( (byte *)from + field->offset );
+			toC = (char *)( (byte *)to + field->offset );
+			if ( *fromC == *toC ) {
+				MSG_WriteBits( msg, 0, 1 );	// no change
+				continue;
+			}
 		}
 
 		MSG_WriteBits( msg, 1, 1 );	// changed
@@ -948,6 +967,10 @@ void MSG_WriteDeltaEntity( msg_t *msg, struct entityState_s *from, struct entity
 					MSG_WriteBits( msg, *toF, 32 );
 				}
 			}
+		} else if ( field->bits == 1024 ) {
+			//Com_Printf("WroteString: %s\n",toC);
+			MSG_WriteBits( msg, 1, 1 );
+			MSG_WriteString( msg, toC );
 		} else {
 			if (*toF == 0) {
 				MSG_WriteBits( msg, 0, 1 );
@@ -980,6 +1003,8 @@ void MSG_ReadDeltaEntity( msg_t *msg, entityState_t *from, entityState_t *to,
 	int			numFields;
 	netField_t	*field;
 	int			*fromF, *toF;
+	char		*fromC, *toC;
+	char		*recv;
 	int			print;
 	int			trunc;
 	int			startBit, endBit;
@@ -1031,7 +1056,13 @@ void MSG_ReadDeltaEntity( msg_t *msg, entityState_t *from, entityState_t *to,
 
 		if ( ! MSG_ReadBits( msg, 1 ) ) {
 			// no change
-			*toF = *fromF;
+			if ( field->bits != 1024 ) {
+				*toF = *fromF;
+			} else {
+				fromC = (char *)( (byte *)from + field->offset );
+				toC = (char *)( (byte *)to + field->offset );
+				*fromC = *toC;
+			}
 		} else {
 			if ( field->bits == 0 ) {
 				// float
@@ -1055,6 +1086,17 @@ void MSG_ReadDeltaEntity( msg_t *msg, entityState_t *from, entityState_t *to,
 						}
 					}
 				}
+			} else if (field->bits == 1024) {
+				fromC = (char *)( (byte *)from + field->offset );
+				toC = (char *)( (byte *)to + field->offset );
+				if ( MSG_ReadBits( msg, 1 ) == 0 ) {
+					strcpy(toC,"");
+				} else {
+					recv = MSG_ReadString( msg );
+					//Com_Printf( "Got String:%s = %s (%i)\n", field->name, recv, field->offset );
+					//Q_strncpyz(toC,recv,sizeof(recv));
+					strcpy(toC,recv);
+				}				
 			} else {
 				if ( MSG_ReadBits( msg, 1 ) == 0 ) {
 					*toF = 0;
@@ -1070,10 +1112,18 @@ void MSG_ReadDeltaEntity( msg_t *msg, entityState_t *from, entityState_t *to,
 		}
 	}
 	for ( i = lc, field = &entityStateFields[lc] ; i < numFields ; i++, field++ ) {
-		fromF = (int *)( (byte *)from + field->offset );
-		toF = (int *)( (byte *)to + field->offset );
-		// no change
-		*toF = *fromF;
+		if (field->bits != 1024) {
+			fromF = (int *)( (byte *)from + field->offset );
+			toF = (int *)( (byte *)to + field->offset );
+			// no change
+			*toF = *fromF;
+		} else {
+			fromC = (char *)( (byte *)from + field->offset );
+			toC = (char *)( (byte *)to + field->offset );
+			// no change
+			//*toC = *fromC;
+			strcpy(toC,fromC);
+		}
 	}
 
 	if ( print ) {

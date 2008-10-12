@@ -319,7 +319,6 @@ int qlua_VectorToAngles(lua_State *L) {
 	lua_tovector(L,1,v);
 
 	vectoangles(v,angles);
-
 	lua_pushvector(L,angles);
 	return 1;
 }
@@ -410,7 +409,7 @@ int qlua_VectorUp(lua_State *L) {
 	luaL_checktype(L,1,LUA_TVECTOR);
 	lua_tovector(L,1,v);
 	AnglesToAxis(v,axis);
-	lua_pushvector(L,axis[2]);
+	lua_pushvector(L,axis[1]);
 	return 1;
 }
 
