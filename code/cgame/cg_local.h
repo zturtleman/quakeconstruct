@@ -203,6 +203,8 @@ typedef struct centity_s {
 	// exact interpolated position of entity on this frame
 	vec3_t			lerpOrigin;
 	vec3_t			lerpAngles;
+
+	int				luatable;
 } centity_t;
 
 
@@ -290,6 +292,8 @@ typedef struct localEntity_s {
 
 	leMarkType_t		leMarkType;		// mark to leave on fragment impact
 	leBounceSoundType_t	leBounceSoundType;
+
+	int				luatable;
 
 	refEntity_t		refEntity;		
 } localEntity_t;

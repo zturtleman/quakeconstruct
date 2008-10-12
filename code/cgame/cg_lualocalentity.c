@@ -47,6 +47,26 @@ int qlua_lgetnextid() {
 	return 2001;
 }
 
+void lua_leentitytab(lua_State *L, localEntity_t *ent) {
+	if(ent->luatable == 0) {
+		lua_newtable(L);
+		ent->luatable = qlua_storefunc(L,lua_gettop(L),0);
+	}
+}
+
+int lua_legetentitytable(lua_State *L) {
+	localEntity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	luaentity = lua_tolocalentity(L,1);
+	if(luaentity != NULL) {
+		if(qlua_getstored(L,luaentity->luatable)) {
+			return 1;
+		}
+	}
+	return 0;
+}
 
 void lua_pushlocalentity(lua_State *L, localEntity_t *cl) {
 	localEntity_t *le = NULL;
@@ -63,6 +83,8 @@ void lua_pushlocalentity(lua_State *L, localEntity_t *cl) {
 			idx = 1;
 		}
 	}
+
+	lua_leentitytab(L,cl);
 
 	le = (localEntity_t*)lua_newuserdata(L, sizeof(localEntity_t));
 	//memcpy(le,cl,sizeof(localEntity_t));
@@ -472,6 +494,7 @@ static const luaL_reg LEntity_methods[] = {
   {"GetRefEntity",	qlua_lgetref},
   {"SetCallback",	qlua_lsetcallback},
   {"SetNextThink",	qlua_lnextthink},
+  {"GetTable",		lua_legetentitytable},
   {0,0}
 };
 
