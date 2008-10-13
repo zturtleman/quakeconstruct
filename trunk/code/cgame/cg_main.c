@@ -1989,6 +1989,7 @@ void CG_InitLua() {
 
 	L = GetClientLuaState();
 	
+	BG_InitLuaTrajectory(L);
 	CG_InitLuaVector(L);
 	CG_InitLuaEnts(L);
 	CG_InitLuaREnts(L);

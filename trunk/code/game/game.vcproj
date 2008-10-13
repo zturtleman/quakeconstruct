@@ -801,6 +801,9 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\bg_luatrajectory.c">
+			</File>
+			<File
 				RelativePath="bg_misc.c">
 				<FileConfiguration
 					Name="Debug TA|Win32">

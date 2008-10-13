@@ -279,6 +279,33 @@ int qlua_entityid(lua_State *L) {
 	return 1;
 }
 
+int qlua_gettrx(lua_State *L) {
+	centity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		lua_pushtrajectory(L,&luaentity->currentState.pos);
+		return 1;
+	}
+	return 0;
+}
+
+int qlua_settrx(lua_State *L) {
+	centity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TUSERDATA);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		luaentity->currentState.pos = *lua_totrajectory(L,2);
+		return 1;
+	}
+	return 0;
+}
+
 static int Entity_tostring (lua_State *L)
 {
   lua_pushfstring(L, "Entity: %p", lua_touserdata(L, 1));
@@ -302,6 +329,8 @@ static int Entity_equal (lua_State *L)
 static const luaL_reg Entity_methods[] = {
   {"GetPos",		qlua_getpos},
   {"SetPos",		qlua_setpos},
+  {"GetTrajectory",	qlua_gettrx},
+  {"SetTrajectory", qlua_settrx},
   {"GetAngles",		qlua_getangles},
   {"SetAngles",		qlua_setangles},
   {"GetInfo",		qlua_getclientinfo},

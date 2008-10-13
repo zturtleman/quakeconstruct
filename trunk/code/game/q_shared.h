@@ -98,9 +98,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #endif
 
 
-/*#include "../lua-src/lua.h"
+#include "../lua-src/lua.h"
 #include "../lua-src/lauxlib.h"
-#include "../lua-src/lualib.h"*/
+#include "../lua-src/lualib.h"
 
 // this is the define for determining if we have an asm version of a C function
 #if (defined _M_IX86 || defined __i386__) && !defined __sun__  && !defined __LCC__
