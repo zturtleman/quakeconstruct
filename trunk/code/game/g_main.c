@@ -1783,7 +1783,7 @@ void G_RunThink (gentity_t *ent) {
 	
 	if (!ent->think) {
 		if (ent->lua_think == 0) {
-			G_Error ( "NULL ent->think");
+			//G_Error ( "NULL ent->think");
 		}
 	} else {
 		ent->think (ent);

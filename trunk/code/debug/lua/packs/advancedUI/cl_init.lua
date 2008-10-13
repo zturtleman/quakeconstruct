@@ -1,4 +1,5 @@
 UI_Components = {}
+UI_Components_UnParent = {}
 UI_Active = {}
 local toRegister = 0
 local nxtID = 0
@@ -48,6 +49,7 @@ end
 function registerComponent(tab,name,base)
 	if(UI_Components[name] == nil) then
 		UI_Components[name] = tab
+		UI_Components_UnParent[name] = table.Copy(tab)
 		tab._mybase = base
 		tab._myname = name
 	end
