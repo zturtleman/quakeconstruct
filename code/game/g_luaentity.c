@@ -1088,6 +1088,114 @@ int lua_setnextthink(lua_State *L) {
 	return 0;
 }
 
+int lua_gettrx(lua_State *L) {
+	gentity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		lua_pushtrajectory(L,&luaentity->s.pos);
+		return 1;
+	}
+	return 0;
+}
+
+int lua_settrx(lua_State *L) {
+	gentity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TUSERDATA);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		luaentity->s.pos = *lua_totrajectory(L,2);
+		return 1;
+	}
+	return 0;
+}
+
+int lua_getmins(lua_State *L) {
+	gentity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		lua_pushvector(L,luaentity->r.mins);
+		return 1;
+	}
+	return 0;
+}
+
+int lua_setmins(lua_State *L) {
+	gentity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TVECTOR);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		lua_tovector(L,2,luaentity->r.mins);
+		return 1;
+	}
+	return 0;
+}
+
+int lua_getmaxs(lua_State *L) {
+	gentity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		lua_pushvector(L,luaentity->r.maxs);
+		return 1;
+	}
+	return 0;
+}
+
+int lua_setmaxs(lua_State *L) {
+	gentity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TVECTOR);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		lua_tovector(L,2,luaentity->r.maxs);
+		return 1;
+	}
+	return 0;
+}
+
+int lua_settakedamage(lua_State *L) {
+	gentity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TBOOLEAN);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		luaentity->takedamage = lua_toboolean(L,2);
+		return 1;
+	}
+	return 0;
+}
+
+int lua_setclip(lua_State *L) {
+	gentity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TNUMBER);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		luaentity->clipmask = lua_tointeger(L,2);
+		return 1;
+	}
+	return 0;
+}
 
 static const luaL_reg Entity_methods[] = {
   {"GetInfo",		qlua_getclientinfo},
@@ -1132,6 +1240,14 @@ static const luaL_reg Entity_methods[] = {
   {"SetTrType",		lua_settr},
   {"GetNextThink",	lua_getnextthink},
   {"SetNextThink",	lua_setnextthink},
+  {"GetTrajectory",	lua_gettrx},
+  {"SetTrajectory", lua_settrx},
+  {"GetMins",		lua_getmins},
+  {"SetMins",		lua_setmins},
+  {"GetMaxs",		lua_getmaxs},
+  {"SetMaxs",		lua_setmaxs},
+  {"SetTakeDamage",	lua_settakedamage},
+  {"SetClip",		lua_setclip},
   {0,0}
 };
 

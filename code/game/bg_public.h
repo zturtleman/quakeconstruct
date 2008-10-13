@@ -707,6 +707,12 @@ void	BG_PlayerStateToEntityStateExtraPolate( playerState_t *ps, entityState_t *s
 
 qboolean	BG_PlayerTouchesItem( playerState_t *ps, entityState_t *item, int atTime );
 
+//LUA
+void BG_InitLuaTrajectory(lua_State *L);
+
+trajectory_t *lua_totrajectory(lua_State *L, int i);
+void lua_pushtrajectory(lua_State *L, trajectory_t *tr);
+
 #define ARENAS_PER_TIER		4
 #define MAX_ARENAS			1024
 #define	MAX_ARENAS_TEXT		8192

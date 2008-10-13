@@ -456,6 +456,34 @@ int qlua_lflags(lua_State *L) {
 	return 0;
 }
 */
+
+int qlua_lgettrx(lua_State *L) {
+	localEntity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	luaentity = lua_tolocalentity(L,1);
+	if(luaentity != NULL) {
+		lua_pushtrajectory(L,&luaentity->pos);
+		return 1;
+	}
+	return 0;
+}
+
+int qlua_lsettrx(lua_State *L) {
+	localEntity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TUSERDATA);
+
+	luaentity = lua_tolocalentity(L,1);
+	if(luaentity != NULL) {
+		luaentity->pos = *lua_totrajectory(L,2);
+		return 1;
+	}
+	return 0;
+}
+
 static int Entity_tostring (lua_State *L)
 {
   lua_pushfstring(L, "RefEntity: %p", lua_touserdata(L, 1));
@@ -485,6 +513,8 @@ static const luaL_reg LEntity_methods[] = {
   {"GetType",		qlua_lgettype},
   {"SetTrType",		qlua_lsettrtype},
   {"GetTrType",		qlua_lgettrtype},
+  {"SetTrajectory",		qlua_lsettrx},
+  {"GetTrajectory",		qlua_lgettrx},
   {"SetStartTime",	qlua_lsetstart},
   {"SetEndTime",	qlua_lsetend},
   {"SetRadius",		qlua_lsetradius},
