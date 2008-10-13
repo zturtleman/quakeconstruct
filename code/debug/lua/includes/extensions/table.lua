@@ -51,6 +51,12 @@ function table.Merge(dest, source)
 	return dest
 end
 
+function table.HasKey( t, key )
+	for k,v in pairs(t) do
+		if (k == key ) then return true end
+	end
+	return false
+end
 
 function table.HasValue( t, val )
 	for k,v in pairs(t) do

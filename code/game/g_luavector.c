@@ -51,9 +51,9 @@ void lua_pushvector(lua_State *L, vec3_t vec) {
 
 void lua_tovector(lua_State *L, int i, vec3_t in) {
 	//vec3_t	out;
-	int x = -1;
-	int y = -1;
-	int z = -1;
+	float x = -1;
+	float y = -1;
+	float z = -1;
 	
 	//G_Printf("Got A Good Table.\n");
 
@@ -400,6 +400,19 @@ int qlua_VectorUp(lua_State *L) {
 	return 1;
 }
 
+int qlua_DotProduct(lua_State *L) {
+	vec3_t dst,src;
+
+	luaL_checktype(L,1,LUA_TVECTOR);
+	luaL_checktype(L,2,LUA_TVECTOR);
+
+	lua_tovector(L,1,src);
+	lua_tovector(L,2,dst);
+
+	lua_pushnumber(L,DotProduct(src,dst));
+	return 1;
+}
+
 void G_InitLuaVector(lua_State *L) {
 	lua_register(L,"TraceLine",qlua_trace);
 	lua_register(L,"VectorToAngles",qlua_VectorToAngles);
@@ -409,6 +422,7 @@ void G_InitLuaVector(lua_State *L) {
 	lua_register(L,"VectorRight",qlua_VectorRight);
 	lua_register(L,"VectorUp",qlua_VectorUp);
 	lua_register(L,"AngleVectors",qlua_AngleVectors);
+	lua_register(L,"DotProduct",qlua_DotProduct);
 
 	Vector_register(L);
 }

@@ -113,6 +113,32 @@ for k, v in pairs(_G) do
 	end
 end
 
+if(CLIENT) then
+	--[[for k, v in pairs(UI_Components) do
+		if ( type(v) == "table" ) then
+			table.insert( t, tostring(k) )
+		end
+	end]]
+	for k,v in pairs(UI_Components) do
+		OUTPUT = OUTPUT .. "\n\r==[["..k.."]] ([[Object]])==\n\r"
+		if(!v.BaseClass) then
+			print(k .. "\n")
+			func = GetFunctions( v )
+			for x, y in pairs( func ) do
+				OUTPUT = OUTPUT .. XSide( k, y ) .. " [["..k.."]]:[["..k..":"..y.."|"..y.."]]<br />\n"
+			end
+		else
+			print(k .. "\n")
+			func = GetFunctions( v )
+			for x, y in pairs( func ) do
+				if(table.HasKey(v.BaseClass,y) == false) then
+					OUTPUT = OUTPUT .. XSide( k, y ) .. " [["..k.."]]:[["..k..":"..y.."|"..y.."]]<br />\n"
+				end
+			end	
+		end
+	end
+end
+
 table.sort( t )
 for k, v in pairs( t ) do
     --Msg("Library: "..v.."\n")
