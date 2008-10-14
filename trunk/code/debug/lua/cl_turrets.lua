@@ -4,6 +4,8 @@ local barrel = LoadModel("models/weapons2/machinegun/machinegun_barrel.md3")
 local mach_flash = LoadModel("models/weapons2/machinegun/machinegun_flash.md3")
 local fx = LoadShader("railCore")
 local mark = LoadShader("gfx/damage/bullet_mrk")
+local red = LoadShader("models/weapons2/machinegun/machinegun_r")
+local blue = LoadShader("models/weapons2/machinegun/machinegun_b")
 local fire = {
 	LoadSound("sound/weapons/machinegun/machgf1b.wav"),
 	LoadSound("sound/weapons/machinegun/machgf2b.wav"),
@@ -73,6 +75,7 @@ local function HandleMessage(msgid)
 				else
 					tab.color = {1,1,1,1}
 				end
+				tab.team = team
 				print("Activated\n")
 			elseif(cmd == 2) then
 				local dx = message.ReadFloat()
@@ -114,6 +117,7 @@ local err = false
 local lt = LevelTime()
 function RenderEnt(ent,name)
 	if(err) then return 0 end
+	local tab = ent:GetTable()
 	local wave = Vector(0,0,math.sin(LevelTime()/300))
 	local ang = ent:GetAngles()
 	local col = ent:GetTable().color
@@ -125,10 +129,14 @@ function RenderEnt(ent,name)
 	if(col != nil) then
 		gun:SetColor(col[1],col[2],col[3],col[4])
 	end
+	if(tab.team == TEAM_RED) then
+		gun:SetShader(red)
+	elseif(tab.team == TEAM_BLUE) then
+		gun:SetShader(blue)
+	end
 	gun:Render()
 	local bar = RefEntity()
 	bar:SetModel(barrel)
-	local tab = ent:GetTable()
 	if(tab) then
 		if(tab.rot) then
 			bar:SetAngles(Vector(0,0,tab.rot))
