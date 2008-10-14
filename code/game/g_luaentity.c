@@ -141,6 +141,10 @@ int qlua_getclientinfo(lua_State *L) {
 		lua_pushstring(L, "model");
 		lua_pushinteger(L,luaentity->s.modelindex);
 		lua_rawset(L, -3);
+
+		lua_pushstring(L, "team");
+		lua_pushinteger(L,luaentity->client->sess.sessionTeam);
+		lua_rawset(L, -3);
 	} else {
 		lua_pushstring(L,"<CLIENT WAS NIL>");
 	}
@@ -440,7 +444,7 @@ int qlua_setammo(lua_State *L) {
 		int weap = lua_tointeger(L,2);
 		int ammo = lua_tointeger(L,3);
 		if(weap < 1 || weap > WP_NUM_WEAPONS-1) {
-			lua_pushstring(L,"Invalid Argument For \"PlayerSetAmmo\"\n (out of range).\n");
+			lua_pushstring(L,"Invalid Argument For \"SetAmmo\"\n (out of range).\n");
 			lua_error(L);
 			return 1;
 		}
@@ -450,6 +454,33 @@ int qlua_setammo(lua_State *L) {
 			if(ammo >= -1 && ammo <= 999) {
 				luaentity->client->ps.ammo[weap] = ammo;
 			}
+		}
+	} else {
+		lua_pushstring(L,"Invalid Number Of Arguments.\n");
+		lua_error(L);
+		return 1;
+	}
+	return 0;
+}
+
+int qlua_getammo(lua_State *L) {
+	gentity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TNUMBER);
+
+	if(lua_gettop(L) == 2) {
+		int weap = lua_tointeger(L,2);
+		if(weap < 1 || weap > WP_NUM_WEAPONS-1) {
+			lua_pushstring(L,"Invalid Argument For \"GetAmmo\"\n (out of range).\n");
+			lua_error(L);
+			return 1;
+		}
+
+		luaentity = lua_toentity(L,1);
+		if(luaentity != NULL && luaentity->client != NULL) {
+			lua_pushinteger(L,luaentity->client->ps.ammo[weap]);
+			return 1;
 		}
 	} else {
 		lua_pushstring(L,"Invalid Number Of Arguments.\n");
@@ -883,7 +914,9 @@ int qlua_playsound(lua_State *L) {
 			}
 
 			index = G_SoundIndex(buffer);
-			G_AddEvent( luaentity, EV_GENERAL_SOUND, index );
+			if(index) {
+				G_AddEvent( luaentity, EV_GENERAL_SOUND, index );
+			}
 		}
 	}
 	return 0;
@@ -1110,7 +1143,6 @@ int lua_settrx(lua_State *L) {
 	luaentity = lua_toentity(L,1);
 	if(luaentity != NULL) {
 		luaentity->s.pos = *lua_totrajectory(L,2);
-		return 1;
 	}
 	return 0;
 }
@@ -1137,7 +1169,6 @@ int lua_setmins(lua_State *L) {
 	luaentity = lua_toentity(L,1);
 	if(luaentity != NULL) {
 		lua_tovector(L,2,luaentity->r.mins);
-		return 1;
 	}
 	return 0;
 }
@@ -1164,7 +1195,6 @@ int lua_setmaxs(lua_State *L) {
 	luaentity = lua_toentity(L,1);
 	if(luaentity != NULL) {
 		lua_tovector(L,2,luaentity->r.maxs);
-		return 1;
 	}
 	return 0;
 }
@@ -1178,12 +1208,27 @@ int lua_settakedamage(lua_State *L) {
 	luaentity = lua_toentity(L,1);
 	if(luaentity != NULL) {
 		luaentity->takedamage = lua_toboolean(L,2);
-		return 1;
 	}
 	return 0;
 }
 
 int lua_setclip(lua_State *L) {
+	gentity_t	*luaentity;
+	int			mask = 0;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TNUMBER);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		mask = lua_tointeger(L,2);
+		luaentity->clipmask = mask;
+		luaentity->r.contents = mask;
+	}
+	return 0;
+}
+
+int lua_sethp(lua_State *L) {
 	gentity_t	*luaentity;
 
 	luaL_checktype(L,1,LUA_TUSERDATA);
@@ -1191,7 +1236,19 @@ int lua_setclip(lua_State *L) {
 
 	luaentity = lua_toentity(L,1);
 	if(luaentity != NULL) {
-		luaentity->clipmask = lua_tointeger(L,2);
+		luaentity->health = lua_tointeger(L,2);
+	}
+	return 0;
+}
+
+int lua_gethp(lua_State *L) {
+	gentity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		lua_pushinteger(L,luaentity->health);
 		return 1;
 	}
 	return 0;
@@ -1216,6 +1273,7 @@ static const luaL_reg Entity_methods[] = {
   {"HasWeapon",		qlua_hasweapon},
   {"HasAmmo",		qlua_hasammo},
   {"SetAmmo",		qlua_setammo},
+  {"GetAmmo",		qlua_getammo},
   {"SetPowerup",	qlua_setpowerup},
   {"GetMaxHealth",	qlua_getmaxhealth},
   {"SetMaxHealth",	qlua_setmaxhealth},
@@ -1248,6 +1306,8 @@ static const luaL_reg Entity_methods[] = {
   {"SetMaxs",		lua_setmaxs},
   {"SetTakeDamage",	lua_settakedamage},
   {"SetClip",		lua_setclip},
+  {"SetHealth",		lua_sethp},
+  {"GetHealth",		lua_gethp},
   {0,0}
 };
 
@@ -1334,8 +1394,13 @@ int qlua_createEntity(lua_State *L) {
 			return 1;
 		}
 		ent = G_Spawn();
+		ent->client = NULL;
+		ent->touch = 0;
+		ent->pain = 0;
+		ent->die = 0;
+		ent->think = 0;
 		ent->s.eType = ET_LUA;
-		ent->r.svFlags = SVF_USE_CURRENT_ORIGIN;
+		ent->r.svFlags = SVF_BROADCAST;
 		ent->s.weapon = WP_NONE;
 		ent->clipmask = MASK_SHOT;
 		ent->target_ent = NULL;

@@ -349,11 +349,11 @@ end
 
 local function profd()
 	local dtime = ProfileFunction(drawx)
-	draw.SetColor(1,1,1,1)
+	--[[draw.SetColor(1,1,1,1)
 	draw.Text(0,100,"TotalTime: " .. dtime,12,12)
 	draw.Text(0,112,"Rects: " .. RECT_DRAW,12,12)
 	draw.Text(0,124,"DrawTime: " .. drawtime,12,12)
 	draw.Text(0,136,"MaskCount: " .. mcount,12,12)
-	draw.Text(0,148,"Thinks: " .. thinks,12,12)
+	draw.Text(0,148,"Thinks: " .. thinks,12,12)]]
 end
 hook.add("Draw2D","uidraw",profd)

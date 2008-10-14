@@ -1,4 +1,17 @@
-MAX_TURRET_DIST = 500
+MAX_TURRET_DIST = 750
+TURRET_HEALTH = 500
+TURRET_SHOTS = 200
+
+local weapons = {
+	WP_MACHINEGUN,
+	WP_GRENADE_LAUNCHER,
+	WP_SHOTGUN,
+	WP_ROCKET_LAUNCHER,
+	WP_LIGHTNING,
+	WP_RAILGUN,
+	WP_PLASMAGUN,
+	WP_BFG,
+}
 
 function vectoangles(v)
 	local out = Vector(0,0,0)
@@ -35,20 +48,30 @@ local function traceit(ent,dx,dy)
 	return res.entity
 end
 
-function sendTurretMsg(ent,val)
+function sendTurretStart(ent,team)
 	for k,v in pairs(GetEntitiesByClass("player")) do
-		local msg = Message(v)
-		message.WriteLong(msg,4)
-		message.WriteLong(msg,val)
+		local msg = Message(v,4)
+		message.WriteLong(msg,1)
 		message.WriteLong(msg,ent:EntIndex())
+		message.WriteLong(msg,team)
+		SendDataMessage(msg)
+	end
+end
+
+function sendTurretStat(ent,stat,val)
+	for k,v in pairs(GetEntitiesByClass("player")) do
+		local msg = Message(v,4)
+		message.WriteLong(msg,4)
+		message.WriteLong(msg,ent:EntIndex())
+		message.WriteLong(msg,stat)
+		message.WriteFloat(msg,val)
 		SendDataMessage(msg)
 	end
 end
 
 function sendTurretFire(ent,dir)
 	for k,v in pairs(GetEntitiesByClass("player")) do
-		local msg = Message(v)
-		message.WriteLong(msg,4)
+		local msg = Message(v,4)
 		message.WriteLong(msg,2)
 		message.WriteLong(msg,ent:EntIndex())
 		message.WriteFloat(msg,dir.x)
@@ -60,17 +83,20 @@ end
 
 function fireTurret(ent)
 	local tab = ent:GetTable()
-	local dir = Vector(0,0,0)
-	dir.x = math.random(-60,60)
-	dir.y = math.random(-60,60)
-	sendTurretFire(ent,dir)
-	local pl = traceit(ent,dir.x,dir.y)
-	if(pl != nil) then
-		pl:Damage(ent,ent:GetTable().owner,math.random(5,10),MOD_MACHINEGUN)
-	end
-	tab.shots = tab.shots - 1
-	if(tab.shots < 1) then
-		tab.done = 1
+	if(tab.shots > 0) then
+		local dir = Vector(0,0,0)
+		dir.x = math.random(-60,60)
+		dir.y = math.random(-60,60)
+		sendTurretFire(ent,dir)
+		local pl = traceit(ent,dir.x,dir.y)
+		if(pl != nil) then
+			pl:Damage(ent,ent:GetTable().owner,math.random(5,10),MOD_MACHINEGUN)
+		end
+		tab.shots = tab.shots - 1
+		sendTurretStat(ent,2,tab.shots/TURRET_SHOTS)
+	else
+		tab.shots = 0
+		sendTurretFire(ent,Vector(0,0,0))
 	end
 end
 
@@ -84,7 +110,6 @@ function aimTurretAt(ent,pos)
 	local vf2 = VectorRight(aim)
 	local dp = DotProduct(vf2,vf1)--VectorLength(vMul(vSub(vf2,vf1),100))/100
 	ent:SetAngles(ang)
-	print(dp .. "\n")
 	if(dp > .9) then
 		--print(dp .. "\n")
 		return true
@@ -98,6 +123,14 @@ end
 
 local function vEq(v1,v2)
 	if(v1.x == v2.x and v1.y == v2.y and v1.z == v2.z) then return true end
+	return false
+end
+
+function checkteam(targ,owner)
+	local t1 = owner:GetInfo().team
+	local t2 = targ:GetInfo().team
+	if(t2 == TEAM_FREE) then return true end
+	if(t1 != t2) then return true end
 	return false
 end
 
@@ -115,7 +148,7 @@ function aimTurret(ent)
 	table.sort(players,plsort)
 	
 	for k,v in pairs(players) do
-		if(v != owner and v:GetInfo().health > 0) then
+		if(v != owner and v:GetInfo().health > 0 and checkteam(v,owner)) then
 			local pos = v:GetPos()
 			if(pos.z > ent:GetPos().z) then
 				pos.z = pos.z + 4
@@ -141,8 +174,62 @@ function aimTurret(ent)
 	return false
 end
 
+function refill(turret,pl,ammo)
+	local tab = turret:GetTable()
+	tab.nextrefill = tab.nextrefill or 0
+	if(tab.nextrefill < LevelTime()) then
+		local needed = TURRET_SHOTS - tab.shots
+		local plhas = pl:GetAmmo(weapons[ammo])
+		needed = math.min(plhas,needed)
+		needed = math.min(needed,5)
+		if(needed <= 0) then 
+			needed = 0
+			if(ammo < #weapons) then
+				if(refill(turret,pl,ammo + 1) == false) then
+					--pl:PlaySound("sound/weapons/noammo.wav")
+				end
+			else
+				tab.nextrefill = LevelTime() + 500
+				return false
+			end
+		else
+			pl:SetAmmo(weapons[ammo],plhas - needed)
+			tab.shots = tab.shots + math.ceil(needed*6)
+			sendTurretStat(turret,2,tab.shots/TURRET_SHOTS)
+			--pl:PlaySound("sound/misc/am_pkup.wav")
+			tab.nextrefill = LevelTime() + 500
+			return true
+		end
+	end
+end
+
+function setupCollision(turret)
+	turret:SetTakeDamage(true)
+	turret:SetMins(Vector(-5,-5,-5))
+	turret:SetMaxs(Vector(5,5,5))
+	turret:SetClip(1)
+	turret:SetHealth(TURRET_HEALTH)
+	
+	local pain = function(ent,a,b,take)
+		sendTurretStat(ent,1,ent:GetHealth()/TURRET_HEALTH)
+	end
+	turret:SetCallback(ENTITY_CALLBACK_PAIN,pain)
+	
+	local death = function(ent,a,b,take)
+		if(ent:GetTable().done == 0) then
+			ent:GetTable().done = 1
+			ent:SetNextThink(LevelTime() + 1)
+			sendTurretStat(ent,1,0)
+			sendTurretStat(ent,2,0)
+			print("TURRET_DEATH")
+		end
+	end
+	turret:SetCallback(ENTITY_CALLBACK_DIE,death)
+end
+
 function etest(ent)
 	if(ent == nil or ent:IsPlayer() == false) then return end
+	if(ent:GetInfo().team == TEAM_SPECTATOR) then return end
 	local forward = VectorForward(ent:GetAimVector())
 	local startpos = vAdd(ent:GetMuzzlePos(),vMul(forward,12))
 	local ignore = ent
@@ -164,6 +251,9 @@ function etest(ent)
 	test:SetPos(res.endpos)
 	test:SetAngles(ang)
 	test:GetTable().owner = ent
+	test:GetTable().team = ent:GetInfo().team
+	
+	setupCollision(test)
 	
 	local callback = function(ent,other,trace)
 		local tab = ent:GetTable()
@@ -179,7 +269,7 @@ function etest(ent)
 			else
 				ent:Remove()
 			end
-			tab.shots = 100
+			tab.shots = TURRET_SHOTS
 			tab.expiration = LevelTime() + 10000
 			ent:SetPos(vAdd(trace.endpos,Vector(0,0,2)))
 			ent:SetTrType(TR_LINEAR)
@@ -194,6 +284,10 @@ function etest(ent)
 			tab.notouch = true
 			tab.done = 0
 			tab.nextShot = LevelTime() + 50
+		else
+			if(other == tab.owner) then
+				refill(ent,other,1)
+			end
 		end
 	end
 	test:SetCallback(ENTITY_CALLBACK_TOUCH,callback)
@@ -206,7 +300,7 @@ function etest(ent)
 				tab.done = 2
 				print("Finish\n")
 			elseif(tab.done == 2) then
-				sendTurretMsg(ent,3)
+				--sendTurretMsg(ent,3)
 				ent:SetPos(ent:GetPos())
 				ent:SetTrType(TR_LINEAR)
 				ent:SetVelocity(vMul(Vector(0,0,1),-60))
@@ -222,14 +316,32 @@ function etest(ent)
 		if(!ent:GetTable().ready) then
 			ent:SetPos(ent:GetPos())
 			ent:SetTrType(TR_STATIONARY)
-			sendTurretMsg(ent,1)
+			sendTurretStart(ent,tab.team)
 			tab.ready = true
 			ent:SetNextThink(LevelTime() + 100)
 		else
+			if(tab.owner:GetInfo().team != tab.team) then
+				tab.done = 1
+			end
+			if(tab.shots <= 1) then
+				ent:SetHealth(ent:GetHealth() - 1)
+				sendTurretStat(ent,1,ent:GetHealth()/TURRET_HEALTH)
+				if(ent:GetHealth() <= 0) then
+					ent:GetTable().done = 1
+				end
+			end
 			if(aimTurret(ent)) then
 				if(tab.nextShot < LevelTime()) then
 					fireTurret(ent)
 					tab.nextShot = LevelTime() + 50
+					if(tab.shots <= 1) then
+						tab.nextShot = LevelTime() + 250
+					end
+				end
+			else
+				if(ent:GetHealth() < TURRET_HEALTH and tab.shots > 1) then
+					ent:SetHealth(ent:GetHealth() + 1)
+					sendTurretStat(ent,1,ent:GetHealth()/TURRET_HEALTH)
 				end
 			end
 			ent:SetNextThink(LevelTime() + 20)

@@ -32,11 +32,15 @@ int qlua_createmessage(lua_State *L) {
 	gentity_t *ent;
 
 	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TNUMBER);
 
 	ent = lua_toentity(L,1);
 
 	trap_N_CreateMessage(&msg, ent->s.clientNum);
+	trap_N_WriteLong(&msg,lua_tointeger(L,2));
+
 	qlua_pushmessage(L,&msg, ent->s.clientNum);
+
 	return 1;
 }
 

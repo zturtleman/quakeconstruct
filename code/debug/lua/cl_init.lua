@@ -99,20 +99,21 @@ local function ParseDamage()
 	local attacker = nil
 	local pos = Vector(0,0,0)
 	local dmg = message.ReadLong()
-	local death = message.ReadLong()
+	local death = message.ReadShort()
+	local self = (message.ReadShort() == LocalPlayer():EntIndex())
+	local suicide = false
+	local hp = message.ReadLong()
 	if(message.ReadShort() != 0) then
 		attacker = message.ReadString()
 		pos = readVector()
+		suicide = (message.ReadShort() == LocalPlayer():EntIndex())
 	end
-	local localattacker = bool(message.ReadShort())
-	local localself = bool(message.ReadShort())
-	CallHook("Damaged",attacker,pos,dmg,death,localself,localattacker)
+	CallHook("Damaged",attacker,pos,dmg,death,self,suicide,hp-dmg)
 	attacker = attacker or ""
-	print("Attacked: " .. dmg .. " " .. EnumToString(meansOfDeath_t,death) .. " " .. attacker .. "\n")
+	--print("Attacked: " .. dmg .. " " .. EnumToString(meansOfDeath_t,death) .. " " .. attacker .. "\n")
 end
 
-function HandleMessage()
-	local msgid = message.ReadLong()
+local function HandleMessage(msgid)
 	if(msgid == 1) then
 		local str = message.ReadString()
 		local float = message.ReadFloat()
@@ -131,6 +132,12 @@ function HandleMessage()
 		ItemPickup(class,pos,vel,itemid)
 	elseif(msgid == 3) then
 		ParseDamage()
+	elseif(msgid == 0) then
+		local self = (message.ReadShort() == LocalPlayer():EntIndex())
+		if(self) then
+			print("^2RESPAWN!\n")
+			CallHook("Respawned")
+		end
 	end
 end
---hook.add("HandleMessage","cl_init",HandleMessage)
+hook.add("HandleMessage","cl_init",HandleMessage)
