@@ -1003,7 +1003,8 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 	// add to the attacker's hit counter (if the target isn't a general entity like a prox mine)
 	if ( attacker->client && targ != attacker && targ->health > 0
 			&& targ->s.eType != ET_MISSILE
-			&& targ->s.eType != ET_GENERAL) {
+			&& targ->s.eType != ET_GENERAL
+			&& targ->s.eType != ET_LUA) {
 		if ( OnSameTeam( targ, attacker ) ) {
 			attacker->client->ps.persistant[PERS_HITS]--;
 		} else {
@@ -1098,7 +1099,27 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 		if ( targ->client ) {
 			targ->client->ps.stats[STAT_HEALTH] = targ->health;
 		}
-			
+		
+		if ( targ->health <= 0 ) {
+			if(qlua_getstored(GetServerLuaState(), targ->lua_die)) {
+				lua_pushentity(GetServerLuaState(), targ);
+				lua_pushentity(GetServerLuaState(), inflictor);
+				lua_pushentity(GetServerLuaState(), attacker);
+				lua_pushinteger(L,take);
+				lua_pushinteger(L,mod);
+				qlua_pcall(GetServerLuaState(), 5, 0, qfalse);
+			}
+		} else {
+			if(qlua_getstored(GetServerLuaState(), targ->lua_pain)) {
+				lua_pushentity(GetServerLuaState(), targ);
+				lua_pushentity(GetServerLuaState(), inflictor);
+				lua_pushentity(GetServerLuaState(), attacker);
+				lua_pushinteger(L,take);
+				lua_pushinteger(L,mod);
+				qlua_pcall(GetServerLuaState(), 5, 0, qfalse);
+			}
+		}
+
 		if ( targ->health <= 0 ) {
 			if ( client )
 				targ->flags |= FL_NO_KNOCKBACK;
@@ -1107,7 +1128,9 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 				targ->health = -999;
 
 			targ->enemy = attacker;
-			targ->die (targ, inflictor, attacker, take, mod);
+			if(targ->die) {
+				targ->die (targ, inflictor, attacker, take, mod);
+			}
 			return;
 		} else if ( targ->pain ) {
 			targ->pain (targ, attacker, take);

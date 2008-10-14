@@ -4,6 +4,8 @@ local texture2 = LoadShader("bloodTrail");
 local texture3 = LoadShader("bloodMark");
 local MARK_TIME = 5000
 local resetnext = false
+local health = 100
+local lastTarget = LocalPlayer()
 
 local modTypes = {}
 modTypes[MOD_SHOTGUN] = texture1
@@ -35,11 +37,11 @@ end
 
 local function mark(x,y,dmg,spread,method)
 	local t = modTypes[method]
-	local tx = 3
+	local tx = 2
 	local spr = Sprite(t)
 	if(t == texture1) then 
 		dmg = dmg + math.random(0,20)
-		tx = 4
+		tx = 3
 		tx = tx - math.random(0,10)/5
 	end
 	spr:SetPos(x+drand(spread),y+drand(spread))
@@ -56,8 +58,9 @@ local function project(pos)
 	return right,up
 end
 
-local function processDamage(attacker,pos,dmg,death,waslocal,wasme)
+local function processDamage(attacker,pos,dmg,death,waslocal,wasme,hp)
 	if(waslocal) then
+		health = hp
 		if(attacker) then
 			local spread = 40
 			local x,y = project(vAdd(pos,Vector(0,0,20)))
@@ -84,26 +87,13 @@ local function processDamage(attacker,pos,dmg,death,waslocal,wasme)
 	end
 end
 
-local function checkreset()
-	local inf = LocalPlayer():GetInfo()["health"];
-	if(inf <= 0) then
-		resetnext = true
-	else
-		if(resetnext) then
-			resetnext = false
-			marks = {}
-		end
-	end
-end
-
 local function draw2d()
-	checkreset()
-	local inf = LocalPlayer():GetInfo()["health"];
 	for k,v in pairs(marks) do
 		local t = v[3]
 		local spr = v[1]
 		local dmg = v[2]
 		local dt = 1 - (LevelTime() - t) / v[6]
+		if(health <= 0) then dt = 1 end
 		if(dt > 0) then
 			local targ = (100+(dmg*2)) - dt * 20
 			v[5] = v[5] + (targ - v[5])*.4
@@ -126,6 +116,17 @@ local function draw2d()
 			table.remove(marks,k)
 		end
 	end
+	if(lastTarget != LocalPlayer()) then
+		health = 100
+		marks = {}	
+		lastTarget = LocalPlayer()
+	end
+end
+
+local function respawn()
+	health = 100
+	marks = {}
 end
 hook.add("Draw2D","cl_blah",draw2d)
 hook.add("Damaged","cl_blah",processDamage)
+hook.add("Respawned","cl_blah",respawn)

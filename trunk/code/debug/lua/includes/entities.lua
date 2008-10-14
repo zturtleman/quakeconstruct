@@ -94,7 +94,7 @@ end
 
 function GetEntityTable(ent)
 	if(ent != nil) then
-		print("^3'GetEntityTable' is depricated. Use Entity:GetTable() instead.\n")
+		--print("^3'GetEntityTable' is depricated. Use Entity:GetTable() instead.\n")
 		return ent:GetTable()
 	end
 end

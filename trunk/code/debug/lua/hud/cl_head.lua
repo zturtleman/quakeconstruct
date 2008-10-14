@@ -40,6 +40,20 @@ local mvz = 0
 local nalpha = 0
 local calpha = 0
 function drawHead(x,y,ICON_SIZE,hp)
+	local inf = LocalPlayer():GetInfo()
+	local nhead = inf.headModel
+	local nskin = inf.headSkin
+	if(nhead != head or nskin != skin) then
+		ref:SetModel(nhead)
+		ref:SetSkin(nskin)
+		ref2:SetModel(nhead)
+		
+		skin = nskin
+		head = nhead
+		
+		positionHead()
+	end
+
 	local frac = 0
 	local size = 0
 	local stretch = 0
@@ -196,7 +210,7 @@ function drawHead(x,y,ICON_SIZE,hp)
 	lct = CurTime()
 end
 
-local function newClientInfo(newinfo,entity)
+--[[local function newClientInfo(newinfo,entity)
 	if(entity:IsClient()) then
 		if(entity == LocalPlayer()) then
 			print("Conditions Passed\n")
@@ -211,4 +225,4 @@ local function newClientInfo(newinfo,entity)
 		end
 	end
 end
-hook.add("ClientInfoLoaded","cl_head",newClientInfo)
+hook.add("ClientInfoLoaded","cl_head",newClientInfo)]]
