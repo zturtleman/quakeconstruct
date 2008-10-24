@@ -72,8 +72,12 @@ end
 function loadScript(ent,cmd,args)
 	if(args[1]) then
 		args[1] = "lua/" .. args[1] .. ".lua"
-		include(args[1])
-		print("^5Loaded Script: " .. args[1] .. "\n")
+		local b,e = pcall(include,args[1])
+		if(!b) then
+			print("^1Error Loading Script:\n" .. e .. "\n")
+		else
+			print("^5Loaded Script: " .. args[1] .. "\n")
+		end
 	else
 		local ex = "cl_marks"
 		if(SERVER) then ex = "knockback" end

@@ -1897,6 +1897,11 @@ int qlua_curtime(lua_State *L) {
 	return 1;
 }
 
+int qlua_lasttime(lua_State *L) {
+	lua_pushnumber(L,cg.oldTime);
+	return 1;
+}
+
 void pushents(lua_State *L) {
 	int numEnts = sizeof(cg_entities) / sizeof(cg_entities[0]);
 	int i=0;
@@ -2000,6 +2005,7 @@ void CG_InitLua() {
 	CG_InitLuaMessages(L);
 
 	lua_register(L,"LevelTime",qlua_curtime);
+	lua_register(L,"LastTime",qlua_lasttime);
 	lua_register(L,"__loadsound",qlua_loadsound);
 	lua_register(L,"LoadCustomSound",qlua_loadcustomsound);
 	lua_register(L,"PlaySound",qlua_playsound);

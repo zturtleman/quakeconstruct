@@ -20,6 +20,8 @@ function SpriteT:Init()
 	self.rot = 0
 	self.col = {1,1,1,1}
 	self.shd = 0
+	self.x = 0
+	self.y = 0
 end
 
 function SpriteT:SetColor(r,g,b,a)
@@ -32,6 +34,8 @@ function SpriteT:GetColor()
 end
 
 function SpriteT:SetPos(x,y)
+	self.x = x
+	self.y = y
 	x = x / 640
 	y = y / 480
 	x = x * 160
@@ -43,7 +47,7 @@ function SpriteT:SetPos(x,y)
 end
 
 function SpriteT:GetPos()
-	return self.ref:GetPos()
+	return self.x,self.y
 end
 
 function SpriteT:SetRadius(r)

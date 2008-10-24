@@ -21,10 +21,8 @@ trajectory_t *lua_totrajectory(lua_State *L, int i) {
 	return tr;
 }
 
-/*int qlua_getbase(lua_State *L) {
-	trajectory_t	*tr = NULL;
-
-	luaL_checktype(L,1,LUA_TUSERDATA);
+int qlua_getbase(lua_State *L) {
+	trajectory_t	*tr = lua_totrajectory(L,1);
 
 	if(tr != NULL) {
 		lua_pushvector(L,tr->trBase);
@@ -34,9 +32,8 @@ trajectory_t *lua_totrajectory(lua_State *L, int i) {
 }
 
 int qlua_setbase(lua_State *L) {
-	trajectory_t	*tr = NULL;
+	trajectory_t	*tr = lua_totrajectory(L,1);
 
-	luaL_checktype(L,1,LUA_TUSERDATA);
 	luaL_checktype(L,2,LUA_TVECTOR);
 
 	if(tr != NULL) {
@@ -44,7 +41,101 @@ int qlua_setbase(lua_State *L) {
 		return 1;
 	}
 	return 0;
-}*/
+}
+
+int qlua_getdelta(lua_State *L) {
+	trajectory_t	*tr = lua_totrajectory(L,1);
+
+	if(tr != NULL) {
+		lua_pushvector(L,tr->trDelta);
+		return 1;
+	}
+	return 0;
+}
+
+int qlua_setdelta(lua_State *L) {
+	trajectory_t	*tr = lua_totrajectory(L,1);
+
+	luaL_checktype(L,2,LUA_TVECTOR);
+
+	if(tr != NULL) {
+		lua_tovector(L,2,tr->trDelta);
+		return 1;
+	}
+	return 0;
+}
+
+int qlua_gettime(lua_State *L) {
+	trajectory_t	*tr = lua_totrajectory(L,1);
+
+	if(tr != NULL) {
+		lua_pushinteger(L,tr->trTime);
+		return 1;
+	}
+	return 0;
+}
+
+int qlua_settime(lua_State *L) {
+	trajectory_t	*tr = lua_totrajectory(L,1);
+
+	luaL_checktype(L,2,LUA_TNUMBER);
+
+	if(tr != NULL) {
+		tr->trTime = lua_tonumber(L,2);
+		return 1;
+	}
+	return 0;
+}
+
+int qlua_gettype(lua_State *L) {
+	trajectory_t	*tr = lua_totrajectory(L,1);
+
+	if(tr != NULL) {
+		lua_pushinteger(L,tr->trType);
+		return 1;
+	}
+	return 0;
+}
+
+int qlua_settype(lua_State *L) {
+	trajectory_t	*tr = lua_totrajectory(L,1);
+
+	luaL_checktype(L,2,LUA_TNUMBER);
+
+	if(tr != NULL) {
+		tr->trType = lua_tonumber(L,2);
+		return 1;
+	}
+	return 0;
+}
+
+int qlua_evaluate(lua_State *L) {
+	trajectory_t	*tr = lua_totrajectory(L,1);
+	vec3_t			res;
+
+	luaL_checktype(L,2,LUA_TNUMBER);
+
+	if(tr != NULL) {
+		BG_EvaluateTrajectory(tr,lua_tonumber(L,2),res);
+		lua_pushvector(L,res);
+		return 1;
+	}
+	return 0;
+}
+
+int qlua_evaluatedelta(lua_State *L) {
+	trajectory_t	*tr = lua_totrajectory(L,1);
+	vec3_t			res;
+
+	luaL_checktype(L,2,LUA_TNUMBER);
+
+	if(tr != NULL) {
+		BG_EvaluateTrajectoryDelta(tr,lua_tonumber(L,2),res);
+		lua_pushvector(L,res);
+		return 1;
+	}
+	return 0;
+}
 
 static int Tr_tostring (lua_State *L)
 {
@@ -71,8 +162,16 @@ static int Tr_equal (lua_State *L)
 }
 
 static const luaL_reg Tr_methods[] = {
-  //{"GetBase",		qlua_getbase},
-  //{"SetBase",		qlua_setbase},
+  {"GetBase",		qlua_getbase},
+  {"SetBase",		qlua_setbase},
+  {"GetDelta",		qlua_getdelta},
+  {"SetDelta",		qlua_setdelta},
+  {"GetTime",		qlua_gettime},
+  {"SetTime",		qlua_settime},
+  {"GetType",		qlua_gettype},
+  {"SetType",		qlua_settype},
+  {"Evaluate",		qlua_evaluate},
+  {"EvaluateDelta",	qlua_evaluatedelta},
   {0,0}
 };
 

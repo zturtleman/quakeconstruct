@@ -21,24 +21,24 @@ void qlua_pullvector(lua_State *L, char *str, vec3_t vec, qboolean req) {
 	if(req) luaL_checktype(L,lua_gettop(L),LUA_TVECTOR);
 	if(lua_type(L,lua_gettop(L)) == LUA_TVECTOR) {
 		lua_tovector(L,lua_gettop(L),v);
+		vec[0] = v[0];
+		vec[1] = v[1];
+		vec[2] = v[2];
 	}
-	vec[0] = v[0];
-	vec[1] = v[1];
-	vec[2] = v[2];
 }
 
-int lua_torefdef(lua_State *L, int idx, refdef_t *refdef) {
+int lua_torefdef(lua_State *L, int idx, refdef_t *refdef, qboolean a640) {
 	float x,y,w,h;
 	vec3_t	angles;
 
 	luaL_checktype(L,idx,LUA_TTABLE);
 
-	x = qlua_pullfloat(L,"x",qtrue,0);
-	y = qlua_pullfloat(L,"y",qtrue,0);
-	w = qlua_pullfloat(L,"width",qtrue,0);
-	h = qlua_pullfloat(L,"height",qtrue,0);
-	refdef->fov_x = qlua_pullfloat(L,"fov_x",qfalse,30);
-	refdef->fov_y = qlua_pullfloat(L,"fov_y",qfalse,30);
+	x = qlua_pullfloat(L,"x",qfalse,refdef->x);
+	y = qlua_pullfloat(L,"y",qfalse,refdef->y);
+	w = qlua_pullfloat(L,"width",qfalse,refdef->width);
+	h = qlua_pullfloat(L,"height",qfalse,refdef->height);
+	refdef->fov_x = qlua_pullfloat(L,"fov_x",qfalse,refdef->fov_x);
+	refdef->fov_y = qlua_pullfloat(L,"fov_y",qfalse,refdef->fov_y);
 	qlua_pullvector(L,"origin",refdef->vieworg,qfalse);
 	qlua_pullvector(L,"angles",angles,qfalse);
 
@@ -47,17 +47,25 @@ int lua_torefdef(lua_State *L, int idx, refdef_t *refdef) {
 	//}
 
 	if(w > 0 && h > 0) {
-		CG_AdjustFrom640( &x, &y, &w, &h );
-		refdef->x = x;
-		refdef->y = y;
-		refdef->width = w;
-		refdef->height = h;
+		if(a640) {
+			CG_AdjustFrom640( &x, &y, &w, &h );
+			refdef->x = x;
+			refdef->y = y;
+			refdef->width = w;
+			refdef->height = h;
+		}
 		return 0;
 	} else {
 		lua_pushstring(L,"RefDef Failed\n");
 		lua_error(L);
 		return 1;
 	}
+}
+
+int qlua_setrefdef(lua_State *L) {
+	luaL_checktype(L,1,LUA_TTABLE);
+	lua_torefdef(L,1,&cg.refdef,qfalse);
+	return 0;
 }
 
 int qlua_renderscene(lua_State *L) {
@@ -80,7 +88,7 @@ int qlua_renderscene(lua_State *L) {
 	refdef.rdflags = RDF_NOWORLDMODEL;
 	AxisClear( refdef.viewaxis );
 
-	error = lua_torefdef(L, 1, &refdef);
+	error = lua_torefdef(L, 1, &refdef, qtrue);
 	if(error == 1) {
 		trap_R_ClearScene();
 		//CG_Printf("Scene Failed\n");
@@ -118,6 +126,7 @@ static const luaL_reg Render_methods[] = {
   {"CreateScene",		qlua_createscene},
   {"RenderScene",		qlua_renderscene},
   {"ModelBounds",		qlua_modelbounds},
+  {"SetRefDef",			qlua_setrefdef},
   {0,0}
 };
 

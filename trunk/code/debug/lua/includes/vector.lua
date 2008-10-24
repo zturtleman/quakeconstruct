@@ -40,6 +40,14 @@ function vMul(v1,v2)
 	return out
 end
 
+function vAbs(v)
+	local out = {}
+	out.x = math.abs(v.x)
+	out.y = math.abs(v.y)
+	out.z = math.abs(v.z)
+	return out
+end
+
 function Vector(x,y,z)
 	return {x=x,y=y,z=z}
 end
