@@ -492,7 +492,7 @@ static int CG_CalcFov( void ) {
 			if ( fov_x < 1 ) {
 				fov_x = 1;
 			} else if ( fov_x > 160 ) {
-				fov_x = 160;
+				//fov_x = 160; -BWAHAHAHAHA
 			}
 		}
 
@@ -602,7 +602,6 @@ static void CG_DamageBlendBlob( void ) {
 	trap_R_AddRefEntityToScene( &ent );
 }
 
-
 /*
 ===============
 CG_CalcViewValues
@@ -612,6 +611,7 @@ Sets cg.refdef view values
 */
 static int CG_CalcViewValues( void ) {
 	playerState_t	*ps;
+	lua_State *L = GetClientLuaState();
 
 	memset( &cg.refdef, 0, sizeof( cg.refdef ) );
 
@@ -684,6 +684,15 @@ static int CG_CalcViewValues( void ) {
 
 	// position eye reletive to origin
 	AnglesToAxis( cg.refdefViewAngles, cg.refdef.viewaxis );
+
+	if(L != NULL) {
+		lua_getglobal(L, "_ViewCalc");
+		lua_pushvector(L,cg.refdef.vieworg);
+		lua_pushvector(L,cg.refdefViewAngles);
+		lua_pushnumber(L,cg.refdef.fov_x);
+		lua_pushnumber(L,cg.refdef.fov_y);
+		qlua_pcall(L,4,0,qfalse);
+	}
 
 	if ( cg.hyperspace ) {
 		cg.refdef.rdflags |= RDF_NOWORLDMODEL | RDF_HYPERSPACE;
@@ -874,12 +883,23 @@ void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demo
 
 }
 
+void MultMatrix4( const float *a, const float *b, float *out ) {
+	int		i, j;
+
+	for ( i = 0 ; i < 4 ; i++ ) {
+		for ( j = 0 ; j < 4 ; j++ ) {
+			out[ i * 4 + j ] =
+				a [ i * 4 + 0 ] * b [ 0 * 4 + j ]
+				+ a [ i * 4 + 1 ] * b [ 1 * 4 + j ]
+				+ a [ i * 4 + 2 ] * b [ 2 * 4 + j ]
+				+ a [ i * 4 + 3 ] * b [ 3 * 4 + j ];
+		}
+	}
+}
+
 void CG_ProjectVector( refdef_t refdef, vec3_t in, vec3_t out ) {
-	float distanceToCamera = (refdef.width / 2) / tan(refdef.fov_x/2);
+	//float d[16];
 
-	out[0] = distanceToCamera * in[0] / -in[2];
-	out[1] = distanceToCamera * in[1] / -in[2];
+	//MatrixMultiply(
 
-	out[0] = in[0] + (refdef.x + refdef.width / 2);
-	out[1] = -in[1] + (refdef.y + refdef.height / 2);
 }

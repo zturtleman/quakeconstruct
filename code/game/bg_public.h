@@ -641,6 +641,8 @@ typedef struct gitem_s {
 	char		*sounds;		// string of all sounds this item will use
 } gitem_t;
 
+#define LUA_TVECTOR LUA_TTABLE
+
 // included in both the game dll and the client
 extern	gitem_t	bg_itemlist[];
 extern	int		bg_numItems;
@@ -708,7 +710,11 @@ void	BG_PlayerStateToEntityStateExtraPolate( playerState_t *ps, entityState_t *s
 qboolean	BG_PlayerTouchesItem( playerState_t *ps, entityState_t *item, int atTime );
 
 //LUA
+void BG_InitLuaVector(lua_State *L);
 void BG_InitLuaTrajectory(lua_State *L);
+
+void lua_pushvector(lua_State *L, vec3_t vec);
+void lua_tovector(lua_State *L, int i, vec3_t in);
 
 trajectory_t *lua_totrajectory(lua_State *L, int i);
 void lua_pushtrajectory(lua_State *L, trajectory_t *tr);

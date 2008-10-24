@@ -2,7 +2,7 @@ local marks = {}
 local texture1 = LoadShader("viewBloodBlend"); --bloodMark
 local texture2 = LoadShader("bloodTrail");
 local texture3 = LoadShader("bloodMark");
-local MARK_TIME = 5000
+local MARK_TIME = 3000
 local resetnext = false
 local health = 100
 local lastTarget = LocalPlayer()
@@ -46,7 +46,19 @@ local function mark(x,y,dmg,spread,method)
 	end
 	spr:SetPos(x+drand(spread),y+drand(spread))
 	spr:SetRotation(math.random(360))
-	table.insert(marks,{spr,dmg,LevelTime(),false,0,MARK_TIME/tx})
+	
+	local dx = math.abs(320 - x) / 320
+	local dy = math.abs(240 - y) / 240
+	local df = (math.sqrt(dx*dx + dy*dy) * 2) + .25
+	
+	print(df .. "\n")
+	
+	local x2,y2 = spr:GetPos()
+	local spr2 = Sprite(t)
+	spr2:SetPos(x2,y2)
+	spr2:SetRotation(math.random(360))
+	table.insert(marks,{spr2,dmg+10,LevelTime(),false,0,((MARK_TIME/tx)+10000) * df,true})
+	table.insert(marks,{spr,dmg,LevelTime(),false,0,(MARK_TIME/tx) * df})
 end
 
 local function project(pos)
@@ -99,14 +111,21 @@ local function draw2d()
 			v[5] = v[5] + (targ - v[5])*.4
 			spr:SetRadius(v[5])
 			if(spr:GetShader() == texture3) then
-				spr:SetColor(.6,.4,.1,dt)
+				spr:SetColor(.8,.4,.1,dt/1.4)
 			elseif(spr:GetShader() == texture1) then
-				spr:SetColor(.8,.4,0,dt)
+				spr:SetColor(.8,.4,0,dt/1.4)
 				spr:Draw()
 			else
-				spr:SetColor(1,1,1,dt)
+				spr:SetColor(1,1,1,dt/1.4)
+			end
+			if(v[7]) then
+				spr:SetShader(texture3)
+				spr:SetColor(.6,.4,.1,dt/3)
 			end
 			spr:Draw()
+			--spr:SetShader(texture3)
+			--spr:SetColor(1,1,1,dt/5)
+			--spr:SetRadius(v[5] + ((1-dt)*50))
 		else
 			v[4] = true
 		end

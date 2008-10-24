@@ -405,6 +405,11 @@ int qlua_curtime(lua_State *L) {
 	return 1;
 }
 
+int qlua_lasttime(lua_State *L) {
+	lua_pushnumber(L,level.previousTime);
+	return 1;
+}
+
 qboolean Cmd_Check_Lua( gentity_t *ent, char cmd[] ) {
 	lua_State *L = GetServerLuaState();
 	
@@ -464,6 +469,7 @@ void G_InitLua() {
 	G_InitLuaMessages(L);
 
 	lua_register(L,"LevelTime",qlua_curtime);
+	lua_register(L,"LastTime",qlua_lasttime);
 	lua_register(L,"grabarg",qlua_grabarg);
 
 	DoLuaIncludes();

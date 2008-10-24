@@ -330,6 +330,9 @@
 				RelativePath="..\game\bg_luatrajectory.c">
 			</File>
 			<File
+				RelativePath="..\game\bg_luavector.c">
+			</File>
+			<File
 				RelativePath="..\game\bg_misc.c">
 				<FileConfiguration
 					Name="Release TA|Win32">

@@ -467,9 +467,6 @@ lua_State *GetServerLuaState( void );
 void lua_pushentity(lua_State *L, gentity_t *cl);
 gentity_t *lua_toentity(lua_State *L, int i);
 
-void lua_pushvector(lua_State *L, vec3_t vec);
-void lua_tovector(lua_State *L, int i, vec3_t in);
-
 void lua_pushtrace(lua_State *L, trace_t results);
 
 int qlua_storefunc(lua_State *L, int i, int ref);

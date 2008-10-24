@@ -1222,10 +1222,7 @@ int qlua_storefunc(lua_State *L, int i, int ref);
 qboolean qlua_getstored(lua_State *L, int ref);
 void qlua_clearfunc(lua_State *L, int ref);
 
-void lua_pushvector(lua_State *L, vec3_t vec);
-void lua_tovector(lua_State *L, int i, vec3_t in);
-
-int lua_torefdef(lua_State *L, int idx, refdef_t *refdef);
+int lua_torefdef(lua_State *L, int idx, refdef_t *refdef, qboolean a640);
 
 void lua_pushentity(lua_State *L, centity_t *cl);
 centity_t *lua_toentity(lua_State *L, int i);

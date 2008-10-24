@@ -225,6 +225,22 @@ function setupCollision(turret)
 		end
 	end
 	turret:SetCallback(ENTITY_CALLBACK_DIE,death)
+	Timer(3,function() turret:Remove() end)
+end
+
+function bounce(ent,trace)
+	local tr = ent:GetTrajectory()
+	local hitTime = LastTime() + ( LevelTime() - LastTime() ) * trace.fraction;
+	local vel = tr:EvaluateDelta(hitTime)
+	local dot = DotProduct( vel, trace.normal );
+	local delta = vAdd(vel,vMul(trace.normal,-2*dot))
+	delta = vMul(delta,.5)
+
+	tr:SetBase(ent:GetPos())
+	tr:SetDelta(delta)
+	ent:SetTrajectory(tr)
+	
+	ent:SetPos(vAdd(ent:GetPos(),trace.normal))
 end
 
 function etest(ent)
@@ -264,10 +280,16 @@ function etest(ent)
 				print("^1Invalid Surface\n")
 				ent:Remove()
 			end
-			if(trace.normal.x == 0 and trace.normal.y == 0 and trace.normal.z == 1) then
-				
+			if(DotProduct(trace.normal,Vector(0,0,1)) > 0.2) then
+				local vel = ent:GetVelocity()
+				vel.z = 0
+				if(VectorLength(vel) > 200) then
+					bounce(ent,trace)
+					return
+				end
 			else
-				ent:Remove()
+				bounce(ent,trace)
+				return
 			end
 			tab.shots = TURRET_SHOTS
 			tab.expiration = LevelTime() + 10000
