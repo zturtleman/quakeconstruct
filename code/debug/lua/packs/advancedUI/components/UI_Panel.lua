@@ -300,10 +300,15 @@ end
 
 function Panel:CatchKeyboard(b)
 	self.catchk = b
+	if(self:IsVisible()) then 
+		UI_EnableKeyboard(b)
+	end
 end
 
 function Panel:GetContentPane() return nil end
 function Panel:OnChildAdded(panel) end
+function Panel:KeyPressed(key) end
+function Panel:KeyTyped(key) end
 function Panel:MouseOver() return self.__mouseInside end
 function Panel:MouseDown() return self.__wasPressed end
 function Panel:MousePressed(x,y) end

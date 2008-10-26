@@ -1,9 +1,11 @@
 UI_Components = {}
 UI_Components_UnParent = {}
 UI_Active = {}
+local kcache = {}
 local toRegister = 0
 local nxtID = 0
 local white = LoadShader("white")
+local enablekey = false
 
 P:include("cursor.lua")
 
@@ -65,6 +67,15 @@ function UI_EnableCursor(b)
 	end
 	if(b != true and hold) then return end
 	EnableCursor(b)
+end
+
+function UI_EnableKeyboard(b)
+	local hold = false
+	for k,v in pairs(UI_Active) do
+		if(v.catchk and v.removeme == false and v:IsVisible()) then hold = true end
+	end
+	if(b != true and hold) then return end
+	enablekey = b
 end
 
 local function getNewId()
@@ -258,6 +269,8 @@ local function garbageCollect()
 		end
 		PaintSort()
 	end
+	UI_EnableCursor(false)
+	UI_EnableKeyboard(false)
 	print("^2Garbage Collected -> " .. rm .. "\n")
 end
 
@@ -357,3 +370,23 @@ local function profd()
 	draw.Text(0,148,"Thinks: " .. thinks,12,12)]]
 end
 hook.add("Draw2D","uidraw",profd)
+
+local function keyed(key,state)
+	if(enablekey) then
+		for i=0, #UI_Active-1 do
+			local v = UI_Active[#UI_Active - i]
+			if(v:IsVisible()) then
+				if(state == true and kcache[key] != true) then
+					v:KeyPressed(key)
+				end
+				if(state == true) then
+					v:KeyTyped(key)
+				end
+			end
+		end
+		kcache[key] = state
+		return true
+	end
+	kcache[key] = state
+end
+hook.add("KeyEvent","uikeys",keyed)
