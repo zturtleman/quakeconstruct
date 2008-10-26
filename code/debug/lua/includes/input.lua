@@ -2,6 +2,12 @@ local mouseDown = false
 local mx = 0
 local my = 0
 local cursorOn = false
+local keys = {}
+
+function KeyIsDown(k)
+	if(keys[k] == true) then return true end
+	return false
+end
 
 local function moused(x,y)
 	if(!cursorOn) then return end
@@ -46,6 +52,7 @@ function EnableCursor(b)
 end
 
 local function keyed(key,state)
+	keys[key] = state
 	if(key == K_MOUSE1) then
 		if(state == false) then
 			if(mouseDown != state) then

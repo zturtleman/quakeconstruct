@@ -371,7 +371,12 @@ local function profd()
 end
 hook.add("Draw2D","uidraw",profd)
 
+local kmin = 999999
+local kmax = 0
+
 local function keyed(key,state)
+	if(key > kmax) then kmax = key end
+	if(key < kmin) then kmin = key end
 	if(enablekey) then
 		for i=0, #UI_Active-1 do
 			local v = UI_Active[#UI_Active - i]
