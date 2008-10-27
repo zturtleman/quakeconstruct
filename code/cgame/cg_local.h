@@ -205,6 +205,8 @@ typedef struct centity_s {
 	vec3_t			lerpAngles;
 
 	int				luatablecent;
+	qboolean		linked;
+	qboolean		customdraw;
 } centity_t;
 
 

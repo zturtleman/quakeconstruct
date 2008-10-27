@@ -39,7 +39,11 @@ end
 
 function debugprint(msg)
 	if(QLUA_DEBUG) then
-		print(msg)
+		if(SERVER) then
+			print("SV: " .. msg)
+		else
+			print("CL: " .. msg)
+		end
 	end
 end
 

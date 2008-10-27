@@ -68,3 +68,13 @@ local function keyed(key,state)
 	end
 end
 hook.add("KeyEvent","input",keyed)
+
+local function press()
+	print("PRESS\n")
+end
+
+local function depress()
+	print("DEPRESS\n")
+end
+concommand.Add("+use",press)
+concommand.Add("-use",depress)

@@ -104,8 +104,8 @@ hook.add("HandleMessage","cl_turrets",HandleMessage)
 function RenderStat(ent,wave,stat,off,r,g,b)
 	local st1 = RefEntity()
 	st1:SetType(RT_RAIL_CORE)
-	st1:SetPos(vAdd(ent:GetPos(),Vector(off.x,off.y,6+wave.z)))
-	st1:SetPos2(vAdd(ent:GetPos(),Vector(off.x,off.y,6+wave.z+(30*stat))))
+	st1:SetPos(vAdd(ent:GetPos(),Vector(off.x,off.y,off.z + 6+wave.z)))
+	st1:SetPos2(vAdd(ent:GetPos(),Vector(off.x,off.y,off.z + 6+wave.z+(30*stat))))
 	--st1:SetAngles(Vector(-90,0,0))
 	st1:SetColor(r,g,b,1)
 	st1:SetRadius(4)
@@ -116,10 +116,12 @@ end
 local err = false
 local lt = LevelTime()
 function RenderEnt(ent,name)
-	if(err) then return 0 end
+	if(name != "turret") then return false end
+	if(err) then return false end
 	local tab = ent:GetTable()
 	local wave = Vector(0,0,math.sin(LevelTime()/300))
 	local ang = ent:GetAngles()
+	local ang2 = ent:GetAngles()
 	local col = ent:GetTable().color
 	ang.x = ang.x + math.cos(LevelTime()/500)*4
 	local gun = RefEntity()
@@ -167,8 +169,12 @@ function RenderEnt(ent,name)
 	tab.stats[1] = tab.stats[1] or 1
 	tab.stats[2] = tab.stats[2] or 1
 
-	RenderStat(ent,wave,tab.stats[1],vMul(VectorUp(ang),-4),1,0,0)
-	RenderStat(ent,wave,tab.stats[2],vMul(VectorUp(ang),4),1,1,0)
+	local f,r,u = AngleVectors(ang2)
+	
+	RenderStat(ent,wave,tab.stats[1],vMul(r,-4),1,0,0)
+	RenderStat(ent,wave,tab.stats[2],vMul(r,4),1,1,0)
+	
+	return true
 end
 hook.add("DrawCustomEntity","cl_turrets",RenderEnt)
 

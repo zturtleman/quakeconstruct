@@ -292,6 +292,105 @@ int qlua_gettrx(lua_State *L) {
 	return 0;
 }
 
+int lua_getweapon(lua_State *L) {
+	centity_t	*luaentity;
+	entityState_t *s1;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		s1 = &luaentity->currentState;
+		if ( s1->weapon > WP_NUM_WEAPONS ) {
+			s1->weapon = 0;
+		}
+		lua_pushinteger(L,s1->weapon);
+		return 1;
+	}
+	return 0;
+}
+
+int qlua_getmodelindex(lua_State *L) {
+	centity_t	*luaentity;
+	entityState_t *s1;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		s1 = &luaentity->currentState;
+		lua_pushinteger(L,s1->modelindex);
+		lua_pushinteger(L,s1->modelindex2);
+		return 2;
+	}
+	return 0;
+}
+
+int lua_customdraw(lua_State *L) {
+	centity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TBOOLEAN);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		luaentity->customdraw = lua_toboolean(L,2);
+	}
+	return 0;
+}
+
+int	lua_classname(lua_State *L) {
+	centity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		switch ( luaentity->currentState.eType ) {
+		default:
+			lua_pushstring(L,"unknown");
+			break;
+		case ET_INVISIBLE:
+		case ET_PUSH_TRIGGER:
+		case ET_TELEPORT_TRIGGER:
+			lua_pushstring(L,"trigger");
+			break;
+		case ET_GENERAL:
+			lua_pushstring(L,"general");
+			break;
+		case ET_PLAYER:
+			lua_pushstring(L,"player");
+			break;
+		case ET_ITEM:
+			lua_pushstring(L,"item");
+			break;
+		case ET_MISSILE:
+			lua_pushstring(L,"missile");
+			break;
+		case ET_MOVER:
+			lua_pushstring(L,"mover");
+			break;
+		case ET_BEAM:
+			lua_pushstring(L,"beam");
+			break;
+		case ET_PORTAL:
+			lua_pushstring(L,"portal");
+			break;
+		case ET_SPEAKER:
+			lua_pushstring(L,"speaker");
+			break;
+		case ET_GRAPPLE:
+			lua_pushstring(L,"grapple");
+			break;
+		case ET_LUA:
+			lua_pushstring(L,luaentity->currentState.luaname);
+			break;
+		}
+		return 1;
+	}
+	return 0;
+}
+
 int qlua_settrx(lua_State *L) {
 	centity_t	*luaentity;
 
@@ -337,10 +436,15 @@ static const luaL_reg Entity_methods[] = {
   {"GetOtherEntity",	qlua_getotherentity},
   {"GetOtherEntity2",	qlua_getotherentity},
   {"GetByteDir",		qlua_getbytedir},
+  {"GetModelIndex",		qlua_getmodelindex},
   {"EntIndex",		qlua_entityid},
   {"IsBot",			qlua_isbot},
   {"IsClient",		qlua_isclient},
+  {"IsPlayer",		qlua_isclient},
   {"GetTable",		lua_cggetentitytable},
+  {"Classname",		lua_classname},
+  {"GetWeapon",		lua_getweapon},
+  {"CustomDraw",	lua_customdraw},
   {0,0}
 };
 

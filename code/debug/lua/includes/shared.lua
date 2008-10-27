@@ -17,13 +17,14 @@ includex("enum")
 includex("vector")
 includex("matrix")
 includex("angles")
+includex("messages")
 includex("scriptmanager")
+includex("commands")
 if(CLIENT) then includex("sound") end
 if(CLIENT) then includex("shader") end
 if(CLIENT) then includex("model") end
-if(CLIENT) then includex("input") end
 if(CLIENT) then includex("sprite") end
-includex("commands")
+if(CLIENT) then includex("input") end
 includex("packs")
 --require "includes/functiondump"
 

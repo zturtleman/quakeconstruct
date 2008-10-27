@@ -1025,7 +1025,9 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 	take = damage;
 	save = 0;
 
-	if(targ->client != NULL && dflags != DAMAGE_THRU_LUA) {
+	if(targ->client != NULL) {
+		qlua_lockdamage = qtrue;
+
 		qlua_gethook(L, "PlayerDamaged");
 		lua_pushentity(L,targ);
 		lua_pushentity(L,inflictor);
@@ -1037,6 +1039,8 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 		qlua_pcall(L,callargs,1,qtrue);
 		if(lua_type(L,-1) == LUA_TNUMBER)
 			take = lua_tointeger(L,-1);
+
+		qlua_lockdamage = qfalse;
 	}
 
 	// save some from armor

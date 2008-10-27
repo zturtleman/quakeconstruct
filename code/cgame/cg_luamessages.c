@@ -2,7 +2,7 @@
 
 void qlua_HandleMessage() {
 	int data = trap_N_ReadLong();
-	qlua_gethook(GetClientLuaState(),"HandleMessage");
+	qlua_gethook(GetClientLuaState(),"_HandleMessage");
 	lua_pushinteger(GetClientLuaState(),data);
 	qlua_pcall(GetClientLuaState(),1,0,qtrue);
 }
@@ -38,5 +38,5 @@ static const luaL_reg Message_methods[] = {
 };
 
 void CG_InitLuaMessages(lua_State *L) {
-	luaL_openlib(L, "message", Message_methods, 0);
+	luaL_openlib(L, "_message", Message_methods, 0);
 }

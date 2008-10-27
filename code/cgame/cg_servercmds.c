@@ -487,11 +487,26 @@ require a reload of all the media
 ===============
 */
 static void CG_MapRestart( void ) {
+	centity_t	*tent = NULL;
+	int numEnts = sizeof(cg_entities) / sizeof(cg_entities[0]);
+	int i=0;
+	int n=0;
+	
 	if ( cg_showmiss.integer ) {
 		CG_Printf( "CG_MapRestart\n" );
 	}
 
 	CG_InitLua();
+
+	for (i = 0, tent = cg_entities, n = 1;
+			i < numEnts;
+			i++, tent++) {
+			if(tent != NULL) {
+				tent->linked = qfalse;
+				tent->customdraw = qfalse;
+			}
+			n++;
+	}
 
 	//DoLuaIncludes();
 	//DoLuaInit();

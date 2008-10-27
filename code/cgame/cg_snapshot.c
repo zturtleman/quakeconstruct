@@ -33,6 +33,24 @@ CG_ResetEntity
 ==================
 */
 static void CG_ResetEntity( centity_t *cent ) {
+	lua_State *L = GetClientLuaState();
+	if(L != NULL) {
+		//cent->linked = qfalse;
+		//qlua_gethook(L,"EntityUnlinked");
+		//lua_pushentity(L,cent);
+		//qlua_pcall(L,1,0,qtrue);
+
+		if(cent->luatablecent != 0) {
+			qlua_clearfunc(L,cent->luatablecent);
+			cent->luatablecent = 0;
+		}
+	} else {
+		if(cent->luatablecent != 0) {
+			cent->luatablecent = 0;
+		}
+	}
+	cent->customdraw = qfalse;
+
 	// if the previous snapshot this entity was updated in is at least
 	// an event window back in time then we can reset the previous event
 	if ( cent->snapShotTime < cg.time - EVENT_VALID_MSEC ) {
@@ -45,11 +63,6 @@ static void CG_ResetEntity( centity_t *cent ) {
 	VectorCopy (cent->currentState.angles, cent->lerpAngles);
 	if ( cent->currentState.eType == ET_PLAYER ) {
 		CG_ResetPlayerEntity( cent );
-	}
-
-	if(cent->luatablecent != 0) {
-		CG_Printf("Reset LuaTable: %i\n",cent->luatablecent);
-		cent->luatablecent = 0;
 	}
 }
 
@@ -92,6 +105,7 @@ void CG_SetInitialSnapshot( snapshot_t *snap ) {
 	int				i;
 	centity_t		*cent;
 	entityState_t	*state;
+	lua_State		*L = GetClientLuaState();
 
 	cg.snap = snap;
 
@@ -202,9 +216,12 @@ A new snapshot has just been read in from the client system.
 ===================
 */
 static void CG_SetNextSnap( snapshot_t *snap ) {
-	int					num;
+	lua_State			*L = GetClientLuaState();
+	int					num,i,n;
+	int					numEnts = sizeof(cg_entities) / sizeof(cg_entities[0]);
 	entityState_t		*es;
-	centity_t			*cent;
+	centity_t			*cent,*tent;
+	qboolean			f = qfalse;
 
 	cg.nextSnap = snap;
 
@@ -225,6 +242,35 @@ static void CG_SetNextSnap( snapshot_t *snap ) {
 			cent->interpolate = qfalse;
 		} else {
 			cent->interpolate = qtrue;
+		}
+
+		if(L != NULL && cent->linked == qfalse && cent->currentState.eType <= ET_LUA && 
+			cent->currentState.eType != ET_GENERAL) {
+			qlua_gethook(L,"EntityLinked");
+			lua_pushentity(L,cent);
+			qlua_pcall(L,1,0,qtrue);
+			cent->linked = qtrue;
+		}
+	}
+
+	if(L != NULL) {
+		for (i = 0, tent = cg_entities, n = 1; i < numEnts; i++, tent++) {
+			if(tent != NULL && tent->linked) {
+				f = qfalse;
+				for ( num = 0 ; num < snap->numEntities ; num++ ) {
+					es = &snap->entities[num];
+					if(es->number == tent->currentState.number) {
+						f = qtrue;
+					}
+				}
+				if(f == qfalse) {
+					tent->linked = qfalse;
+					qlua_gethook(L,"EntityUnlinked");
+					lua_pushentity(L,tent);
+					qlua_pcall(L,1,0,qtrue);
+				}
+			}
+			n++;
 		}
 	}
 

@@ -64,6 +64,9 @@ local function UnlinkEntity(ent)
 			debugprint("Entity Unlinked: " .. index .. "\n")
 		end
 	end
+	if(CLIENT) then
+		removeEnt(ent)
+	end
 	debugprint("NumLinks: " .. #game_entities .. "\n")
 end
 

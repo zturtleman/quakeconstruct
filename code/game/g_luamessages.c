@@ -88,7 +88,7 @@ static const luaL_reg Message_methods[] = {
 };
 
 void G_InitLuaMessages(lua_State *L) {
-	lua_register(L,"Message",qlua_createmessage);
-	lua_register(L,"SendDataMessage",qlua_sendmessage);
-	luaL_openlib(L, "message", Message_methods, 0);
+	lua_register(L,"_Message",qlua_createmessage);
+	lua_register(L,"_SendDataMessage",qlua_sendmessage);
+	luaL_openlib(L, "_message", Message_methods, 0);
 }
