@@ -127,6 +127,7 @@ void CG_PushClientInfoTab(lua_State *L, clientInfo_t *ci) {
 		setTableInt(L,"legsSkin",ci->legsSkin);
 		setTableInt(L,"headSkin",ci->headSkin);
 		setTableInt(L,"torsoSkin",ci->torsoSkin);
+		setTableInt(L,"team",ci->team);
 	} else {
 		lua_pushstring(L,"<CLIENT WAS NIL>");
 		lua_error(L);

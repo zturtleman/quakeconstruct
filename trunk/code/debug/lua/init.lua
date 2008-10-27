@@ -8,13 +8,13 @@
 require "turrets"
 
 function makeMessage()
+	local msg = Message()
+	message.WriteString(msg,base64.enc("I Rock!"))
+	message.WriteFloat(msg,100.0)
+	message.WriteFloat(msg,120.5)
+	message.WriteShort(msg,10)
 	for k,v in pairs(GetEntitiesByClass("player")) do
-		local msg = Message(v,1)
-		message.WriteString(msg,base64.enc("I Rock!"))
-		message.WriteFloat(msg,100.0)
-		message.WriteFloat(msg,120.5)
-		message.WriteShort(msg,10)
-		SendDataMessage(msg)
+		SendDataMessage(msg,v,1)
 	end
 end
 concommand.Add("msgtest",makeMessage)
@@ -30,13 +30,14 @@ local function ItemPickup(item, other, trace, itemid)
 		local vec = item:GetPos()
 		local vec2 = other:GetVelocity()
 		
+		local msg = Message()
+		message.WriteString(msg,item:Classname())
+		writeVector(msg,vec)
+		writeVector(msg,vec2)
+		message.WriteLong(msg,itemid)
+		
 		for k,v in pairs(GetEntitiesByClass("player")) do
-			local msg = Message(v,2)
-			message.WriteString(msg,item:Classname())
-			writeVector(msg,vec)
-			writeVector(msg,vec2)
-			message.WriteLong(msg,itemid)
-			SendDataMessage(msg)
+			SendDataMessage(msg,v,2)
 		end
 	end
 	--return false
@@ -60,12 +61,9 @@ local function PlayerDamaged(self,inflictor,attacker,damage,meansOfDeath)
 		end
 		SendDataMessage(msg)
 	end
-	if(meansOfDeath != MOD_TRIGGER_HURT) then
-		--return 0
-	end
 end
 
-hook.add("PlayerDamaged","Accention",PlayerDamaged)
+hook.add("PlayerDamaged","init",PlayerDamaged)
 
 local function PlayerSpawned(pl)
 	for k,v in pairs(GetEntitiesByClass("player")) do

@@ -203,5 +203,27 @@ local function processDamage(attacker,pos,dmg,death,waslocal,wasme,health)
 	end
 end
 
+local function rvec(amt)
+	return Vector(math.random(-amt,amt),math.random(-amt,amt),math.random(-amt,amt))
+end
+
+local flare = LoadShader("flareShader")
+local function d3d()
+	local tab = GetEntitiesByClass("missile")
+	for k,v in pairs(tab) do
+		if(v != nil and v:GetWeapon() == WP_ROCKET_LAUNCHER) then
+			v:CustomDraw(true)
+			local s = RefEntity()
+			s:SetType(RT_SPRITE)
+			s:SetPos(v:GetPos())
+			s:SetColor(1,1,1,1)
+			s:SetRadius(12)
+			s:SetShader(flare)
+			s:Render()
+		end
+	end
+end
+hook.add("Draw3D","cl_init",d3d)
+
 hook.add("Respawned","cl_init",respawn)
 hook.add("Damaged","cl_init",processDamage)

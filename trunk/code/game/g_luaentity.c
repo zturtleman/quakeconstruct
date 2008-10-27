@@ -816,6 +816,16 @@ int qlua_damageplayer(lua_State *L) {
 	int			df = 0;
 	int			mod = 0;
 	int			carg = 1;
+	vec3_t		dir;
+	vec3_t		point;
+	qboolean	ddir = qfalse;
+	qboolean	dpoint = qfalse;
+
+	if(qlua_lockdamage) {
+		lua_pushstring(L,"Can't use Damage function in a damage hook.\n");
+		lua_error(L);
+		return 1;
+	}
 
 	if(lua_gettop(L) > 0) {
 		luaL_checktype(L,carg,LUA_TUSERDATA);
@@ -833,14 +843,32 @@ int qlua_damageplayer(lua_State *L) {
 		damage = lua_tointeger(L,carg);
 
 		if(lua_gettop(L) > carg) {
-			mod = lua_tointeger(L,carg+1);
+			carg++;
+			if(lua_type(L,carg) == LUA_TNUMBER) {
+				mod = lua_tointeger(L,carg);
+			}
+			carg++;
+			if(lua_type(L,carg) == LUA_TVECTOR) {
+				lua_tovector(L,carg,dir);
+				ddir = qtrue;
+			}
+			carg++;
+			if(lua_type(L,carg) == LUA_TVECTOR) {
+				lua_tovector(L,carg,point);
+				dpoint = qtrue;
+			}
 		}
 
 		if ( mod >= 0 && mod <= MOD_MAX ) {
-			G_Damage(targ,inflictor,attacker,NULL,NULL,damage,DAMAGE_THRU_LUA,mod);
+			if(ddir && dpoint) {
+				G_Damage(targ,inflictor,attacker,dir,point,damage,DAMAGE_THRU_LUA,mod);
+			} else {
+				G_Damage(targ,inflictor,attacker,NULL,NULL,damage,DAMAGE_THRU_LUA,mod);
+			}
 		} else {
 			lua_pushstring(L,"Invalid Argument For \"DamagePlayer\"\n (MOD out of range).\n");
 			lua_error(L);
+			return 1;
 		}
 	}
 	return 0;

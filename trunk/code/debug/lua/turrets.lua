@@ -45,39 +45,39 @@ local function traceit(ent,dx,dy)
 	
 	--print(VectorLength(vSub(res.endpos,startpos)) .. "\n")
 	
-	return res.entity
+	return res.entity,res.endpos
 end
 
 function sendTurretStart(ent,team)
+	local msg = Message()
+	message.WriteLong(msg,1)
+	message.WriteLong(msg,ent:EntIndex())
+	message.WriteLong(msg,team)
 	for k,v in pairs(GetEntitiesByClass("player")) do
-		local msg = Message(v,4)
-		message.WriteLong(msg,1)
-		message.WriteLong(msg,ent:EntIndex())
-		message.WriteLong(msg,team)
-		SendDataMessage(msg)
+		SendDataMessage(msg,v,4)
 	end
 end
 
 function sendTurretStat(ent,stat,val)
+	local msg = Message()
+	message.WriteLong(msg,4)
+	message.WriteLong(msg,ent:EntIndex())
+	message.WriteLong(msg,stat)
+	message.WriteFloat(msg,val)
 	for k,v in pairs(GetEntitiesByClass("player")) do
-		local msg = Message(v,4)
-		message.WriteLong(msg,4)
-		message.WriteLong(msg,ent:EntIndex())
-		message.WriteLong(msg,stat)
-		message.WriteFloat(msg,val)
-		SendDataMessage(msg)
+		SendDataMessage(msg,v,4)
 	end
 end
 
 function sendTurretFire(ent,dir)
+	local msg = Message()
+	message.WriteLong(msg,2)
+	message.WriteLong(msg,ent:EntIndex())
+	message.WriteFloat(msg,dir.x)
+	message.WriteFloat(msg,dir.y)
+	message.WriteLong(msg,MAX_TURRET_DIST)
 	for k,v in pairs(GetEntitiesByClass("player")) do
-		local msg = Message(v,4)
-		message.WriteLong(msg,2)
-		message.WriteLong(msg,ent:EntIndex())
-		message.WriteFloat(msg,dir.x)
-		message.WriteFloat(msg,dir.y)
-		message.WriteLong(msg,MAX_TURRET_DIST)
-		SendDataMessage(msg)
+		SendDataMessage(msg,v,4)
 	end
 end
 
@@ -88,9 +88,10 @@ function fireTurret(ent)
 		dir.x = math.random(-60,60)
 		dir.y = math.random(-60,60)
 		sendTurretFire(ent,dir)
-		local pl = traceit(ent,dir.x,dir.y)
+		local pl,endpos = traceit(ent,dir.x,dir.y)
+		local forward = VectorForward(ent:GetAngles())
 		if(pl != nil) then
-			pl:Damage(ent,ent:GetTable().owner,math.random(5,10),MOD_MACHINEGUN)
+			pl:Damage(ent,ent:GetTable().owner,math.random(5,10),MOD_MACHINEGUN,forward,endpos)
 		end
 		tab.shots = tab.shots - 1
 		sendTurretStat(ent,2,tab.shots/TURRET_SHOTS)
@@ -225,7 +226,6 @@ function setupCollision(turret)
 		end
 	end
 	turret:SetCallback(ENTITY_CALLBACK_DIE,death)
-	Timer(3,function() turret:Remove() end)
 end
 
 function bounce(ent,trace)
@@ -262,7 +262,7 @@ function etest(ent)
 
 	local ang = vectoangles(forward)
 	local ang2 = vMul(forward,360)
-	local test = CreateEntity("testent")
+	local test = CreateEntity("turret")
 	test:SetVelocity(vAdd(vMul(forward,300),ent:GetVelocity()))
 	test:SetPos(res.endpos)
 	test:SetAngles(ang)

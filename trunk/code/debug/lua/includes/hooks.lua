@@ -2,6 +2,7 @@ if(!hook) then
 	hook = {}
 	hook.events = {}
 	hook.debugflags = {}
+	hook.locked = {}
 end
 
 function hook.sort(event)
@@ -30,6 +31,7 @@ function hook.remove(event,name)
 end
 
 function hook.add(event,name,func,priority)
+	if(hook.locked[event]) then return end
 	priority = priority or 0
 	if(event != nil and name != nil and func != nil) then
 		local tab = {func=func,name=name,priority=priority}
@@ -42,6 +44,10 @@ function hook.add(event,name,func,priority)
 		error("Unable to add hook: " .. event .. ".\n")
 	end
 	hook.sort(event)
+end
+
+function hook.lock(event)
+	hook.locked[event] = true
 end
 
 function hook.debug(event,b)

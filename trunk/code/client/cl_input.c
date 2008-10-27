@@ -51,6 +51,7 @@ at the same time.
 kbutton_t	in_left, in_right, in_forward, in_back;
 kbutton_t	in_lookup, in_lookdown, in_moveleft, in_moveright;
 kbutton_t	in_strafe, in_speed;
+kbutton_t	in_use;
 kbutton_t	in_up, in_down;
 
 kbutton_t	in_buttons[16];
@@ -216,6 +217,9 @@ void IN_SpeedDown(void) {IN_KeyDown(&in_speed);}
 void IN_SpeedUp(void) {IN_KeyUp(&in_speed);}
 void IN_StrafeDown(void) {IN_KeyDown(&in_strafe);}
 void IN_StrafeUp(void) {IN_KeyUp(&in_strafe);}
+
+void IN_UseDown(void) {IN_KeyDown(&in_use);}
+void IN_UseUp(void) {IN_KeyUp(&in_use);}
 
 void IN_Button0Down(void) {IN_KeyDown(&in_buttons[0]);}
 void IN_Button0Up(void) {IN_KeyUp(&in_buttons[0]);}
@@ -877,6 +881,8 @@ void CL_InitInput( void ) {
 	Cmd_AddCommand ("-speed", IN_SpeedUp);
 	Cmd_AddCommand ("+attack", IN_Button0Down);
 	Cmd_AddCommand ("-attack", IN_Button0Up);
+	//Cmd_AddCommand ("+use", IN_UseDown); -Let lua handle these.
+	//Cmd_AddCommand ("-use", IN_UseUp);
 	Cmd_AddCommand ("+button0", IN_Button0Down);
 	Cmd_AddCommand ("-button0", IN_Button0Up);
 	Cmd_AddCommand ("+button1", IN_Button1Down);
