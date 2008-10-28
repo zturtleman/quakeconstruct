@@ -79,6 +79,7 @@ int qlua_rsetpos(lua_State *L) {
 	luaentity = lua_torefentity(L,1);
 	if(luaentity != NULL) {
 		lua_tovector(L,2,origin);
+		VectorCopy( origin, luaentity->lightingOrigin );
 		VectorCopy( origin, luaentity->origin );
 	}
 	return 0;
@@ -277,6 +278,84 @@ int qlua_rgetskin(lua_State *L) {
 	return 0;
 }
 
+int qlua_rsetoldframe(lua_State *L) {
+	refEntity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TNUMBER);
+
+	luaentity = lua_torefentity(L,1);
+	if(luaentity != NULL && lua_tointeger(L,2) > -1) {
+		luaentity->oldframe = lua_tointeger(L,2);
+	}
+	return 0;
+}
+
+int qlua_rgetoldframe(lua_State *L) {
+	refEntity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	luaentity = lua_torefentity(L,1);
+	if(luaentity != NULL) {
+		lua_pushinteger(L,luaentity->oldframe);
+		return 1;
+	}
+	return 0;
+}
+
+int qlua_rsetframe(lua_State *L) {
+	refEntity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TNUMBER);
+
+	luaentity = lua_torefentity(L,1);
+	if(luaentity != NULL && lua_tointeger(L,2) > -1) {
+		luaentity->frame = lua_tointeger(L,2);
+	}
+	return 0;
+}
+
+int qlua_rgetframe(lua_State *L) {
+	refEntity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	luaentity = lua_torefentity(L,1);
+	if(luaentity != NULL) {
+		lua_pushinteger(L,luaentity->frame);
+		return 1;
+	}
+	return 0;
+}
+
+int qlua_rsetlerp(lua_State *L) {
+	refEntity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TNUMBER);
+
+	luaentity = lua_torefentity(L,1);
+	if(luaentity != NULL && lua_tointeger(L,2) > -1) {
+		luaentity->backlerp = lua_tonumber(L,2);
+	}
+	return 0;
+}
+
+int qlua_rgetlerp(lua_State *L) {
+	refEntity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	luaentity = lua_torefentity(L,1);
+	if(luaentity != NULL) {
+		lua_pushnumber(L,luaentity->backlerp);
+		return 1;
+	}
+	return 0;
+}
+
 int qlua_rsetscale(lua_State *L) {
 	refEntity_t	*luaentity;
 	vec3_t in;
@@ -423,6 +502,12 @@ static const luaL_reg REntity_methods[] = {
   {"GetType",		qlua_rgettype},
   {"SetRadius",		qlua_rsetradius},
   {"GetRadius",		qlua_rgetradius},
+  {"SetFrame",		qlua_rsetframe},
+  {"GetFrame",		qlua_rgetframe},
+  {"SetOldFrame",	qlua_rsetoldframe},
+  {"GetOldFrame",	qlua_rgetoldframe},
+  {"SetLerp",		qlua_rsetlerp},
+  {"GetLerp",		qlua_rgetlerp},
   {"SetColor",		qlua_rsetcolor},
   {"SetRotation",	qlua_rsetrotation},
   {"Scale",			qlua_rsetscale},

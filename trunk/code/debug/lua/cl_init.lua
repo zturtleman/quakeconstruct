@@ -207,7 +207,6 @@ local function rvec(amt)
 	return Vector(math.random(-amt,amt),math.random(-amt,amt),math.random(-amt,amt))
 end
 
-local flare = LoadShader("flareShader")
 local function d3d()
 	local tab = GetEntitiesByClass("missile")
 	for k,v in pairs(tab) do
