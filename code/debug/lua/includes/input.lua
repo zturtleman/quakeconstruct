@@ -3,6 +3,7 @@ local mx = 0
 local my = 0
 local cursorOn = false
 local keys = {}
+local usepress = false
 
 function KeyIsDown(k)
 	if(keys[k] == true) then return true end
@@ -71,10 +72,14 @@ hook.add("KeyEvent","input",keyed)
 
 local function press()
 	print("PRESS\n")
+	usepress = true;
 end
 
 local function depress()
-	print("DEPRESS\n")
+	if(usepress) then
+		print("DEPRESS\n")
+		usepress = false
+	end
 end
 concommand.Add("+use",press)
 concommand.Add("-use",depress)
