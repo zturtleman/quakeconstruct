@@ -19,6 +19,7 @@ Panel.catchk = false
 Panel.cc = 0
 Panel.delegate = nil
 Panel.lastsize = {0,0}
+Panel.inLayout = false
 
 local function qcolor(tab)
 	draw.SetColor(tab[1],tab[2],tab[3],tab[4])
@@ -224,7 +225,7 @@ function Panel:GetLocalPos()
 	return self:GetLocalX(), self:GetLocalY()
 end
 
-function Panel:SetSize(w,h)
+function Panel:ISetSize(w,h)
 	if(w < 0) then w = 0 end
 	if(h < 0) then h = 0 end
 	if(self.lastsize[1] != w or self.lastsize[2] != h) then 
@@ -232,7 +233,20 @@ function Panel:SetSize(w,h)
 		self.h = h
 		self:InvalidateLayout()
 		self.lastsize = {w,h}
+		return true
 	end
+	return false
+end
+
+function Panel:SetSize(w,h)
+	if(self.inLayout == true) then return self:ISetSize(w,h) end
+	if(self:ISetSize(w,h)) then
+		self.inLayout = true
+		self:DoLayout()
+		self.inLayout = false
+		return true
+	end
+	return false
 end
 
 function Panel:GetWidth() return self.w end

@@ -88,7 +88,7 @@ end
 
 function Panel:OnScroll(v) end
 
-function Panel:DoLayout()
+function Panel:Layout(n)
 	local par = self:GetParent()
 	if(par) then
 		if(self.axis == 0) then
@@ -140,6 +140,11 @@ function Panel:DoLayout()
 		self:OnScroll(0)
 		self.wo = true
 	end
+	if(n == 1) then self:Layout(2) end
+end
+
+function Panel:DoLayout()
+	self:Layout(1)
 end
 
 registerComponent(Panel,"scrollbar","panel")

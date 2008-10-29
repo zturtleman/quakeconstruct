@@ -11,8 +11,12 @@ P:include("cursor.lua")
 
 local letters = string.alphabet
 
-function UI_ERROR(txt)
-	print("^1UI ERROR: " .. txt .. "\n")
+function UI_ERROR(txt,cmp)
+	local err = "^1UI ERROR: " .. txt
+	if(cmp != nil) then
+		err =  err .. "(" .. cmp._myname .. ")"
+	end
+	print(err .. "\n")
 end
 
 function parentComponents()
