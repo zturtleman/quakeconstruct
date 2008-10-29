@@ -54,20 +54,45 @@ function hexFormat(k)
 end
 
 if(CLIENT) then
-function drawNSBox(x,y,w,h,v,shader,nocenter)
-	local d = 1/3
-	draw.Rect(x,y,v,v,shader,0,0,d,d)
-	draw.Rect(x+v,y,v+(w-v*3),v,shader,d,0,d*2,d)
-	draw.Rect(x+(w-v),y,v,v,shader,d*2,0,d*3,d)
-	
-	draw.Rect(x,y+v,v,v+(h-v*3),shader,0,d,d,d*2)
-	if(!nocenter) then draw.Rect(x+v,y+v,v+(w-v*3),v+(h-(v*3)),shader,d,d,d*2,d*2) end
-	draw.Rect(x+(w-v),y+v,v,v+(h-(v*3)),shader,d*2,d,d*3,d*2)
-	
-	draw.Rect(x,y+(h-v),v,v,shader,0,d*2,d,d*3)
-	draw.Rect(x+v,y+(h-v),v+(w-v*3),v,shader,d,d*2,d*2,d*3)
-	draw.Rect(x+(w-v),y+(h-v),v,v,shader,d*2,d*2,d*3,d*3)
-end
+	function drawNSBox(x,y,w,h,v,shader,nocenter)
+		local d = 1/3
+		draw.Rect(x,y,v,v,shader,0,0,d,d)
+		draw.Rect(x+v,y,v+(w-v*3),v,shader,d,0,d*2,d)
+		draw.Rect(x+(w-v),y,v,v,shader,d*2,0,d*3,d)
+		
+		draw.Rect(x,y+v,v,v+(h-v*3),shader,0,d,d,d*2)
+		if(!nocenter) then draw.Rect(x+v,y+v,v+(w-v*3),v+(h-(v*3)),shader,d,d,d*2,d*2) end
+		draw.Rect(x+(w-v),y+v,v,v+(h-(v*3)),shader,d*2,d,d*3,d*2)
+		
+		draw.Rect(x,y+(h-v),v,v,shader,0,d*2,d,d*3)
+		draw.Rect(x+v,y+(h-v),v+(w-v*3),v,shader,d,d*2,d*2,d*3)
+		draw.Rect(x+(w-v),y+(h-v),v,v,shader,d*2,d*2,d*3,d*3)
+	end
+
+	function LoadCharacter(char,skin)
+		skin = skin or "default"
+		local ghead = LoadModel("models/players/" .. char .. "/head.md3")
+		local gtorso = LoadModel("models/players/" .. char .. "/upper.md3")
+		local glegs = LoadModel("models/players/" .. char .. "/lower.md3")
+
+		local headskin = util.LoadSkin("models/players/" .. char .. "/head_" .. skin .. ".skin")
+		local torsoskin = util.LoadSkin("models/players/" .. char .. "/upper_" .. skin .. ".skin")
+		local legskin = util.LoadSkin("models/players/" .. char .. "/lower_" .. skin .. ".skin")
+		
+		local legs = RefEntity()
+		legs:SetModel(glegs)
+		legs:SetSkin(legskin)
+
+		local torso = RefEntity()
+		torso:SetModel(gtorso)
+		torso:SetSkin(torsoskin)
+
+		local head = RefEntity()
+		head:SetModel(ghead)
+		head:SetSkin(headskin)
+		
+		return legs,torso,head
+	end
 end
 
 function DamageInfo(self,inflictor,attacker,damage,meansOfDeath,killed)
