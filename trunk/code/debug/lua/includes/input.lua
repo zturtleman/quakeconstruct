@@ -71,14 +71,18 @@ end
 hook.add("KeyEvent","input",keyed)
 
 local function press()
-	print("PRESS\n")
-	usepress = true;
+	if(!usepress) then
+		print("PRESS\n")
+		usepress = true;
+		CallHook("Use",true)
+	end
 end
 
 local function depress()
 	if(usepress) then
 		print("DEPRESS\n")
 		usepress = false
+		CallHook("Use",false)
 	end
 end
 concommand.Add("+use",press)

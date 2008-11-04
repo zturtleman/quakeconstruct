@@ -81,11 +81,13 @@ local function processDamage(attacker,pos,dmg,death,waslocal,wasme,hp)
 			if(death == MOD_SHOTGUN) then
 				spread = 200
 			end
-			if(wasme or death == MOD_SUICIDE) then
-				x = 320
-				y = 240
-				spread = 200
-			end
+			--[[if(!death == MOD_MACHINEGUN) then
+				if(wasme or death == MOD_SUICIDE) then
+					x = 320
+					y = 240
+					spread = 200
+				end
+			end]]
 			mark(x,y,dmg,spread,death)
 		else
 			if(death == MOD_FALLING) then

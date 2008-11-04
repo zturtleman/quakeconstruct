@@ -37,7 +37,7 @@ int qlua_createmessage(lua_State *L) {
 	ent = lua_toentity(L,1);
 
 	trap_N_CreateMessage(&msg, ent->s.clientNum);
-	trap_N_WriteLong(&msg,lua_tointeger(L,2));
+	trap_N_WriteShort(&msg,lua_tointeger(L,2));
 
 	qlua_pushmessage(L,&msg, ent->s.clientNum);
 

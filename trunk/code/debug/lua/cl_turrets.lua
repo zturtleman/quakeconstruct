@@ -58,7 +58,7 @@ local function fireFX(ent,dx,dy,dist)
 end
 
 local function HandleMessage(msgid)
-	if(msgid == 4) then
+	if(msgid == "turretaction") then
 		local cmd = message.ReadLong()
 		local turret = GetEntityByIndex(message.ReadLong())
 		if(turret != nil) then

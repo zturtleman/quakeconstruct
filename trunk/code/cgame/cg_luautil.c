@@ -164,15 +164,63 @@ int qlua_createmark(lua_State *L) {
 	return 0;
 }
 
+int qlua_playeranim(lua_State *L) {
+	refEntity_t	*legs;
+	refEntity_t	*torso;
+	centity_t	*player;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	player = lua_toentity(L,1);
+	legs = lua_torefentity(L,2);
+	torso = lua_torefentity(L,3);
+	if(player != NULL && legs != NULL && torso != NULL) {
+		CG_PlayerAnimation(player,&legs->oldframe,&legs->frame,&legs->backlerp,&torso->oldframe,&torso->frame,&torso->backlerp);
+	}
+	return 0;
+}
+
+int qlua_playerangles(lua_State *L) {
+	refEntity_t	*legs;
+	refEntity_t	*torso;
+	refEntity_t	*head;
+	centity_t	*player;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	player = lua_toentity(L,1);
+	legs = lua_torefentity(L,2);
+	torso = lua_torefentity(L,3);
+	head = lua_torefentity(L,4);
+	if(player != NULL && legs != NULL && torso != NULL) {
+		CG_PlayerAngles(player,legs->axis,torso->axis,head->axis);
+	}
+	return 0;
+}
+
+int qlua_localpos(lua_State *L) {
+	lua_pushvector(L,cg.predictedPlayerEntity.lerpOrigin);
+	return 1;
+}
+
+int qlua_localang(lua_State *L) {
+	lua_pushvector(L,cg.predictedPlayerEntity.lerpAngles);
+	return 1;
+}
+
 static const luaL_reg Util_methods[] = {
-  {"GetItemIcon",	qlua_getitemicon},
-  {"GetItemModel",	qlua_getitemmodel},
-  {"GetItemName",	qlua_getitemname},
-  {"GetWeaponIcon",	qlua_getweaponicon},
-  {"GetWeaponName",	qlua_getweaponname},
-  {"LockMouse",		qlua_lockmouse},
-  {"LoadSkin",		qlua_loadskin},
-  {"CreateMark",	qlua_createmark},
+  {"GetItemIcon",		qlua_getitemicon},
+  {"GetItemModel",		qlua_getitemmodel},
+  {"GetItemName",		qlua_getitemname},
+  {"GetWeaponIcon",		qlua_getweaponicon},
+  {"GetWeaponName",		qlua_getweaponname},
+  {"LockMouse",			qlua_lockmouse},
+  {"LoadSkin",			qlua_loadskin},
+  {"CreateMark",		qlua_createmark},
+  {"AnimatePlayer",		qlua_playeranim},
+  {"AnglePlayer",		qlua_playerangles},
+  {"LocalPos",			qlua_localpos},
+  {"LocalAngles",		qlua_localang},
   {0,0}
 };
 

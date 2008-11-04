@@ -962,6 +962,7 @@ void SV_RestartGameProgs( void ) {
 		return;
 	}
 	VM_Call( gvm, GAME_SHUTDOWN, qtrue );
+	//VM_Call( gvm, GAME_RESTART, qtrue );
 
 	// do a restart instead of a free
 	gvm = VM_Restart( gvm );

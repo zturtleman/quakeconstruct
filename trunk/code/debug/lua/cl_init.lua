@@ -129,16 +129,16 @@ local function HandleMessage(msgid)
 		print("Got Float: " .. float .. "\n")
 		print("Got Float2: " .. float2 .. "\n")
 		print("Got Short: " .. short .. "\n")
-	elseif(msgid == 2) then
+	elseif(msgid == "itempickup") then
 		local class = message.ReadString()
 		local pos = readVector()
 		local vel = readVector()
 		local itemid = message.ReadLong()
 		
 		ItemPickup(class,pos,vel,itemid)
-	elseif(msgid == 3) then
+	elseif(msgid == "playerdamage") then
 		ParseDamage()
-	elseif(msgid == 0) then
+	elseif(msgid == "playerrespawn") then
 		local self = (message.ReadShort() == LocalPlayer():EntIndex())
 		if(self) then
 			print("^2RESPAWN!\n")
@@ -206,23 +206,6 @@ end
 local function rvec(amt)
 	return Vector(math.random(-amt,amt),math.random(-amt,amt),math.random(-amt,amt))
 end
-
-local function d3d()
-	local tab = GetEntitiesByClass("missile")
-	for k,v in pairs(tab) do
-		if(v != nil and v:GetWeapon() == WP_ROCKET_LAUNCHER) then
-			v:CustomDraw(true)
-			local s = RefEntity()
-			s:SetType(RT_SPRITE)
-			s:SetPos(v:GetPos())
-			s:SetColor(1,1,1,1)
-			s:SetRadius(12)
-			s:SetShader(flare)
-			s:Render()
-		end
-	end
-end
-hook.add("Draw3D","cl_init",d3d)
 
 hook.add("Respawned","cl_init",respawn)
 hook.add("Damaged","cl_init",processDamage)

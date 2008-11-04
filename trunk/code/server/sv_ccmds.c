@@ -311,7 +311,7 @@ static void SV_MapRestart_f( void ) {
 		client->state = CS_ACTIVE;
 
 		SV_ClientEnterWorld( client, &client->lastUsercmd );
-	}	
+	}
 
 	// run another frame to allow things to look at all the players
 	VM_Call( gvm, GAME_RUN_FRAME, svs.time );

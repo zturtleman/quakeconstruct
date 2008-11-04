@@ -39,3 +39,15 @@ CONTENTS_LAVA = 8
 CONTENTS_SLIME = 16
 CONTENTS_WATER = 32
 CONTENTS_FOG = 64
+
+if(SERVER) then
+	local function message(str,pl)
+		if(str == "_clientready") then
+			CallHook("ClientReady",pl)
+			--Timer(3.8,CallHook,"ClientReady",pl)
+		end
+	end
+	hook.add("MessageReceived","includes",message)
+else
+	SendString("_clientready")
+end
