@@ -81,19 +81,42 @@ centity_t *lua_toentity(lua_State *L, int i) {
 	centity_t	*luaentity;
 	luaL_checktype(L,i,LUA_TUSERDATA);
 	luaentity = (centity_t *)luaL_checkudata(L, i, "Entity");
-	luaentity = qlua_getrealentity(luaentity->currentState.number);
+
+	if (luaentity->currentState.number == cg.predictedPlayerEntity.currentState.number) {
+		return &cg.predictedPlayerEntity;
+	} else {
+		luaentity = qlua_getrealentity(luaentity->currentState.number);
+	}
 
 	if (luaentity == NULL) luaL_typerror(L, i, "Entity");
+
+	//CG_CalcEntityLerpPositions( luaentity );
+
+	return luaentity;
+}
+
+centity_t *lua_toentityraw(lua_State *L, int i) {
+	centity_t	*luaentity;
+	luaL_checktype(L,i,LUA_TUSERDATA);
+	luaentity = (centity_t *)luaL_checkudata(L, i, "Entity");
+
+	if (luaentity == NULL) luaL_typerror(L, i, "Entity");
+
+	if (luaentity->currentState.number == cg.predictedPlayerEntity.currentState.number) {
+		return &cg.predictedPlayerEntity;
+	}
+
+	//CG_CalcEntityLerpPositions( luaentity );
 
 	return luaentity;
 }
 
 int qlua_getpos(lua_State *L) {
-	centity_t	*luaentity;
+	centity_t	*luaentity = lua_toentity(L,1);
 
-	luaL_checktype(L,1,LUA_TUSERDATA);
+	//luaL_checktype(L,1,LUA_TUSERDATA);
 
-	luaentity = lua_toentity(L,1);
+	//luaentity = lua_toentity(L,1);
 	if(luaentity != NULL) {
 		lua_pushvector(L,luaentity->lerpOrigin);
 		return 1;
@@ -129,6 +152,19 @@ int qlua_getangles(lua_State *L) {
 	luaentity = lua_toentity(L,1);
 	if(luaentity != NULL) {
 		lua_pushvector(L,luaentity->currentState.angles);
+		return 1;
+	}
+	return 0;
+}
+
+int qlua_getlerpangles(lua_State *L) {
+	centity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		lua_pushvector(L,luaentity->lerpAngles);
 		return 1;
 	}
 	return 0;
@@ -344,8 +380,13 @@ int	lua_classname(lua_State *L) {
 
 	luaL_checktype(L,1,LUA_TUSERDATA);
 
-	luaentity = lua_toentity(L,1);
+	luaentity = lua_toentityraw(L,1); //Get raw entity so classname is consistant
 	if(luaentity != NULL) {
+		if ( luaentity->currentState.eType >= (ET_EVENTS) ) {
+			lua_pushstring(L,"unknown");
+			return 1;
+		}
+
 		switch ( luaentity->currentState.eType ) {
 		default:
 			lua_pushstring(L,"unknown");
@@ -431,6 +472,7 @@ static const luaL_reg Entity_methods[] = {
   {"GetTrajectory",	qlua_gettrx},
   {"SetTrajectory", qlua_settrx},
   {"GetAngles",		qlua_getangles},
+  {"GetLerpAngles",	qlua_getlerpangles},
   {"SetAngles",		qlua_setangles},
   {"GetInfo",		qlua_getclientinfo},
   {"GetOtherEntity",	qlua_getotherentity},

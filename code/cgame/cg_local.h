@@ -1228,6 +1228,7 @@ int lua_torefdef(lua_State *L, int idx, refdef_t *refdef, qboolean a640);
 
 void lua_pushentity(lua_State *L, centity_t *cl);
 centity_t *lua_toentity(lua_State *L, int i);
+centity_t *lua_toentityraw(lua_State *L, int i);
 
 void lua_pushrefentity(lua_State *L, refEntity_t *cl);
 refEntity_t *lua_torefentity(lua_State *L, int i);
@@ -1749,4 +1750,9 @@ void	CG_ParticleExplosion (char *animStr, vec3_t origin, vec3_t vel, int duratio
 extern qboolean		initparticles;
 int CG_NewParticleArea ( int num );
 
-
+//Player Functions
+void CG_InterpolateEntityPosition( centity_t *cent );
+void CG_CalcEntityLerpPositions( centity_t *cent );
+void CG_PlayerAngles( centity_t *cent, vec3_t legs[3], vec3_t torso[3], vec3_t head[3] );
+void CG_PlayerAnimation( centity_t *cent, int *legsOld, int *legs, float *legsBackLerp,
+						int *torsoOld, int *torso, float *torsoBackLerp );

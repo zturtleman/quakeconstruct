@@ -191,6 +191,7 @@ void G_InitGame( int levelTime, int randomSeed, int restart );
 void G_RunFrame( int levelTime );
 void G_ShutdownGame( int restart );
 void CheckExitRules( void );
+void G_InitLua( void );
 
 
 /*
@@ -208,6 +209,10 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 		return 0;
 	case GAME_SHUTDOWN:
 		G_ShutdownGame( arg0 );
+		return 0;
+	case GAME_RESTART:
+		CloseServerLua();
+		G_InitLua();
 		return 0;
 	case GAME_CLIENT_CONNECT:
 		return (int)ClientConnect( arg0, arg1, arg2 );
@@ -459,6 +464,7 @@ void pushents(lua_State *L) {
 void G_InitLua() {
 	lua_State *L = NULL;
 
+	//trap_SendServerCommand(-1,"postlua");
 	InitServerLua();
 
 	L = GetServerLuaState();
@@ -600,6 +606,8 @@ G_ShutdownGame
 void G_ShutdownGame( int restart ) {
 	G_Printf ("==== ShutdownGame ====\n");
 
+	CloseServerLua();
+
 	if ( level.logFile ) {
 		G_LogPrintf("ShutdownGame:\n" );
 		G_LogPrintf("------------------------------------------------------------\n" );
@@ -612,8 +620,6 @@ void G_ShutdownGame( int restart ) {
 	if ( trap_Cvar_VariableIntegerValue( "bot_enable" ) ) {
 		BotAIShutdown( restart );
 	}
-
-	CloseServerLua();
 }
 
 

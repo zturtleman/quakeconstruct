@@ -123,7 +123,24 @@ int qlua_rgetangles(lua_State *L) {
 	luaentity = lua_torefentity(L,1);
 	if(luaentity != NULL) {
 		lua_pushvector(L,luaentity->axis[0]);
-		return 1;
+		lua_pushvector(L,luaentity->axis[1]);
+		lua_pushvector(L,luaentity->axis[2]);
+		return 3;
+	}
+	return 0;
+}
+
+int qlua_rgetaxis(lua_State *L) {
+	refEntity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	luaentity = lua_torefentity(L,1);
+	if(luaentity != NULL) {
+		lua_pushvector(L,luaentity->axis[0]);
+		lua_pushvector(L,luaentity->axis[1]);
+		lua_pushvector(L,luaentity->axis[2]);
+		return 3;
 	}
 	return 0;
 }
@@ -490,6 +507,7 @@ static const luaL_reg REntity_methods[] = {
   {"SetPos",		qlua_rsetpos},
   {"GetPos2",		qlua_rgetpos2},
   {"SetPos2",		qlua_rsetpos2},
+  {"GetAxis",		qlua_rgetaxis},
   {"GetAngles",		qlua_rgetangles},
   {"SetAngles",		qlua_rsetangles},
   {"SetShader",		qlua_rsetshader},

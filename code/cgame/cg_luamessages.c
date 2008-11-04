@@ -1,7 +1,7 @@
 #include "cg_local.h"
 
 void qlua_HandleMessage() {
-	int data = trap_N_ReadLong();
+	int data = trap_N_ReadShort();
 	qlua_gethook(GetClientLuaState(),"_HandleMessage");
 	lua_pushinteger(GetClientLuaState(),data);
 	qlua_pcall(GetClientLuaState(),1,0,qtrue);

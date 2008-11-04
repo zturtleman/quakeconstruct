@@ -1149,6 +1149,12 @@ static void CG_ServerCommand( void ) {
 		return;
 	}
 
+	if ( !strcmp( cmd, "postlua" ) ) {
+		//CG_InitLua();
+		//DoLuaInit();
+		return;
+	}
+
   if ( Q_stricmp (cmd, "remapShader") == 0 ) {
 		if (trap_Argc() == 4) {
 			trap_R_RemapShader(CG_Argv(1), CG_Argv(2), CG_Argv(3));

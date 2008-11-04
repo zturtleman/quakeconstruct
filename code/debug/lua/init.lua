@@ -7,6 +7,11 @@
 
 require "turrets"
 
+message.Precache("msgtest")
+message.Precache("itempickup")
+message.Precache("playerdamage")
+message.Precache("playerrespawn")
+
 function makeMessage()
 	local msg = Message()
 	message.WriteString(msg,base64.enc("I Rock!"))
@@ -14,7 +19,7 @@ function makeMessage()
 	message.WriteFloat(msg,120.5)
 	message.WriteShort(msg,10)
 	for k,v in pairs(GetEntitiesByClass("player")) do
-		SendDataMessage(msg,v,1)
+		SendDataMessage(msg,v,"msgtest")
 	end
 end
 concommand.Add("msgtest",makeMessage)
@@ -37,24 +42,24 @@ local function ItemPickup(item, other, trace, itemid)
 		message.WriteLong(msg,itemid)
 		
 		for k,v in pairs(GetEntitiesByClass("player")) do
-			SendDataMessage(msg,v,2)
+			SendDataMessage(msg,v,"itempickup")
 		end
 	end
 	--return false
 end
 hook.add("ItemPickup","init",ItemPickup)
 
-local function PlayerDamaged(self,inflictor,attacker,damage,meansOfDeath)
+local function PlayerDamaged(self,inflictor,attacker,damage,meansOfDeath,dir,pos)
 	for k,v in pairs(GetEntitiesByClass("player")) do
-		local msg = Message(v,3)
+		local msg = Message(v,"playerdamage")
 		message.WriteLong(msg,damage)
 		message.WriteShort(msg,meansOfDeath)
 		message.WriteShort(msg,self:EntIndex())
-		message.WriteLong(msg,self:GetInfo().health)
+		message.WriteLong(msg,self:GetInfo().health)	
 		if(attacker) then
 			message.WriteShort(msg,1)
 			message.WriteString(msg,attacker:GetInfo().name)
-			writeVector(msg,attacker:GetPos())
+			writeVector(msg,pos or attacker:GetPos())
 			message.WriteShort(msg,attacker:EntIndex())
 		else
 			message.WriteShort(msg,0)
@@ -67,7 +72,7 @@ hook.add("PlayerDamaged","init",PlayerDamaged)
 
 local function PlayerSpawned(pl)
 	for k,v in pairs(GetEntitiesByClass("player")) do
-		local msg = Message(v,0)
+		local msg = Message(v,"playerrespawn")
 		message.WriteShort(msg,pl:EntIndex())
 		SendDataMessage(msg)
 	end

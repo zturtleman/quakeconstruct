@@ -2,6 +2,8 @@ MAX_TURRET_DIST = 750
 TURRET_HEALTH = 500
 TURRET_SHOTS = 200
 
+message.Precache("turretaction")
+
 local weapons = {
 	WP_MACHINEGUN,
 	WP_GRENADE_LAUNCHER,
@@ -54,7 +56,7 @@ function sendTurretStart(ent,team)
 	message.WriteLong(msg,ent:EntIndex())
 	message.WriteLong(msg,team)
 	for k,v in pairs(GetEntitiesByClass("player")) do
-		SendDataMessage(msg,v,4)
+		SendDataMessage(msg,v,"turretaction")
 	end
 end
 
@@ -65,7 +67,7 @@ function sendTurretStat(ent,stat,val)
 	message.WriteLong(msg,stat)
 	message.WriteFloat(msg,val)
 	for k,v in pairs(GetEntitiesByClass("player")) do
-		SendDataMessage(msg,v,4)
+		SendDataMessage(msg,v,"turretaction")
 	end
 end
 
@@ -77,7 +79,7 @@ function sendTurretFire(ent,dir)
 	message.WriteFloat(msg,dir.y)
 	message.WriteLong(msg,MAX_TURRET_DIST)
 	for k,v in pairs(GetEntitiesByClass("player")) do
-		SendDataMessage(msg,v,4)
+		SendDataMessage(msg,v,"turretaction")
 	end
 end
 
@@ -103,8 +105,9 @@ end
 
 function aimTurretAt(ent,pos)
 	--Use DotProduct so we don't waste ammo
+	local tpos = vAdd(pos,Vector(0,0,math.random(10,20)))
 	local entang = ent:GetAngles()
-	local aim = VectorNormalize(vSub(pos,ent:GetPos()))
+	local aim = VectorNormalize(vSub(tpos,ent:GetPos()))
 	local aim = vectoangles(aim)
 	local ang = vAdd(entang,vMul(getDeltaAngle3(aim,entang),.2))
 	local vf1 = VectorRight(entang)
@@ -149,24 +152,26 @@ function aimTurret(ent)
 	table.sort(players,plsort)
 	
 	for k,v in pairs(players) do
-		if(v != owner and v:GetInfo().health > 0 and checkteam(v,owner)) then
-			local pos = v:GetPos()
-			if(pos.z > ent:GetPos().z) then
-				pos.z = pos.z + 4
-			end
-			local dist = VectorLength(vSub(ent:GetPos(),pos))
-			if(dist < MAX_TURRET_DIST) then
-				local flags = 1
-				flags = bitOr(flags,33554432)
-				flags = bitOr(flags,67108864)
-				local res = TraceLine(ent:GetPos(),pos,ent,flags)
-				if(res.entity == v or vEq(pos,res.endpos)) then
-					if(aimTurretAt(ent,pos)) then
-						return true
+		--if(v != owner and v:GetInfo().health > 0 and checkteam(v,owner)) then
+			if(v:GetInfo().health > 0) then
+				local pos = v:GetPos()
+				if(pos.z > ent:GetPos().z) then
+					pos.z = pos.z + 4
+				end
+				local dist = VectorLength(vSub(ent:GetPos(),pos))
+				if(dist < MAX_TURRET_DIST) then
+					local flags = 1
+					flags = bitOr(flags,33554432)
+					flags = bitOr(flags,67108864)
+					local res = TraceLine(ent:GetPos(),pos,ent,flags)
+					if(res.entity == v or vEq(pos,res.endpos)) then
+						if(aimTurretAt(ent,pos)) then
+							return true
+						end
 					end
 				end
 			end
-		end
+		--end
 	end
 	
 	if(LevelTime() > tab.expiration) then
