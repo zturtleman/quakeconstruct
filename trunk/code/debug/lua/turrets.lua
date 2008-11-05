@@ -16,7 +16,7 @@ local weapons = {
 }
 
 function vectoangles(v)
-	local out = Vector(0,0,0)
+	local out = Vector()
 
 	local yaw = ( (math.atan2 ( v.y, v.x ) * 180) / math.pi );
 	local forward = math.sqrt ( v.x*v.x + v.y*v.y );
@@ -86,7 +86,7 @@ end
 function fireTurret(ent)
 	local tab = ent:GetTable()
 	if(tab.shots > 0) then
-		local dir = Vector(0,0,0)
+		local dir = Vector()
 		dir.x = math.random(-60,60)
 		dir.y = math.random(-60,60)
 		sendTurretFire(ent,dir)
@@ -99,7 +99,7 @@ function fireTurret(ent)
 		sendTurretStat(ent,2,tab.shots/TURRET_SHOTS)
 	else
 		tab.shots = 0
-		sendTurretFire(ent,Vector(0,0,0))
+		sendTurretFire(ent,Vector())
 	end
 end
 

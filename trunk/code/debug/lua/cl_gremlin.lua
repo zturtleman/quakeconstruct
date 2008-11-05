@@ -49,7 +49,7 @@ local function d3d()
 	legs:SetPos(lp)
 	
 	--Scaling works relative so set angles to reset scale
-	legs:SetAngles(Vector(0,0,0))
+	legs:SetAngles(Vector())
 	if(speed < 0) then
 		legs:SetAngles(Vector(0,180,0))
 	end

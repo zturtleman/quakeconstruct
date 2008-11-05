@@ -49,6 +49,9 @@ function vAbs(v)
 end
 
 function Vector(x,y,z)
+	x = x or 0
+	y = y or 0
+	z = z or 0
 	return {x=x,y=y,z=z}
 end
 

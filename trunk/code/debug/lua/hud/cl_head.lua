@@ -62,7 +62,7 @@ function drawHead(x,y,ICON_SIZE,hp)
 	local damageX = _CG.damageX
 	local damageY = _CG.damageY
 	local delta = (ltime - damageTime)
-	local angles = Vector(0,0,0)
+	local angles = Vector()
 	if(delta < DAMAGE_TIME) then
 		frac = delta / DAMAGE_TIME
 		size = ICON_SIZE * 1.25 * ( 1.5 - frac * 0.5 );
