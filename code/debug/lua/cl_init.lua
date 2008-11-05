@@ -23,11 +23,11 @@ local flare = LoadShader("flareShader")
 local blood1 = LoadShader("BloodMark") --viewBloodFilter_HQ
 local i=0
 local rpos = Vector(670,500,30)
-local lastPos = Vector(0,0,0)
+local lastPos = Vector()
 local bob = 0
 local nxt = 0
-local plmoved = Vector(0,0,0)
-local lastplmoved = Vector(0,0,0)
+local plmoved = Vector()
+local lastplmoved = Vector()
 local smoothvel = 0
 local smoothfall = 0
 local ddir = 0
@@ -86,7 +86,7 @@ local function ItemPickup(class,pos,vel,itemid)
 end
 
 local function readVector()
-	local vec = Vector(0,0,0)
+	local vec = Vector()
 	vec.x = message.ReadFloat()
 	vec.y = message.ReadFloat()
 	vec.z = message.ReadFloat()
@@ -103,7 +103,7 @@ end
 
 local function ParseDamage()
 	local attacker = nil
-	local pos = Vector(0,0,0)
+	local pos = Vector()
 	local dmg = message.ReadLong()
 	local death = message.ReadShort()
 	local self = (message.ReadShort() == LocalPlayer():EntIndex())
@@ -152,7 +152,7 @@ local function maxvel(v)
 	return math.min(math.max(v,-320),320)/320;
 end
 
-function _ViewCalc(pos,ang,fovx,fovy)
+local function bobview(pos,ang,fovx,fovy)
 	if(!_CG) then print("^1NO CG!\n") return end
 	local crd = _CG.refdef.right
 	local vel = LocalPlayer():GetTrajectory():GetDelta()
@@ -180,11 +180,7 @@ function _ViewCalc(pos,ang,fovx,fovy)
 	smoothvel = smoothvel + (rvel - smoothvel)*.2
 	smoothfall = smoothfall + (f - smoothfall)*.2
 	
-	local def = {
-		origin = vAdd(pos,Vector(0,0,0)),
-		angles = ang,
-	}
-	render.SetRefDef(def)
+	ApplyView(pos,ang)
 	
 	if(lastTarget != LocalPlayer()) then
 		hp = 100
@@ -192,6 +188,7 @@ function _ViewCalc(pos,ang,fovx,fovy)
 	end
 	--print("Set Ref\n")
 end
+hook.add("CalcView","cl_init",bobview)
 
 local function respawn()
 	hp = 100

@@ -30,8 +30,8 @@ refdef.x = 0
 refdef.y = 0
 refdef.width = 640
 refdef.height = 480
-refdef.origin = Vector(0,0,0)
-refdef.angles = Vector(0,0,0)
+refdef.origin = Vector()
+refdef.angles = Vector()
 refdef.fov_y = 30
 refdef.fov_x = refdef.fov_y * aspect
 

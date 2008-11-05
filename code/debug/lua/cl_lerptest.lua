@@ -46,11 +46,11 @@ local function d3d()
 	legs:SetPos(lp)
 	legs:Render()
 	
-	torso:SetAngles(Vector(0,0,0))
+	torso:SetAngles(Vector())
 	torso:PositionOnTag(legs,"tag_torso")
 	torso:Render()
 	
-	head:SetAngles(Vector(0,0,0))
+	head:SetAngles(Vector())
 	head:PositionOnTag(torso,"tag_head")
 	head:Render()
 end

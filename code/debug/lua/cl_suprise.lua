@@ -13,7 +13,7 @@ local explodeSound = LoadSound("sound/player/kapop.wav")
 
 local i=0
 local rpos = Vector(670,500,30)
-local lastPos = Vector(0,0,0)
+local lastPos = Vector()
 
 local function rvel(a)
 	return Vector(

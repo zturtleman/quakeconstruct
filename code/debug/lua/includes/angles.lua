@@ -6,7 +6,7 @@ FOURTH = 4;
 function getDeltaAngle3(angle1, angle2)
 	angle1 = normalizeAngle3(angle1)
 	angle2 = normalizeAngle3(angle2)
-	local ang = Vector(0,0,0)
+	local ang = Vector()
 	ang.x = getDeltaAngle(angle2.x, angle1.x)
 	ang.y = getDeltaAngle(angle2.y, angle1.y)
 	ang.z = getDeltaAngle(angle2.z, angle1.z)
@@ -14,7 +14,7 @@ function getDeltaAngle3(angle1, angle2)
 end
 
 function normalizeAngle3(angle)
-	local ang = Vector(0,0,0)
+	local ang = Vector()
 	ang.x = normalizeAngle(angle.x)
 	ang.y = normalizeAngle(angle.y)
 	ang.z = normalizeAngle(angle.z)

@@ -19,8 +19,8 @@ ball:SetPos(lp)
 local plus = RefEntity()
 plus:SetModel(smallcross)
 
-charger_pos = charger_pos or Vector(0,0,0)
-charger_normal = charger_normal or Vector(0,0,0)
+charger_pos = charger_pos or Vector()
+charger_normal = charger_normal or Vector()
 
 local pos = charger_pos
 local normal = charger_normal
@@ -59,7 +59,7 @@ local function d3d()
 	center = vAdd(center,vMul(f,1.5))
 
 	ball:SetPos(center)
-	ball:SetAngles(Vector(0,0,0))
+	ball:SetAngles(Vector())
 	ball:Scale(Vector(.3,.3,.3))
 	
 	--center = vAdd(center,vMul(u,-1))

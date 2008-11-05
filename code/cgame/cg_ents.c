@@ -991,7 +991,10 @@ static void CG_AddCEntity( centity_t *cent ) {
 	// add automatic effects
 	CG_EntityEffects( cent );
 
-	if(cent->customdraw) return;
+	if(cent->customdraw) {
+		cent->customdraw = qfalse;
+		return;
+	}
 
 	switch ( cent->currentState.eType ) {
 	default:

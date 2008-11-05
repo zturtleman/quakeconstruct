@@ -1,6 +1,6 @@
 local Panel = {}
 Panel.model = nil
-Panel.org = Vector(0,0,0)
+Panel.org = Vector()
 
 function Panel:Initialize()
 	self.ref = RefEntity()

@@ -6,9 +6,12 @@ local health = 100
 local lastTarget = nil
 local gibhp = -40
 local skull = LoadModel("models/gibs/skull.md3")
-local skspin = Vector(0,0,0)
+local flare = LoadShader("flareShader")
+local skspin = Vector()
 local spin = 0
-local gibpos = Vector(0,0,0)
+local gibpos = Vector()
+local look = Vector()
+local look2 = Vector()
 leganim:SetType(ANIM_ACT_LOOP_LERP)
 legidle:SetType(ANIM_ACT_LOOP_LERP)
 local function trDown(pos)
@@ -17,8 +20,25 @@ local function trDown(pos)
 	return res.endpos
 end
 
-local headpos = Vector(0,0,0)
-local headang = Vector(0,0,0)
+local headpos = Vector()
+local headang = Vector()
+
+local function RefFlare(pos)
+	local fl = RefEntity()
+	fl:SetShader(flare)
+	fl:SetColor(.9,0,0,1)
+	fl:SetRadius(5)	
+	fl:SetPos(pos)
+	fl:SetType(RT_SPRITE)
+	fl:Render()
+end
+
+local function sight(pos,ang)
+	local f = ang
+	local endpos = vAdd(pos,vMul(f,10000))
+	local res = TraceLine(pos,endpos,nil,1)
+	RefFlare(res.endpos)
+end
 
 local function d3d()
 	LocalPlayer():CustomDraw(true)
@@ -125,6 +145,9 @@ local function d3d()
 		
 		legs:SetAngles(vAdd(LocalPlayer():GetAngles(),Vector(90,0,0)))
 		legs:SetPos(gibpos)
+		legs:SetFrame(1)
+		legs:SetOldFrame(1)
+		
 		legs:Render()
 	end
 	
@@ -135,12 +158,14 @@ local function d3d()
 end
 hook.add("Draw3D","cl_legtest",d3d)
 
-local deadpos = Vector(0,0,0)
+local deadpos = Vector()
 
-function _ViewCalc(pos,ang,fovx,fovy)
+local function legview(pos,ang,fovx,fovy)
 	local hp = health
 	local prev = Vector(pos.x,pos.y,pos.z)
 	local preva = Vector(ang.x,ang.y,ang.z)
+	
+	if(hp > 0) then sight(pos,AngleVectors(ang)) end
 	
 	if(hp > gibhp) then
 		pos = headpos
@@ -155,6 +180,8 @@ function _ViewCalc(pos,ang,fovx,fovy)
 			ang.z = ang.z + getDeltaAngle(ang.z,preva.z)/4
 			
 			deadpos = pos
+			
+			--pos.z = prev.z
 		end
 	end
 	
@@ -179,20 +206,30 @@ function _ViewCalc(pos,ang,fovx,fovy)
 			ang = VectorToAngles(VectorNormalize(vSub(headpos,pos)))
 			ang.z = headang.z --ang.z + 30
 			pos.z = headpos.z + 45
+			ang = vAdd(ang,look2)
 		else
 			ang = VectorToAngles(VectorNormalize(vSub(gibpos,pos)))
+			ang = vAdd(ang,look2)
 			local f = AngleVectors(ang)
 			pos = vAdd(pos,vMul(f,-100))
 			pos.z = LocalPlayer():GetPos().z + 4
 		end
+		
+		look2 = vAdd(look2,vMul(getDeltaAngle3(look,look2),.03))
+	else
+		look = Vector()
 	end
 	
-	local def = {
-		origin = vAdd(pos,Vector(0,0,0)),
-		angles = ang,
-	}
-	render.SetRefDef(def)
+	ApplyView(pos,ang)
 end
+hook.add("CalcView","cl_legtest",legview)
+
+local function moused(x,y)
+	look = vAdd(look,Vector(y/6,-x/6,0))
+	if(look.x < -90) then look.x = -90 end
+	if(look.x > 90) then look.x = 90 end
+end
+hook.add("MouseEvent","cl_legtest",moused)
 
 local function processDamage(attacker,pos,dmg,death,waslocal,wasme,hp)
 	if(waslocal) then

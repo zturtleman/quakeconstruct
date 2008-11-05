@@ -24,7 +24,7 @@ local blood3 = LoadShader("viewBloodFilter_HQ")
 local gore = LoadShader("deadGore")
 local i=0
 local rpos = Vector(670,500,30)
-local lastPos = Vector(0,0,0)
+local lastPos = Vector()
 local bob = 0
 local nxt = 0
 
