@@ -1278,6 +1278,7 @@ void CG_SetScoreSelection(void *menu);
 score_t *CG_GetSelectedScore();
 void CG_BuildSpectatorString();
 void qlua_HandleMessage();
+void CG_DemoStarted();
 
 
 //

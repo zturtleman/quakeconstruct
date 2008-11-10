@@ -81,6 +81,9 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 		//Handle Messages. -Hxrmn
 		qlua_HandleMessage();
 		return 0;
+	case CG_DEMOSTARTED:
+		CG_DemoStarted();
+		return 0;
 	default:
 		CG_Error( "vmMain: unknown command %i", command );
 		break;
@@ -2156,6 +2159,14 @@ CG_EventHandling
 */
 #ifndef MISSIONPACK
 void CG_EventHandling(int type) {
+}
+
+void CG_DemoStarted() {
+	lua_State *L = GetClientLuaState();
+	if(L != NULL) {
+		qlua_gethook(L,"DemoStarted");
+		qlua_pcall(L,0,0,qtrue);
+	}
 }
 
 

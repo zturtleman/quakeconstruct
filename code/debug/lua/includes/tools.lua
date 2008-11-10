@@ -1,4 +1,4 @@
-QLUA_DEBUG = false;
+QLUA_DEBUG = true;
 
 function killGaps(line)
 	line = string.Replace(line," ","")

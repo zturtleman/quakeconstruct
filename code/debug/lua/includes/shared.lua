@@ -46,9 +46,16 @@ if(SERVER) then
 		if(str == "_clientready") then
 			CallHook("ClientReady",pl)
 			--Timer(3.8,CallHook,"ClientReady",pl)
+		elseif(str == "_demostarted") then
+			CallHook("DemoStarted",pl)
 		end
 	end
 	hook.add("MessageReceived","includes",message)
 else
 	SendString("_clientready")
+	
+	local function demo()
+		SendString("_demostarted")
+	end
+	hook.add("DemoStarted","includes",demo)	
 end
