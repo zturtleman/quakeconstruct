@@ -378,6 +378,8 @@ void CL_Record_f( void ) {
 	FS_Write (buf.data, buf.cursize, clc.demofile);
 
 	// the rest of the demo file will be copied from net messages
+
+	VM_Call( cgvm, CG_DEMOSTARTED );
 }
 
 /*

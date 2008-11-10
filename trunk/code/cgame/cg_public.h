@@ -247,7 +247,8 @@ typedef enum {
 	CG_EVENT_HANDLING,
 //	void (*CG_EventHandling)(int type);
 	
-	CG_LUA_MSG
+	CG_LUA_MSG,
+	CG_DEMOSTARTED
 } cgameExport_t;
 
 //----------------------------------------------

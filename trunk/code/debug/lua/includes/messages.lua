@@ -92,14 +92,14 @@ if(SERVER) then
 		return msgIDs[id]
 	end
 	
-	local function SendCache(pl)
+	local function SendCache(pl,force)
 		if(pl == nil) then error("^5MESSAGE ERROR: Unable to send cache to player (player was nil)\n") return end
 		local tab = pl:GetTable()
 		tab.msglist = tab.msglist or {}
 		
 		local send = {}
 		for k,v in pairs(msgIDs) do
-			if(tab.msglist[k] != true) then
+			if(tab.msglist[k] != true or force) then
 				print(k .. " - " .. v .. "\n")
 				if(k != nil and v != nil) then
 					table.insert(send, {v,k})
@@ -179,6 +179,12 @@ if(SERVER) then
 		SendCache(pl)
 	end
 	hook.add("ClientReady","messages",PlayerJoined)
+	
+	local function DemoSend(pl)
+		Timer(.5,SendCache,pl,true)
+		print("^5Demo Recording Started, Sending Message ID's\n")
+	end
+	hook.add("DemoStarted","messages",DemoSend)
 end
 
 if(CLIENT) then
