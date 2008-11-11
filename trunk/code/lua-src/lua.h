@@ -16,6 +16,8 @@
 #include "luaconf.h"
 
 
+//#define LUA_BITWISE_OPERATORS
+
 #define LUA_VERSION	"Lua 5.1"
 #define LUA_RELEASE	"Lua 5.1.3 patched (added | & ^^ << >> ~ \\ !=)"
 #define LUA_VERSION_NUM	501
