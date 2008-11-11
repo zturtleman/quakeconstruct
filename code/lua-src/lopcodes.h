@@ -174,9 +174,19 @@ OP_MUL,/*	A B C	R(A) := RK(B) * RK(C)				*/
 OP_DIV,/*	A B C	R(A) := RK(B) / RK(C)				*/
 OP_MOD,/*	A B C	R(A) := RK(B) % RK(C)				*/
 OP_POW,/*	A B C	R(A) := RK(B) ^ RK(C)				*/
+#if defined(LUA_BITWISE_OPERATORS)
+OP_BOR,/*	A B C	R(A) := RK(B) | RK(C)				*/
+OP_BAND,/*	A B C	R(A) := RK(B) & RK(C)				*/
+OP_BXOR,/*	A B C	R(A) := RK(B) ^| RK(C)				*/
+OP_BLSHFT,/*	A B C	R(A) := RK(B) << RK(C)				*/
+OP_BRSHFT,/*	A B C	R(A) := RK(B) >> RK(C)				*/
+OP_BNOT,/*	A B	R(A) := ~ R(B)				*/
+OP_INTDIV,/*	A B C	R(A) := RK(B) \ RK(C)				*/
+#endif
 OP_UNM,/*	A B	R(A) := -R(B)					*/
 OP_NOT,/*	A B	R(A) := not R(B)				*/
 OP_LEN,/*	A B	R(A) := length of R(B)				*/
+
 
 OP_CONCAT,/*	A B C	R(A) := R(B).. ... ..R(C)			*/
 
@@ -186,8 +196,8 @@ OP_EQ,/*	A B C	if ((RK(B) == RK(C)) ~= A) then pc++		*/
 OP_LT,/*	A B C	if ((RK(B) <  RK(C)) ~= A) then pc++  		*/
 OP_LE,/*	A B C	if ((RK(B) <= RK(C)) ~= A) then pc++  		*/
 
-OP_TEST,/*	A C	if not (R(A) <=> C) then pc++			*/ 
-OP_TESTSET,/*	A B C	if (R(B) <=> C) then R(A) := R(B) else pc++	*/ 
+OP_TEST,/*	A C	if not (R(A) <=> C) then pc++			*/
+OP_TESTSET,/*	A B C	if (R(B) <=> C) then R(A) := R(B) else pc++	*/
 
 OP_CALL,/*	A B C	R(A), ... ,R(A+C-2) := R(A)(R(A+1), ... ,R(A+B-1)) */
 OP_TAILCALL,/*	A B C	return R(A)(R(A+1), ... ,R(A+B-1))		*/
@@ -197,8 +207,8 @@ OP_FORLOOP,/*	A sBx	R(A)+=R(A+2);
 			if R(A) <?= R(A+1) then { pc+=sBx; R(A+3)=R(A) }*/
 OP_FORPREP,/*	A sBx	R(A)-=R(A+2); pc+=sBx				*/
 
-OP_TFORLOOP,/*	A C	R(A+3), ... ,R(A+2+C) := R(A)(R(A+1), R(A+2)); 
-                        if R(A+3) ~= nil then R(A+2)=R(A+3) else pc++	*/ 
+OP_TFORLOOP,/*	A C	R(A+3), ... ,R(A+2+C) := R(A)(R(A+1), R(A+2));
+                        if R(A+3) ~= nil then R(A+2)=R(A+3) else pc++	*/
 OP_SETLIST,/*	A B C	R(A)[(C-1)*FPF+i] := R(A+i), 1 <= i <= B	*/
 
 OP_CLOSE,/*	A 	close all variables in the stack up to (>=) R(A)*/

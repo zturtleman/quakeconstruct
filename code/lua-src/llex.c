@@ -39,7 +39,11 @@ const char *const luaX_tokens [] = {
     "end", "false", "for", "function", "if",
     "in", "local", "nil", "not", "or", "repeat",
     "return", "then", "true", "until", "while",
-    "..", "...", "==", ">=", "<=", "~=",
+#if defined(LUA_BITWISE_OPERATORS)
+    "..", "...", "==", ">=", ">>", "<=", "<<", "^^", "~=", "!="
+#else
+     "..", "...", "==", ">=", "<=", "~=",
+#endif
     "<number>", "<name>", "<string>", "<eof>",
     NULL
 };
@@ -383,6 +387,30 @@ static int llex (LexState *ls, SemInfo *seminfo) {
         if (ls->current != '=') return '=';
         else { next(ls); return TK_EQ; }
       }
+#if defined(LUA_BITWISE_OPERATORS)
+      case '<': {
+        next(ls);
+        if (ls->current == '=') { next(ls); return TK_LE; }
+        else if (ls->current == '<') { next(ls); return TK_LSHFT; }
+        else  return '<';
+      }
+      case '>': {
+        next(ls);
+        if (ls->current == '=') { next(ls); return TK_GE; }
+        else if (ls->current == '>') { next(ls); return TK_RSHFT; }
+        else return '>';
+      }
+      case '^': {
+        next(ls);
+        if (ls->current != '^') return '^';
+        else { next(ls); return TK_XOR; }
+      }
+      case '!': {
+        next(ls);
+        if (ls->current != '=') return '!';
+        else { next(ls); return TK_NE; }
+      }
+#else
       case '<': {
         next(ls);
         if (ls->current != '=') return '<';
@@ -393,17 +421,18 @@ static int llex (LexState *ls, SemInfo *seminfo) {
         if (ls->current != '=') return '>';
         else { next(ls); return TK_GE; }
       }
+#endif
       case '~': {
         next(ls);
         if (ls->current != '=') return '~';
         else { next(ls); return TK_NE; }
       }
 	//BEGIN HXRMN'S C SYNTAX
-      case '!': {
+    /*  case '!': {
         next(ls);
         if (ls->current != '=') return '!';
         else { next(ls); return TK_NE; }
-      }
+      }*/
       case '&': {
         next(ls);
         if (ls->current != '&') return '&';
