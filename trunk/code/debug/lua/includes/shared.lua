@@ -1,10 +1,22 @@
-for k,v in pairs(_G) do
+--[[for k,v in pairs(_G) do
 	print(k .. "\n")
-end
+end]]
 
 local function includex(s)
 	include("lua/includes/" .. s .. ".lua")
 end
+
+--[[includex("tools")
+includex("extensions/init")
+includex("vector")
+includex("angles")
+includex("hooks")
+if(CLIENT) then includex("input") end
+if(CLIENT) then includex("view") end
+
+_qlimit()
+]]
+--if(true) then return end
 
 includex("tools")
 includex("extensions/init")

@@ -8,6 +8,8 @@ lua_State *L;
 int samey = 0;
 char *samey2 = "";
 
+qboolean limited = qfalse;
+
 int qlua_ticks(lua_State *L) {
 	LARGE_INTEGER tick;   // A point in time
 
@@ -193,6 +195,7 @@ int qlua_runstr(lua_State *L) {
 }
 
 qboolean FS_doScript( const char *filename ) {
+	if(limited) return qtrue;
 	if(luaL_loadfile(L,filename) || lua_pcall(L, 0, 0, 0)) {
 		return qfalse;
 	}
@@ -305,6 +308,11 @@ int qlua_servertime (lua_State *L) {
 	return 1;
 }
 
+int qlimit(lua_State *L) {
+	limited = qtrue;
+	return 0;
+}
+
 void InitClientLua( void ) {
 	CloseClientLua();
 	L = lua_open();
@@ -334,6 +342,7 @@ void InitClientLua( void ) {
 	lua_register(L,"ConsoleCommand",qlua_concommand);
 	lua_register(L,"MD5",qlua_md5);
 	lua_register(L,"ServerTime",qlua_servertime);
+	lua_register(L,"_qlimit",qlimit);
 
 
 	CG_Printf("----------------Done-----------------\n");
@@ -350,6 +359,7 @@ void DoLuaInit( void ) {
 }
 
 void DoLuaIncludes( void ) {
+	limited = qfalse;
 	//C:/Quake3/luamod_src/code/debug
 	//if(luaL_loadfile(L,"lua/includes/init.lua") || lua_pcall(L, 0, 0, 0)) {
     //    error(L, lua_tostring(L, -1));
