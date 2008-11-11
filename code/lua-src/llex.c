@@ -405,11 +405,11 @@ static int llex (LexState *ls, SemInfo *seminfo) {
         if (ls->current != '^') return '^';
         else { next(ls); return TK_XOR; }
       }
-      case '!': {
+      /*case '!': {
         next(ls);
         if (ls->current != '=') return '!';
         else { next(ls); return TK_NE; }
-      }
+      }*/
 #else
       case '<': {
         next(ls);
@@ -428,11 +428,11 @@ static int llex (LexState *ls, SemInfo *seminfo) {
         else { next(ls); return TK_NE; }
       }
 	//BEGIN HXRMN'S C SYNTAX
-    /*  case '!': {
+      case '!': {
         next(ls);
         if (ls->current != '=') return '!';
         else { next(ls); return TK_NE; }
-      }*/
+      }
       case '&': {
         next(ls);
         if (ls->current != '&') return '&';
