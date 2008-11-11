@@ -641,7 +641,7 @@ typedef struct gitem_s {
 	char		*sounds;		// string of all sounds this item will use
 } gitem_t;
 
-#define LUA_TVECTOR LUA_TTABLE
+#define LUA_TVECTOR LUA_TUSERDATA
 
 // included in both the game dll and the client
 extern	gitem_t	bg_itemlist[];

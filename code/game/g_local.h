@@ -59,7 +59,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define FL_NO_HUMANS			0x00004000	// spawn point just for bots
 #define FL_FORCE_GESTURE		0x00008000	// force gesture on client
 
-#define LUA_TVECTOR				LUA_TTABLE
+#define LUA_TVECTOR				LUA_TUSERDATA
 
 // movers are things like doors, plats, buttons, etc
 typedef enum {

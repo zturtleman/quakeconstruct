@@ -99,7 +99,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define DEFAULT_REDTEAM_NAME		"Stroggs"
 #define DEFAULT_BLUETEAM_NAME		"Pagans"
 
-#define LUA_TVECTOR				LUA_TTABLE
+#define LUA_TVECTOR				LUA_TUSERDATA
 
 typedef enum {
 	FOOTSTEP_NORMAL,

@@ -1,6 +1,8 @@
 #include "q_shared.h"
 #include "bg_public.h"
 
+#define MYTYPE		"vector3"
+
 typedef struct {
 	vec_t x;
 	vec_t y;
@@ -30,7 +32,7 @@ void lua_tovector(lua_State *L, int i, vec3_t in) {
 }*/
 
 
-
+/*WORKING SYSTEM
 void lua_pushvector(lua_State *L, vec3_t vec) {
 	int tableIdx;
 	lua_createtable(L,3,0);
@@ -78,106 +80,81 @@ void lua_tovector(lua_State *L, int i, vec3_t in) {
 		in[1] = y;
 		in[2] = z;
 	//}
+}*/
+
+float *lua_getLVector(lua_State *L, int i) {
+	if (luaL_checkudata(L,i,MYTYPE)==NULL) luaL_typerror(L,i,MYTYPE);
+	return lua_touserdata(L,i);
 }
 
-luavector_t *lua_toluavector(lua_State *L, int i) {
-	luavector_t	*luavector;
-	luaL_checktype(L,i,LUA_TUSERDATA);
-	luavector = (luavector_t *)lua_touserdata(L, i);
-	if (luavector == NULL) luaL_typerror(L, i, "Vector");
-	return luavector;
+float *lua_pushLVector(lua_State *L) {
+	float *v=lua_newuserdata(L,3*sizeof(float));
+	luaL_getmetatable(L,MYTYPE);
+	lua_setmetatable(L,-2);
+	return v;
 }
 
-static int qlua_setvector (lua_State *L) {
-	luavector_t *vec = lua_toluavector(L, 1);
-	int index = lua_tointeger(L, 2);
-	vec_t value = luaL_checknumber(L, 3);
-
-	if(index == 0)
-		vec->x = value;
-
-	if(index == 1)
-		vec->y = value;
-
-	if(index == 2)
-		vec->z = value;
-
-	return 0;
+int lua_newvector(lua_State *L)
+{
+	float *v;
+	lua_settop(L,3);
+	v=lua_pushLVector(L);
+	v[0]=luaL_optnumber(L,1,0);
+	v[1]=luaL_optnumber(L,2,0);
+	v[2]=luaL_optnumber(L,3,0);
+	return 1;
 }
 
-static int qlua_getvector (lua_State *L) {
-	luavector_t *vec = NULL;
-	int index = 0;
-
-	vec = lua_toluavector(L, 1);
-	index = lua_tointeger(L, 2);
-
-	if(index == 0) {
-		lua_pushnumber(L,vec->x);
-		return 1;
-	}
-
-	if(index == 1) {
-		lua_pushnumber(L,vec->y);
-		return 1;
-	}
-
-	if(index == 2) {
-		lua_pushnumber(L,vec->z);
-		return 1;
-	}
-	return 0;
+void lua_pushvector(lua_State *L, vec3_t vec)
+{
+	float *v;
+	v=lua_pushLVector(L);
+	v[0]=vec[0];
+	v[1]=vec[1];
+	v[2]=vec[2];
 }
 
-/*
-static int qlua_setvector (lua_State *L) {
-	luavector_t *vec = lua_toluavector(L, 1);
-	const char *index = luaL_checkstring(L, 2);
-	vec_t value = luaL_checknumber(L, 3);
-
-	if(strcmp(index,"x") == 0)
-		vec->x = value;
-
-	if(strcmp(index,"y") == 0)
-		vec->y = value;
-
-	if(strcmp(index,"z") == 0)
-		vec->z = value;
-
-	return 0;
+void lua_tovector(lua_State *L, int i, vec3_t vec)
+{
+	float *v = lua_getLVector(L,i);
+	vec[0] = v[0];
+	vec[1] = v[1];
+	vec[2] = v[2];
 }
 
-static int qlua_getvector (lua_State *L) {
-	luavector_t *vec = NULL;
-	const char *index = "";
-
-	vec = lua_toluavector(L, 1);
-	index = lua_tostring(L, 2);
-
-	if(index != NULL) {
-		if(strcmp(index,"x") == 0) {
-			lua_pushnumber(L,vec->x);
-			return 1;
+static int Lget(lua_State *L)
+{
+	float *v=lua_getLVector(L,1);
+	const char* i=luaL_checkstring(L,2);
+		switch (*i) {
+			case '1': case 'x': case 'p': lua_pushnumber(L,v[0]); break;
+			case '2': case 'y': lua_pushnumber(L,v[1]); break;
+			case '3': case 'z': case 'r': lua_pushnumber(L,v[2]); break;
+			default: lua_pushnil(L); break;
 		}
-
-		if(strcmp(index,"y") == 0) {
-			lua_pushnumber(L,vec->y);
-			return 1;
-		}
-
-		if(strcmp(index,"z") == 0) {
-			lua_pushnumber(L,vec->z);
-			return 1;
-		}
-	}
-	return 0;
+	return 1;
 }
-*/
+
+static int Lset(lua_State *L) {
+	float *v=lua_getLVector(L,1);
+	const char* i=luaL_checkstring(L,2);
+	float t=luaL_checknumber(L,3);
+		switch (*i) {
+			case '1': case 'x': case 'p': v[0]=t; break;
+			case '2': case 'y': v[1]=t; break;
+			case '3': case 'z': case 'r': v[2]=t; break;
+			default: break;
+		}
+	return 1;
+}
 
 static int Vector_tostring (lua_State *L)
 {
-  lua_pushfstring(L, "Vector: %p", lua_touserdata(L, 1));
-  return 1;
+	vec3_t v1;
+
+	lua_tovector(L,1,v1);
+	lua_pushfstring(L,"%f, %f, %f",v1[0],v1[1],v1[2]);
+	return 1;
 }
 
 static int Vector_equal (lua_State *L)
@@ -196,43 +173,141 @@ static int Vector_equal (lua_State *L)
   return 1;
 }
 
+static int Vector_add (lua_State *L) {
+	vec3_t v1,v2,out;
+	float n = 0;
+
+	lua_tovector(L,1,v1);
+
+	if(lua_type(L,2) == LUA_TNUMBER) {
+		n = lua_tonumber(L,2);
+		out[0] = v1[0] + n;
+		out[1] = v1[1] + n;
+		out[2] = v1[2] + n;
+	} else {
+		lua_tovector(L,2,v2);
+		if(v1 != NULL && v2 != NULL) {
+			VectorAdd(v1,v2,out);
+		} else {
+			return 0;
+		}
+	}
+	lua_pushvector(L,out);
+	return 1;
+}
+
+static int Vector_sub (lua_State *L) {
+	vec3_t v1,v2,out;
+	float n = 0;
+
+	lua_tovector(L,1,v1);
+
+	if(lua_type(L,2) == LUA_TNUMBER) {
+		n = lua_tonumber(L,2);
+		out[0] = v1[0] - n;
+		out[1] = v1[1] - n;
+		out[2] = v1[2] - n;
+	} else {
+		lua_tovector(L,2,v2);
+		if(v1 != NULL && v2 != NULL) {
+			VectorSubtract(v1,v2,out);
+		} else {
+			return 0;
+		}
+	}
+	lua_pushvector(L,out);
+	return 1;
+}
+
+static int Vector_mul (lua_State *L) {
+	vec3_t v1,v2,out;
+	float n = 0;
+
+	lua_tovector(L,1,v1);
+
+	if(lua_type(L,2) == LUA_TNUMBER) {
+		n = lua_tonumber(L,2);
+		out[0] = v1[0] * n;
+		out[1] = v1[1] * n;
+		out[2] = v1[2] * n;
+	} else {
+		lua_tovector(L,2,v2);
+		if(v1 != NULL && v2 != NULL) {
+			out[0] = v1[0] * v2[0];
+			out[1] = v1[1] * v2[1];
+			out[2] = v1[2] * v2[2];
+		} else {
+			return 0;
+		}
+	}
+	lua_pushvector(L,out);
+	return 1;
+}
+
+static int Vector_div (lua_State *L) {
+	vec3_t v1,v2,out;
+	float n = 0;
+
+	lua_tovector(L,1,v1);
+
+	if(lua_type(L,2) == LUA_TNUMBER) {
+		n = lua_tonumber(L,2);
+		out[0] = v1[0] / n;
+		out[1] = v1[1] / n;
+		out[2] = v1[2] / n;
+	} else {
+		lua_tovector(L,2,v2);
+		if(v1 != NULL && v2 != NULL) {
+			out[0] = v1[0] / v2[0];
+			out[1] = v1[1] / v2[1];
+			out[2] = v1[2] / v2[2];
+		} else {
+			return 0;
+		}
+	}
+	lua_pushvector(L,out);
+	return 1;
+}
+
+static int Vector_metatest (lua_State *L)
+{
+	vec3_t v1;
+
+	lua_tovector(L,1,v1);
+	lua_pushfstring(L,"THIS IS A METAFUNCTION: %f, %f, %f",v1[0],v1[1],v1[2]);
+	return 1;
+}
+
 static const luaL_reg Vector_methods[] = {
-  {"get",		qlua_getvector},
-  {"set",		qlua_setvector},
+  { "MetaTest",		Vector_metatest },
   {0,0}
 };
 
+
 static const luaL_reg Vector_meta[] = {
-  {"__tostring", Vector_tostring},
-  {"__eq", Vector_equal},
-  {"__index", qlua_getvector},
-  {"__newindex", qlua_setvector},
-  {0, 0}
+  { "__index",		Lget			},
+  { "__newindex",	Lset			},
+  { "__tostring",	Vector_tostring	},
+  { "__eq",			Vector_equal	},
+  { "__add",		Vector_add		},
+  { "__sub",		Vector_sub		},
+  { "__mul",		Vector_mul		},
+  { "__div",		Vector_div		},
+  {0,0}
 };
 
 int Vector_register (lua_State *L) {
-	luaL_openlib(L, "Vector", Vector_methods, 0);
+	luaL_openlib(L, MYTYPE, Vector_methods, 0);
+	luaL_newmetatable(L,MYTYPE);
+	luaL_openlib(L,NULL,Vector_meta,0);
 
-	luaL_newmetatable(L, "Vector");
-
-	luaL_openlib(L, 0, Vector_meta, 0);
-
-	lua_pushliteral(L, "__index");
-	lua_pushvalue(L, -3);
-	lua_rawset(L, -3);
-	lua_pushliteral(L, "__metatable");
-	lua_pushvalue(L, -3);
-	lua_rawset(L, -3);
-
-	lua_pop(L, 1);
+	lua_register(L,"Vector",lua_newvector);
 
 	return 1;
 }
 
 int qlua_VectorToAngles(lua_State *L) {
 	vec3_t v,angles;
-
-	luaL_checktype(L,1,LUA_TVECTOR);
 	lua_tovector(L,1,v);
 
 	vectoangles(v,angles);
@@ -242,7 +317,7 @@ int qlua_VectorToAngles(lua_State *L) {
 
 int qlua_AngleVectors(lua_State *L) {
 	vec3_t v,f,r,u;
-	luaL_checktype(L,1,LUA_TVECTOR);
+	
 	lua_tovector(L,1,v);
 
 	v[0] = AngleMod(v[0]);
@@ -259,7 +334,6 @@ int qlua_AngleVectors(lua_State *L) {
 int qlua_VectorNormalize(lua_State *L) {
 	vec3_t v;
 	int	len = 0;
-	luaL_checktype(L,1,LUA_TVECTOR);
 	lua_tovector(L,1,v);
 	len = VectorNormalize(v);
 	lua_pushvector(L,v);
@@ -270,7 +344,6 @@ int qlua_VectorNormalize(lua_State *L) {
 int qlua_VectorLength(lua_State *L) {
 	vec3_t v;
 	float len = 0;
-	luaL_checktype(L,1,LUA_TVECTOR);
 	lua_tovector(L,1,v);
 	len = sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
 	lua_pushnumber(L,len);
@@ -280,8 +353,6 @@ int qlua_VectorLength(lua_State *L) {
 int qlua_VectorForward(lua_State *L) {
 	vec3_t v;
 	vec3_t f,r,u;
-
-	luaL_checktype(L,1,LUA_TVECTOR);
 	lua_tovector(L,1,v);
 	AngleVectors(v,f,r,u);
 	lua_pushvector(L,f);
@@ -291,8 +362,6 @@ int qlua_VectorForward(lua_State *L) {
 int qlua_VectorRight(lua_State *L) {
 	vec3_t v;
 	vec3_t axis[3];
-
-	luaL_checktype(L,1,LUA_TVECTOR);
 	lua_tovector(L,1,v);
 	AnglesToAxis(v,axis);
 	lua_pushvector(L,axis[0]);
@@ -302,8 +371,6 @@ int qlua_VectorRight(lua_State *L) {
 int qlua_VectorUp(lua_State *L) {
 	vec3_t v;
 	vec3_t axis[3];
-
-	luaL_checktype(L,1,LUA_TVECTOR);
 	lua_tovector(L,1,v);
 	AnglesToAxis(v,axis);
 	lua_pushvector(L,axis[2]);
@@ -312,13 +379,8 @@ int qlua_VectorUp(lua_State *L) {
 
 int qlua_DotProduct(lua_State *L) {
 	vec3_t dst,src;
-
-	luaL_checktype(L,1,LUA_TVECTOR);
-	luaL_checktype(L,2,LUA_TVECTOR);
-
 	lua_tovector(L,1,src);
 	lua_tovector(L,2,dst);
-
 	lua_pushnumber(L,DotProduct(src,dst));
 	return 1;
 }
