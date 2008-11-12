@@ -8,8 +8,8 @@ function ApplyView(pos,ang,fovx,fovy)
 	fovx = fovx or 0
 	fovy = fovy or 0
 	
-	vpos = vAdd(vpos,vSub(pos,vpos))
-	vang = vAdd(vang,getDeltaAngle3(ang,vang))
+	vpos = vpos + (pos - vpos)
+	vang = vang + getDeltaAngle3(ang,vang)
 	vfovx = vfovx + fovx
 	vfovy = vfovy + fovy
 end

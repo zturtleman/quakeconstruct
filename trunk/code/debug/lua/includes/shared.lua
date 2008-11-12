@@ -38,6 +38,7 @@ if(CLIENT) then includex("sequence") end
 if(CLIENT) then includex("animation") end
 if(CLIENT) then includex("model") end
 if(CLIENT) then includex("sprite") end
+if(CLIENT) then includex("poly") end
 if(CLIENT) then includex("input") end
 if(CLIENT) then includex("view") end
 includex("packs")

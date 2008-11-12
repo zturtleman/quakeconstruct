@@ -127,8 +127,8 @@ static int Lget(lua_State *L)
 	float *v=lua_getLVector(L,1);
 	const char* i=luaL_checkstring(L,2);
 		switch (*i) {
-			case '1': case 'x': case 'p': lua_pushnumber(L,v[0]); break;
-			case '2': case 'y': lua_pushnumber(L,v[1]); break;
+			case '1': case 'x': case 'p': case 'u': lua_pushnumber(L,v[0]); break;
+			case '2': case 'y': case 'v': lua_pushnumber(L,v[1]); break;
 			case '3': case 'z': case 'r': lua_pushnumber(L,v[2]); break;
 			default: lua_pushnil(L); break;
 		}
@@ -140,8 +140,8 @@ static int Lset(lua_State *L) {
 	const char* i=luaL_checkstring(L,2);
 	float t=luaL_checknumber(L,3);
 		switch (*i) {
-			case '1': case 'x': case 'p': v[0]=t; break;
-			case '2': case 'y': v[1]=t; break;
+			case '1': case 'x': case 'p': case 'u': v[0]=t; break;
+			case '2': case 'y': case 'v': v[1]=t; break;
 			case '3': case 'z': case 'r': v[2]=t; break;
 			default: break;
 		}
