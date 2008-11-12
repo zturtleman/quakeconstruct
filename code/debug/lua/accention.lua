@@ -17,26 +17,28 @@ local function Think()
 	for k,v in pairs(tab) do
 		if(v:IsPlayer() and v:GetInfo()["connected"]) then
 			local weap = v:GetInfo()["weapon"]
+			local vtab = v:GetTable()
+			local hp = v:GetInfo()["health"]
 			
 			if(v:IsBot()) then
 				pcall(v.SetAmmo,v,weap,100) --Bots need ammo or else they go to gauntlet
 			end
 			
-			if(GetEntityTable(v).dtime and GetEntityTable(v).dtime < CurTime()) then
+			if(vtab.dtime and vtab.dtime < CurTime()) then
 				--Gib The Player
-				v:Damage(nil,nil,1000,12)
-				GetEntityTable(v).dtime = nil
+				v:Damage(nil,nil,(hp/2) + 5,12)
+				vtab.dtime = nil
 			end
 			
-			if(GetEntityTable(v).adtime) then
-				if(GetEntityTable(v).adtime < CurTime()) then
+			if(vtab.adtime) then
+				if(vtab.adtime < CurTime()) then
 					--Gib The Player
-					v:Damage(nil,nil,1000,12)
+					v:Damage(nil,nil,(hp/2) + 5,12)
 					v:SetInfo(PLAYERINFO_SCORE,v:GetInfo()["score"]+1)
-					GetEntityTable(v).adtime = nil
+					vtab.adtime = nil
 				else
 					--Tell The Player He's Gonna Be Gibbed
-					local sec = math.ceil(GetEntityTable(v).adtime - CurTime())
+					local sec = math.ceil(vtab.adtime - CurTime())
 					v:SendMessage("You have accended to the top.\nYou will die in " .. sec .. " seconds.\n",true)
 				end
 			end
@@ -45,15 +47,16 @@ local function Think()
 end
 
 local function SetNextWeap(cl)
-	GetEntityTable(cl).currWeap = GetEntityTable(cl).nextWeap
-	if not (GetEntityTable(cl).currWeap == WP_BFG) then
-		GetEntityTable(cl).nextWeap = GetEntityTable(cl).currWeap+1
+	local vtab = cl:GetTable()
+	vtab.currWeap = vtab.nextWeap
+	if not (vtab.currWeap == WP_BFG) then
+		vtab.nextWeap = vtab.currWeap+1
 	end
 end
 
 --Ammo And Weapons Blah Blah Blah Etc.
 local function ApplyNextWeap(cl)
-	local tab = GetEntityTable(cl)
+	local tab = cl:GetTable()
 	cl:RemoveWeapons()
 	
 	if(tab.currWeap == WP_PLASMAGUN and tab.nextWeap == WP_BFG) then
@@ -79,8 +82,9 @@ end
 
 --Player Spawned, Clean Player.
 local function PlayerSpawned(cl)
-	GetEntityTable(cl).nextWeap = 1
-	GetEntityTable(cl).dtime = nil
+	local tab = cl:GetTable()
+	tab.nextWeap = 1
+	tab.dtime = nil
 	SetNextWeap(cl)
 	ApplyNextWeap(cl)
 	cl:SetInfo(PLAYERINFO_HEALTH,100)
@@ -92,7 +96,7 @@ local function PlayerKilled(self,inflictor,attacker,damage,meansOfDeath)
 		if(attacker:IsPlayer()) then ApplyNextWeap(attacker) end
 	end
 	
-	GetEntityTable(self).dtime = CurTime() + 1
+	self:GetTable().dtime = CurTime() + 1
 end
 
 local function PlayerDamaged(self,inflictor,attacker,damage,meansOfDeath)
@@ -100,7 +104,7 @@ local function PlayerDamaged(self,inflictor,attacker,damage,meansOfDeath)
 		local hp = attacker:GetInfo(attacker)["health"]
 		if(hp) then
 			if(hp < 200) then
-				attacker:SetInfo(PLAYERINFO_HEALTH,hp + damage)
+				attacker:SetInfo(PLAYERINFO_HEALTH,hp + math.ceil(damage/5))
 				hp = attacker:GetInfo()["health"]
 			end
 			if(hp > 200) then
@@ -111,17 +115,17 @@ local function PlayerDamaged(self,inflictor,attacker,damage,meansOfDeath)
 	if(self:GetInfo()["health"] <= 0) then
 		damage = 0
 	else
-		if(damage > self:GetInfo()["health"]) then
+		--[[if(damage > self:GetInfo()["health"]) then
 			damage = self:GetInfo()["health"]
 			return damage
-		end
+		end]]
 	end
 	damage = damage * 2
 	return damage
 end
 
 hook.add("PlayerSpawned","Accention",PlayerSpawned)
-hook.add("PlayerJoined","Accention",PlayerJoined)
+hook.add("PlayerJoined","Accention",PlayerSpawned)
 hook.add("PlayerDamaged","Accention",PlayerDamaged)
 hook.add("PlayerKilled","Accention",PlayerKilled)
 hook.add("ShouldDropItem","Accention",function() return false end)

@@ -328,6 +328,16 @@ function table.ClearKeys( Table, bSaveKey )
 end
 
 
+function table.Flip( Table )
+	local t2 = {}
+	
+	for i=1,#Table do
+		t2[#Table - (i-1)] = Table[i]
+	end
+	
+	return t2
+end
+
 
 local function fnPairsSorted( pTable, Index )
 

@@ -1,37 +1,12 @@
 --require("cl_marks")
 --require("cl_cgtab")
 --self.VAriblae
+include("lua/cl_viewtest.lua")
 include("lua/cl_menu2.lua")
 include("lua/cl_testmenu2.lua")
 include("lua/cl_turrets.lua")
 
-local gibs = {
-	LoadModel("models/gibs/abdomen.md3"),
-	LoadModel("models/gibs/arm.md3"),
-	LoadModel("models/gibs/chest.md3"),
-	LoadModel("models/gibs/fist.md3"),
-	LoadModel("models/gibs/foot.md3"),
-	LoadModel("models/gibs/forearm.md3"),
-	LoadModel("models/gibs/intestine.md3"),
-	LoadModel("models/gibs/leg.md3"),
-	LoadModel("models/gibs/brain.md3"),
-}
-
-local explodeSound = LoadSound("sound/player/gibsplt1.wav")
-local skull = LoadModel("models/gibs/skull.md3")
 local flare = LoadShader("flareShader")
-local blood1 = LoadShader("BloodMark") --viewBloodFilter_HQ
-local i=0
-local rpos = Vector(670,500,30)
-local lastPos = Vector()
-local bob = 0
-local nxt = 0
-local plmoved = Vector()
-local lastplmoved = Vector()
-local smoothvel = 0
-local smoothfall = 0
-local ddir = 0
-local hp = 100
 
 local function rvel(a)
 	return Vector(
@@ -120,16 +95,7 @@ local function ParseDamage()
 end
 
 local function HandleMessage(msgid)
-	if(msgid == 1) then
-		local str = message.ReadString()
-		local float = message.ReadFloat()
-		local float2 = message.ReadFloat()
-		local short = message.ReadShort()
-		print("Got String: " .. base64.dec(str) .. "\n")
-		print("Got Float: " .. float .. "\n")
-		print("Got Float2: " .. float2 .. "\n")
-		print("Got Short: " .. short .. "\n")
-	elseif(msgid == "itempickup") then
+	if(msgid == "itempickup") then
 		local class = message.ReadString()
 		local pos = readVector()
 		local vel = readVector()
@@ -148,61 +114,34 @@ local function HandleMessage(msgid)
 end
 hook.add("HandleMessage","cl_init",HandleMessage)
 
-local function maxvel(v)
-	return math.min(math.max(v,-320),320)/320;
-end
+local poly = Poly(flare)
+--[[poly:AddVertex(Vector(-100,-100,10),0,.2,{1,0,0,1})
+poly:AddVertex(Vector(100,-100,10),1,.2,{0,1,0,1})
+poly:AddVertex(Vector(0,100,10),.5,1,{0,0,1,1})]]
 
-local function bobview(pos,ang,fovx,fovy)
-	if(!_CG) then print("^1NO CG!\n") return end
-	local crd = _CG.refdef.right
-	local vel = LocalPlayer():GetTrajectory():GetDelta()
-	local lvel = VectorLength(vel)
-	local cvel = Vectorv(vel)
-	local nang = Vectorv(ang)
-	local rvel = maxvel(DotProduct(vel,crd))
-	cvel.z = 0
-	plmoved = vAdd(plmoved,vAbs(cvel))
-	
-	nang.x = ang.x + (math.cos(VectorLength(plmoved)/2000)*1) * maxvel(lvel)
-	pos.z = pos.z + (math.cos(VectorLength(plmoved)/1000)*1) * maxvel(lvel)
-	
-	nang.z = nang.z - smoothvel*5
-	nang.x = nang.x + smoothfall
-	
-	if(hp <= 0) then nang.z = nang.z + (30*ddir) else ddir = (math.random(0,1)*2)-1 end
-	
-	ang = nang
-	
-	--pos = vAdd(pos,vMul(crd,-20))
-	
-	local f = (maxvel(vel.z/2)*2) * 2
-	
-	smoothvel = smoothvel + (rvel - smoothvel)*.2
-	smoothfall = smoothfall + (f - smoothfall)*.2
-	
-	ApplyView(pos,ang)
-	
-	if(lastTarget != LocalPlayer()) then
-		hp = 100
-		lastTarget = LocalPlayer()
-	end
-	--print("Set Ref\n")
-end
-hook.add("CalcView","cl_init",bobview)
+poly:AddVertex(Vector(-100,-100,10),0,0,{1,1,1,1})
+poly:AddVertex(Vector(100,-100,10),1,0,{1,1,1,1})
+poly:AddVertex(Vector(100,100,50),1,.5,{1,1,1,1})
+poly:AddVertex(Vector(-100,100,50),0,.5,{1,1,1,1})
 
-local function respawn()
-	hp = 100
-end
+poly:Split()
 
-local function processDamage(attacker,pos,dmg,death,waslocal,wasme,health)
-	if(waslocal) then
-		hp = health
-	end
-end
+poly:AddVertex(Vector(-100,100,50),0,.5,{1,1,1,1})
+poly:AddVertex(Vector(100,100,50),1,.5,{1,1,1,1})
+poly:AddVertex(Vector(100,100,100),1,.5,{1,1,1,1})
+poly:AddVertex(Vector(-100,100,100),0,.5,{1,1,1,1})
 
-local function rvec(amt)
-	return Vector(math.random(-amt,amt),math.random(-amt,amt),math.random(-amt,amt))
-end
+poly:Split()
 
-hook.add("Respawned","cl_init",respawn)
-hook.add("Damaged","cl_init",processDamage)
+poly:AddVertex(Vector(-100,100,100),0,.5,{1,1,1,1})
+poly:AddVertex(Vector(100,100,100),1,.5,{1,1,1,1})
+poly:AddVertex(Vector(100,300,10),1,1,{1,1,1,1})
+poly:AddVertex(Vector(-100,300,10),0,1,{1,1,1,1})
+
+local off = Vector(672,1872,72)
+
+local function d3d()
+	poly:SetOffset(off)
+	poly:Render(false)
+end
+hook.add("Draw3D","cl_init",d3d)

@@ -7,22 +7,9 @@
 
 require "turrets"
 
-message.Precache("msgtest")
 message.Precache("itempickup")
 message.Precache("playerdamage")
 message.Precache("playerrespawn")
-
-function makeMessage()
-	local msg = Message()
-	message.WriteString(msg,base64.enc("I Rock!"))
-	message.WriteFloat(msg,100.0)
-	message.WriteFloat(msg,120.5)
-	message.WriteShort(msg,10)
-	for k,v in pairs(GetEntitiesByClass("player")) do
-		SendDataMessage(msg,v,"msgtest")
-	end
-end
-concommand.Add("msgtest",makeMessage)
 
 local function writeVector(msg,v)
 	message.WriteFloat(msg,v.x)
