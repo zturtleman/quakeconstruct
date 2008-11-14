@@ -338,6 +338,34 @@ function table.Flip( Table )
 	return t2
 end
 
+function table.Fuse( Table, Condition )
+	if(Condition == nil or Table == nil) then return end
+	
+	local out = Table
+	
+	for x=1, #out-1 do
+		for y=x+1, #out do
+			if(x != y) then
+				local v1 = out[x]
+				local v2 = out[y]
+				local b,e = pcall(Condition,v1,v2)
+				if(!b) then
+					error("Table Condition Error: " .. e)
+				else
+					if(e) then
+						--[[if(type(v1) == "table") then
+							table.Merge(out[y], out[x])
+						else
+							out[y] = v1
+						end]]
+						out[y] = out[x]
+					end
+				end
+			end
+		end
+	end
+	return out
+end
 
 local function fnPairsSorted( pTable, Index )
 
