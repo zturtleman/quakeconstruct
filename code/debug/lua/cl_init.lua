@@ -83,7 +83,9 @@ local function ParseDamage()
 	local pos = Vector()
 	local dmg = message.ReadLong()
 	local death = message.ReadShort()
-	local self = (message.ReadShort() == LocalPlayer():EntIndex())
+	local id = message.ReadShort()
+	local self = (id == LocalPlayer():EntIndex())
+	local self2 = GetEntityByIndex(id)
 	local suicide = false
 	local hp = message.ReadLong()
 	if(message.ReadShort() != 0) then
@@ -92,6 +94,7 @@ local function ParseDamage()
 		suicide = (message.ReadShort() == LocalPlayer():EntIndex())
 	end
 	CallHook("Damaged",attacker,pos,dmg,death,self,suicide,hp-dmg)
+	CallHook("PlayerDamaged",self2,attacker,pos,dmg,death,self,suicide,hp-dmg,id)
 	attacker = attacker or ""
 	--print("Attacked: " .. dmg .. " " .. EnumToString(meansOfDeath_t,death) .. " " .. attacker .. "\n")
 end
@@ -107,9 +110,12 @@ local function HandleMessage(msgid)
 	elseif(msgid == "playerdamage") then
 		ParseDamage()
 	elseif(msgid == "playerrespawn") then
-		local self = (message.ReadShort() == LocalPlayer():EntIndex())
+		local id = message.ReadShort()
+		local self = (id == LocalPlayer():EntIndex())
+		local self2 = GetEntityByIndex(id)
+		CallHook("PlayerRespawned",self2,id)
+		print("^2RESPAWN!\n")
 		if(self) then
-			print("^2RESPAWN!\n")
 			CallHook("Respawned")
 		end
 	end

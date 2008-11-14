@@ -37,21 +37,30 @@ local function qbeam(v1,v2,r,g,b,point)
 	le:SetTrType(TR_STATIONARY)
 end
 
+local healthvals = {}
 local nexttrail = LevelTime()
 local function trailent(v)
 	if(v != nil) then
+		local hue = LevelTime()/5
 		local t = v:GetTable()
 		local team = v:GetInfo().team
+		local hpx = nil
 		if(t != nil) then
 			t.lastpos = t.lastpos or v:GetPos()
-
+			if(v.EntIndex) then hpx = healthvals[v:EntIndex()] end
+			local hp = (hpx or v:GetInfo().health) / 100
+			if(hp > 1) then hp = 1 end
+			if(hp < 0) then hp = 0 end
+			
+			hue = hp * 120
+			
 			local st1 = nil
 			if(team == TEAM_RED) then
 				st1 = getBeamRef(v:GetPos(),t.lastpos,1,0,0)
 			elseif(team == TEAM_BLUE) then
 				st1 = getBeamRef(v:GetPos(),t.lastpos,0,0,1)
 			elseif(team == TEAM_FREE) then
-				st1 = getBeamRef(v:GetPos(),t.lastpos,1,1,.2)
+				st1 = getBeamRef(v:GetPos(),t.lastpos,hsv(hue,1,1))
 			end
 			if(st1 != nil) then
 				st1:Render()
@@ -66,8 +75,8 @@ local function trailent(v)
 					qbeam(v:GetPos(),t.lastpos,0,0,1)
 					qbeam(v:GetPos(),t.lastpos,0,0,1,true)
 				elseif(team == TEAM_FREE) then
-					qbeam(v:GetPos(),t.lastpos,1,1,.2)
-					qbeam(v:GetPos(),t.lastpos,1,1,.2,true)
+					qbeam(v:GetPos(),t.lastpos,hsv(hue,1,1,false))
+					qbeam(v:GetPos(),t.lastpos,hsv(hue,1,1,true))
 				end
 				t.lastpos = v:GetPos()
 			end
@@ -104,3 +113,14 @@ local function d3d()
 	end
 end
 hook.add("Draw3D","cl_trails",d3d)
+
+local function processDamage(self,attacker,pos,dmg,death,waslocal,wasme,hp,id)
+	healthvals[id] = hp
+end
+
+local function respawn(self,id)
+	print("Player Respawned\n")
+	healthvals[id] = 100
+end
+hook.add("PlayerDamaged","cl_trails",processDamage)
+hook.add("PlayerRespawned","cl_trails",respawn)
