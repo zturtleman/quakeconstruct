@@ -9,18 +9,64 @@ function PolyT:Init()
 	self.splitted = false
 end
 
+function PolyT:Fuse(savemap)
+	local ids = {}
+	local buffer = {}
+	local save = {}
+	for i=1, #self.set do
+		for v=1, #self.set[i][1] do
+			table.insert(buffer,self.set[i][1][v])
+			ids[#buffer] = {i,v,1}
+			
+			table.insert(buffer,self.set[i][2][v])
+			ids[#buffer] = {i,v,2}
+		end
+	end
+
+	--save = table.Copy(buffer)
+	
+	buffer = table.Fuse(buffer,function(a,b) return a[1] == b[1] end)
+	
+	for k,v in pairs(buffer) do
+		local id = ids[k]
+		local set = id[1]
+		local vert = id[2]
+		local fl = id[3]
+		
+		--local vert = self.set[set][fl][vert]
+		self.set[set][fl][vert] = v
+		
+		if(savemap) then
+			--vert[2] = save[k][2]
+		end
+	end
+end
+
+function PolyT:VClamp(v)
+	if(v > 1) then v = 1 end
+	if(v < 0) then v = 0 end
+	return v
+end
+
+function PolyT:ColorCheck(c)
+	c = self:VClamp(c)
+	return c * 255
+end
+
 function PolyT:AddVertex(pos,u,v,color)
 	r = color.r or color[1]
 	g = color.g or color[2]
 	b = color.b or color[3]
 	a = color.a or color[4]
 
-	u = math.min(1,math.max(u,0))
-	v = math.min(1,math.max(v,0))
-	r = math.min(1,math.max(r,0)) * 255
-	g = math.min(1,math.max(g,0)) * 255
-	b = math.min(1,math.max(b,0)) * 255
-	a = math.min(1,math.max(a,0)) * 255
+	u = self:VClamp(u)
+	v = self:VClamp(v)
+	
+	r = self:ColorCheck(r)
+	g = self:ColorCheck(g)
+	b = self:ColorCheck(b)
+	a = self:ColorCheck(a)
+	
 	table.insert(self.verts,{pos,Vector(u,v),r,g,b,a})
 	if(#self.verts > 1) then
 		self.flipped = table.Flip(self.verts)
@@ -38,7 +84,14 @@ function PolyT:Split()
 end
 
 function PolyT:GetVerts()
-	return table.Copy(self.verts)
+	local buffer = {}
+	for i=1, #self.set do
+		for v=1, #self.set[i][1] do
+			table.insert(buffer,self.set[i][1][v])
+		end
+	end
+	
+	return buffer
 end
 
 function PolyT:ClearVerts()
@@ -76,7 +129,7 @@ function PolyT:Render(flipped)
 					render.DrawPoly(s[2],self.shd,self.offset)
 				end
 			else
-				error("Not enough vertices.\n")
+				error("Not enough vertices in set[" .. i .. "], " .. #s .. ".\n")
 			end
 		end
 	end
