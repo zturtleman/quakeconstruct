@@ -93,6 +93,34 @@ if(CLIENT) then
 		
 		return legs,torso,head
 	end
+	
+	function hsv(h,s,v,...)
+		h = h % 360
+		local h1 = math.floor((h/60) % 6)
+		local f = (h / 60) - math.floor(h / 60)
+		local p = v * (1 - s)
+		local q = v * (1 - (f * s) )
+		local t = v * (1 - (1 - f) * s)
+		
+		local values =  {
+			{v,t,p},
+			{q,v,p},
+			{p,v,t},
+			{p,q,v},
+			{t,p,v},
+			{v,p,q}
+		}
+		
+		local out = values[h1+1]
+		
+		if(arg != nil) then
+			for k,v in pairs(arg) do
+				table.insert(out,v)
+			end
+		end
+		
+		return unpack(out)
+	end
 end
 
 function DamageInfo(self,inflictor,attacker,damage,meansOfDeath,killed)
