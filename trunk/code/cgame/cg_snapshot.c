@@ -34,18 +34,19 @@ CG_ResetEntity
 */
 static void CG_ResetEntity( centity_t *cent ) {
 	lua_State *L = GetClientLuaState();
+	qboolean isplayer = (&cgs.clientinfo[ cent->currentState.clientNum ] != NULL);
 	if(L != NULL) {
 		//cent->linked = qfalse;
 		//qlua_gethook(L,"EntityUnlinked");
 		//lua_pushentity(L,cent);
 		//qlua_pcall(L,1,0,qtrue);
 
-		if(cent->luatablecent != 0) {
+		if(cent->luatablecent != 0 && !isplayer) {
 			qlua_clearfunc(L,cent->luatablecent);
 			cent->luatablecent = 0;
 		}
 	} else {
-		if(cent->luatablecent != 0) {
+		if(cent->luatablecent != 0 && !isplayer) {
 			cent->luatablecent = 0;
 		}
 	}
@@ -222,6 +223,7 @@ static void CG_SetNextSnap( snapshot_t *snap ) {
 	entityState_t		*es;
 	centity_t			*cent,*tent;
 	qboolean			f = qfalse;
+	qboolean			isplayer = qfalse;
 
 	cg.nextSnap = snap;
 
@@ -232,6 +234,7 @@ static void CG_SetNextSnap( snapshot_t *snap ) {
 	for ( num = 0 ; num < snap->numEntities ; num++ ) {
 		es = &snap->entities[num];
 		cent = &cg_entities[ es->number ];
+		isplayer = (&cgs.clientinfo[ cent->currentState.clientNum ] != NULL);
 
 		memcpy(&cent->nextState, es, sizeof(entityState_t));
 		//cent->nextState = *es;
@@ -256,6 +259,7 @@ static void CG_SetNextSnap( snapshot_t *snap ) {
 	if(L != NULL) {
 		for (i = 0, tent = cg_entities, n = 1; i < numEnts; i++, tent++) {
 			if(tent != NULL && tent->linked) {
+				isplayer = (&cgs.clientinfo[ tent->currentState.clientNum ] != NULL);
 				f = qfalse;
 				for ( num = 0 ; num < snap->numEntities ; num++ ) {
 					es = &snap->entities[num];
@@ -263,6 +267,7 @@ static void CG_SetNextSnap( snapshot_t *snap ) {
 						f = qtrue;
 					}
 				}
+				// && !isplayer
 				if(f == qfalse) {
 					tent->linked = qfalse;
 					qlua_gethook(L,"EntityUnlinked");

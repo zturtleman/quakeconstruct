@@ -99,6 +99,31 @@ int qlua_getweaponname(lua_State *L) {
 	return 1;
 }
 
+int qlua_chardata (lua_State *L) {
+	const char *str = lua_tostring(L,1);
+	int ch = *str;
+	int row,col;
+	float frow,fcol,size;
+
+	ch &= 255;
+
+	row = ch>>4;
+	col = ch&15;
+
+	frow = row*0.0625;
+	fcol = col*0.0625;
+	size = 0.0625;
+
+	lua_pushnumber(L,frow);
+	lua_pushnumber(L,fcol);
+	lua_pushnumber(L,size);
+
+	lua_pushinteger(L,row);
+	lua_pushinteger(L,col);
+
+	return 5;
+}
+
 int qlua_lockmouse (lua_State *L) {
 	luaL_checktype(L,LUA_TBOOLEAN,1);
 	trap_LockMouse(lua_toboolean(L,1));
@@ -221,6 +246,7 @@ static const luaL_reg Util_methods[] = {
   {"AnglePlayer",		qlua_playerangles},
   {"LocalPos",			qlua_localpos},
   {"LocalAngles",		qlua_localang},
+  {"CharData",			qlua_chardata},
   {0,0}
 };
 

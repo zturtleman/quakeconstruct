@@ -83,9 +83,9 @@ local function HandleMessage(msgid)
 				local dist = message.ReadLong()
 				if(turret:GetTable().stats[2] > 0) then
 					fireFX(turret,dx,dy,dist)
-					PlaySound(turret:GetPos(),fire[math.random(1,#fire)])
+					PlaySound(turret,fire[math.random(1,#fire)])
 				else
-					PlaySound(turret:GetPos(),empty)
+					PlaySound(turret,empty)
 				end
 			elseif(cmd == 3) then
 				turret:GetTable().active = false

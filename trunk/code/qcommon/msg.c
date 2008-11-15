@@ -836,6 +836,7 @@ netField_t	entityStateFields[] =
 { NETF(angles2[2]), 0 },
 { NETF(constantLight), 32 },
 { NETF(frame), 16 },
+{ NETF(health), 32 },
 { NETF(luaname), 1024 },
 };
 
@@ -1103,6 +1104,9 @@ void MSG_ReadDeltaEntity( msg_t *msg, entityState_t *from, entityState_t *to,
 				} else {
 					// integer
 					*toF = MSG_ReadBits( msg, field->bits );
+					//if ( !strcmp(field->name,"health") ) {
+						//Com_Printf( "Got HP: %s:%i ", field->name, *toF );
+					//}
 					if ( print ) {
 						Com_Printf( "%s:%i ", field->name, *toF );
 					}

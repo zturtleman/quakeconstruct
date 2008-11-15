@@ -207,10 +207,10 @@ int qlua_isclient(lua_State *L) {
 
 	if(luaentity != NULL) {
 		ci = &cgs.clientinfo[ luaentity->currentState.clientNum ];
-		if(ci != NULL && ci->botSkill != 0) {
-			lua_pushboolean(L,0);
-		} else {
+		if(ci != NULL) {
 			lua_pushboolean(L,1);
+		} else {
+			lua_pushboolean(L,0);
 		}
 		return 1;
 	}
@@ -245,12 +245,14 @@ int qlua_getclientinfo(lua_State *L) {
 	luaentity = lua_toentity(L,1);
 	if(luaentity != NULL) {
 		ci = &cgs.clientinfo[ luaentity->currentState.clientNum ];
-		if(luaentity->currentState.clientNum == cg.clientNum) {
-			if(cg.snap && cg.snap->ps.commandTime != 0) {
+		if(cg.snap && cg.snap->ps.commandTime != 0) {
+			if(luaentity->currentState.clientNum == cg.clientNum) {
 				ci->health = cg.snap->ps.stats[STAT_HEALTH];
 				ci->armor = cg.snap->ps.stats[STAT_ARMOR];
 				ci->curWeapon = cg.snap->ps.weapon;
 				ci->ammo = cg.snap->ps.ammo[ci->curWeapon];
+			} else {
+				ci->health = luaentity->currentState.health;
 			}
 		}
 		CG_PushClientInfoTab(L,ci);

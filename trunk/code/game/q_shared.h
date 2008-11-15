@@ -1329,6 +1329,7 @@ typedef struct entityState_s {
 	int		torsoAnim;		// mask off ANIM_TOGGLEBIT
 
 	int		generic1;
+	int		health;
 
 	char	luaname[1024];
 } entityState_t;
