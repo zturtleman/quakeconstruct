@@ -104,6 +104,10 @@ typedef struct {
 	// extra sprite information
 	float		radius;
 	float		rotation;
+
+	int numVerts;
+	const polyVert_t *verts;		//Hxrmn's poly code
+
 } refEntity_t;
 
 

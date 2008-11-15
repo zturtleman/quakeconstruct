@@ -8,8 +8,9 @@ local function draw2d()
 	local pk = _CG.itemPickupTime
 	local pi = _CG.itemPickup
 	local pkn = "<invalid>"
-		drawHead(x-10,y-100,100,hp)
-		x = x + 100
+		local size = 150
+		drawHead(x-15,y-size,size,hp)
+		x = x + size
 	
 		if(pi > 0) then pkn = util.GetItemName(pi) end
 		local dhp = math.min(math.max(hp/100,0),1)

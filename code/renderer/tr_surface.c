@@ -481,6 +481,7 @@ void RB_SurfaceRailRings( void ) {
 /*
 ** RB_SurfaceRailCore
 */
+//MARKED! -Hxrmn
 void RB_SurfaceRailCore( void ) {
 	refEntity_t *e;
 	int			len;
@@ -513,6 +514,16 @@ void RB_SurfaceRailCore( void ) {
 		DoRailCore( start, end, right, len, r_railCoreWidth->integer );
 	}
 }
+
+//Hxrmn's Poly Code
+void RB_EntitySurfacePolys( void ) {
+	refEntity_t *e;
+
+	e = &backEnd.currentEntity->e;
+
+	RE_AddPolyToScene(e->customShader,e->numVerts,e->verts,1);
+}
+
 
 /*
 ** RB_SurfaceLightningBolt
@@ -1119,6 +1130,9 @@ void RB_SurfaceEntity( surfaceType_t *surfType ) {
 		break;
 	case RT_LIGHTNING:
 		RB_SurfaceLightningBolt();
+		break;
+	case RT_POLY:
+		RB_EntitySurfacePolys();
 		break;
 	default:
 		RB_SurfaceAxis();

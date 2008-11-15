@@ -1938,6 +1938,10 @@ void G_RunFrame( int levelTime ) {
 			//	PlayerInfoMessage( ent );
 			//}
 
+			if(ent->s.health != ent->health) {
+				ent->s.health = ent->health;
+			}
+
 			qlua_gethook(L, "ClientThink");
 			lua_pushentity(L, ent);
 			qlua_pcall(L,1,0,qtrue);
