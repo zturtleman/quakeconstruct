@@ -157,6 +157,8 @@ struct gentity_s {
 	int			lua_die;
 	int			lua_persistanttable;
 
+	qboolean	spawn_lua_parse;
+
 	int			pain_debounce_time;
 	int			fly_sound_debounce_time;	// wind tunnel
 	int			last_move_time;

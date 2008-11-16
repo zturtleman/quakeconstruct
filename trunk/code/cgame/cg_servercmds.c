@@ -504,6 +504,9 @@ static void CG_MapRestart( void ) {
 			if(tent != NULL) {
 				tent->linked = qfalse;
 				tent->customdraw = qfalse;
+				if(tent->luatablecent != 0) {
+					tent->luatablecent = 0;
+				}
 			}
 			n++;
 	}

@@ -116,6 +116,7 @@ field_t fields[] = {
 	{"angle", FOFS(s.angles), F_ANGLEHACK},
 	{"targetShaderName", FOFS(targetShaderName), F_LSTRING},
 	{"targetShaderNewName", FOFS(targetShaderNewName), F_LSTRING},
+	//{"lua", FOFS(spawn_lua_parse), F_INT},
 
 	{NULL}
 };
@@ -302,6 +303,28 @@ qboolean G_CallSpawn( gentity_t *ent ) {
 			return qtrue;
 		}
 	}
+
+	//Spawn Lua Entity Here :) -Hxrmn
+	//spawn_lua_parse
+
+	if(ent->spawn_lua_parse) {
+		G_Printf ("^2Found lua entity: %s\n", ent->classname);
+		ent->client = NULL;
+		ent->touch = 0;
+		ent->pain = 0;
+		ent->die = 0;
+		ent->think = 0;
+		ent->s.eType = ET_LUA;
+		ent->r.svFlags = SVF_BROADCAST;
+		ent->s.weapon = WP_NONE;
+		ent->clipmask = MASK_SHOT;
+		ent->target_ent = NULL;
+		strcpy(ent->s.luaname, ent->classname);
+		VectorCopy(ent->s.pos.trBase,ent->s.origin2); 
+		qlua_LinkEntity(ent);
+		return qtrue;
+	}
+
 	G_Printf ("%s doesn't have a spawn function\n", ent->classname);
 	return qfalse;
 }
@@ -454,6 +477,11 @@ void G_SpawnGEntityFromSpawnVars( void ) {
 		return;
 	}
 #endif
+
+	G_SpawnInt( "lua", "0", &i );
+	if ( i ) {
+		ent->spawn_lua_parse = qtrue;
+	}
 
 	if( G_SpawnString( "gametype", NULL, &value ) ) {
 		if( g_gametype.integer >= GT_FFA && g_gametype.integer < GT_MAX_GAME_TYPE ) {

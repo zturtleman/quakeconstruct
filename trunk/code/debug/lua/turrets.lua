@@ -60,6 +60,15 @@ function sendTurretStart(ent,team)
 	end
 end
 
+function sendTurretMsg(ent,msg)
+	--[[local msg = Message()
+	message.WriteLong(msg,msg)
+	message.WriteLong(msg,ent:EntIndex())
+	for k,v in pairs(GetEntitiesByClass("player")) do
+		SendDataMessage(msg,v,"turretaction")
+	end]]
+end
+
 function sendTurretStat(ent,stat,val)
 	local msg = Message()
 	message.WriteLong(msg,4)
@@ -93,10 +102,16 @@ function fireTurret(ent)
 		local pl,endpos = traceit(ent,dir.x,dir.y)
 		local forward = VectorForward(ent:GetAngles())
 		if(pl != nil) then
-			pl:Damage(ent,ent:GetTable().owner,math.random(5,10),MOD_MACHINEGUN,forward,endpos)
+			if(!tab.world) then
+				pl:Damage(ent,ent:GetTable().owner,math.random(5,10),MOD_MACHINEGUN,forward,endpos)
+			else
+				pl:Damage(ent,ent,math.random(1,4),MOD_MACHINEGUN,forward,endpos)				
+			end
 		end
-		tab.shots = tab.shots - 1
-		sendTurretStat(ent,2,tab.shots/TURRET_SHOTS)
+		if(!ent:GetTable().world) then
+			tab.shots = tab.shots - 1
+			sendTurretStat(ent,2,tab.shots/TURRET_SHOTS)
+		end
 	else
 		tab.shots = 0
 		sendTurretFire(ent,Vector())
@@ -131,6 +146,7 @@ local function vEq(v1,v2)
 end
 
 function checkteam(targ,owner)
+	if(owner == nil) then return true end
 	local t1 = owner:GetInfo().team
 	local t2 = targ:GetInfo().team
 	if(t2 == TEAM_FREE) then return true end
@@ -151,8 +167,9 @@ function aimTurret(ent)
 	local players = table.Copy(GetAllPlayers())
 	table.sort(players,plsort)
 	
+	--if(true) then return false end
 	for k,v in pairs(players) do
-		--if(v != owner and v:GetInfo().health > 0 and checkteam(v,owner)) then
+		if(v != owner and v:GetInfo().health > 0 and checkteam(v,owner)) then
 			if(v:GetInfo().health > 0) then
 				local pos = v:GetPos()
 				if(pos.z > ent:GetPos().z) then
@@ -171,7 +188,7 @@ function aimTurret(ent)
 					end
 				end
 			end
-		--end
+		end
 	end
 	
 	if(LevelTime() > tab.expiration) then
@@ -210,27 +227,31 @@ function refill(turret,pl,ammo)
 end
 
 function setupCollision(turret)
-	turret:SetTakeDamage(true)
+	if(!turret:GetTable().world) then
+		turret:SetTakeDamage(true)
+	end
 	turret:SetMins(Vector(-5,-5,-5))
 	turret:SetMaxs(Vector(5,5,5))
 	turret:SetClip(1)
 	turret:SetHealth(TURRET_HEALTH)
 	
-	local pain = function(ent,a,b,take)
-		sendTurretStat(ent,1,ent:GetHealth()/TURRET_HEALTH)
-	end
-	turret:SetCallback(ENTITY_CALLBACK_PAIN,pain)
-	
-	local death = function(ent,a,b,take)
-		if(ent:GetTable().done == 0) then
-			ent:GetTable().done = 1
-			ent:SetNextThink(LevelTime() + 1)
-			sendTurretStat(ent,1,0)
-			sendTurretStat(ent,2,0)
-			print("TURRET_DEATH")
+	if(!turret:GetTable().world) then
+		local pain = function(ent,a,b,take)
+			sendTurretStat(ent,1,ent:GetHealth()/TURRET_HEALTH)
 		end
+		turret:SetCallback(ENTITY_CALLBACK_PAIN,pain)
+		
+		local death = function(ent,a,b,take)
+			if(ent:GetTable().done == 0) then
+				ent:GetTable().done = 1
+				ent:SetNextThink(LevelTime() + 1)
+				sendTurretStat(ent,1,0)
+				sendTurretStat(ent,2,0)
+				print("TURRET_DEATH")
+			end
+		end
+		turret:SetCallback(ENTITY_CALLBACK_DIE,death)
 	end
-	turret:SetCallback(ENTITY_CALLBACK_DIE,death)
 end
 
 function bounce(ent,trace)
@@ -248,33 +269,14 @@ function bounce(ent,trace)
 	ent:SetPos(vAdd(ent:GetPos(),trace.normal))
 end
 
-function etest(ent)
-	if(ent == nil or ent:IsPlayer() == false) then return end
-	if(ent:GetInfo().team == TEAM_SPECTATOR) then return end
-	local forward = VectorForward(ent:GetAimVector())
-	local startpos = vAdd(ent:GetMuzzlePos(),vMul(forward,12))
-	local ignore = ent
-	local mask = 1
-	
-	local endpos = vAdd(startpos,vMul(forward,16))
-	local res = TraceLine(startpos,endpos,ignore,mask)
-
-	if(res.hit) then
-		print("Hit\n")
-	else
-		print("No Hit\n")
-	end
-
-	local ang = vectoangles(forward)
-	local ang2 = vMul(forward,360)
-	local test = CreateEntity("turret")
-	test:SetVelocity(vAdd(vMul(forward,300),ent:GetVelocity()))
-	test:SetPos(res.endpos)
-	test:SetAngles(ang)
-	test:GetTable().owner = ent
-	test:GetTable().team = ent:GetInfo().team
-	
+function setupTurret(test)
 	setupCollision(test)
+
+	local tab = test:GetTable()
+	tab.shots = TURRET_SHOTS
+	tab.expiration = LevelTime() + 10000
+	tab.done = 0
+	tab.nextShot = LevelTime() + 50
 	
 	local callback = function(ent,other,trace)
 		local tab = ent:GetTable()
@@ -296,8 +298,7 @@ function etest(ent)
 				bounce(ent,trace)
 				return
 			end
-			tab.shots = TURRET_SHOTS
-			tab.expiration = LevelTime() + 10000
+
 			ent:SetPos(vAdd(trace.endpos,Vector(0,0,2)))
 			ent:SetTrType(TR_LINEAR)
 			ent:SetVelocity(vMul(Vector(0,0,1),60))
@@ -309,7 +310,6 @@ function etest(ent)
 			ent:SetAngles(ang2)
 			print("Touch\n")
 			tab.notouch = true
-			tab.done = 0
 			tab.nextShot = LevelTime() + 50
 		else
 			if(other == tab.owner) then
@@ -327,15 +327,15 @@ function etest(ent)
 				tab.done = 2
 				print("Finish\n")
 			elseif(tab.done == 2) then
-				--sendTurretMsg(ent,3)
+				sendTurretMsg(ent,3)
 				ent:SetPos(ent:GetPos())
 				ent:SetTrType(TR_LINEAR)
 				ent:SetVelocity(vMul(Vector(0,0,1),-60))
 				ent:SetNextThink(LevelTime() + 800)
-				--print("Sink\n")
+				print("Sink\n")
 				tab.done = 3
 			else
-				--print("Removed\n")
+				print("Removed\n")
 				ent:Remove()
 			end
 			return;
@@ -347,8 +347,9 @@ function etest(ent)
 			tab.ready = true
 			ent:SetNextThink(LevelTime() + 100)
 		else
-			if(tab.owner:GetInfo().team != tab.team) then
+			if(tab.owner != nil and tab.owner:GetInfo().team != tab.team) then
 				tab.done = 1
+				print("Turret team break!\n")
 			end
 			if(tab.shots <= 1) then
 				ent:SetHealth(ent:GetHealth() - 1)
@@ -378,6 +379,56 @@ function etest(ent)
 	test:SetCallback(ENTITY_CALLBACK_THINK,callback2)
 
 	--Timer(5,function() if(test != nil) then test:Remove() end end)
+end
+
+function spawnTurretFromWorld(v)
+	print("Got Turret: " .. v:Classname() .. " " .. tostring(v:GetPos()) .. "\n")
+	
+	v:GetTable().owner = nil
+	v:GetTable().team = 0
+	v:GetTable().notouch = true
+	v:GetTable().world = true
+	
+	setupTurret(v)
+	
+	v:SetTrType(TR_STATIONARY)
+	sendTurretStart(v,TEAM_RED)
+	v:GetTable().ready = true
+	v:SetNextThink(LevelTime() + 100)
+end
+
+for k,v in pairs(GetEntitiesByClass("luaobj_turret")) do
+	Timer(2,spawnTurretFromWorld,v)
+end
+
+
+function etest(ent)
+	if(ent == nil or ent:IsPlayer() == false) then return end
+	if(ent:GetInfo().team == TEAM_SPECTATOR) then return end
+	local forward = VectorForward(ent:GetAimVector())
+	local startpos = vAdd(ent:GetMuzzlePos(),vMul(forward,12))
+	local ignore = ent
+	local mask = 1
+	
+	local endpos = vAdd(startpos,vMul(forward,16))
+	local res = TraceLine(startpos,endpos,ignore,mask)
+
+	if(res.hit) then
+		print("Hit\n")
+	else
+		print("No Hit\n")
+	end
+
+	local ang = vectoangles(forward)
+	local ang2 = vMul(forward,360)
+	local test = CreateEntity("turret")
+	test:SetVelocity(vAdd(vMul(forward,300),ent:GetVelocity()))
+	test:SetPos(res.endpos)
+	test:SetAngles(ang)
+	test:GetTable().owner = ent
+	test:GetTable().team = ent:GetInfo().team
+	
+	setupTurret(test)
 end
 concommand.Add("etest",etest)
 

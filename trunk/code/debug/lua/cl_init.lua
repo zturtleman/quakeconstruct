@@ -122,10 +122,8 @@ local function HandleMessage(msgid)
 end
 hook.add("HandleMessage","cl_init",HandleMessage)
 
+--[[
 local poly = Poly(blood)
---[[poly:AddVertex(Vector(-100,-100,10),0,.2,{1,0,0,1})
-poly:AddVertex(Vector(100,-100,10),1,.2,{0,1,0,1})
-poly:AddVertex(Vector(0,100,10),.5,1,{0,0,1,1})]]
 
 local len = 5
 local min = -(len-2) * 20
@@ -220,4 +218,4 @@ hook.add("Use","cl_init",used)
 local function d3d()
 	poly:Render(true)
 end
-hook.add("Draw3D","cl_init",d3d)
+hook.add("Draw3D","cl_init",d3d)]]

@@ -10,6 +10,18 @@ strings[D_LONG] = "Long"
 strings[D_STRING] = "String"
 strings[D_FLOAT] = "Float"
 
+local types = {}
+types[D_SHORT] = "number"
+types[D_LONG] = "number"
+types[D_STRING] = "string"
+types[D_FLOAT] = "number"
+
+local defaults = {}
+defaults[D_SHORT] = 0
+defaults[D_LONG] = 0
+defaults[D_STRING] = ""
+defaults[D_FLOAT] = 0
+
 message = {}
 
 if(SERVER) then
@@ -27,18 +39,30 @@ if(SERVER) then
 		return false
 	end
 	
-	local function checkData(v,t)
-		if(t == nil) then return false end
+	local function reportDataType(v,t,m)
+		local cnt = -1
+		local vtype = type(v)
+		if(vtype == nil) then vtype = "" end
+		if(m != nil) then cnt = m.argcount or -1 end
+		print("^3Message Warning[A](arg " .. cnt .. "): Expected " .. types[t] ..
+		" got " .. vtype .. ".\nUsing Default: " .. defaults[t] .. "\n")
+	end
+	
+	local function checkData(v,t,m)
+		if(t == nil) then
+			error("^5MESSAGE ERROR[B]: Data type was nil (this error should never happen!)\n")
+			return false
+		end
 		if(t < D_SHORT or t > D_FLOAT) then return false end
-		if(t == D_STRING and type(v) != "string") then return false end
-		if(t == D_SHORT and type(v) != "number") then return false end
-		if(t == D_LONG and type(v) != "number") then return false end
-		if(t == D_FLOAT and type(v) != "number") then return false end
+		if(type(v) != types[t]) then reportDataType(v,t,m) return false end
 		return true
 	end
 	
 	local function addData(m,v,t)
-		if(!checkData(v,t)) then return end
+		m.argcount = m.argcount + 1
+		if(!checkData(v,t,m)) then 
+			v = defaults[t]
+		end
 		if(check(m)) then table.insert(m,{v,t})end
 	end
 
@@ -47,6 +71,7 @@ if(SERVER) then
 		tab.ismessage = true
 		tab.pl = pl
 		tab.msgid = msgid
+		tab.argcount = 0
 		return tab
 	end
 	
@@ -86,14 +111,14 @@ if(SERVER) then
 				return nil
 			end
 		else
-			error("^5MESSAGE ERROR: Unable to send message to player (player was not connected)\n")
+			error("^5MESSAGE ERROR[C]: Unable to send message to player (player was not connected)\n")
 			return nil
 		end
 		return msgIDs[id]
 	end
 	
 	local function SendCache(pl,force)
-		if(pl == nil) then error("^5MESSAGE ERROR: Unable to send cache to player (player was nil)\n") return end
+		if(pl == nil) then error("^5MESSAGE ERROR[D]: Unable to send cache to player (player was nil)\n") return end
 		local tab = pl:GetTable()
 		tab.msglist = tab.msglist or {}
 		
@@ -132,7 +157,7 @@ if(SERVER) then
 				end
 			end
 		else
-			error("^5MESSAGE ERROR: Failure to precache message (Use String)\n")
+			error("^5MESSAGE ERROR[E]: Failure to precache message (Use String)\n")
 		end
 	end
 	
@@ -141,8 +166,8 @@ if(SERVER) then
 			pl = pl or m.pl
 			msgid = msgid or m.msgid
 			if(pl:IsBot()) then return end
-			if(pl == nil) then error("^5MESSAGE ERROR: Nil Player\n") end
-			if(msgid == nil) then error("^5MESSAGE ERROR: Nil Message Id\n") end
+			if(pl == nil) then error("^5MESSAGE ERROR[F]: Nil Player\n") end
+			if(msgid == nil) then error("^5MESSAGE ERROR[G]: Nil Message Id\n") end
 			msgid = string.lower(msgid)
 			local msgid = MessageID(pl,tostring(msgid))
 			if(msgid == nil) then print("^5Forced Message Precache\nUse message.Precache(name)\n") return end
@@ -163,10 +188,10 @@ if(SERVER) then
 				if(type(v) == "table") then
 					local data = v[1]
 					local dtype = v[2]
-					if(checkData(v,t)) then print("^5MESSAGE ERROR: Ivalid Data\n") return end
+					--if(!checkData(v,t)) then print("^5MESSAGE ERROR: Invalid Data\n") return end
 					local b,e = pcall(funcs[dtype],msg,data)
 					if(!b) then
-						error("^5MESSAGE ERROR: " .. e .. "\n")
+						error("^5MESSAGE ERROR[H]: " .. e .. "\n")
 					end
 				end
 			end
@@ -190,6 +215,7 @@ end
 if(CLIENT) then
 	local stack = {}
 	local funcs = {}
+	local lastInStack = -1
 	funcs[D_SHORT] = _message.ReadShort
 	funcs[D_LONG] = _message.ReadLong
 	funcs[D_STRING] = _message.ReadString
@@ -199,7 +225,11 @@ if(CLIENT) then
 		local d = stack[1]
 		
 		if(d == nil) then
-			error("^5MESSAGE ERROR: OverRead Data\n")
+			if(lastInStack == -1) then
+				error("^5MESSAGE ERROR[I]: Empty DataMessage\n")
+			else
+				error("^5MESSAGE ERROR[J]: Overread Data After " .. strings[lastInStack] .. "\n")
+			end
 			return
 		end
 		
@@ -207,9 +237,12 @@ if(CLIENT) then
 		local dtype = d[2]
 		table.remove(stack,1)
 		
+		lastInStack = dtype
+		
 		if(dtype == t) then return data end
 		
-		error("^5MESSAGE ERROR: Invalid Data (Skipped?)\n")
+		error("^5MESSAGE ERROR[K]: Invalid Data[" .. #stack+2 .. "] (Skipped?)\n" .. 
+		      "Attempted to read " .. strings[t] .. " got " .. strings[dtype] .. "\n")
 		
 		if(t == D_STRING) then return "" end
 		return 0
@@ -236,14 +269,15 @@ if(CLIENT) then
 			local contents = tostring(_message.ReadLong())
 			local strid = _message.ReadLong()
 			if(msgIDs[strid] == nil) then
-				print("^5MESSAGE ERROR: Invalid Message ID: " .. strid .. "\n")
+				print("^5MESSAGE ERROR[L]: Invalid Message ID: " .. strid .. "\n")
 			end
 			contents = string.ToTable(contents)
+			lastInStack = -1
 			for k,v in pairs(contents) do
 				v = tonumber(v)
 				local b,e = pcall(funcs[v])
 				if(!b) then
-					error("^5MESSAGE ERROR: " .. e .. "\n")
+					error("^5MESSAGE ERROR[M]: " .. e .. "\n")
 				else
 					if(e != nil) then
 						table.insert(stack,{e,v})
@@ -266,7 +300,7 @@ if(CLIENT) then
 				debugprint("Got messageID: " .. id .. "->" .. str .. "\n")
 			end
 		else
-			error("^5MESSAGE ERROR: Invalid Internal Message ID\n")
+			error("^5MESSAGE ERROR[N]: Invalid Internal Message ID\n")
 		end
 	end
 	hook.add("_HandleMessage","messages",handle)
