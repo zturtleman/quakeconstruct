@@ -123,7 +123,7 @@ function draw3d()
 	
 	
 	
-	--rpoint(off):Render()
+	rpoint(Vector(64,64,64)):Render()
 end
 hook.add("Draw3D","cl_chartest",draw3d)
 

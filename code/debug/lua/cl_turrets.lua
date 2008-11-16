@@ -63,6 +63,9 @@ local function HandleMessage(msgid)
 		local turret = GetEntityByIndex(message.ReadLong())
 		if(turret != nil) then
 			local tab = turret:GetTable()
+			if(tab == nil) then 
+				error("Turret Table is null!!!!\n")
+			end
 			if(cmd == 1) then
 				turret:GetTable().rot = 0
 				turret:GetTable().rotspeed = 0
@@ -113,12 +116,15 @@ function RenderStat(ent,wave,stat,off,r,g,b)
 	st1:Render()
 end
 
-local err = false
+--local err = true
 local lt = LevelTime()
 function RenderEnt(ent,name)
-	if(name != "turret") then return false end
+	if(name != "turret" and name != "luaobj_turret") then return false end
 	if(err) then return false end
 	local tab = ent:GetTable()
+	if(tab == nil) then 
+		return
+	end
 	local wave = Vector(0,0,math.sin(LevelTime()/300))
 	local ang = ent:GetAngles()
 	local ang2 = ent:GetAngles()

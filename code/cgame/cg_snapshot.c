@@ -41,12 +41,12 @@ static void CG_ResetEntity( centity_t *cent ) {
 		//lua_pushentity(L,cent);
 		//qlua_pcall(L,1,0,qtrue);
 
-		if(cent->luatablecent != 0 && !isplayer) {
+		if(cent->luatablecent != 0) { // && !isplayer
 			qlua_clearfunc(L,cent->luatablecent);
 			cent->luatablecent = 0;
 		}
 	} else {
-		if(cent->luatablecent != 0 && !isplayer) {
+		if(cent->luatablecent != 0) { // && !isplayer
 			cent->luatablecent = 0;
 		}
 	}

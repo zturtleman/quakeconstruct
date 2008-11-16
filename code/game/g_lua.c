@@ -322,7 +322,7 @@ void InitServerLua( void ) {
 	lua_register(L,"SendTest",SendTest);
 	lua_register(L,"_qlimit",qlimit);
 
-	G_Printf("CONTENTS_AREAPORTAL = %i\n",CONTENTS_AREAPORTAL);
+	/*G_Printf("CONTENTS_AREAPORTAL = %i\n",CONTENTS_AREAPORTAL);
 	G_Printf("CONTENTS_BODY = %i\n",CONTENTS_BODY);
 	G_Printf("CONTENTS_BOTCLIP = %i\n",CONTENTS_BOTCLIP);
 	G_Printf("CONTENTS_CLUSTERPORTAL = %i\n",CONTENTS_CLUSTERPORTAL);
@@ -335,7 +335,7 @@ void InitServerLua( void ) {
 	G_Printf("CONTENTS_MONSTERCLIP = %i\n",CONTENTS_MONSTERCLIP);
 	G_Printf("CONTENTS_MOVER = %i\n",CONTENTS_MOVER);
 	G_Printf("CONTENTS_NOBOTCLIP = %i\n",CONTENTS_NOBOTCLIP);
-	//G_Printf("CONTENTS_NODE = %i\n",CONTENTS_NODE);
+	G_Printf("CONTENTS_NODE = %i\n",CONTENTS_NODE);
 	G_Printf("CONTENTS_NODROP = %i\n",CONTENTS_NODROP);
 	G_Printf("CONTENTS_NOTTEAM1 = %i\n",CONTENTS_NOTTEAM1);
 	G_Printf("CONTENTS_NOTTEAM2 = %i\n",CONTENTS_NOTTEAM2);
@@ -347,9 +347,9 @@ void InitServerLua( void ) {
 	G_Printf("CONTENTS_TELEPORTER = %i\n",CONTENTS_TELEPORTER);
 	G_Printf("CONTENTS_TRANSLUCENT = %i\n",CONTENTS_TRANSLUCENT);
 	G_Printf("CONTENTS_TRIGGER = %i\n",CONTENTS_TRIGGER);
-	G_Printf("CONTENTS_WATER = %i\n",CONTENTS_WATER);
+	G_Printf("CONTENTS_WATER = %i\n",CONTENTS_WATER);*/
 
-	G_Printf("----------------Done-----------------\n");
+	//G_Printf("----------------Done-----------------\n");
 }
 
 void DoLuaInit( void ) {
