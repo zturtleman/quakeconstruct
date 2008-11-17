@@ -121,6 +121,48 @@ if(CLIENT) then
 		
 		return unpack(out)
 	end
+	
+	local hsvtemp = {}
+	for i=0,360 do
+		local r,g,b = hsv(i,1,1)
+		hsvtemp[i+1] = {r,g,b}
+	end
+	
+	function fasthue(h,v,...)
+		h = h % 360
+		if(h < 1) then h = 1 end
+		if(h > 360) then h = 360 end
+		h = math.ceil(h)
+		
+		local out = table.Copy(hsvtemp[h])
+		out[1] = out[1] * v
+		out[2] = out[2] * v
+		out[3] = out[3] * v
+		
+		if(arg != nil) then
+			for k,v in pairs(arg) do
+				table.insert(out,v)
+			end
+		end
+		
+		return unpack(out)
+	end
+end
+
+function LerpReach(lr,id,v,t,thr,s,r)
+	if(lr == nil or type(lr) != "table") then error("No LerpReach for you :(\n") end
+	lr[id] = lr[id] or {}
+	local l = lr[id]
+	
+	l.t = l.t or t
+	l.v = l.v or v
+	
+	l.v = l.v + (l.t - l.v)*s
+	
+	if(math.abs(l.t-l.v) < thr) then
+		pcall(r,l)
+	end
+	return l.v
 end
 
 function DamageInfo(self,inflictor,attacker,damage,meansOfDeath,killed)

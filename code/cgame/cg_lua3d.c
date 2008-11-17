@@ -192,14 +192,15 @@ void qlua_readvert(lua_State *L, polyVert_t *vert, vec3_t offset) {
 int qlua_passpoly(lua_State *L) {
 	int size = 0;
 	int i = 0;
-	qhandle_t shader;
+	qhandle_t shader = cgs.media.whiteShader;
 	vec3_t offset;
 	polyVert_t	verts[1024];
 
 	luaL_checktype(L,1,LUA_TTABLE);
-	luaL_checktype(L,2,LUA_TNUMBER);
-	
-	shader = lua_tointeger(L,2);
+
+	if(lua_type(L,2) == LUA_TNUMBER) {
+		shader = lua_tointeger(L,2);
+	}
 
 	if(lua_type(L,3) == LUA_TVECTOR) {
 		lua_tovector(L,3,offset);
