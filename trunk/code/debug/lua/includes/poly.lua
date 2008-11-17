@@ -5,21 +5,20 @@ function PolyT:Init()
 	self.verts = {}
 	self.flipped = {}
 	self.offset = Vector()
-	self.shd = 0
+	self.shd = nil
 	self.splitted = false
 end
 
 function PolyT:Fuse(savemap)
 	local ids = {}
 	local buffer = {}
-	local save = {}
 	for i=1, #self.set do
 		for v=1, #self.set[i][1] do
 			table.insert(buffer,self.set[i][1][v])
 			ids[#buffer] = {i,v,1}
 			
-			table.insert(buffer,self.set[i][2][v])
-			ids[#buffer] = {i,v,2}
+			--table.insert(buffer,self.set[i][2][v])
+			--ids[#buffer] = {i,v,2}
 		end
 	end
 
@@ -35,11 +34,9 @@ function PolyT:Fuse(savemap)
 		
 		--local vert = self.set[set][fl][vert]
 		self.set[set][fl][vert] = v
-		
-		if(savemap) then
-			--vert[2] = save[k][2]
-		end
 	end
+	
+	--table.Flip(self.verts)
 end
 
 function PolyT:VClamp(v)
@@ -101,12 +98,39 @@ function PolyT:ClearVerts()
 	self.splitted = false
 end
 
+function PolyT:Copy()
+	local ids = {}
+	local buffer = {}
+	for i=1, #self.set do
+		for v=1, #self.set[i][1] do
+			table.insert(buffer,self.set[i][1][v])
+			ids[#buffer] = {i,v,1}
+		end
+	end
+
+	local cp = table.Copy(self)
+
+	for k,v in pairs(buffer) do
+		local id = ids[k]
+		local set = id[1]
+		local vert = id[2]
+		local fl = id[3]
+		
+		local nv = {Vectorv(v[1]),Vectorv(v[2]),v[3],v[4],v[5],v[6]}
+		
+		--local vert = self.set[set][fl][vert]
+		cp.set[set][fl][vert] = nv
+	end	
+	
+	return cp
+end
+
 function PolyT:SetOffset(o)
 	self.offset = o
 end
 
 function PolyT:SetShader(s)
-	if(s != nil and type(s) == "number") then
+	if(s == nil or type(s) == "number") then
 		self.shd = s
 	end
 end
