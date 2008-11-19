@@ -1,21 +1,7 @@
 local SpriteT = {}
 local aspect = (1 + ((640 - 480) / 640))
-local refdef = {}
-refdef.x = 0
-refdef.y = 0
-refdef.width = 640
-refdef.height = 480
-refdef.origin = Vector()
-refdef.angles = Vector()
-refdef.fov_y = 30
-refdef.fov_x = (refdef.fov_y * aspect)
 
 function SpriteT:Init()
-	self.ref = RefEntity()
-	self.ref:SetType(RT_SPRITE)
-	self.ref:SetRadius(10)
-	self.ref:SetRotation(0)
-	self.ref:SetColor(1,1,1,1)
 	self.rad = 10
 	self.rot = 0
 	self.col = {1,1,1,1}
@@ -25,7 +11,6 @@ function SpriteT:Init()
 end
 
 function SpriteT:SetColor(r,g,b,a)
-	self.ref:SetColor(r,g,b,a)
 	self.col = {r,g,b,a}
 end
 
@@ -36,14 +21,6 @@ end
 function SpriteT:SetPos(x,y)
 	self.x = x
 	self.y = y
-	x = x / 640
-	y = y / 480
-	x = x * 160
-	y = y * 160
-	local nx = 80-x
-	local ny = 80-y
-	nx = nx * aspect
-	self.ref:SetPos(Vector(300,nx,ny))
 end
 
 function SpriteT:GetPos()
@@ -51,7 +28,6 @@ function SpriteT:GetPos()
 end
 
 function SpriteT:SetRadius(r)
-	self.ref:SetRadius(r/3)
 	self.rad = r
 end
 
@@ -60,7 +36,6 @@ function SpriteT:GetRadius()
 end
 
 function SpriteT:SetRotation(r)
-	self.ref:SetRotation(r)
 	self.rot = r
 end
 
@@ -70,7 +45,6 @@ end
 
 function SpriteT:SetShader(s)
 	if(s != nil and type(s) == "number") then
-		self.ref:SetShader(s)
 		self.shd = s
 	end
 end
@@ -80,9 +54,8 @@ function SpriteT:GetShader()
 end
 
 function SpriteT:Draw()
-	render.CreateScene()
-	self.ref:Render()
-	render.RenderScene(refdef)
+	draw.SetColor(unpack(self.col))
+	draw.RectRotated(self.x,self.y,self.rad*2,self.rad*2,self.shd,self.rot)
 end
 
 function Sprite(tex)

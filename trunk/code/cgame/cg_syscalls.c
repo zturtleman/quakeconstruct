@@ -327,6 +327,11 @@ void	trap_R_DrawStretchPic( float x, float y, float w, float h,
 	syscall( CG_R_DRAWSTRETCHPIC, PASSFLOAT(x), PASSFLOAT(y), PASSFLOAT(w), PASSFLOAT(h), PASSFLOAT(s1), PASSFLOAT(t1), PASSFLOAT(s2), PASSFLOAT(t2), hShader );
 }
 
+void	trap_R_DrawTransformPic( float x, float y, float w, float h, 
+							   float s1, float t1, float s2, float t2, float r, qhandle_t hShader ) {
+	syscall( CG_R_DRAWTRANSFORMPIC, PASSFLOAT(x), PASSFLOAT(y), PASSFLOAT(w), PASSFLOAT(h), PASSFLOAT(s1), PASSFLOAT(t1), PASSFLOAT(s2), PASSFLOAT(t2), PASSFLOAT(r), hShader );
+}
+
 void	trap_R_ModelBounds( clipHandle_t model, vec3_t mins, vec3_t maxs ) {
 	syscall( CG_R_MODELBOUNDS, model, mins, maxs );
 }
@@ -347,6 +352,15 @@ void	trap_R_BeginMask( float x, float y, float w, float h ) {
 
 void	trap_R_EndMask( void ) {
 	syscall( CG_R_ENDMASK );
+}
+
+//Coordinate Functions
+void	trap_R_Begin2D( void ) {
+	syscall( CG_R_BEGIN2D );
+}
+
+void	trap_R_End2D( void ) {
+	syscall( CG_R_END2D );
 }
 
 void		trap_GetGlconfig( glconfig_t *glconfig ) {

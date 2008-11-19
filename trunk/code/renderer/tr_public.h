@@ -72,6 +72,8 @@ typedef struct {
 	void	(*SetColor)( const float *rgba );	// NULL = 1,1,1,1
 	void	(*DrawStretchPic) ( float x, float y, float w, float h, 
 		float s1, float t1, float s2, float t2, qhandle_t hShader );	// 0 = white
+	void	(*DrawTransformPic) ( float x, float y, float w, float h, 
+		float s1, float t1, float s2, float t2, float r, qhandle_t hShader );	// 0 = white
 
 	// Draw images for cinematic rendering, pass as 32 bit rgba
 	void	(*DrawStretchRaw) (int x, int y, int w, int h, int cols, int rows, const byte *data, int client, qboolean dirty);
@@ -100,6 +102,9 @@ typedef struct {
 	
 	void (*BeginMask)(float x, float y, float w, float h);
 	void (*EndMask)(void);
+
+	void (*Begin2D)(void);
+	void (*End2D)(void);
 } refexport_t;
 
 //
