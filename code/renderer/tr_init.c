@@ -1205,6 +1205,7 @@ refexport_t *GetRefAPI ( int apiVersion, refimport_t *rimp ) {
 
 	re.SetColor = RE_SetColor;
 	re.DrawStretchPic = RE_StretchPic;
+	re.DrawTransformPic = RE_TransformPic;
 	re.DrawStretchRaw = RE_StretchRaw;
 	re.UploadCinematic = RE_UploadCinematic;
 
@@ -1216,6 +1217,10 @@ refexport_t *GetRefAPI ( int apiVersion, refimport_t *rimp ) {
 	//Mask Functions
 	re.BeginMask = RE_BeginMask;
 	re.EndMask = RE_EndMask;
+
+	//Coordinate Functions
+	re.Begin2D = RE_Begin2D;
+	re.End2D = RE_End2D;
 
 	return &re;
 }

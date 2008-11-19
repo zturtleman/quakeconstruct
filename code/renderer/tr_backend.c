@@ -25,6 +25,7 @@ backEndData_t	*backEndData[SMP_FRAMES];
 backEndState_t	backEnd;
 
 maskDef_t		maskState;
+qboolean		cmd2D = qfalse;
 
 
 static float	s_flipMatrix[16] = {
@@ -831,6 +832,104 @@ const void	*RB_SetColor( const void *data ) {
 
 /*
 =============
+RB_TransformPic
+=============
+*/
+const void *RB_TransformPic ( const void *data ) {
+	const transformPicCommand_t	*cmd;
+	shader_t *shader;
+	int		numVerts, numIndexes, vn;
+	float	r = 0;
+	float	x,y;
+
+	cmd = (const transformPicCommand_t *)data;
+
+	if ( !backEnd.projection2D ) {
+		RB_SetGL2D();
+	}
+
+	shader = cmd->shader;
+	if ( shader != tess.shader ) {
+		if ( tess.numIndexes ) {
+			RB_EndSurface();
+		}
+		backEnd.currentEntity = &backEnd.entity2D;
+		RB_BeginSurface( shader, 0 );
+	}
+
+	RB_CHECKOVERFLOW( 4, 6 );
+	numVerts = tess.numVertexes;
+	numIndexes = tess.numIndexes;
+
+	tess.numVertexes += 4;
+	tess.numIndexes += 6;
+
+	tess.indexes[ numIndexes ] = numVerts + 3;
+	tess.indexes[ numIndexes + 1 ] = numVerts + 0;
+	tess.indexes[ numIndexes + 2 ] = numVerts + 2;
+	tess.indexes[ numIndexes + 3 ] = numVerts + 2;
+	tess.indexes[ numIndexes + 4 ] = numVerts + 0;
+	tess.indexes[ numIndexes + 5 ] = numVerts + 1;
+
+	*(int *)tess.vertexColors[ numVerts ] =
+		*(int *)tess.vertexColors[ numVerts + 1 ] =
+		*(int *)tess.vertexColors[ numVerts + 2 ] =
+		*(int *)tess.vertexColors[ numVerts + 3 ] = *(int *)backEnd.color2D;
+
+	tess.xyz[ numVerts ][0] = -1;
+	tess.xyz[ numVerts ][1] = -1;
+	tess.xyz[ numVerts ][2] = 0;
+
+	tess.texCoords[ numVerts ][0][0] = cmd->s1;
+	tess.texCoords[ numVerts ][0][1] = cmd->t1;
+
+	tess.xyz[ numVerts + 1 ][0] = 1;
+	tess.xyz[ numVerts + 1 ][1] = -1;
+	tess.xyz[ numVerts + 1 ][2] = 0;
+
+	tess.texCoords[ numVerts + 1 ][0][0] = cmd->s2;
+	tess.texCoords[ numVerts + 1 ][0][1] = cmd->t1;
+
+	tess.xyz[ numVerts + 2 ][0] = 1;
+	tess.xyz[ numVerts + 2 ][1] = 1;
+	tess.xyz[ numVerts + 2 ][2] = 0;
+
+	tess.texCoords[ numVerts + 2 ][0][0] = cmd->s2;
+	tess.texCoords[ numVerts + 2 ][0][1] = cmd->t2;
+
+	tess.xyz[ numVerts + 3 ][0] = -1;
+	tess.xyz[ numVerts + 3 ][1] = 1;
+	tess.xyz[ numVerts + 3 ][2] = 0;
+
+	tess.texCoords[ numVerts + 3 ][0][0] = cmd->s1;
+	tess.texCoords[ numVerts + 3 ][0][1] = cmd->t2;
+
+	r = cmd->r;
+	if(r != 0) {
+		r = r / 57.3;
+	}
+
+	for(vn = numVerts;vn<=numVerts+3;vn++) {
+		//Scale, Rotate, Translate
+		tess.xyz[ vn ][0] *= cmd->w/2;
+		tess.xyz[ vn ][1] *= cmd->h/2;
+
+		x = tess.xyz[ vn ][0];
+		y = tess.xyz[ vn ][1];
+
+		tess.xyz[ vn ][0] = (cos(r)*x) - (sin(r)*y);
+		tess.xyz[ vn ][1] = (sin(r)*x) + (cos(r)*y);
+
+		tess.xyz[ vn ][0] += cmd->x;
+		tess.xyz[ vn ][1] += cmd->y;
+	}
+
+	return (const void *)(cmd + 1);
+}
+
+
+/*
+=============
 RB_StretchPic
 =============
 */
@@ -1135,12 +1234,18 @@ void RB_ExecuteRenderCommands( const void *data ) {
 	}
 
 	while ( 1 ) {
+		if ( backEnd.projection2D == qfalse && cmd2D ) {
+			RB_SetGL2D();
+		}
 		switch ( *(const int *)data ) {
 		case RC_SET_COLOR:
 			data = RB_SetColor( data );
 			break;
 		case RC_STRETCH_PIC:
 			data = RB_StretchPic( data );
+			break;
+		case RC_TRANSFORM_PIC:
+			data = RB_TransformPic( data );
 			break;
 		case RC_DRAW_SURFS:
 			data = RB_DrawSurfs( data );
@@ -1157,7 +1262,17 @@ void RB_ExecuteRenderCommands( const void *data ) {
 		case RC_ENDMASK:
 			data = RB_EndMask(data);
 			break;
-
+		case RC_BEGIN2D:
+			if ( !backEnd.projection2D ) {
+				cmd2D = qtrue;
+				RB_SetGL2D();
+			}
+			break;
+		case RC_END2D:
+			if ( cmd2D ) {
+				cmd2D = qfalse;
+			}
+			break;
 		case RC_END_OF_LIST:
 		default:
 			// stop rendering on this thread

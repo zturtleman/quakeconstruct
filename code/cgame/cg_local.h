@@ -1657,12 +1657,17 @@ void		trap_R_RenderScene( const refdef_t *fd );
 void		trap_R_SetColor( const float *rgba );	// NULL = 1,1,1,1
 void		trap_R_DrawStretchPic( float x, float y, float w, float h, 
 			float s1, float t1, float s2, float t2, qhandle_t hShader );
+void	trap_R_DrawTransformPic( float x, float y, float w, float h, 
+			float s1, float t1, float s2, float t2, float r, qhandle_t hShader );
 void		trap_R_ModelBounds( clipHandle_t model, vec3_t mins, vec3_t maxs );
 int			trap_R_LerpTag( orientation_t *tag, clipHandle_t mod, int startFrame, int endFrame, 
 					   float frac, const char *tagName );
 void		trap_R_RemapShader( const char *oldShader, const char *newShader, const char *timeOffset );
 void		trap_R_BeginMask( float x, float y, float w, float h );
 void		trap_R_EndMask( void );
+void		trap_R_Begin2D( void );
+void		trap_R_End2D( void );
+
 
 // The glconfig_t will not change during the life of a cgame.
 // If it needs to change, the entire cgame will be restarted, because

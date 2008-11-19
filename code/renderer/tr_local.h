@@ -1539,6 +1539,16 @@ typedef struct {
 
 typedef struct {
 	int		commandId;
+	shader_t	*shader;
+	float	x, y;
+	float	w, h;
+	float	s1, t1;
+	float	s2, t2;
+	float	r;
+} transformPicCommand_t;
+
+typedef struct {
+	int		commandId;
 	float	x, y;
 	float	w, h;
 } maskRectCommand_t;
@@ -1569,11 +1579,14 @@ typedef enum {
 	RC_END_OF_LIST,
 	RC_SET_COLOR,
 	RC_STRETCH_PIC,
+	RC_TRANSFORM_PIC,
 	RC_DRAW_SURFS,
 	RC_DRAW_BUFFER,
 	RC_SWAP_BUFFERS,
 	RC_SCREENSHOT,
 	RC_ENDMASK,
+	RC_BEGIN2D,
+	RC_END2D,
 } renderCommand_t;
 
 typedef struct {
@@ -1627,6 +1640,8 @@ void R_AddDrawSurfCmd( drawSurf_t *drawSurfs, int numDrawSurfs );
 void RE_SetColor( const float *rgba );
 void RE_StretchPic ( float x, float y, float w, float h, 
 					  float s1, float t1, float s2, float t2, qhandle_t hShader );
+void RE_TransformPic ( float x, float y, float w, float h, 
+					  float s1, float t1, float s2, float t2, float r, qhandle_t hShader );
 void RE_BeginFrame( stereoFrame_t stereoFrame );
 void RE_EndFrame( int *frontEndMsec, int *backEndMsec );
 void SaveJPG(char * filename, int quality, int image_width, int image_height, unsigned char *image_buffer);
@@ -1639,5 +1654,9 @@ void RE_RegisterFont(const char *fontName, int pointSize, fontInfo_t *font);
 //Mask Functions
 void RE_BeginMask( float x, float y, float w, float h );
 void RE_EndMask( void );
+
+//Coordinate Functions
+void RE_Begin2D( void );
+void RE_End2D( void );
 
 #endif //TR_LOCAL_H

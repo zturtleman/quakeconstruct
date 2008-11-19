@@ -92,6 +92,37 @@ int qlua_rect(lua_State *L) {
 	return 0;
 }
 
+int qlua_rectrotated(lua_State *L) {
+	float x,y,w,h,s,t,s2,t2,r;
+
+	qhandle_t shader = cgs.media.whiteShader;
+
+	luaL_checktype(L,1,LUA_TNUMBER);
+	luaL_checktype(L,2,LUA_TNUMBER);
+	luaL_checktype(L,3,LUA_TNUMBER);
+	luaL_checktype(L,4,LUA_TNUMBER);
+
+	x = lua_tonumber(L,1);
+	y = lua_tonumber(L,2);
+	w = lua_tonumber(L,3);
+	h = lua_tonumber(L,4);
+
+	if(lua_type(L,5) == LUA_TNUMBER) {
+		shader = lua_tointeger(L,5);
+	}
+	
+	r = quickfloat(L,6,0);
+	s = quickfloat(L,7,0);
+	t = quickfloat(L,8,0);
+	s2 = quickfloat(L,9,1);
+	t2 = quickfloat(L,10,1);
+
+	CG_AdjustFrom640( &x, &y, &w, &h );
+	trap_R_DrawTransformPic( x, y, w, h, s, t, s2, t2, r, shader );
+
+	return 0;
+}
+
 int qlua_text(lua_State *L) {
 	int x,y;
 	int w=CHAR_WIDTH,h=CHAR_HEIGHT;
@@ -116,6 +147,7 @@ int qlua_text(lua_State *L) {
 static const luaL_reg Draw_methods[] = {
   {"SetColor",		qlua_setcolor},
   {"Rect",			qlua_rect},
+  {"RectRotated",	qlua_rectrotated},
   {"Text",			qlua_text},
   {"EndMask",		qlua_endmask},
   {"MaskRect",		qlua_maskrect},
