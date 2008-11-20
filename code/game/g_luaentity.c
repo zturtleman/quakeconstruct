@@ -1282,6 +1282,32 @@ int lua_gethp(lua_State *L) {
 	return 0;
 }
 
+int lua_setarmor(lua_State *L) {
+	gentity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TNUMBER);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL && luaentity->client) {
+		luaentity->client->ps.stats[STAT_ARMOR] = lua_tointeger(L,2);
+	}
+	return 0;
+}
+
+int lua_getarmor(lua_State *L) {
+	gentity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL && luaentity->client) {
+		lua_pushinteger(L,luaentity->client->ps.stats[STAT_ARMOR]);
+		return 1;
+	}
+	return 0;
+}
+
 static const luaL_reg Entity_methods[] = {
   {"GetInfo",		qlua_getclientinfo},
   {"SetInfo",		qlua_setclientinfo},
@@ -1336,6 +1362,8 @@ static const luaL_reg Entity_methods[] = {
   {"SetClip",		lua_setclip},
   {"SetHealth",		lua_sethp},
   {"GetHealth",		lua_gethp},
+  {"SetArmor",		lua_setarmor},
+  {"GetArmor",		lua_getarmor},
   {0,0}
 };
 
