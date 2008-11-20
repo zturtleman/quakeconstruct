@@ -111,7 +111,7 @@ if(SERVER) then
 				return nil
 			end
 		else
-			error("^5MESSAGE ERROR[C]: Unable to send message to player (player was not connected)\n")
+			error("^5MESSAGE ERROR[C]: Unable to send message ID to player (player was not connected)\n")
 			return nil
 		end
 		return msgIDs[id]
@@ -119,6 +119,7 @@ if(SERVER) then
 	
 	local function SendCache(pl,force)
 		if(pl == nil) then error("^5MESSAGE ERROR[D]: Unable to send cache to player (player was nil)\n") return end
+		if(pl:IsBot()) then return end
 		local tab = pl:GetTable()
 		tab.msglist = tab.msglist or {}
 		
@@ -200,7 +201,7 @@ if(SERVER) then
 	end
 	
 	local function PlayerJoined(pl)
-		pl:GetTable()._mconnected = true
+		if(!pl:IsBot()) then pl:GetTable()._mconnected = true end
 		SendCache(pl)
 	end
 	hook.add("ClientReady","messages",PlayerJoined)
