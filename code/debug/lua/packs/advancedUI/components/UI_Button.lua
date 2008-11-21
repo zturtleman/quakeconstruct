@@ -3,7 +3,7 @@ local Panel = {}
 local function coloradjust(tab,amt)
 	local out = {}
 	for k,v in pairs(tab) do
-		out[k] = math.min(math.max(v + amt,0),1)
+		out[k] = math.min(math.max(v * (1 + amt),0),1)
 	end
 	return out
 end

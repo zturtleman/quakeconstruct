@@ -65,7 +65,7 @@ if(SERVER) then
 	end
 	hook.add("MessageReceived","includes",message)
 else
-	SendString("_clientready")
+	Timer(.5,SendString,"_clientready")
 	
 	local function demo()
 		SendString("_demostarted")

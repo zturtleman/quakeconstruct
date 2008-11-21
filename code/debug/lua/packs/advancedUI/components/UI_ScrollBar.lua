@@ -3,14 +3,16 @@ local Panel = {}
 function Panel:Initialize()
 
 	self.axis = 0
-	self.bgcolor = {.4,.4,.4,1}
+	--self.bgcolor = {.4,.4,.4,1}
+	self.bgcolor = self:ColorAdjust(self.bgcolor,-.8)
 	self.range = 0
 	self.wo = false
 	self.lip = 0
 	self.dragbar = UI_Create("dragbutton",self,true)
 	self.dragbar:SetSize(self:GetWidth(),50)
 	
-	self.dragbar.bgcolor = {.7,.7,.7,1}
+	--self.dragbar.bgcolor = {.7,.7,.7,1}
+	self.dragbar.bgcolor = self:ColorAdjust(self.dragbar.bgcolor,1.5)
 	self.dragbar:SetPos(0,0)
 	self.dragbar:LockCenter(false)
 	self.dragbar:ConstrainToParent(true)

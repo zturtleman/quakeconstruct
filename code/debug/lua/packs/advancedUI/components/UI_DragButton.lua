@@ -1,11 +1,15 @@
 local Panel = {}
-Panel.bgcolor = {0.3,0.3,0.3,.8}
+--Panel.bgcolor = {0.3,0.3,0.3,.8}
 Panel.draging = false
 Panel.dragx = 0
 Panel.dragy = 0
 Panel.constrain = false
 Panel.affectParent = false
 Panel.lockCenter = false
+
+function Panel:Initialize()
+	self.bgcolor = self:ColorAdjust(self.bgcolor,-.7)
+end
 
 function Panel:Affect(dx,dy)
 	if(self.parent and self.affectParent) then

@@ -1,8 +1,10 @@
 local Panel = {}
-Panel.bgcolor = {0.3,0.3,0.3,.8}
+--Panel.bgcolor = {0.3,0.3,0.3,.8}
 
 function Panel:Initialize()
+	--self:ColorAdjust(self.bgcolor,.3)
 	self.contentPane = UI_Create("panel",self)
+	self.contentPane.bgcolor = self:ColorAdjust(self.contentPane.bgcolor,-.2)
 	
 	self.dragbar = UI_Create("dragbutton",self,true)
 	self.dragbar:AffectParent(true)
