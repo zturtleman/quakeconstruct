@@ -5,7 +5,7 @@ Panel.x = 0
 Panel.y = 0
 Panel.w = 0
 Panel.h = 0
-Panel.bgcolor = {0.5,0.5,0.5,1}
+Panel.bgcolor = {0,0.6,1,1}
 Panel.fgcolor = {1,1,1,1}
 Panel.shader = LoadShader("9slice1")
 Panel.pset = false
@@ -32,6 +32,16 @@ local function coloradjust(tab,amt)
 	end
 	out[4] = tab[4]/2
 	qcolor(out)
+end
+
+function Panel:ColorAdjust(tab,amt)
+	tab = table.Copy(tab)
+	for k,v in pairs(tab) do
+		if(k != 4) then
+			tab[k] = math.min(math.max(v * math.abs(amt),0),1)
+		end
+	end
+	return tab
 end
 
 function Panel:Initialize()
