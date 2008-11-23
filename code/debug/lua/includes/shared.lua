@@ -30,6 +30,7 @@ includex("vector")
 includex("matrix")
 includex("angles")
 includex("messages")
+includex("netvars")
 includex("scriptmanager")
 includex("commands")
 if(CLIENT) then includex("sound") end
