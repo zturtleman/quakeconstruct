@@ -135,6 +135,11 @@ void CG_SetInitialSnapshot( snapshot_t *snap ) {
 		// check for events
 		CG_CheckEvents( cent );
 	}
+
+	if(GetClientLuaState()) {
+		qlua_gethook(GetClientLuaState(),"InitialSnapshot");
+		qlua_pcall(GetClientLuaState(),0,0,qtrue);
+	}
 }
 
 

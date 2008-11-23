@@ -16,7 +16,7 @@ if(SERVER) then
 	message.Precache(n_msgid)
 
 	local function isFloat(n)
-		return (math.floor(n) == n)
+		return (math.floor(n) != n)
 	end
 
 	local function sendVariable(var,val,new,pl)
@@ -34,7 +34,11 @@ if(SERVER) then
 			if(isFloat(val)) then
 				message.WriteFloat(msg,val)
 			else
-				message.WriteLong(msg,val)
+				if(val < 32767 and val > -32768) then
+					message.WriteShort(msg,val)
+				else
+					message.WriteLong(msg,val)
+				end
 			end
 		elseif(type(val) == "string") then
 			message.WriteString(msg,val)
@@ -52,7 +56,6 @@ if(SERVER) then
 		if(last != nil) then
 			if(last != val) then
 				debugprint("Varable Changed: " .. var .. " " .. last .. " -> " .. val .. "\n")
-				--Create timers so net messages are in sync with the Think function
 				sendVariable(var,val,false)
 			end
 		else
@@ -84,13 +87,15 @@ if(SERVER) then
 	end
 	
 	local function SendVars(pl)
-		for k,v in pairs(_N) do
+		debugprint("Sending Vars To " .. pl:GetInfo().name .. "\n")
+		for k,v in pairs(_protected) do
+			debugprint("Sent: " .. tostring(k) .. "\n")
 			sendVariable(k,v,true,pl)
 		end	
 	end
 	
 	local function PlayerJoined(pl)
-		if(!pl:IsBot()) then pl:GetTable()._mconnected = true end
+		--if(!pl:IsBot()) then pl:GetTable()._mconnected = true end
 		Timer(.05,SendVars,pl) --Wait a sec
 	end
 	hook.add("ClientReady","netvars",PlayerJoined)

@@ -156,6 +156,7 @@ if(SERVER) then
 				msgIDs[str] = nextid
 				nextid = nextid + 1
 				
+				print("Message Precache:\n")
 				for k,v in pairs(GetAllPlayers()) do
 					if(v:GetTable()._mconnected) then
 						SendCache(v)
@@ -218,15 +219,19 @@ if(SERVER) then
 	
 	local function PlayerJoined(pl)
 		if(!pl:IsBot()) then pl:GetTable()._mconnected = true end
-		SendCache(pl)
+		if(pl == nil) then return end
+		print("ClientReadyHook:\n")
+		SendCache(pl,true)
 	end
-	hook.add("ClientReady","messages",PlayerJoined)
+	hook.add("ClientReady","messages",PlayerJoined,9999)
 	
 	local function DemoSend(pl)
-		Timer(.5,SendCache,pl,true)
+		if(pl == nil) then return end
+		print("ClientDemoHook:\n")
+		SendCache(pl,true)
 		print("^5Demo Recording Started, Sending Message ID's\n")
 	end
-	hook.add("DemoStarted","messages",DemoSend)
+	hook.add("DemoStarted","messages",DemoSend,9999)
 end
 
 if(CLIENT) then
