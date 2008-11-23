@@ -1,7 +1,7 @@
-D_SHORT = 0
-D_LONG = 1
-D_STRING = 2
-D_FLOAT = 3
+D_SHORT = 1 --At first this was 0 but now I realize that 'tostring' truncates 0's
+D_LONG = 2
+D_STRING = 3
+D_FLOAT = 4
 
 local msgIDs = {}
 local strings = {}
@@ -68,6 +68,10 @@ if(SERVER) then
 
 	function Message(pl,msgid)
 		local tab = {}
+		if(type(pl) == "string") then 
+			msgid = pl 
+			pl = nil
+		end
 		tab.ismessage = true
 		tab.pl = pl
 		tab.msgid = msgid
@@ -147,6 +151,7 @@ if(SERVER) then
 	
 	function message.Precache(str)
 		if(str != nil and type(str) == "string") then
+			str = string.lower(str)
 			if(msgIDs[str] == nil) then
 				msgIDs[str] = nextid
 				nextid = nextid + 1
@@ -170,8 +175,9 @@ if(SERVER) then
 			if(pl == nil) then error("^5MESSAGE ERROR[F]: Nil Player\n") end
 			if(msgid == nil) then error("^5MESSAGE ERROR[G]: Nil Message Id\n") end
 			msgid = string.lower(msgid)
+			local prev = msgid
 			local msgid = MessageID(pl,tostring(msgid))
-			if(msgid == nil) then print("^5Forced Message Precache\nUse message.Precache(name)\n") return end
+			if(msgid == nil) then print("^5Forced Message Precache[" .. prev .. "]\nUse message.Precache(name)\n") return end
 			
 			local msg = d_Message(pl,1)
 			local contents = ""
@@ -183,6 +189,7 @@ if(SERVER) then
 					end
 				end
 			end
+			--print("Sent Contents: " .. contents .. "\n")
 			_message.WriteLong(msg,tonumber(contents))
 			_message.WriteLong(msg,msgid)
 			for k,v in pairs(m) do
@@ -198,6 +205,15 @@ if(SERVER) then
 			end
 			d_Send(msg)
 		end
+	end
+	
+	function SendDataMessageToAll(m,msgid)
+		msgid = msgid or m.msgid
+		for k,v in pairs(GetAllPlayers()) do
+			if(v:GetTable()._mconnected) then
+				SendDataMessage(m,v,msgid)
+			end
+		end	
 	end
 	
 	local function PlayerJoined(pl)
@@ -240,12 +256,13 @@ if(CLIENT) then
 		
 		lastInStack = dtype
 		
-		if(dtype == t) then return data end
+		if(dtype == t or t == nil) then return data end
 		
 		error("^5MESSAGE ERROR[K]: Invalid Data[" .. #stack+2 .. "] (Skipped?)\n" .. 
 		      "Attempted to read " .. strings[t] .. " got " .. strings[dtype] .. "\n")
 		
 		if(t == D_STRING) then return "" end
+		if(t == nil) then return nil end
 		return 0
 	end
 	
@@ -265,6 +282,10 @@ if(CLIENT) then
 		return readData(D_FLOAT)
 	end
 	
+	function message.ReadRaw()
+		return readData(nil)
+	end
+	
 	local function handle(msgid)
 		if(msgid == 1) then
 			local contents = tostring(_message.ReadLong())
@@ -272,10 +293,12 @@ if(CLIENT) then
 			if(msgIDs[strid] == nil) then
 				print("^5MESSAGE ERROR[L]: Invalid Message ID: " .. strid .. "\n")
 			end
+			--print("Message Contents: " .. contents .. "\n")
 			contents = string.ToTable(contents)
 			lastInStack = -1
 			for k,v in pairs(contents) do
 				v = tonumber(v)
+				--print("Content: " .. k .. " " .. v .. "\n")
 				local b,e = pcall(funcs[v])
 				if(!b) then
 					error("^5MESSAGE ERROR[M]: " .. e .. "\n")
