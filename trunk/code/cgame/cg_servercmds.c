@@ -535,6 +535,11 @@ static void CG_MapRestart( void ) {
 
 	DoLuaInit();
 
+	if(GetClientLuaState()) {
+		qlua_gethook(GetClientLuaState(),"InitialSnapshot");
+		qlua_pcall(GetClientLuaState(),0,0,qtrue);
+	}
+
 	// we really should clear more parts of cg here and stop sounds
 
 	// play the "fight" sound if this is a restart without warmup

@@ -33,7 +33,7 @@ local ccmds = {}
 function Call(ent,cmd,args)
 	if(ccmds[cmd]) then
 		for k,v in pairs(ccmds[cmd]) do
-			if(ent:EntIndex() == 0 or adminonly != true) then
+			if(ent:EntIndex() == 0 or v.adminonly != true) then
 				local b, e = pcall(v.func,ent,cmd,args)
 				if(!b) then
 					if(SERVER) then
@@ -88,7 +88,7 @@ end
 if(SERVER) then
 	Add("load",loadScript,true)
 else
-	Add("load_cl",loadScript,true)
+	Add("load_cl",loadScript,false)
 end
 
 function runlua(ent,cmd,args)
@@ -103,5 +103,5 @@ end
 if(SERVER) then
 	Add("lua",runlua,true)
 else
-	Add("lua_cl",runlua,true)
+	Add("lua_cl",runlua,false)
 end

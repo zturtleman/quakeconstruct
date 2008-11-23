@@ -410,6 +410,20 @@ static int	FloatAsInt( float f ) {
 
 	return temp;
 }
+
+void MakeMsg(msg_t *msg) {
+	byte		data[MAX_MSGLEN];
+
+	MSG_Init( msg, data, sizeof(data) );
+
+	msg->allowoverflow = qtrue;
+
+	MSG_WriteLong( msg, clc.reliableSequence );
+
+	MSG_WriteByte (msg, svc_lua);
+	MSG_WriteLong (msg, clc.serverCommandSequence );
+}
+
 /*
 ====================
 CL_CgameSystemCalls

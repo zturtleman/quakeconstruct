@@ -216,6 +216,8 @@ local function legview(pos,ang,fovx,fovy)
 		end
 		
 		look2 = vAdd(look2,vMul(getDeltaAngle3(look,look2),.03))
+		
+		ang.z = ang.z - 25
 	else
 		look = Vector()
 	end
