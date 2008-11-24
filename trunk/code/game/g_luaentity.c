@@ -497,7 +497,11 @@ int qlua_getclass(lua_State *L) {
 
 	luaentity = lua_toentity(L,1);
 	if(luaentity != NULL) {
-		lua_pushstring(L,luaentity->classname);
+		if(!strcmp("luaentity",luaentity->classname)) {
+			lua_pushstring(L,luaentity->s.luaname);
+		} else {
+			lua_pushstring(L,luaentity->classname);
+		}
 	} else {
 		lua_pushstring(L,"<INVALID ENTITY>");
 	}
@@ -1440,7 +1444,6 @@ int qlua_link(lua_State *L) {
 int qlua_createEntity(lua_State *L) {
 	gentity_t	*ent;
 	const char	*classname;
-
 	luaL_checktype(L,1,LUA_TSTRING);
 	classname = lua_tostring(L,1);
 	if(classname) {
@@ -1455,6 +1458,13 @@ int qlua_createEntity(lua_State *L) {
 		ent->pain = 0;
 		ent->die = 0;
 		ent->think = 0;
+		ent->classname = (char*)classname;
+		if(G_CallSpawn(ent)) {
+			lua_pushentity(L,ent);
+			qlua_LinkEntity(ent);
+			return 1;
+		}
+
 		ent->s.eType = ET_LUA;
 		ent->r.svFlags = SVF_BROADCAST;
 		ent->s.weapon = WP_NONE;

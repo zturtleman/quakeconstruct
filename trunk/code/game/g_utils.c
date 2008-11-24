@@ -465,10 +465,11 @@ Links an entity and reports to qlua about it
 */
 void qlua_LinkEntity( gentity_t *ed ) {
 	if(GetServerLuaState() != NULL) {
-		if(!ed->client) {
+		if(!ed->client && !ed->lua_linked) {
 			qlua_gethook(GetServerLuaState(),"EntityLinked");
 			lua_pushentity(GetServerLuaState(),ed);
 			qlua_pcall(GetServerLuaState(),1,0,qtrue);
+			ed->lua_linked = qtrue;
 		}
 	}
 
@@ -484,10 +485,11 @@ Unlinks an entity and reports to qlua about it
 */
 void qlua_UnlinkEntity( gentity_t *ed ) {
 	if(GetServerLuaState() != NULL) {
-		if(!ed->client) {
+		if(!ed->client && ed->lua_linked) {
 			qlua_gethook(GetServerLuaState(),"EntityUnlinked");
 			lua_pushentity(GetServerLuaState(),ed);
 			qlua_pcall(GetServerLuaState(),1,0,qtrue);
+			ed->lua_linked = qfalse;
 		}
 	}
 

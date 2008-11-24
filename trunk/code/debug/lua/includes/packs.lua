@@ -31,7 +31,7 @@ function packlib.CreatePack(file)
 	o['PACK_DIR'] = fileDir(file)
 	o['PACK_AUTHOR'] = "n/a"
 	o['PACK_DESCRIPTION'] = "n/a"
-	o['PACK_MODE'] = "invalid"
+	o['PACK_MODE'] = "manual"
 	o['PACK_NAME'] = killGaps(string.sub(string.GetFileFromFilename(o['PACK_DIR']),2))
 	o['PACK_NAME'] = string.lower(o['PACK_NAME'])
 	
@@ -86,11 +86,13 @@ function packlib.ParsePack(pack)
 		local name = pack['PACK_DESCRIPTION']
 		if(name == "n/a") then name = dir end
 		print("Loading Pack: '" .. name .. "' - " .. pack['PACK_NAME'] .. "\n")
-		if(mode != "lib" and mode != "game") then 
-			print("^1Unable to load pack: invalid type, specify \"game\" or \"lib\"\n")
+		if(mode != "autorun" and mode != "manual") then 
+			print("^1Unable to load pack: invalid mode, specify \"autorun\" or \"manual\"\n")
 			return 
 		end
-		packlib.Inits(dir)
+		if(mode == "autorun") then
+			packlib.Inits(dir)
+		end
 		return ptab
 	else
 		print("^1There was an error loading the pack.\n")
@@ -104,7 +106,13 @@ function packlib.ParseAll()
 	end
 end
 
-function packlib.ReloadPack(pname)
+function packlib.LoadPack(pname)
+	if(type(pname) == "table") then
+		if(pname['PACK_NAME'] != nil) then
+			packlib.Inits(pname['PACK_DIR'])
+			return
+		end
+	end
 	for k,v in pairs(packlib.packs) do
 		if(v['PACK_NAME'] == string.lower(pname)) then
 			packlib.Inits(v['PACK_DIR'])
@@ -112,13 +120,17 @@ function packlib.ReloadPack(pname)
 	end
 end
 
+function packlib.List()
+	return packlib.packs;
+end
+
 local function cc(p,c,a)
 	if(a[1] != nil) then
-		packlib.ReloadPack(a[1])
+		packlib.LoadPack(a[1])
 	else
 		print("Please specify a pack.\n")
 	end
 end
-concommand.Add("ReloadPack",cc)
+concommand.Add("LoadPack",cc)
 
 packlib.LoadPacks()

@@ -130,7 +130,7 @@ if(SERVER) then
 		local send = {}
 		for k,v in pairs(msgIDs) do
 			if(tab.msglist[k] != true or force) then
-				print(k .. " - " .. v .. "\n")
+				debugprint(k .. " - " .. v .. "\n")
 				if(k != nil and v != nil) then
 					table.insert(send, {v,k})
 				end
@@ -156,7 +156,7 @@ if(SERVER) then
 				msgIDs[str] = nextid
 				nextid = nextid + 1
 				
-				print("Message Precache:\n")
+				debugprint("Message Precache[" .. str .. "]:\n")
 				for k,v in pairs(GetAllPlayers()) do
 					if(v:GetTable()._mconnected) then
 						SendCache(v)
@@ -220,14 +220,14 @@ if(SERVER) then
 	local function PlayerJoined(pl)
 		if(!pl:IsBot()) then pl:GetTable()._mconnected = true end
 		if(pl == nil) then return end
-		print("ClientReadyHook:\n")
+		debugprint("ClientReadyHook:\n")
 		SendCache(pl,true)
 	end
 	hook.add("ClientReady","messages",PlayerJoined,9999)
 	
 	local function DemoSend(pl)
 		if(pl == nil) then return end
-		print("ClientDemoHook:\n")
+		debugprint("ClientDemoHook:\n")
 		SendCache(pl,true)
 		print("^5Demo Recording Started, Sending Message ID's\n")
 	end

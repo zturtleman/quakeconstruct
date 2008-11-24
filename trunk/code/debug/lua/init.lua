@@ -65,3 +65,8 @@ local function PlayerSpawned(pl)
 	end
 end
 hook.add("PlayerSpawned","init",PlayerSpawned)
+
+local lp = Vector(672,1872,22)
+local ent = CreateEntity("testentity")
+ent:SetPos(lp)
+ent:SetTrType(TR_STATIONARY)

@@ -44,4 +44,4 @@ function CheckTimers()
 end
 hook.add("Think","Timers",CheckTimers)
 
-print("^3Timer code loaded.\n")
+debugprint("^3Timer code loaded.\n")

@@ -91,4 +91,4 @@ function CallHook(event,...)
 	if(retVal != nil) then return retVal end
 end
 
-print("^3Hook code loaded.\n")
+debugprint("^3Hook code loaded.\n")

@@ -35,7 +35,7 @@ function parentComponents()
 				if(type(base) == "string" and UI_Components[base] and base != name) then
 					if(UI_Components[base].__loaded == true) then
 						v = table.Inherit( v, UI_Components[base] )
-						print("Parented: " .. name .. " -> " .. base .. "\n")
+						debugprint("Parented: " .. name .. " -> " .. base .. "\n")
 						lc = lc + 1
 						v.__loaded = true
 					else
@@ -49,7 +49,7 @@ function parentComponents()
 		end
 		i = i + 1
 	end
-	print("Loaded " .. lc .. " components with " .. i .. " iterations.\n")
+	debugprint("Loaded " .. lc .. " components with " .. i .. " iterations.\n")
 end
 
 function registerComponent(tab,name,base)
@@ -59,7 +59,7 @@ function registerComponent(tab,name,base)
 		tab._mybase = base
 		tab._myname = name
 	end
-	print("Registered " .. name .. "\n")
+	debugprint("Registered " .. name .. "\n")
 end
 
 local currentInit = nil
@@ -275,7 +275,7 @@ local function garbageCollect()
 	end
 	UI_EnableCursor(false)
 	UI_EnableKeyboard(false)
-	print("^2Garbage Collected -> " .. rm .. "\n")
+	debugprint("^2Garbage Collected -> " .. rm .. "\n")
 end
 
 local function checkRemove(v)

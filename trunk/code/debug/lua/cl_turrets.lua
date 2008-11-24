@@ -184,4 +184,4 @@ function RenderEnt(ent,name)
 end
 hook.add("DrawCustomEntity","cl_turrets",RenderEnt)
 
-print("^3Loaded CL_Turrets\n")
+debugprint("^3Loaded CL_Turrets\n")

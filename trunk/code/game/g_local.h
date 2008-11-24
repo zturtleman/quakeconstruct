@@ -157,6 +157,7 @@ struct gentity_s {
 	int			lua_die;
 	int			lua_persistanttable;
 
+	qboolean	lua_linked;
 	qboolean	spawn_lua_parse;
 
 	int			pain_debounce_time;
@@ -499,6 +500,7 @@ qboolean	G_SpawnString( const char *key, const char *defaultString, char **out )
 qboolean	G_SpawnFloat( const char *key, const char *defaultString, float *out );
 qboolean	G_SpawnInt( const char *key, const char *defaultString, int *out );
 qboolean	G_SpawnVector( const char *key, const char *defaultString, float *out );
+qboolean	G_CallSpawn( gentity_t *ent );	
 void		G_SpawnEntitiesFromString( void );
 char *G_NewString( const char *string );
 

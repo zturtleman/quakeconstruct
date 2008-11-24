@@ -43,6 +43,7 @@ if(CLIENT) then includex("poly") end
 if(CLIENT) then includex("input") end
 if(CLIENT) then includex("view") end
 includex("packs")
+includex("custom")
 --require "includes/functiondump"
 
 ENTITYNUM_NONE = 1023
