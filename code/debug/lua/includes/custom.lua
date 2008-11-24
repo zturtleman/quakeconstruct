@@ -1,7 +1,7 @@
 _CUSTOM = {}
 
 local function checkdir(str)
-	if(str == "" or str == "." or str == "..") then return false end
+	if(str == "" or string.find(str,".") != nil) then return false end
 	return true
 end
 
