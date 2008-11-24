@@ -108,4 +108,4 @@ hook.add("EntityUnlinked","_UnlinkFromLua",UnlinkEntity)
 hook.add("PlayerDisconnected","_UnlinkFromLua",UnlinkPlayer)
 hook.add("PlayerJoined","_LinkToLua",LinkEntity)
 
-print("^3Entity code loaded.\n")
+debugprint("^3Entity code loaded.\n")

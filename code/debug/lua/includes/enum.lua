@@ -107,7 +107,7 @@ end
 
 local enumfiles = findFileByType("enum")
 for k,v in pairs(enumfiles) do
-	print("^3Found Enumeration Set '" .. v .. "'.\n")
+	debugprint("^3Found Enumeration Set '" .. v .. "'.\n")
 	parseEnumerationSet(v)
 end
 --parseEnumerationSet("lua/includes/enum/input.enum")
@@ -116,7 +116,7 @@ local count = 0
 local val = 0
 local forced = 0
 for n,e in pairs(enum) do
-	print("^3Enumerated '" .. n .. "'.\n")
+	debugprint("^3Enumerated '" .. n .. "'.\n")
 	for k,v in pairs(e) do
 		--print(v.name)
 		local value = val
@@ -162,4 +162,4 @@ function EnumToString(set,val)
 	return ""
 end
 
-print("^3" .. count .. " Enumerations loaded.\n")
+debugprint("^3" .. count .. " Enumerations loaded.\n")

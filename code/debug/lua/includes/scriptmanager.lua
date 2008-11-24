@@ -291,4 +291,4 @@ if(SERVER) then
 	end
 	hook.add("MessageReceived","scriptmanager",messagetest)
 end
-print("^3Script Manager System Loaded.\n")
+debugprint("^3Script Manager System Loaded.\n")

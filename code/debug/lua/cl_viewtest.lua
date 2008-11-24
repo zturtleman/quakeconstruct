@@ -15,7 +15,7 @@ local function maxvel(v)
 end
 
 local function bobview(pos,ang,fovx,fovy)
-	if(!_CG) then print("^1NO CG!\n") return end
+	if(!_CG) then return end
 	local crd = _CG.refdef.right
 	local vel = LocalPlayer():GetTrajectory():GetDelta()
 	local lvel = VectorLength(vel)

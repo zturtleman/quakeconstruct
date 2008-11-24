@@ -8,7 +8,6 @@ local s_menu_close = LoadSound("sound/misc/menu3.wav")
 local s_menu_select = s_menu_close
 local s_menu_fail = LoadSound("sound/misc/menu4.wav")
 
-print("template\n")
 local template = UI_Create("button")
 template:SetPos(0,20)
 template:SetSize(100,20)

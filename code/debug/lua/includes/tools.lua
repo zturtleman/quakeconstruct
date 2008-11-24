@@ -184,4 +184,4 @@ end
 
 POWERUP_FOREVER = 10000*10000
 
-print("^3Tools loaded.\n")
+debugprint("^3Tools loaded.\n")

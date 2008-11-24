@@ -299,7 +299,7 @@ static const luaL_reg Vector_meta[] = {
 int Vector_register (lua_State *L) {
 	luaL_openlib(L, MYTYPE, Vector_methods, 0);
 	luaL_newmetatable(L,MYTYPE);
-	luaL_openlib(L,NULL,Vector_meta,0);
+	luaL_openlib(L, NULL,Vector_meta,0);
 
 	lua_register(L,"Vector",lua_newvector);
 

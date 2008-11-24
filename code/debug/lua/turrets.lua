@@ -432,4 +432,4 @@ function etest(ent)
 end
 concommand.Add("etest",etest)
 
-print("^3Loaded Turrets\n")
+debugprint("^3Loaded Turrets\n")
