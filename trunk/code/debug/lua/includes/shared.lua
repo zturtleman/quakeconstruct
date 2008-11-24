@@ -3,7 +3,10 @@
 end]]
 
 local function includex(s)
-	include("lua/includes/" .. s .. ".lua")
+	local b,e = pcall(include,"lua/includes/" .. s .. ".lua")
+	if(!b) then
+		print("^1Failure To Load \"" .. s .. "\":\n" .. e .. "\n")
+	end
 end
 
 --[[includex("tools")
