@@ -158,10 +158,10 @@ local function event(entity,event,pos,dir)
 		--newParticle(pos,entity:GetByteDir(),gibs[math.random(1,#gibs)])
 	end
 	if(event == EV_BULLET_HIT_FLESH) then
-		newParticle(pos,vMul(entity:GetByteDir(),.2),gibs[5])
+		--newParticle(pos,vMul(entity:GetByteDir(),.2),gibs[5])
 	end
 	if(event == EV_GIB_PLAYER) then
-		local vel = entity:GetTrajectory():GetDelta()/300
+		local vel = entity:GetTrajectory():GetDelta()/500
 		PlaySound(entity,explodeSound)
 		
 		local mdl = entity:GetInfo().headModel or skull

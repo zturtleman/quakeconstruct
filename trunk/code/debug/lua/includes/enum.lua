@@ -107,8 +107,10 @@ end
 
 local enumfiles = findFileByType("enum")
 for k,v in pairs(enumfiles) do
-	debugprint("^3Found Enumeration Set '" .. v .. "'.\n")
-	parseEnumerationSet(v)
+	if(string.sub(v,1,4) == "lua/") then
+		print("^3Found Enumeration Set '" .. v .. "'.\n")
+		parseEnumerationSet(v)
+	end
 end
 --parseEnumerationSet("lua/includes/enum/input.enum")
 
