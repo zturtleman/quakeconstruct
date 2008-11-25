@@ -65,10 +65,21 @@ local function PlayerSpawned(pl)
 	end
 end
 hook.add("PlayerSpawned","init",PlayerSpawned)
-
+--[[
+local tests = {}
 local ent = CreateEntity("testentity")
-ent:SetPos(Vector(532,1872,100))
+local pos = Vector(532,1872,100)
+pos = Vector(30,80,100)
+ent:SetPos(pos)
 --ent:SetTrType(TR_STATIONARY)
+table.insert(tests,ent)
+
+local ent2 = CreateEntity("item_quad")
+ent2:SetPos(pos + Vector(160,0,150))
+ent2:SetTrType(TR_STATIONARY)
+ent2:SetWait(1)
+ent2:SetSpawnFlags(1)
+table.insert(tests,ent2)
 
 for x=0,4 do
 	local class = "item_armor_body"
@@ -84,10 +95,18 @@ for x=0,4 do
 	if(x==3) then
 		class = "weapon_shotgun"
 	end
-	local lp = Vector(532 + (x*80),1872,200)
+	local lp = pos + Vector(x*80,0,100)
 	local ent = CreateEntity(class)
 	ent:SetPos(lp)
 	ent:SetTrType(TR_STATIONARY)
 	ent:SetWait(1)
 	ent:SetSpawnFlags(1)
+	table.insert(tests,ent)
 end
+
+local function removeTests()
+	for k,v in pairs(tests) do
+		v:Remove()
+	end
+end
+concommand.Add("RemoveTests",removeTests,true)]]
