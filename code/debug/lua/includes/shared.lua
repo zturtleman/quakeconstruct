@@ -6,6 +6,8 @@ local function includex(s)
 	local b,e = pcall(include,"lua/includes/" .. s .. ".lua")
 	if(!b) then
 		print("^1Failure To Load \"" .. s .. "\":\n" .. e .. "\n")
+	else
+		print("^2Loaded: " .. s .. "\n")
 	end
 end
 
