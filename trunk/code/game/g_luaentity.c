@@ -542,6 +542,7 @@ int qlua_setpos(lua_State *L) {
 			luaentity->s.pos.trDuration += (level.time - luaentity->s.pos.trTime);
 			luaentity->s.pos.trTime = level.time;
 			VectorCopy(luaentity->s.pos.trBase, luaentity->r.currentOrigin);
+			VectorCopy(luaentity->s.pos.trBase, luaentity->s.origin);
 		}
 		return 1;
 	}
@@ -623,6 +624,9 @@ int qlua_setvel(lua_State *L) {
 		if(luaentity->client) {
 			lua_tovector(L,2,luaentity->client->ps.velocity);
 		} else {
+			if(luaentity->s.pos.trType == TR_STATIONARY) {
+				luaentity->s.pos.trType = TR_GRAVITY;
+			}
 			BG_EvaluateTrajectory( &luaentity->s.pos, level.time, origin );
 			VectorCopy(origin, luaentity->s.pos.trBase);
 			luaentity->s.pos.trDuration += (level.time - luaentity->s.pos.trTime);
@@ -1312,6 +1316,78 @@ int lua_getarmor(lua_State *L) {
 	return 0;
 }
 
+int qlua_setground(lua_State *L) {
+	gentity_t	*luaentity;
+	int ground = 0;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TNUMBER);
+
+	ground = lua_tointeger(L,2);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		luaentity->s.groundEntityNum = ground;		
+	}
+	return 0;
+}
+
+int qlua_getground(lua_State *L) {
+	gentity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		lua_pushinteger(L,luaentity->s.groundEntityNum);
+		return 1;
+	}
+	return 0;
+}
+
+int qlua_setwait(lua_State *L) {
+	gentity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TNUMBER);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		luaentity->wait = lua_tonumber(L,2);
+	}
+	return 0;
+}
+
+int qlua_setspflags(lua_State *L) {
+	gentity_t	*luaentity;
+	int flags = 0;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TNUMBER);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		flags = lua_tointeger(L,2);
+		luaentity->spawnflags = flags;
+		luaentity->s.generic1 = flags;
+	}
+	return 0;
+}
+
+int qlua_setbounce(lua_State *L) {
+	gentity_t	*luaentity;
+	int flags = 0;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TNUMBER);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		luaentity->physicsBounce = lua_tonumber(L,2);
+	}
+	return 0;
+}
+
 static const luaL_reg Entity_methods[] = {
   {"GetInfo",		qlua_getclientinfo},
   {"SetInfo",		qlua_setclientinfo},
@@ -1368,6 +1444,11 @@ static const luaL_reg Entity_methods[] = {
   {"GetHealth",		lua_gethp},
   {"SetArmor",		lua_setarmor},
   {"GetArmor",		lua_getarmor},
+  {"SetGroundEntity",		qlua_setground},
+  {"GetGroundEntity",		qlua_getground},
+  {"SetWait",		qlua_setwait},
+  {"SetSpawnFlags",	qlua_setspflags},
+  {"SetBounce",		qlua_setbounce},
   {0,0}
 };
 

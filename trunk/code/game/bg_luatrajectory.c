@@ -109,6 +109,28 @@ int qlua_settype(lua_State *L) {
 	return 0;
 }
 
+int qlua_getduration(lua_State *L) {
+	trajectory_t	*tr = lua_totrajectory(L,1);
+
+	if(tr != NULL) {
+		lua_pushinteger(L,tr->trDuration);
+		return 1;
+	}
+	return 0;
+}
+
+int qlua_setduration(lua_State *L) {
+	trajectory_t	*tr = lua_totrajectory(L,1);
+
+	luaL_checktype(L,2,LUA_TNUMBER);
+
+	if(tr != NULL) {
+		tr->trDuration = lua_tonumber(L,2);
+		return 1;
+	}
+	return 0;
+}
+
 int qlua_evaluate(lua_State *L) {
 	trajectory_t	*tr = lua_totrajectory(L,1);
 	vec3_t			res;
@@ -170,6 +192,8 @@ static const luaL_reg Tr_methods[] = {
   {"SetTime",		qlua_settime},
   {"GetType",		qlua_gettype},
   {"SetType",		qlua_settype},
+  {"GetDuration",	qlua_getduration},
+  {"SetDuration",	qlua_setduration},
   {"Evaluate",		qlua_evaluate},
   {"EvaluateDelta",	qlua_evaluatedelta},
   {0,0}

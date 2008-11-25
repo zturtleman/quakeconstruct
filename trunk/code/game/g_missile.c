@@ -69,6 +69,18 @@ void G_BounceMissile( gentity_t *ent, trace_t *trace ) {
 		}
 	}
 
+	if ( ent->s.eType == ET_LUA ) {
+		if ( ent->physicsBounce > 0 ) {
+			VectorScale( ent->s.pos.trDelta, ent->physicsBounce, ent->s.pos.trDelta );
+			if ( trace->plane.normal[2] > 0.2 && VectorLength( ent->s.pos.trDelta ) < 40 ) {
+				G_SetOrigin( ent, trace->endpos );
+				return;
+			}
+		} else {
+			G_SetOrigin( ent, trace->endpos );
+		}
+	}
+
 	VectorAdd( ent->r.currentOrigin, trace->plane.normal, ent->r.currentOrigin);
 	VectorCopy( ent->r.currentOrigin, ent->s.pos.trBase );
 	ent->s.pos.trTime = level.time;
@@ -309,7 +321,8 @@ void G_MissileImpact( gentity_t *ent, trace_t *trace ) {
 		return;
 	}
 
-	if ( ent->s.eType == ET_LUA ) {
+	if ( ent->s.eType == ET_LUA && ent->s.pos.trType == TR_GRAVITY) {
+		G_BounceMissile( ent, trace );
 		return;
 	}
 

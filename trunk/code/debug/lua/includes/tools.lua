@@ -149,6 +149,38 @@ if(CLIENT) then
 	end
 end
 
+function SetOrigin( ent, origin )
+	local tr = ent:GetTrajectory()
+	tr:SetBase(origin)
+	tr:SetType(TR_STATIONARY)
+	tr:SetTime(0)
+	tr:SetDuration(0)
+	tr:SetDelta(Vector(0,0,0))
+	ent:SetTrajectory(tr)
+end
+
+function BounceEntity(ent,trace,amt)
+	local tr = ent:GetTrajectory()
+	local hitTime = LastTime() + ( LevelTime() - LastTime() ) * trace.fraction;
+	local vel = tr:EvaluateDelta(hitTime)
+	local dot = DotProduct( vel, trace.normal );
+	local delta = vAdd(vel,vMul(trace.normal,-2*dot))
+	delta = vMul(delta,amt or .5)
+
+	tr:SetBase(ent:GetPos())
+	tr:SetDelta(delta)
+	ent:SetTrajectory(tr)
+	
+	if ( trace.normal.z > 0 and delta.z < 40 ) then
+		trace.endpos.z = trace.endpos.z + 1.0
+		SetOrigin( ent, trace.endpos );
+		ent:SetGroundEntity(trace.entitynum);
+		return;
+	end
+	
+	ent:SetPos(vAdd(ent:GetPos(),trace.normal))
+end
+
 function LerpReach(lr,id,v,t,thr,s,r)
 	if(lr == nil or type(lr) != "table") then error("No LerpReach for you :(\n") end
 	lr[id] = lr[id] or {}

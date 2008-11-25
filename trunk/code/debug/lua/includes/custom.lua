@@ -1,7 +1,8 @@
 _CUSTOM = {}
 
 local function checkdir(str)
-	if(str == "" or string.find(str,".") != nil) then return false end
+	--str, seperator, ll, true
+	if(str == "" or string.find(str,".",0,true) != nil) then return false end
 	return true
 end
 
@@ -17,6 +18,7 @@ function FindCustomFiles(dir)
 	local out = {}
 	for filename in lfs.dir(dir) do
 		local attr = lfs.attributes(dir .. "/" .. filename)
+		print(filename .. "\n")
 		if (attr.mode == "directory" and checkdir(filename) ) then
 			print("Found " .. filename .. "\n")
 			table.insert(out,{dir .. "/" .. filename,filename})
