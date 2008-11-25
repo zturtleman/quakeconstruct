@@ -1949,9 +1949,9 @@ void CG_MissileHitWall( int weapon, int clientNum, vec3_t origin, vec3_t dir, im
 
 		// colorize with client color
 		color = cgs.clientinfo[clientNum].color2;
-		CG_ImpactMark( mark, origin, dir, random()*360, color[0],color[1], color[2],1, alphaFade, radius, qfalse );
+		CG_ImpactMark( mark, origin, dir, random()*360, color[0],color[1], color[2],1, alphaFade, radius, qfalse, 0 );
 	} else {
-		CG_ImpactMark( mark, origin, dir, random()*360, 1,1,1,1, alphaFade, radius, qfalse );
+		CG_ImpactMark( mark, origin, dir, random()*360, 1,1,1,1, alphaFade, radius, qfalse, 0 );
 	}
 }
 

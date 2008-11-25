@@ -73,10 +73,12 @@ void CG_FreeLocalEntity( localEntity_t *le ) {
 	qlua_clearfunc(GetClientLuaState(),le->lua_die);
 	qlua_clearfunc(GetClientLuaState(),le->lua_bounce);
 	qlua_clearfunc(GetClientLuaState(),le->lua_think);
+	qlua_clearfunc(GetClientLuaState(),le->lua_stopped);
 
 	le->lua_die = 0;
 	le->lua_think = 0;
 	le->lua_bounce = 0;
+	le->lua_stopped = 0;
 
 	// remove from the doubly linked active list
 	le->prev->next = le->next;
@@ -177,12 +179,12 @@ void CG_FragmentBounceMark( localEntity_t *le, trace_t *trace ) {
 
 		radius = 16 + (rand()&31);
 		CG_ImpactMark( cgs.media.bloodMarkShader, trace->endpos, trace->plane.normal, random()*360,
-			1,1,1,1, qtrue, radius, qfalse );
+			1,1,1,1, qtrue, radius, qfalse, 0 );
 	} else if ( le->leMarkType == LEMT_BURN ) {
 
 		radius = 8 + (rand()&15);
 		CG_ImpactMark( cgs.media.burnMarkShader, trace->endpos, trace->plane.normal, random()*360,
-			1,1,1,1, qtrue, radius, qfalse );
+			1,1,1,1, qtrue, radius, qfalse, 0 );
 	}
 
 
@@ -249,6 +251,10 @@ void CG_ReflectVelocity( localEntity_t *le, trace_t *trace ) {
 		( trace->plane.normal[2] > 0 && 
 		( le->pos.trDelta[2] < 40 || le->pos.trDelta[2] < -cg.frametime * le->pos.trDelta[2] ) ) ) {
 		le->pos.trType = TR_STATIONARY;
+		if(qlua_getstored(GetClientLuaState(), le->lua_stopped)) {
+			lua_pushlocalentity(GetClientLuaState(), le);
+			qlua_pcall(GetClientLuaState(), 1, 0, qfalse);
+		}
 	} else {
 
 	}
@@ -266,7 +272,7 @@ CG_AddFragment
 ================
 */
 void CG_AddFragment( localEntity_t *le ) {
-	vec3_t	newOrigin;
+	vec3_t	newOrigin, newAngle;
 	trace_t	trace;
 	float col;
 
@@ -277,6 +283,15 @@ void CG_AddFragment( localEntity_t *le ) {
 	le->refEntity.shaderRGBA[1] = le->color[1] * col;
 	le->refEntity.shaderRGBA[2] = le->color[2] * col;
 	le->refEntity.shaderRGBA[3] = le->color[3] * col;
+
+	if ( le->angles.trType == TR_LINEAR ) {
+		BG_EvaluateTrajectory( &le->angles, cg.time, newAngle);
+		AnglesToAxis(newAngle,le->refEntity.axis);
+
+		VectorScale(le->refEntity.axis[0],le->refEntity.lua_scale[0],le->refEntity.axis[0]);
+		VectorScale(le->refEntity.axis[1],le->refEntity.lua_scale[1],le->refEntity.axis[1]);
+		VectorScale(le->refEntity.axis[2],le->refEntity.lua_scale[2],le->refEntity.axis[2]);
+	}
 
 	if ( le->pos.trType == TR_STATIONARY ) {
 		// sink into the ground if near the removal time

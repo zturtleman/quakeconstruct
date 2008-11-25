@@ -159,6 +159,7 @@ int qlua_createmark(lua_State *L) {
 	float alpha;
 	qboolean alphafade = qfalse;
 	float radius;
+	float time = 0;
 	
 	luaL_checkint(L,1);
 	luaL_checktype(L,2,LUA_TVECTOR);
@@ -184,7 +185,11 @@ int qlua_createmark(lua_State *L) {
 		alphafade = lua_toboolean(L,10);
 	}
 
-	CG_ImpactMark(shader,origin,plane,orient,red,green,blue,alpha,alphafade,radius,qfalse);
+	if(lua_type(L,11) == LUA_TNUMBER) {
+		time = lua_tonumber(L,11);
+	}
+
+	CG_ImpactMark(shader,origin,plane,orient,red,green,blue,alpha,alphafade,radius,qfalse,time);
 
 	return 0;
 }

@@ -179,6 +179,51 @@ int qlua_lsetvelocity(lua_State *L) {
 	return 0;
 }
 
+int qlua_lgetanglevelocity(lua_State *L) {
+	localEntity_t	*luaentity;
+	vec3_t		vel;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	luaentity = lua_tolocalentity(L,1);
+	if(luaentity != NULL) {
+		BG_EvaluateTrajectoryDelta(&luaentity->angles,cg.time,vel);
+		lua_pushvector(L,vel);
+		return 1;
+	}
+	return 0;
+}
+
+int qlua_lsetanglevelocity(lua_State *L) {
+	localEntity_t	*luaentity;
+	vec3_t		angle;
+	vec3_t		delta;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TVECTOR);
+
+	luaentity = lua_tolocalentity(L,1);
+	if(luaentity != NULL) {
+		BG_EvaluateTrajectory( &luaentity->angles, cg.time, angle );
+		VectorCopy(angle, luaentity->angles.trBase);
+		luaentity->angles.trDuration += (cg.time - luaentity->angles.trTime);
+		luaentity->angles.trTime = cg.time;
+		lua_tovector(L,2,luaentity->angles.trDelta);
+		VectorCopy(luaentity->angles.trDelta,delta);
+		//CG_Printf("SetAngleVelocity: %f,%f,%f\n", delta[0], delta[1], delta[2]);
+		if(VectorLength(delta) <= 1) {
+			luaentity->angles.trType = TR_STATIONARY;
+			//CG_Printf("SetAngleVelocity: STATIONARY\n");
+		} else {
+			luaentity->angles.trType = TR_LINEAR;
+			//CG_Printf("SetAngleVelocity: LINEAR\n");
+		}
+		return 1;
+	}
+	return 0;
+}
+
+
 int qlua_lgetangles(lua_State *L) {
 	localEntity_t	*luaentity;
 	vec3_t			angles;
@@ -385,6 +430,7 @@ int qlua_lsetcallback(lua_State *L) {
 				case 0: ent->lua_think = qlua_storefunc(L,3,ent->lua_think); break;
 				case 1: ent->lua_bounce = qlua_storefunc(L,3,ent->lua_bounce); break;
 				case 2: ent->lua_die = qlua_storefunc(L,3,ent->lua_die); break;
+				case 3: ent->lua_stopped = qlua_storefunc(L,3,ent->lua_stopped); break;
 			}		
 		}
 	}
@@ -509,6 +555,8 @@ static const luaL_reg LEntity_methods[] = {
   {"SetVelocity",	qlua_lsetvelocity},
   {"GetAngles",		qlua_lgetangles},
   {"SetAngles",		qlua_lsetangles},
+  {"GetAngleVelocity",	qlua_lgetanglevelocity},
+  {"SetAngleVelocity",	qlua_lsetanglevelocity},
   {"SetType",		qlua_lsettype},
   {"GetType",		qlua_lgettype},
   {"SetTrType",		qlua_lsettrtype},

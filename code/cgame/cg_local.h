@@ -270,6 +270,7 @@ typedef struct localEntity_s {
 	int				id;
 
 	int				lua_bounce;
+	int				lua_stopped;
 	int				lua_think;
 	int				lua_die;
 	float			lua_nextThink;
@@ -1448,7 +1449,7 @@ void	CG_ImpactMark( qhandle_t markShader,
 					float orientation, 
 				    float r, float g, float b, float a, 
 					qboolean alphaFade, 
-					float radius, qboolean temporary );
+					float radius, qboolean temporary, float extime );
 
 //
 // cg_localents.c

@@ -107,6 +107,7 @@ typedef struct {
 
 	int numVerts;
 	const polyVert_t *verts;		//Hxrmn's poly code
+	vec3_t		lua_scale;
 
 } refEntity_t;
 

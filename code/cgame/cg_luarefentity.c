@@ -383,6 +383,7 @@ int qlua_rsetscale(lua_State *L) {
 	luaentity = lua_torefentity(L,1);
 	if(luaentity != NULL) {
 		lua_tovector(L,2,in);
+		VectorCopy(in,luaentity->lua_scale);
 		VectorScale(luaentity->axis[0],in[0],luaentity->axis[0]);
 		VectorScale(luaentity->axis[1],in[1],luaentity->axis[1]);
 		VectorScale(luaentity->axis[2],in[2],luaentity->axis[2]);
@@ -573,6 +574,9 @@ int qlua_createrefentity (lua_State *L) {
 	memset( &ent, 0, sizeof( ent ) );
 	
 	AxisClear( ent.axis );
+	ent.lua_scale[0] = 1;
+	ent.lua_scale[1] = 1;
+	ent.lua_scale[2] = 1;
 
 	lua_pushrefentity(L,&ent);
 	return 1;

@@ -89,7 +89,7 @@ local function trailent(v)
 				t.lastpos = pos
 			end
 		else
-			print("NIL ENTITY TABLE\n")
+			--print("NIL ENTITY TABLE\n")
 		end
 	end
 end
