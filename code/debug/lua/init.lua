@@ -66,7 +66,28 @@ local function PlayerSpawned(pl)
 end
 hook.add("PlayerSpawned","init",PlayerSpawned)
 
-local lp = Vector(672,1872,22)
 local ent = CreateEntity("testentity")
-ent:SetPos(lp)
-ent:SetTrType(TR_STATIONARY)
+ent:SetPos(Vector(532,1872,100))
+--ent:SetTrType(TR_STATIONARY)
+
+for x=0,4 do
+	local class = "item_armor_body"
+	if(x==0) then
+		class = "item_health_mega"
+	end
+	if(x==1) then
+		class = "weapon_railgun"
+	end
+	if(x==2) then
+		class = "weapon_bfg"
+	end
+	if(x==3) then
+		class = "weapon_shotgun"
+	end
+	local lp = Vector(532 + (x*80),1872,200)
+	local ent = CreateEntity(class)
+	ent:SetPos(lp)
+	ent:SetTrType(TR_STATIONARY)
+	ent:SetWait(1)
+	ent:SetSpawnFlags(1)
+end

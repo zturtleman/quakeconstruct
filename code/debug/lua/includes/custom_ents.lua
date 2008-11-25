@@ -66,9 +66,9 @@ local function LinkEntity(ent)
 		SetCallbacks(ent,cent)
 	end
 	
-	local str = "Entity Linked: " .. name .. "\n"
-	if(SERVER) then str = "SV: " .. str else str = "CL: " .. str end
-	print(str)
+	--local str = "Entity Linked: " .. name .. "\n"
+	--if(SERVER) then str = "SV: " .. str else str = "CL: " .. str end
+	--print(str)
 end
 hook.add("EntityLinked","checkcustom",LinkEntity)
 
@@ -80,9 +80,9 @@ local function UnlinkEntity(ent)
 	end
 	active[id] = nil
 	
-	local str = "Entity Unlinked: " .. ent:Classname() .. "\n"
-	if(SERVER) then str = "SV: " .. str else str = "CL: " .. str end
-	print(str)
+	--local str = "Entity Unlinked: " .. ent:Classname() .. "\n"
+	--if(SERVER) then str = "SV: " .. str else str = "CL: " .. str end
+	--print(str)
 end
 hook.add("EntityUnlinked","checkcustom",UnlinkEntity)
 

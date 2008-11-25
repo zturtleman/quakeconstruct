@@ -108,7 +108,7 @@ if(SERVER) then
 			tab.msglist = tab.msglist or {}
 			if(tab.msglist[id] != true) then
 				local msg = d_Message(pl,2)
-				_message.WriteLong(msg,msgIDs[id])
+				_message.WriteShort(msg,msgIDs[id])
 				_message.WriteString(msg,id)
 				d_Send(msg)
 				tab.msglist[id] = true
@@ -143,7 +143,7 @@ if(SERVER) then
 		for i=1, ts do
 			local v = send[i]
 			debugprint("Send: " .. v[1] .. "->" .. v[2] .. "\n")
-			_message.WriteLong(msg,v[1])
+			_message.WriteShort(msg,v[1])
 			_message.WriteString(msg,v[2])
 		end
 		d_Send(msg)
@@ -170,6 +170,7 @@ if(SERVER) then
 	
 	function SendDataMessage(m,pl,msgid)
 		if(check(m)) then
+			local start = ticks() / 1000
 			pl = pl or m.pl
 			msgid = msgid or m.msgid
 			if(pl:IsBot()) then return end
@@ -192,7 +193,7 @@ if(SERVER) then
 			end
 			--print("Sent Contents: " .. contents .. "\n")
 			_message.WriteLong(msg,tonumber(contents))
-			_message.WriteLong(msg,msgid)
+			_message.WriteShort(msg,msgid)
 			for k,v in pairs(m) do
 				if(type(v) == "table") then
 					local data = v[1]
@@ -205,6 +206,7 @@ if(SERVER) then
 				end
 			end
 			d_Send(msg)
+			print("Message Time: " .. (ticks() / 1000) - start .. "\n")
 		end
 	end
 	
@@ -294,7 +296,7 @@ if(CLIENT) then
 	local function handle(msgid)
 		if(msgid == 1) then
 			local contents = tostring(_message.ReadLong())
-			local strid = _message.ReadLong()
+			local strid = _message.ReadShort()
 			if(msgIDs[strid] == nil) then
 				print("^5MESSAGE ERROR[L]: Invalid Message ID: " .. strid .. "\n")
 			end
@@ -316,14 +318,14 @@ if(CLIENT) then
 			CallHook("HandleMessage",msgIDs[strid],contents)
 			stack = {}
 		elseif(msgid == 2) then
-			local id = _message.ReadLong()
+			local id = _message.ReadShort()
 			local str = _message.ReadString()
 			msgIDs[id] = str
 			debugprint("Got messageID: " .. id .. "->" .. str .. "\n")
 		elseif(msgid == 3) then
 			local count = _message.ReadLong()
 			for i=1, count do
-				local id = _message.ReadLong()
+				local id = _message.ReadShort()
 				local str = _message.ReadString()
 				msgIDs[id] = str
 				debugprint("Got messageID: " .. id .. "->" .. str .. "\n")

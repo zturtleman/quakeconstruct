@@ -18,6 +18,10 @@ void lua_pushtrace(lua_State *L, trace_t results) {
 			lua_rawset(L, -3);
 		}
 
+		lua_pushstring(L, "entitynum");
+		lua_pushinteger(L,results.entityNum);
+		lua_rawset(L, -3);
+
 		lua_pushstring(L, "normal");
 		lua_pushvector(L,results.plane.normal);
 		lua_rawset(L, -3);
