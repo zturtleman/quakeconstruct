@@ -56,6 +56,7 @@ function MakeModelFrame(mdl)
 		MDL_MODEL:SetSkin(0)		
 		local pl = "models/players"
 		if(string.sub(mdl,0,string.len(pl)) == pl) then
+			--local skin = util.LoadSkin("")
 			MDL_MODEL:SetSkin(1)
 			print("SetSkin\n")
 		end
