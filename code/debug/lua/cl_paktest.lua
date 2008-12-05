@@ -50,7 +50,7 @@ function lister.plist(path,init)
 	table.sort(test,function(a,b) return a < b end)
 	for k,v in pairs(test) do
 		local ext = string.GetExtensionFromFilename(v)
-		if(countSlashes(v) == 0 or (countSlashes(v) == 1 and lastChar(v) == "/")) then
+		if((countSlashes(v) == 0 or countSlashes(v) == 1 and lastChar(v) == "/")) then
 			if(v != "") then
 				if(ext == "md3") then
 					altmenu.addButton(v,function() MakeModelFrame(path .. v) end)
@@ -65,5 +65,6 @@ function lister.plist(path,init)
 end
 
 lister.dirlist()
+--lister.plist("models/players/sorlag/gibs/",nil)
 
 --altmenu.setBack(menutest.main)

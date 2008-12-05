@@ -32,7 +32,7 @@ int qlua_ticksPerSecond(lua_State *L) {
 
 int qlua_packList(lua_State *L) {
 	int		numfiles;
-	char	filelist[4096];
+	char	filelist[8192];
 	char*	fileptr;
 	int		i;
 	int		filelen;
@@ -46,7 +46,7 @@ int qlua_packList(lua_State *L) {
 	ext = lua_tostring(L,2);
 
 	lua_newtable(L);
-	numfiles = trap_FS_GetFileList( path, ext, filelist, 4096 );
+	numfiles = trap_FS_GetFileList( path, ext, filelist, 8192 );
 	fileptr  = filelist;
 	for (i=0; i<numfiles; i++,fileptr+=filelen+1)
 	{

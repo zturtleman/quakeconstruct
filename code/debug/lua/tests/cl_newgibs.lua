@@ -1,3 +1,5 @@
+require "tests/cl_gibchooser"
+
 local gibs = {
 	LoadModel("models/gibs/abdomen.md3"),
 	LoadModel("models/gibs/arm.md3"),
@@ -55,7 +57,7 @@ function newParticle(pos,dir,model,scale,skin,head)
 	scale = scale or 1
 	local r = RefEntity()
 	r:SetModel(model)
-	if(skin) then r:SetSkin(skin) end
+	if(skin and skin != -1) then r:SetSkin(skin) end
 	r:SetColor(1,1,1,1)
 	--r:SetType() --RT_RAIL_CORE
 	--r:SetType(RT_SPRITE)
@@ -78,7 +80,7 @@ function newParticle(pos,dir,model,scale,skin,head)
 	le:SetRefEntity(r)
 	le:SetVelocity(vMul(dir,300))
 	le:SetStartTime(LevelTime())
-	le:SetEndTime(LevelTime() + (6000 + ex) + math.random(1000,4000))
+	le:SetEndTime(LevelTime() + (8000 + ex) + math.random(1000,4000))
 	le:SetType(LE_FRAGMENT)
 	le:SetColor(1,.5,.3,1)
 	le:SetRadius(r:GetRadius())
@@ -119,13 +121,13 @@ function newParticle(pos,dir,model,scale,skin,head)
 			ref:SetColor(1,1,1,1)
 			ref:SetType(RT_SPRITE)
 			ref:SetShader(blood1)
-			ref:SetRadius(30 + math.random(0,10))
-			le2:SetRadius(30 + math.random(0,10))
+			ref:SetRadius(15 + math.random(0,10))
+			le2:SetRadius(15 + math.random(0,10))
 			le2:SetRefEntity(ref)
 			le2:SetStartTime(LevelTime())
-			le2:SetEndTime(LevelTime() + 1000)
+			le2:SetEndTime(LevelTime() + 2000)
 			le2:SetType(LE_FADE_RGB) --LE_FRAGMENT
-			le2:SetColor(1,0,0,.4)
+			le2:SetColor(.7,math.random(0,3)/10,0,.5 + (math.random(0,5)/10))
 			le2:SetTrType(TR_STATIONARY)
 		end
 		--le2:SetTrType(TR_STATIONARY)
@@ -158,10 +160,10 @@ local function event(entity,event,pos,dir)
 		--newParticle(pos,entity:GetByteDir(),gibs[math.random(1,#gibs)])
 	end
 	if(event == EV_BULLET_HIT_FLESH) then
-		--newParticle(pos,vMul(entity:GetByteDir(),.2),gibs[5])
+		newParticle(pos,vMul(entity:GetByteDir(),.2),gibs[5])
 	end
 	if(event == EV_GIB_PLAYER) then
-		local vel = entity:GetTrajectory():GetDelta()/500
+		local vel = entity:GetTrajectory():GetDelta()/300
 		PlaySound(entity,explodeSound)
 		
 		local mdl = entity:GetInfo().headModel or skull
@@ -175,13 +177,17 @@ local function event(entity,event,pos,dir)
 		
 		newParticle(pos,Vector(0,0,1.2) + vel,mdl,1.4,skin,true)
 		if(math.random(0,1) == 1) then
-			newParticle(pos+Vector(0,0,20) + vel,Vector(0,0,.2),torso,1,torsoskin,false)
+			--newParticle(pos+Vector(0,0,20) + vel,Vector(0,0,.2),torso,1,torsoskin,false)
 		else
-			newParticle(pos,Vector(0,0,.2) + vel,legs,1,legsskin,false)
+			--newParticle(pos,Vector(0,0,.2) + vel,legs,1,legsskin,false)
 		end
 		--for x=1, 2 do
-			for i=1, #gibs do
-				newParticle(pos,Vector(0,0,.4) + vel,gibs[i],1.2 + ((math.random(1,6))/20))
+			local list = getGibModels(entity)
+			local skins = getGibSkins(entity)
+			for i=1, #list do
+				local mdl = list[i]
+				local skin = skins[i]
+				newParticle(pos,Vector(0,0,.4) + vel,mdl,1.2 + ((math.random(1,6))/20),skin)
 			end
 		--end
 		return true
