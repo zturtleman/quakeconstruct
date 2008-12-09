@@ -62,6 +62,8 @@ local function funcname(func)
 	return ""
 end
 
+local ispost = false
+
 function CallHook(event,...)
 	if(hook.events[event] == nil) then return end
 	local retVal = nil

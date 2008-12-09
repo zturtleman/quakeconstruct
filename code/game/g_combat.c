@@ -921,6 +921,20 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 		VectorNormalize(dir);
 	}
 
+	if(targ->client != NULL && qlua_lockdamage == qfalse) {
+		qlua_gethook(L, "PrePlayerDamaged");
+		lua_pushentity(L,targ);
+		lua_pushentity(L,inflictor);
+		lua_pushentity(L,attacker);
+		lua_pushinteger(L,damage);
+		lua_pushinteger(L,mod);
+		if(dir != NULL) {lua_pushvector(L,dir); callargs++;}
+		if(point != NULL) {lua_pushvector(L,point); callargs++;}
+		qlua_pcall(L,callargs,1,qtrue);
+		if(lua_type(L,-1) == LUA_TNUMBER)
+			damage = lua_tointeger(L,-1);
+	}
+
 	knockback = damage;
 	if ( knockback > 200 ) {
 		knockback = 200;
@@ -992,7 +1006,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 
 	// battlesuit protects from all radius damage (but takes knockback)
 	// and protects 50% against all damage
-	if ( client && client->ps.powerups[PW_BATTLESUIT] && !(dflags & DAMAGE_THRU_LUA) ) {
+	if ( client && client->ps.powerups[PW_BATTLESUIT] ) {
 		G_AddEvent( targ, EV_POWERUP_BATTLESUIT, 0 );
 		if ( ( dflags & DAMAGE_RADIUS ) || ( mod == MOD_FALLING ) ) {
 			return;
@@ -1015,7 +1029,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 
 	// always give half damage if hurting self
 	// calculated after knockback, so rocket jumping works
-	if ( targ == attacker && !(dflags & DAMAGE_THRU_LUA)) {
+	if ( targ == attacker ) {
 		damage *= 0.5;
 	}
 
@@ -1025,9 +1039,8 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 	take = damage;
 	save = 0;
 
-	if(targ->client != NULL) {
-		qlua_lockdamage = qtrue;
-
+	if(targ->client != NULL && qlua_lockdamage == qfalse) {
+		callargs = 5;
 		qlua_gethook(L, "PlayerDamaged");
 		lua_pushentity(L,targ);
 		lua_pushentity(L,inflictor);
@@ -1039,15 +1052,11 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 		qlua_pcall(L,callargs,1,qtrue);
 		if(lua_type(L,-1) == LUA_TNUMBER)
 			take = lua_tointeger(L,-1);
-
-		qlua_lockdamage = qfalse;
 	}
 
 	// save some from armor
-	if(!(dflags & DAMAGE_THRU_LUA)) {
-		asave = CheckArmor (targ, take, dflags);
-		take -= asave;
-	}
+	asave = CheckArmor (targ, take, dflags);
+	take -= asave;
 
 	if ( g_debugDamage.integer ) {
 		G_Printf( "%i: client:%i health:%i damage:%i armor:%i\n", level.time, targ->s.number,
@@ -1100,10 +1109,27 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 	if (take) {
 		targ->health = targ->health - take;
 		//trap_SendServerCommand( -1, va("playerhealth %i %i", targ->s.number, targ->health) );
+		
+		if(targ->client != NULL && qlua_lockdamage == qfalse) {
+			callargs = 6;
+			qlua_gethook(L, "PostPlayerDamaged");
+			lua_pushentity(L,targ);
+			lua_pushentity(L,inflictor);
+			lua_pushentity(L,attacker);
+			lua_pushinteger(L,damage);
+			lua_pushinteger(L,mod);
+			lua_pushinteger(L,asave);
+			if(dir != NULL) {lua_pushvector(L,dir); callargs++;}
+			if(point != NULL) {lua_pushvector(L,point); callargs++;}
+			qlua_pcall(L,callargs,1,qtrue);
+			if(lua_type(L,-1) == LUA_TNUMBER)
+				targ->health = lua_tointeger(L,-1);
+		}
+
 		if ( targ->client ) {
 			targ->client->ps.stats[STAT_HEALTH] = targ->health;
 		}
-		
+
 		if ( targ->health <= 0 ) {
 			if(qlua_getstored(GetServerLuaState(), targ->lua_die)) {
 				lua_pushentity(GetServerLuaState(), targ);

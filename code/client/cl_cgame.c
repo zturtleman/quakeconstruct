@@ -411,7 +411,7 @@ static int	FloatAsInt( float f ) {
 	return temp;
 }
 
-void MakeMsg(msg_t *msg) {
+/*void MakeMsg(msg_t *msg) {
 	byte		data[MAX_MSGLEN];
 
 	MSG_Init( msg, data, sizeof(data) );
@@ -422,7 +422,7 @@ void MakeMsg(msg_t *msg) {
 
 	MSG_WriteByte (msg, svc_lua);
 	MSG_WriteLong (msg, clc.serverCommandSequence );
-}
+}*/
 
 /*
 ====================

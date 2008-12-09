@@ -49,19 +49,24 @@ function getCustomGib(pl,n)
 	return nil
 end
 
+local function addAux(tab,n,pl)
+	local custom = getCustomGib(pl,n)
+	if(custom != nil) then 
+		table.insert(tab,{custom,true})
+	end
+end
+
 function getGibList(pl)
 	local out = {}
 	local name = pl:GetInfo().modelName
 	if(name == nil) then return {} end
 	if(listcache[name] != nil) then return listcache[name] end
 	for i=0,5 do
-		local nn = "aux"
+		local nn = ""
 		if(i > 0) then nn = nn .. i end
-		local custom = getCustomGib(pl,nn)
-		if(custom != nil) then 
-			--print("Found Aux: " .. custom .. "\n")
-			table.insert(out,{custom,true})
-		end
+		addAux(out,"aux" .. nn,pl)
+		addAux(out,"aux_u" .. nn,pl)
+		addAux(out,"aux_l" .. nn,pl)
 	end
 	for k,v in pairs(default) do
 		local n = getGibName(v)
@@ -107,9 +112,13 @@ function getGibSkins(pl)
 			if(string.find(name,"leg") or 
 				string.find(name,"foot") or 
 				string.find(name,"abdomen") or 
-				string.find(name,"intestine") or
-				string.find(name,"aux")) then
+				string.find(name,"intestine")) then
 					table.insert(out,pl:GetInfo().legsSkin)
+			elseif(string.find(name,"aux_u")) then
+				table.insert(out,pl:GetInfo().torsoSkin)
+			elseif(string.find(name,"aux") or
+				   string.find(name,"aux_l")) then
+				table.insert(out,pl:GetInfo().legsSkin)
 			else
 				table.insert(out,pl:GetInfo().torsoSkin)
 			end
