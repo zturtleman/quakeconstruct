@@ -30,6 +30,34 @@ int qlua_ticksPerSecond(lua_State *L) {
 	return 1;
 }
 
+int qlua_packRead(lua_State *L) {
+	int			len;
+	char		text[20000];
+	const char	*filename;
+	fileHandle_t	f;
+
+	luaL_checktype(L,1,LUA_TSTRING);
+
+	filename = lua_tostring(L,1);
+
+	len = trap_FS_FOpenFile( filename, &f, FS_READ );
+	if ( len <= 0 ) {
+		//CG_Printf( "File %s was empty\n", filename );
+		return 0;
+	}
+	if ( len >= sizeof( text ) - 1 ) {
+		CG_Printf( "File %s too long\n", filename );
+		return 0;
+	}
+	trap_FS_Read( text, len, f );
+	text[len] = 0;
+	trap_FS_FCloseFile( f );
+
+	lua_pushstring(L,text);
+
+	return 1;
+}
+
 int qlua_packList(lua_State *L) {
 	int		numfiles;
 	char	filelist[8192];
@@ -331,6 +359,7 @@ void InitClientLua( void ) {
 	lua_register(L,"ticksPerSecond",qlua_ticksPerSecond);
 
 	lua_register(L,"packList",qlua_packList);
+	lua_register(L,"packRead",qlua_packRead);
 	lua_register(L,"print",message);
 	lua_register(L,"bitAnd",bitwiseAnd);
 	lua_register(L,"bitOr",bitwiseOr);

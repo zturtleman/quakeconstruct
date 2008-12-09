@@ -160,10 +160,11 @@ local function event(entity,event,pos,dir)
 		--newParticle(pos,entity:GetByteDir(),gibs[math.random(1,#gibs)])
 	end
 	if(event == EV_BULLET_HIT_FLESH) then
-		newParticle(pos,vMul(entity:GetByteDir(),.2),gibs[5])
+		--newParticle(pos,vMul(entity:GetByteDir(),.2),gibs[5])
 	end
 	if(event == EV_GIB_PLAYER) then
-		local vel = entity:GetTrajectory():GetDelta()/300
+		local vel = entity:GetTrajectory():GetDelta()/800
+		if(vel.z < 0) then vel.z = vel.z * -1 end
 		PlaySound(entity,explodeSound)
 		
 		local mdl = entity:GetInfo().headModel or skull
@@ -187,7 +188,8 @@ local function event(entity,event,pos,dir)
 			for i=1, #list do
 				local mdl = list[i]
 				local skin = skins[i]
-				newParticle(pos,Vector(0,0,.4) + vel,mdl,1.2 + ((math.random(1,6))/20),skin)
+				-- + ((math.random(1,6))/20)
+				newParticle(pos,Vector(0,0,.4) + vel,mdl,1.25,skin)
 			end
 		--end
 		return true
