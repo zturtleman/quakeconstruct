@@ -13,12 +13,12 @@ function teleporterCallbackTest(teleporter)
 				if(otherName == "rocket" or otherName == "grenade" or otherName == "bfg" or otherName == "plasma") then
 					local len = VectorLength(other:GetVelocity())
 					
-					CreateTempEntity(vAdd(other:GetPos(),{x=0,y=0,z=-5}),EV_PLAYER_TELEPORT_IN)
+					CreateTempEntity(vAdd(other:GetPos(),Vector(0,0,-5)),EV_PLAYER_TELEPORT_IN)
 					
 					other:SetPos(targ:GetPos())
 					other:SetVelocity(vMul(angles,len))
 					
-					CreateTempEntity(vAdd(other:GetPos(),{x=0,y=0,z=-5}),EV_PLAYER_TELEPORT_OUT)
+					CreateTempEntity(vAdd(other:GetPos(),Vector(0,0,-5)),EV_PLAYER_TELEPORT_OUT)
 				end
 			end
 		end

@@ -34,6 +34,7 @@ if(CLIENT) then
 		end
 		if(args[1] == "downloadline") then
 			str = string.sub(str,14,string.len(str))
+			str = base64.dec(str)
 			DL_CONTENTS = DL_CONTENTS .. str .. "\n"
 			DL_DOWNLOADED = DL_DOWNLOADED + 1
 			return
@@ -179,6 +180,17 @@ if(SERVER) then
 		end
 	end
 	
+	local function fixLine(line)
+		if(line != "" and line != " " and line != "\n") then
+			line = string.Replace(line,"\t","")
+			line = string.Replace(line,"\r","")
+			if(line != "" and line != " " and line != "\n") then
+				return line
+			end
+		end	
+		return nil
+	end
+	
 	function scriptmanager.sendIt(pl,script)
 		local d = 0.08
 		if(fileExists(script)) then
@@ -187,7 +199,10 @@ if(SERVER) then
 			if(file != nil) then
 				local lines = 0
 				for line in file:lines() do
-					lines = lines + 1
+					line = fixLine(line)
+					if(line != nil) then
+						lines = lines + 1
+					end
 				end
 				
 				file:close()
@@ -198,9 +213,12 @@ if(SERVER) then
 				
 				local i = 1
 				for line in file:lines() do
-					line = string.Replace(line, "\"", "\'")
-					Timer(i*d,pl.SendString,pl,"downloadline " .. line)
-					i=i+1
+					line = fixLine(line)
+					if(line != nil) then
+						line = base64.enc(line)
+						Timer(i*d,pl.SendString,pl,"downloadline " .. line)
+						i=i+1
+					end
 				end
 				
 				Timer((i*d)+0.8,sendString,"enddownload")

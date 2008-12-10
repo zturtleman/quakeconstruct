@@ -212,7 +212,7 @@ if(SERVER) then
 				end
 			end
 			d_Send(msg)
-			print("Message Time: " .. (ticks() / 1000) - start .. "\n")
+			--print("Message Time: " .. (ticks() / 1000) - start .. "\n")
 		end
 	end
 	
