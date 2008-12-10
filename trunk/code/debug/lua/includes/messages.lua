@@ -95,6 +95,12 @@ if(SERVER) then
 		addData(m,s,D_FLOAT)
 	end
 	
+	function message.WriteVector(m,v)
+		message.WriteFloat(m,v.x)
+		message.WriteFloat(m,v.y)
+		message.WriteFloat(m,v.z)
+	end
+	
 	local d_Message = _Message
 	local d_Send = _SendDataMessage
 	
@@ -291,6 +297,13 @@ if(CLIENT) then
 	
 	function message.ReadRaw()
 		return readData(nil)
+	end
+	
+	function message.ReadVector()
+		local x = message.ReadFloat()
+		local y = message.ReadFloat()
+		local z = message.ReadFloat()
+		return Vector(x,y,z)
 	end
 	
 	local function handle(msgid)

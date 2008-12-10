@@ -1230,6 +1230,7 @@ int lua_torefdef(lua_State *L, int idx, refdef_t *refdef, qboolean a640);
 void lua_pushentity(lua_State *L, centity_t *cl);
 centity_t *lua_toentity(lua_State *L, int i);
 centity_t *lua_toentityraw(lua_State *L, int i);
+qboolean IsEntity(lua_State *L, int i);
 
 void lua_pushrefentity(lua_State *L, refEntity_t *cl);
 refEntity_t *lua_torefentity(lua_State *L, int i);

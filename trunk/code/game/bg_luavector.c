@@ -300,7 +300,6 @@ int Vector_register (lua_State *L) {
 	luaL_openlib(L, MYTYPE, Vector_methods, 0);
 	luaL_newmetatable(L,MYTYPE);
 	luaL_openlib(L, NULL,Vector_meta,0);
-
 	lua_register(L,"Vector",lua_newvector);
 
 	return 1;
@@ -396,4 +395,18 @@ void BG_InitLuaVector(lua_State *L) {
 	lua_register(L,"DotProduct",qlua_DotProduct);
 
 	Vector_register(L);
+}
+
+qboolean IsVector(lua_State *L, int i) {
+	void *p = lua_touserdata(L, i);
+	if (p != NULL) {  /* value is a userdata? */
+		if (lua_getmetatable(L, i)) {  /* does it have a metatable? */
+			lua_getfield(L, LUA_REGISTRYINDEX, MYTYPE);  /* get correct metatable */
+			if (lua_rawequal(L, -1, -2)) {  /* does it have the correct mt? */
+				lua_pop(L, 2);  /* remove both metatables */
+				return qtrue;
+			}
+		}
+	}
+	return qfalse;
 }

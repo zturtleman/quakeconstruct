@@ -1039,6 +1039,10 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 	take = damage;
 	save = 0;
 
+	// save some from armor
+	asave = CheckArmor (targ, take, dflags);
+	take -= asave;
+
 	if(targ->client != NULL && qlua_lockdamage == qfalse) {
 		callargs = 5;
 		qlua_gethook(L, "PlayerDamaged");
@@ -1053,10 +1057,6 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 		if(lua_type(L,-1) == LUA_TNUMBER)
 			take = lua_tointeger(L,-1);
 	}
-
-	// save some from armor
-	asave = CheckArmor (targ, take, dflags);
-	take -= asave;
 
 	if ( g_debugDamage.integer ) {
 		G_Printf( "%i: client:%i health:%i damage:%i armor:%i\n", level.time, targ->s.number,

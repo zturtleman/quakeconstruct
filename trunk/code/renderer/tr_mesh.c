@@ -312,7 +312,7 @@ void R_AddMD3Surfaces( trRefEntity_t *ent ) {
 	// is outside the view frustum.
 	//
 	cull = R_CullModel ( header, ent );
-	if ( cull == CULL_OUT ) {
+	if ( cull == CULL_OUT && ent->e.alwaysRender == qfalse ) {
 		return;
 	}
 

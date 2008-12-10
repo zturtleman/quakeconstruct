@@ -5,6 +5,7 @@
 include("lua/cl_menu2.lua")
 include("lua/cl_testmenu2.lua")
 include("lua/cl_turrets.lua")
+include("lua/cl_explosion.lua")
 
 local flare = LoadShader("flareShader")
 local blood = LoadShader("bloodMark")
