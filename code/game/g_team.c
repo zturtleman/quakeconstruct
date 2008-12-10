@@ -129,6 +129,7 @@ AddTeamScore
 */
 void AddTeamScore(vec3_t origin, int team, int score) {
 	gentity_t	*te;
+	lua_State	*L = GetServerLuaState();
 
 	te = G_TempEntity(origin, EV_GLOBAL_TEAM_SOUND );
 	te->r.svFlags |= SVF_BROADCAST;
@@ -164,6 +165,14 @@ void AddTeamScore(vec3_t origin, int team, int score) {
 		}
 	}
 	level.teamScores[ team ] += score;
+	if(L != NULL) {
+		qlua_gethook(L, "TeamScored");
+		lua_pushinteger(L,team);
+		lua_pushinteger(L,score);
+		lua_pushinteger(L,te->s.eventParm);
+		lua_pushvector(L,origin);
+		qlua_pcall(L,4,0,qtrue);
+	}
 }
 
 /*
@@ -193,6 +202,7 @@ static char oneFlagStatusRemap[] = { '0', '1', '2', '3', '4' };
 
 void Team_SetFlagStatus( int team, flagStatus_t status ) {
 	qboolean modified = qfalse;
+	lua_State	*L = GetServerLuaState();
 
 	switch( team ) {
 	case TEAM_RED:	// CTF
@@ -232,9 +242,18 @@ void Team_SetFlagStatus( int team, flagStatus_t status ) {
 
 		trap_SetConfigstring( CS_FLAGSTATUS, st );
 	}
+
+	if(L != NULL) {
+		qlua_gethook(L, "FlagStatus");
+		lua_pushinteger(L,team);
+		lua_pushinteger(L,status);
+		qlua_pcall(L,2,0,qtrue);
+	}
 }
 
 void Team_CheckDroppedItem( gentity_t *dropped ) {
+	lua_State *L = GetServerLuaState();
+
 	if( dropped->item->giTag == PW_REDFLAG ) {
 		Team_SetFlagStatus( TEAM_RED, FLAG_DROPPED );
 	}
@@ -243,6 +262,14 @@ void Team_CheckDroppedItem( gentity_t *dropped ) {
 	}
 	else if( dropped->item->giTag == PW_NEUTRALFLAG ) {
 		Team_SetFlagStatus( TEAM_FREE, FLAG_DROPPED );
+	} else {
+		return;
+	}
+	if(L != NULL) {
+		qlua_gethook(L, "FlagDropped");
+		lua_pushentity(L, dropped);
+		lua_pushinteger(L, dropped->item->giTag);
+		qlua_pcall(L,2,0,qtrue);
 	}
 }
 
@@ -702,6 +729,7 @@ int Team_TouchOurFlag( gentity_t *ent, gentity_t *other, int team ) {
 	gentity_t	*player;
 	gclient_t	*cl = other->client;
 	int			enemy_flag;
+	lua_State	*L = GetServerLuaState();
 
 #ifdef MISSIONPACK
 	if( g_gametype.integer == GT_1FCTF ) {
@@ -744,6 +772,13 @@ int Team_TouchOurFlag( gentity_t *ent, gentity_t *other, int team ) {
 #ifdef MISSIONPACK
 	}
 #endif
+
+	if(L != NULL) {
+		qlua_gethook(L, "FlagCaptured");
+		lua_pushentity(L, other);
+		lua_pushinteger(L, OtherTeam(team));
+		qlua_pcall(L,2,0,qtrue);
+	}
 
 	cl->ps.powerups[enemy_flag] = 0;
 
