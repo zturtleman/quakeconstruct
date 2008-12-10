@@ -1963,12 +1963,12 @@ int qlua_playsound(lua_State *L) {
 	vec3_t	origin;
 	sfxHandle_t	handle;
 	
-	if(lua_type(L,1) == LUA_TUSERDATA) {
+	if(IsEntity(L,1)) {
 		ent = lua_toentity(L,1);
 		if(lua_type(L,2) == LUA_TNUMBER) {
 			handle = lua_tointeger(L,2);
 		}
-	} else if(lua_type(L,1) == LUA_TVECTOR) {
+	} else if(IsVector(L,1)) {
 		if(lua_type(L,2) == LUA_TNUMBER) {
 			handle = lua_tointeger(L,2);
 			lua_tovector(L,1,origin);

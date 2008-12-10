@@ -715,6 +715,7 @@ void BG_InitLuaTrajectory(lua_State *L);
 
 void lua_pushvector(lua_State *L, vec3_t vec);
 void lua_tovector(lua_State *L, int i, vec3_t in);
+qboolean IsVector(lua_State *L, int i);
 
 trajectory_t *lua_totrajectory(lua_State *L, int i);
 void lua_pushtrajectory(lua_State *L, trajectory_t *tr);

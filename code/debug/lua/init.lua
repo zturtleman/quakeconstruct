@@ -6,6 +6,7 @@
 --SendScript("lua/includes/scriptmanager.lua")
 
 require "turrets"
+require "explosion"
 
 message.Precache("itempickup")
 message.Precache("playerdamage")

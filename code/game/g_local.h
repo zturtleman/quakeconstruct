@@ -469,6 +469,7 @@ lua_State *GetServerLuaState( void );
 //gclient_t *lua_toplayer(lua_State *L, int i);
 void lua_pushentity(lua_State *L, gentity_t *cl);
 gentity_t *lua_toentity(lua_State *L, int i);
+qboolean IsEntity(lua_State *L, int i);
 
 void lua_pushtrace(lua_State *L, trace_t results);
 

@@ -484,6 +484,20 @@ int qlua_rrenderfx(lua_State *L) {
 	return 0;
 }
 
+int qlua_rsetalways(lua_State *L) {
+	refEntity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TBOOLEAN);
+
+	luaentity = lua_torefentity(L,1);
+	if(luaentity != NULL) {
+		luaentity->alwaysRender = lua_toboolean(L,2);
+		return 1;
+	}
+	return 0;	
+}
+
 static int Entity_tostring (lua_State *L)
 {
   lua_pushfstring(L, "RefEntity: %p", lua_touserdata(L, 1));
@@ -531,6 +545,7 @@ static const luaL_reg REntity_methods[] = {
   {"SetRotation",	qlua_rsetrotation},
   {"Scale",			qlua_rsetscale},
   {"Render",		qlua_rrender},
+  {"AlwaysRender",	qlua_rsetalways},
   {"PositionOnTag",	qlua_rpositionontag},
   {0,0}
 };

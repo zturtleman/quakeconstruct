@@ -1793,6 +1793,10 @@ void G_RunThink (gentity_t *ent) {
 			qlua_pcall(GetServerLuaState(), 1, 0, qfalse);
 		}
 	}
+
+	if(!strcmp(ent->classname, "freed")) {
+		return;
+	}
 	
 	if (!ent->think) {
 		if (ent->lua_think == 0) {

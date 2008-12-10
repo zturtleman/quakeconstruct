@@ -98,6 +98,9 @@ void lua_pushentity(lua_State *L, gentity_t *cl) {
 gentity_t *lua_toentity(lua_State *L, int i) {
 	gentity_t	*luaentity;
 	luaL_checktype(L,i,LUA_TUSERDATA);
+	
+	if(luaL_checkudata(L,i,"Entity") == NULL) luaL_typerror(L,i,"Entity");
+
 	luaentity = (gentity_t *)lua_touserdata(L, i);
 	luaentity = qlua_getrealentity(luaentity);
 
@@ -865,9 +868,9 @@ int qlua_damageplayer(lua_State *L) {
 			qlua_lockdamage = qtrue;
 			df |= DAMAGE_THRU_LUA;
 			if(ddir && dpoint) {
-				G_Damage(targ,inflictor,attacker,dir,point,damage,df,mod);
+				G_Damage(targ,inflictor,attacker,dir,point,damage,0,mod);
 			} else {
-				G_Damage(targ,inflictor,attacker,NULL,NULL,damage,df,mod);
+				G_Damage(targ,inflictor,attacker,NULL,NULL,damage,0,mod);
 			}
 			qlua_lockdamage = qfalse;
 		} else {
@@ -1593,4 +1596,18 @@ void G_InitLuaEnts(lua_State *L) {
 	lua_register(L,"UnlinkEntity",qlua_unlink);
 	lua_register(L,"LinkEntity",qlua_link);
 	lua_register(L,"CreateEntity",qlua_createEntity);
+}
+
+qboolean IsEntity(lua_State *L, int i) {
+	void *p = lua_touserdata(L, i);
+	if (p != NULL) {  /* value is a userdata? */
+		if (lua_getmetatable(L, i)) {  /* does it have a metatable? */
+			lua_getfield(L, LUA_REGISTRYINDEX, "Entity");  /* get correct metatable */
+			if (lua_rawequal(L, -1, -2)) {  /* does it have the correct mt? */
+				lua_pop(L, 2);  /* remove both metatables */
+				return qtrue;
+			}
+		}
+	}
+	return qfalse;
 }

@@ -312,6 +312,9 @@ void G_MissileImpact( gentity_t *ent, trace_t *trace ) {
 		lua_pushtrace(GetServerLuaState(), convertTrace(trace));
 		qlua_pcall(GetServerLuaState(), 3, 0, qfalse);
 	}
+	if(!strcmp(ent->classname, "freed")) {
+		return;
+	}
 
 	// check for bounce
 	if ( !other->takedamage &&
