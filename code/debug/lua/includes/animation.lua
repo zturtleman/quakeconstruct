@@ -5,11 +5,16 @@ ANIM_ACT_STOP = 2
 local AnimationT = {}
 
 function AnimationT:Init()
-	self:Reset()
+	self.playing = false
+	--self:Reset()
+	self.frame = self.start
+	self.oldframe = self.start
 	self.act = ANIM_ACT_LOOP
 end
 
 function AnimationT:Reset()
+	self.playing = false
+	--print("Stopped Playing!\n")
 	self.frame = self.start
 	self.oldframe = self.start
 	self:Play()
@@ -17,17 +22,24 @@ end
 
 function AnimationT:Stop()
 	self.playing = false
+	--print("Stopped Playing!\n")
 end
 
 function AnimationT:Play()
-	self.playing = true
-	self.frameTime = LevelTime()
-	self.oldFrameTime = LevelTime() + self.lerp
+	if(self.playing == false) then
+		self.playing = true
+		self.frameTime = LevelTime()
+		self.oldFrameTime = LevelTime() + self.lerp
+		--print("Started Playing!\n")
+	end
 end
 
 function AnimationT:Animate()
+	--print("Animate\n")
 	if(self.playing != true) then return end
+	--print("Is Playing\n")
 	if(LevelTime() > self.frameTime) then
+		--print("New Frame\n")
 		self.oldFrameTime = self.frameTime
 		self.oldframe = self.frame
 		
@@ -55,10 +67,13 @@ function AnimationT:Animate()
 		end
 	end
 	if(self.ref != nil) then
+		--print("Ref-Frame\n")
 		local backlerp = 1.0 - (LevelTime() - self.oldFrameTime ) / ( self.frameTime - self.oldFrameTime );
 		self.ref:SetOldFrame(self.oldframe)
 		self.ref:SetFrame(self.frame)
 		self.ref:SetLerp(backlerp)
+	else
+		--print("Ref was nil\n")
 	end
 end
 
@@ -78,6 +93,19 @@ end
 
 function AnimationT:SetEnd(e)
 	self.endf = self.start + e
+	self.length = e
+end
+
+function AnimationT:GetStart()
+	return self.start
+end
+
+function AnimationT:GetLength()
+	return self.length
+end
+
+function AnimationT:GetFrame()
+	return self.frame
 end
 
 function Animation(_start,_end,_lerp)
@@ -88,6 +116,7 @@ function Animation(_start,_end,_lerp)
 
 	o.start = _start
 	o.endf = _start + _end
+	o.length = _end
 	o.lerp = 1000/_lerp
 	
 	o:Init()

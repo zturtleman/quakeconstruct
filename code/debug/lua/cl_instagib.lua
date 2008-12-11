@@ -1,14 +1,17 @@
 local shd = LoadShader("railCore")
 local clicksound = LoadSound("sound/weapons/noammo.wav")
+local landsound = LoadSound("sound/player/land1.wav")
 STAT_SHOTS = 1
 STAT_HITS = 2
 STAT_ACCURACY = 3
 STAT_DEATHS = 4
+STAT_LONGSHOT = 5
 local stats = {
 	[STAT_SHOTS] = {0,"Shots"},
 	[STAT_HITS] = {0,"Hits"},
 	[STAT_ACCURACY] = {0,"Accuracy",true},
 	[STAT_DEATHS] = {0,"Deaths"},
+	[STAT_LONGSHOT] = {0,"Shot Distance"}
 }
 
 local function shouldDraw(str)
@@ -105,3 +108,11 @@ local function HandleMessage(msgid)
 	end
 end
 hook.add("HandleMessage","cl_instagib",HandleMessage)
+
+local function event(entity,event,pos,dir)
+	if(event == EV_FALL_MEDIUM or event == EV_FALL_FAR) then
+		PlaySound(landsound)
+		return true --No fall pain sounds
+	end
+end
+hook.add("EventReceived","cl_newgibs",event)

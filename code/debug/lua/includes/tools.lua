@@ -6,6 +6,14 @@ function killGaps(line)
 	return line
 end
 
+function lastChar(v)
+	return string.sub(v,string.len(v),string.len(v))
+end
+
+function firstChar(v)
+	return string.sub(v,1,1)
+end
+
 function ProfileFunction(func,...)
 	local tps = ticksPerSecond()
 	local s = ticks() / 1000

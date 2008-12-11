@@ -26,21 +26,19 @@ local function damagePlayers(v,falloff,expush)
 	local etab = GetAllPlayers()
 	table.Add(etab,GetEntitiesByClass("bodyque"))
 	for _,pl in pairs(etab) do
-		local dtab = pl:GetTable()
 		local plPos = pl:GetPos()
 		local dp = (plPos - pos)
 		local len = VectorLength(dp)
 		local push = (dp / len) * (200 + expush)
 		local dfc = 1 - (len / v.radius)
 		if(dfc < .3) then dfc = .3 end
-		dtab.nextEDamage = dtab.nextEDamage or lt
-		if((dtab.nextEDamage - lt) > 200) then
-			dtab.nextEDamage = 0
+		if((v.lastdamage - lt) > 200) then
+			v.lastdamage = 0
 		end
-		if(len < r and dtab.nextEDamage < lt) then
+		if(len < r and v.lastdamage < lt) then
 			pl:Damage(v.owner,v.owner,v.damage*dfc,12)
 			pl:SetVelocity(pl:GetVelocity() + push)
-			dtab.nextEDamage = lt + 80
+			v.lastdamage = lt + 80
 		end
 	end
 end
@@ -55,6 +53,7 @@ function CreateExplosion(pos,radius,length,damage,owner)
 		radius = radius,
 		owner = owner,
 		damage = damage,
+		lastdamage = 0,
 	}
 	table.insert(explosions,e)
 	sendExplosion(e)
@@ -112,8 +111,8 @@ local function Rockets(v)
 		local pa = ent:GetParent()
 		local add = 10
 		if(pa != nil) then
-			CreateExplosion(pos,70 + add,5,100,pa)
-			CreateExplosion(pos,90 + add,8,20,pa)
+			CreateExplosion(pos,70 + add,5,150,pa)
+			CreateExplosion(pos,90 + add,8,25,pa)
 			ent:Remove()
 		end
 	end
