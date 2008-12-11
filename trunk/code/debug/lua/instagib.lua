@@ -3,6 +3,7 @@ IG_RELOADTIME = 2000
 STAT_SHOTS = 1
 STAT_HITS = 2
 STAT_DEATHS = 4
+STAT_LONGSHOT = 5
 
 local let = {
 	[MOD_UNKNOWN] = 1,
@@ -19,16 +20,6 @@ local let = {
 
 message.Precache("igrailfire")
 message.Precache("igstat")
-
-local function pickspawn()
-	local tab = GetEntitiesByClass("info_player_start")
-	table.Add(tab,GetEntitiesByClass("info_player_deathmatch"))
-	local point = tab[math.random(1,#tab)]
-	if(point != nil) then
-		return point
-	end
-	return nil
-end
 
 local function fullHealth(self) 
 	--Simple function set's player's health to full and set's a timer to do so after damage
@@ -76,6 +67,10 @@ local function addStat(pl,s,i)
 	sendStat(pl,s)
 end
 
+local function getStat(pl,s)
+	return pl:GetTable().stats[s]
+end
+
 local function setupPlayer(pl)
 	fullHealth(pl)
 	pl:RemoveWeapons() --Remove all of the player's weapons
@@ -91,20 +86,6 @@ local function setupPlayer(pl)
 	Timer(2.5,go)
 end
 
-local function spawnPlayer(self)
-	local spawn = pickspawn()
-	if(spawn) then
-		self:SetVelocity(Vector())
-		self:SetPos(spawn:GetPos())
-		CreateTempEntity(vAdd(self:GetPos(),Vector(0,0,10)),EV_PLAYER_TELEPORT_IN)
-		local angles = spawn:GetAngles()
-		if(angles) then
-			self:SetAngles(angles)
-		end
-		--setupPlayer(self)
-	end
-end
-
 local function PreDamage(self,inflictor,attacker,damage,dtype) 
 	--PreDamage is called BEFORE the player is damaged, and the returned value is the amount of damage the player will take
 	self:GetTable().gi_invistime = self:GetTable().gi_invistime or 0
@@ -117,6 +98,8 @@ local function PreDamage(self,inflictor,attacker,damage,dtype)
 			--If the player was hit with a railgun
 			addStat(attacker,STAT_HITS,1)
 			addStat(self,STAT_DEATHS,1)
+			local d = VectorLength(attacker:GetPos() - self:GetPos())
+			setStat(attacker,STAT_LONGSHOT,d)
 			return 200 --Just gib the player (loads of damage)
 		end
 	end
@@ -125,10 +108,7 @@ local function PreDamage(self,inflictor,attacker,damage,dtype)
 		return 0 --If we don't have an exception (aka hazard) then don't damage the player
 		--This makes it so that the player doesn't take falling damage
 	else
-		--Respawn the player when he touches a hazard
-		spawnPlayer(self)
-		fullHealth(self)
-		return 0
+		return 200
 	end
 end
 
@@ -149,6 +129,14 @@ local function FiredWeapon(player,weapon,delay,pos,angle)
 		return rv --fire rate
 	end
 end
+
+local function CLThink(pl)
+	if(pl:GetHealth() <= 0) then
+		pl:Damage(1000)
+	end
+end
+
+hook.add("ClientThink","instagib",CLThink)
 hook.add("PlayerSpawned","instagib",setupPlayer)
 hook.add("PrePlayerDamaged","instagib",PreDamage)
 hook.add("FiredWeapon","instagib",FiredWeapon)
@@ -161,6 +149,7 @@ for k,v in pairs(GetAllPlayers()) do
 	setupPlayer(v)
 	setStat(v,STAT_SHOTS,0)
 	setStat(v,STAT_HITS,0)
+	setStat(v,STAT_LONGSHOT,0)
 end
 
 SendScript("lua/cl_instagib.lua")

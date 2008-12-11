@@ -935,6 +935,8 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 			damage = lua_tointeger(L,-1);
 	}
 
+	if(damage == 0) return;
+
 	knockback = damage;
 	if ( knockback > 200 ) {
 		knockback = 200;
