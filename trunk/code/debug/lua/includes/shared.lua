@@ -23,6 +23,11 @@ _qlimit()
 ]]
 --if(true) then return end
 
+local toadd = {}
+
+concommand = {}
+concommand.Add = function(strcmd,func) table.insert(toadd,{strcmd,func}) end
+
 includex("tools")
 includex("extensions/init")
 includex("base64")
@@ -50,6 +55,10 @@ if(CLIENT) then includex("view") end
 includex("packs")
 includex("custom")
 --require "includes/functiondump"
+
+for k,v in pairs(toadd) do
+	concommand.Add(v[1],v[2])
+end
 
 ENTITYNUM_NONE = 1023
 ENTITYNUM_WORLD	= 1022

@@ -19,17 +19,21 @@ local function writeVector(msg,v)
 end
 
 local function ItemPickup(item, other, trace, itemid)
+	print("Pickup Hook!\n")
 	if(item and other and itemid) then
 		local vec = item:GetPos()
 		local vec2 = other:GetVelocity()
 		
+		print("New Message\n")
 		local msg = Message()
 		message.WriteString(msg,item:Classname())
 		writeVector(msg,vec)
 		writeVector(msg,vec2)
 		message.WriteLong(msg,itemid)
 		
+		print("Message Send\n")
 		for k,v in pairs(GetEntitiesByClass("player")) do
+			print("Send To Player: " .. v:GetInfo().name)
 			SendDataMessage(msg,v,"itempickup")
 		end
 	end

@@ -49,6 +49,8 @@ end
 
 local function UnlinkEntity(ent)
 	if(ent == nil) then return end
+	if(string.find(ent:Classname(),"func_")) then return end
+	if(string.find(ent:Classname(),"mover")) then return end
 	local index = ent:EntIndex()
 	if(ent:IsPlayer() == false) then
 		removeEnt(ent)
@@ -85,6 +87,9 @@ end
 
 local function LinkEntity(ent)
 	if(ent == nil) then return end
+	if(string.find(ent:Classname(),"target_")) then return end
+	if(string.find(ent:Classname(),"func_")) then return end
+	if(string.find(ent:Classname(),"mover")) then return end
 	local index = ent:EntIndex()
 	if(!addEnt(ent)) then return end
 	if(ent:Classname() != nil) then
@@ -106,6 +111,7 @@ end
 hook.add("EntityLinked","_LinkToLua",LinkEntity)
 hook.add("EntityUnlinked","_UnlinkFromLua",UnlinkEntity)
 hook.add("PlayerDisconnected","_UnlinkFromLua",UnlinkPlayer)
-hook.add("PlayerJoined","_LinkToLua",LinkEntity)
+hook.add("PlayerJoined","_LinkToLua",function(ent) Timer(.2,LinkEntity,ent) end)
+--Delay player linking so that other entities can link up first
 
 debugprint("^3Entity code loaded.\n")
