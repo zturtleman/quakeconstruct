@@ -103,7 +103,7 @@ end
 hook.add("Think","explosion",ExplosionThink)
 
 local function Rockets(v)
-	if(v == nil) then return end
+	if(v == nil or v != nil) then return end
 	if(v:Classname() != "rocket") then return end
 	local touch = function(ent,other,trace)
 		if(other != nil and other:IsPlayer() == false) then return end

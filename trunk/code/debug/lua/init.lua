@@ -43,7 +43,7 @@ local function PlayerDamaged(self,inflictor,attacker,damage,meansOfDeath,dir,pos
 		message.WriteLong(msg,damage)
 		message.WriteShort(msg,meansOfDeath)
 		message.WriteShort(msg,self:EntIndex())
-		message.WriteLong(msg,self:GetInfo().health)	
+		message.WriteLong(msg,self:GetHealth())	
 		if(attacker) then
 			message.WriteShort(msg,1)
 			message.WriteString(msg,attacker:GetInfo().name or "")
@@ -56,7 +56,8 @@ local function PlayerDamaged(self,inflictor,attacker,damage,meansOfDeath,dir,pos
 	end
 end
 
-hook.add("PlayerDamaged","init",PlayerDamaged)
+hook.add("PostPlayerDamaged","init",PlayerDamaged)
+hook.remove("PlayerDamaged","init")
 
 local function PlayerSpawned(pl)
 	for k,v in pairs(GetEntitiesByClass("player")) do
