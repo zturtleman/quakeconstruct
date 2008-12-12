@@ -1,4 +1,5 @@
 QLUA_DEBUG = false;
+if(SERVER) then QLUA_DEBUG = true end
 
 function killGaps(line)
 	line = string.Replace(line," ","")

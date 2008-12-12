@@ -10,6 +10,7 @@ function hook.sort(event)
 end
 
 function hook.replacehook(tab,event)
+	if(hook.events[event] == nil) then return end
 	for k,v in pairs(hook.events[event]) do
 		if(v.name == tab.name) then 
 			hook.events[event][k] = tab
@@ -22,6 +23,7 @@ function hook.replacehook(tab,event)
 end
 
 function hook.remove(event,name)
+	if(hook.events[event] == nil) then return end
 	for k,v in pairs(hook.events[event]) do
 		if(v.name == name) then 
 			table.remove(hook.events[event],k)
@@ -63,6 +65,19 @@ local function funcname(func)
 end
 
 local ispost = false
+
+local function printhooks()
+	for k,_ in pairs(hook.events) do
+		print(k .. "\n")
+		if(type(hook.events[k]) == "table") then
+			for _,v in pairs(hook.events[k]) do 
+				print("  -" .. v.name .. "\n")
+			end
+		end
+	end
+end
+if(SERVER) then concommand.Add("PrintHooks_SV",printhooks) end
+if(CLIENT) then concommand.Add("PrintHooks_CL",printhooks) end
 
 function CallHook(event,...)
 	if(hook.events[event] == nil) then return end

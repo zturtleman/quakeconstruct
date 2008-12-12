@@ -175,6 +175,7 @@ if(SERVER) then
 	end
 	
 	function SendDataMessage(m,pl,msgid)
+		print("Sending Data Message...\n")
 		if(check(m)) then
 			local start = ticks() / 1000
 			pl = pl or m.pl
@@ -212,12 +213,14 @@ if(SERVER) then
 				end
 			end
 			d_Send(msg)
+			print("Done!\n")
 			--print("Message Time: " .. (ticks() / 1000) - start .. "\n")
 		end
 	end
 	
 	function SendDataMessageToAll(m,msgid)
 		msgid = msgid or m.msgid
+		print("Message To All!\n")
 		for k,v in pairs(GetAllPlayers()) do
 			if(v:GetTable()._mconnected) then
 				SendDataMessage(m,v,msgid)

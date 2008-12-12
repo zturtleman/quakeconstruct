@@ -93,7 +93,7 @@ local function lrtest(id,i)
 end
 
 local function lrtest2(id,i,targ)
-	i = LerpReach(lr,id,i,targ,1,.025,function(lr)
+	i = LerpReach(lr,id,i,targ,1,.06,function(lr)
 		lr.t = targ
 	end)
 	return i
@@ -130,8 +130,11 @@ local function draw()
 		local nhx = nh2 * 1.4
 		if(nhx > 255) then 
 			nhx = nhx - 255
-			v[3] = 255 - nhx
-			v[4] = (255-nh2) + nhx
+			v[3] = 200
+			v[4] = 255-nh2
+			v[5] = 255-nh2
+			if(v[5] < 20) then v[5] = 20 end
+			if(v[4] < 20) then v[4] = 20 end
 		else
 			v[3] = 255
 			v[4] = 255-nh2
@@ -154,11 +157,11 @@ local function draw()
 			v[3] = 255 --255-nhx
 			v[4] = 50 --255-nhx
 			v[5] = 0
-			v[6] = nhx
+			v[6] = nhx/1.5
 		end
 	end
 	
-	--renderPoly(add)
+	renderPoly(add)
 	
 	for k,v in pairs(verts) do
 		if(!v.fixed) then
