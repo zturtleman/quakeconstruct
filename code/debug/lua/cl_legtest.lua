@@ -59,7 +59,7 @@ local function d3d()
 	--pos.z = math.max(fl,pos.z)
 	
 	local player = LocalPlayer()
-	local hp = health
+	local hp = _CG.stats[STAT_HEALTH]
 	local pos = player:GetPos()
 	
 	local head = RefEntity()
@@ -161,7 +161,7 @@ hook.add("Draw3D","cl_legtest",d3d)
 local deadpos = Vector()
 
 local function legview(pos,ang,fovx,fovy)
-	local hp = health
+	local hp = _CG.stats[STAT_HEALTH]
 	local prev = Vector(pos.x,pos.y,pos.z)
 	local preva = Vector(ang.x,ang.y,ang.z)
 	

@@ -499,9 +499,11 @@ int qlua_getclass(lua_State *L) {
 	luaL_checktype(L,1,LUA_TUSERDATA);
 
 	luaentity = lua_toentity(L,1);
-	if(luaentity != NULL) {
+	if(luaentity != NULL && luaentity->classname != NULL) {
 		if(!strcmp("luaentity",luaentity->classname)) {
-			lua_pushstring(L,luaentity->s.luaname);
+			if(luaentity->s.luaname != NULL) {
+				lua_pushstring(L,luaentity->s.luaname);
+			}
 		} else {
 			lua_pushstring(L,luaentity->classname);
 		}

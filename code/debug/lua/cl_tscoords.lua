@@ -158,7 +158,7 @@ local function draw()
 		end
 	end
 	
-	renderPoly(add)
+	--renderPoly(add)
 	
 	for k,v in pairs(verts) do
 		if(!v.fixed) then

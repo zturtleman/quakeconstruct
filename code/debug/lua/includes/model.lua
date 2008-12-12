@@ -17,3 +17,28 @@ function LoadModel(str)
 	end
 	return __loadmodel(str)
 end
+
+local function absvec(v)
+	return Vector(math.abs(v.x),math.abs(v.y),math.abs(v.z))
+end
+
+function GetModelCenter(m)
+	if(type(m) != "number") then return end
+	mins,maxs = render.ModelBounds(m)
+
+	return vMul(vSub(maxs,absvec(mins)),-.5)
+end
+
+function GetModelSize(m)
+	if(type(m) != "number") then return end
+	mins,maxs = render.ModelBounds(m)
+	
+	return VectorLength(vMul(vSub(maxs,mins),2))
+end
+
+function GetModelSize3(m)
+	if(type(m) != "number") then return end
+	mins,maxs = render.ModelBounds(m)
+	
+	return vMul(vSub(maxs,mins),2)
+end
