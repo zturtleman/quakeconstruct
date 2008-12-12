@@ -29,14 +29,16 @@ local function damagePlayers(v,falloff,expush)
 		local plPos = pl:GetPos()
 		local dp = (plPos - pos)
 		local len = VectorLength(dp)
-		local push = (dp / len) * (200 + expush)
-		local dfc = 1 - (len / v.radius)
-		if(dfc < .3) then dfc = .3 end
+		local push = (dp / len) * (100 + expush)
+		local dfc = 1 - (len / r)
+		if(len > r) then dfc = 0 end
+		if(dfc < .2) then dfc = .2 end
+		dfc = dfc * (1-dt)
 		if((v.lastdamage - lt) > 200) then
 			v.lastdamage = 0
 		end
 		if(len < r and v.lastdamage < lt) then
-			pl:Damage(v.owner,v.owner,v.damage*dfc,12)
+			pl:Damage(v.owner,v.owner,v.damage*dfc,MOD_ROCKET_SPLASH)
 			pl:SetVelocity(pl:GetVelocity() + push)
 			v.lastdamage = lt + 80
 		end
@@ -73,7 +75,7 @@ function etest(ent)
 
 	if(res.hit) then
 		print("HIT!\n")
-		CreateExplosion(res.endpos,160,2,25,ent)
+		CreateExplosion(res.endpos,500,3,100,ent)
 	else
 		print("No Hit\n")
 	end
@@ -103,7 +105,7 @@ end
 hook.add("Think","explosion",ExplosionThink)
 
 local function Rockets(v)
-	if(v == nil or v != nil) then return end
+	if(v == nil) then return end
 	if(v:Classname() != "rocket") then return end
 	local touch = function(ent,other,trace)
 		if(other != nil and other:IsPlayer() == false) then return end
