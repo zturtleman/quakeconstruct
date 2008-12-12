@@ -16,7 +16,7 @@ local function rpoint(pos)
 end
 
 function genFireSphere(pos,radius,a)
-	local r = radius/61.3
+	local r = radius/39.2
 	local s = RefEntity()
 	s:SetModel(sphere)
 	s:SetPos(pos)
@@ -25,6 +25,7 @@ function genFireSphere(pos,radius,a)
 	s:SetShader(fire)
 	s:AlwaysRender(true)
 	s:Render()
+	--rpoint(pos+Vector(0,0,radius)):Render()
 end
 
 local function HandleMessage(msgid)
@@ -48,6 +49,7 @@ end
 hook.add("HandleMessage","cl_explosion",HandleMessage)
 
 local function d3d()
+	--genFireSphere(Vector(0,0,0),1800,1)
 	for k,v in pairs(explosions) do
 		local lt = LevelTime()
 		local len = v.et - v.st
