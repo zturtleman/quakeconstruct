@@ -1,5 +1,6 @@
 if(SERVER) then
 	--SendScript("lua/sh_notify.lua")
+	downloader.add("lua/sh_notify.lua")
 	message.Precache("deathnotify")
 	local function death(self,inflictor,attacker,damage,means)
 		if(self == nil) then return end

@@ -62,6 +62,33 @@ function hexFormat(k)
 	end)
 end
 
+function purgeTable(tab,param,val)
+	for i=1, #tab do
+		if(type(tab[i]) == "table") then
+			if(tab[i][param] == val) then
+				tab[i][param] = 1
+			else
+				tab[i][param] = 0
+			end
+		else
+			local prev = tab[i]
+			tab[i] = {}
+			tab[i][param] = 0
+			tab[i].__prev = prev
+		end
+	end
+	tab = table.sort(tab,function(a,b) return a[param] > b[param] end)
+	while(tab[1] != nil and tab[1][param] == 1) do
+		table.remove(tab,1)
+	end
+	for i=1, #tab do
+		if(tab[i].__prev) then
+			tab[i] = tab[i].__prev
+		end
+	end
+	return tab
+end
+
 if(CLIENT) then
 	function drawNSBox(x,y,w,h,v,shader,nocenter)
 		local d = 1/3

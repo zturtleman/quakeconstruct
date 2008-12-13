@@ -67,8 +67,8 @@ function fileMD5(n)
 				lines = lines + 1
 				line = string.Replace(line,"\n","")
 				line = string.Replace(line,"\t","")
-				line = string.Replace(line,"\"","'")
-				line = string.Trim(line)
+				--line = string.Replace(line,"\"","'")
+				--line = string.Trim(line)
 				
 				if(line != "") then
 					dat = dat .. line

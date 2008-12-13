@@ -6,7 +6,7 @@ if(!hook) then
 end
 
 function hook.sort(event)
-	table.sort(hook.events[event],function(a,b) return a.priority < b.priority end)
+	table.sort(hook.events[event],function(a,b) return a.priority > b.priority end)
 end
 
 function hook.replacehook(tab,event)
