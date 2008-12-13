@@ -152,7 +152,7 @@ for k,v in pairs(GetAllPlayers()) do
 	setStat(v,STAT_LONGSHOT,0)
 end
 
-SendScript("lua/cl_instagib.lua")
+downloader.add("lua/cl_instagib.lua")
 
 
 local function reloadTime(p,c,a)
