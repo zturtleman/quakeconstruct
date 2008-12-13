@@ -41,7 +41,8 @@ includex("matrix")
 includex("angles")
 includex("messages")
 includex("netvars")
-includex("scriptmanager")
+--includex("scriptmanager")
+includex("downloader")
 includex("commands")
 if(CLIENT) then includex("sound") end
 if(CLIENT) then includex("shader") end
