@@ -1,4 +1,4 @@
-require "tests/cl_gibchooser"
+--require "tests/cl_gibchooser"
 
 local gibs = {
 	LoadModel("models/gibs/abdomen.md3"),

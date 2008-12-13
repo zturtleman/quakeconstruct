@@ -57,6 +57,28 @@ end
 
 fmd5cnt = 0
 
+function countFileLines(n,condition)
+	file = io.open(n, "r")
+	if(file != nil) then
+		local lines = 0
+		for line in file:lines() do
+			local c = true
+			if(condition) then
+				local b,e = pcall(condition,line,lines)
+				if(!b) then error(e) end
+				c = e
+			end
+			if(c) then
+				lines = lines + 1
+			end
+		end
+		
+		file:close()
+		return lines
+	end
+	return 0
+end
+
 function fileMD5(n)
 	if(fileExists(n)) then
 		file = io.open(n, "r")

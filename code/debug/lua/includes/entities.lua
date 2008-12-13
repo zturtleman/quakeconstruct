@@ -108,10 +108,10 @@ function GetEntityTable(ent)
 end
 
 
-hook.add("EntityLinked","_LinkToLua",LinkEntity)
-hook.add("EntityUnlinked","_UnlinkFromLua",UnlinkEntity)
-hook.add("PlayerDisconnected","_UnlinkFromLua",UnlinkPlayer)
-hook.add("PlayerJoined","_LinkToLua",function(ent) Timer(.2,LinkEntity,ent) end)
+hook.add("EntityLinked","_LinkToLua",LinkEntity,999)
+hook.add("EntityUnlinked","_UnlinkFromLua",UnlinkEntity,999)
+hook.add("PlayerDisconnected","_UnlinkFromLua",UnlinkPlayer,999)
+hook.add("PlayerJoined","_LinkToLua",function(ent) Timer(.2,LinkEntity,ent) end,999)
 --Delay player linking so that other entities can link up first
 
 debugprint("^3Entity code loaded.\n")
