@@ -473,6 +473,7 @@ void G_InitLua() {
 	G_InitLuaEnts(L);
 	G_InitLuaVector(L);
 	G_InitLuaMessages(L);
+	G_InitLuaTeam(L);
 
 	lua_register(L,"LevelTime",qlua_curtime);
 	lua_register(L,"LastTime",qlua_lasttime);

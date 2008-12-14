@@ -3,7 +3,7 @@ local function JetPak()
 		if(v:IsPlayer() and v:GetInfo()["health"] > 0 and v:IsBot() == false) then
 			local tab = GetEntityTable(v)
 			if(tab.fly) then
-				local vec = VectorForward(v:GetAimVector())
+				local vec = VectorForward(v:GetAimAngles())
 				
 				local pvel = v:GetVelocity()
 				

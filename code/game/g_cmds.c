@@ -587,6 +587,10 @@ void SetTeam( gentity_t *ent, char *s ) {
 		return;
 	}
 
+	if ( !LuaTeamChanged(ent,team) ) {
+		return;
+	}
+
 	//
 	// execute the team change
 	//

@@ -14,7 +14,7 @@ function etest(ent)
 	local test = CreateEntity("testent")
 	test:SetPos(Vector(433.611694,-469.85690,475.6014404))
 	if(ent and ent:IsPlayer()) then
-		local forward = VectorForward(ent:GetAimVector())
+		local forward = VectorForward(ent:GetAimAngles())
 		local startpos = ent:GetMuzzlePos()
 		local ignore = ent
 		local mask = 1 --Solid

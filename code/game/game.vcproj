@@ -1286,6 +1286,9 @@
 				RelativePath=".\g_luamessages.c">
 			</File>
 			<File
+				RelativePath=".\g_luateam.c">
+			</File>
+			<File
 				RelativePath=".\g_luavector.c">
 			</File>
 			<File

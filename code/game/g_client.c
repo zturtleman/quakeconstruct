@@ -366,7 +366,7 @@ A player is respawning, so make an entity that looks
 just like the existing corpse to leave behind.
 =============
 */
-void CopyToBodyQue( gentity_t *ent ) {
+gentity_t *CopyToBodyQue( gentity_t *ent ) {
 #ifdef MISSIONPACK
 	gentity_t	*e;
 	int i;
@@ -379,7 +379,7 @@ void CopyToBodyQue( gentity_t *ent ) {
 	// if client is in a nodrop area, don't leave the body
 	contents = trap_PointContents( ent->s.origin, -1 );
 	if ( contents & CONTENTS_NODROP ) {
-		return;
+		return NULL;
 	}
 
 	// grab a body que and cycle to the next one
@@ -466,6 +466,7 @@ void CopyToBodyQue( gentity_t *ent ) {
 
 	VectorCopy ( body->s.pos.trBase, body->r.currentOrigin );
 	trap_LinkEntity (body);
+	return body;
 }
 
 //======================================================================
