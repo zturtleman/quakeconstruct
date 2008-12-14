@@ -16,7 +16,7 @@ local function Guided()
 			end
 			if(!tab.disarmed) then
 				local vel = v:GetVelocity()
-				local forward = VectorForward(parent:GetAimVector())
+				local forward = VectorForward(parent:GetAimAngles())
 				local startpos = parent:GetMuzzlePos()
 				local ignore = parent
 				local mask = 1 --Solid

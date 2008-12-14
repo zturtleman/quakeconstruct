@@ -130,7 +130,7 @@ int qlua_getclientinfo(lua_State *L) {
 		lua_rawset(L, -3);
 
 		lua_pushstring(L, "connected");
-		lua_pushboolean(L,luaentity->client->pers.connected);
+		lua_pushboolean(L,(luaentity->client->pers.connected == CON_CONNECTED));
 		lua_rawset(L, -3);
 
 		lua_pushstring(L, "weapon");
@@ -139,6 +139,10 @@ int qlua_getclientinfo(lua_State *L) {
 
 		lua_pushstring(L, "buttons");
 		lua_pushinteger(L,luaentity->client->buttons);
+		lua_rawset(L, -3);
+
+		lua_pushstring(L, "entertime");
+		lua_pushinteger(L,luaentity->client->pers.enterTime);
 		lua_rawset(L, -3);
 
 		lua_pushstring(L, "model");
@@ -220,6 +224,24 @@ int qlua_isbot(lua_State *L) {
 			lua_pushboolean(L,0);
 		}
 	}
+	return 1;
+}
+
+int qlua_islocal(lua_State *L) {
+	gentity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL && luaentity->client != NULL) {
+		if(luaentity->client->pers.localClient) {
+			lua_pushboolean(L,1);
+		} else {
+			lua_pushboolean(L,0);
+		}
+		return 1;
+	}
+	lua_pushboolean(L,0);
 	return 1;
 }
 
@@ -645,7 +667,7 @@ int qlua_setvel(lua_State *L) {
 
 
 
-int qlua_aimvec(lua_State *L) {
+int qlua_getaimvec(lua_State *L) {
 	gentity_t	*luaentity;
 
 	luaL_checktype(L,1,LUA_TUSERDATA);
@@ -655,6 +677,118 @@ int qlua_aimvec(lua_State *L) {
 		if(luaentity->client) {
 			lua_pushvector(L,luaentity->client->ps.viewangles);
 			return 1;
+		}
+	}
+	return 0;
+}
+
+int qlua_setaimvec(lua_State *L) {
+	gentity_t	*luaentity;
+	vec3_t		angle;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TUSERDATA);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		if(luaentity->client) {
+			lua_tovector(L,2,angle);
+			SetClientViewAngle(luaentity,angle);
+		}
+	}
+	return 0;
+}
+
+int qlua_setteam(lua_State *L) {
+	gentity_t	*luaentity;
+	int			team = TEAM_FREE;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TNUMBER);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		if(luaentity->client) {
+			team = lua_tonumber(L,2);
+			if(team < TEAM_FREE || team >= TEAM_NUM_TEAMS) {
+				team = luaentity->client->sess.sessionTeam;
+			}
+			if(luaentity->client->sess.sessionTeam != team) {
+				LuaTeamChanged(luaentity,team);
+				luaentity->client->sess.sessionTeam = team;
+			}
+		}
+	}
+	return 0;
+}
+
+int qlua_getteam(lua_State *L) {
+	gentity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		if(luaentity->client) {
+			lua_pushinteger(L,luaentity->client->sess.sessionTeam);
+			return 1;
+		}
+	}
+	return 0;
+}
+
+int qlua_setspectatorstate(lua_State *L) {
+	gentity_t	*luaentity;
+	int			state = SPECTATOR_NOT;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TNUMBER);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		if(luaentity->client) {
+			state = lua_tonumber(L,2);
+			if(state < SPECTATOR_NOT || state > SPECTATOR_SCOREBOARD) {
+				state = luaentity->client->sess.spectatorState;
+			}
+			if(luaentity->client->sess.spectatorState != state) {
+				luaentity->client->sess.spectatorState = state;
+			}
+		}
+	}
+	return 0;
+}
+
+int qlua_getspectatorstate(lua_State *L) {
+	gentity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		if(luaentity->client) {
+			lua_pushinteger(L,luaentity->client->sess.spectatorState);
+			return 1;
+		}
+	}
+	return 0;
+}
+
+int qlua_respawn(lua_State *L) {
+	gentity_t	*luaentity;
+	gentity_t	*body = NULL;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		if(luaentity->client) {
+			if(luaentity->health <= 0) body = CopyToBodyQue(luaentity);
+			ClientSpawn(luaentity);
+			if(body != NULL) {
+				lua_pushentity(L,body);
+				return 1;
+			}
 		}
 	}
 	return 0;
@@ -790,7 +924,11 @@ int qlua_removeentity(lua_State *L) {
 
 	luaentity = lua_toentity(L,1);
 	if(luaentity != NULL && luaentity->client == NULL) {
-		G_FreeEntity(luaentity);
+		if(!strcmp(luaentity->classname,"bodyque")) {
+			G_FreeEntity(luaentity);
+		} else {
+			qlua_UnlinkEntity(luaentity);
+		}
 	}
 	return 0;
 }
@@ -1398,7 +1536,13 @@ static const luaL_reg Entity_methods[] = {
   {"GetAngles",		qlua_getangles},
   {"SetAngles",		qlua_setangles},
   {"GetMuzzlePos",	qlua_getmuzzlepos},
-  {"GetAimVector",		qlua_aimvec},
+  {"GetAimAngles",		qlua_getaimvec},
+  {"SetAimAngles",		qlua_setaimvec},
+  {"GetTeam",			qlua_getteam},
+  {"SetTeam",			qlua_setteam},
+  {"SetSpectatorType",	qlua_setspectatorstate},
+  {"GetSpectatorType",	qlua_getspectatorstate},
+  {"Respawn",			qlua_respawn},
   {"GetVelocity",		qlua_getvel},
   {"SetVelocity",		qlua_setvel},
   {"GetOtherEntity",	qlua_getotherentity},
@@ -1419,6 +1563,8 @@ static const luaL_reg Entity_methods[] = {
   {"SendMessage",	qlua_sendtexttoplayer},
   {"IsPlayer",		qlua_isclient},
   {"IsBot",			qlua_isbot},
+  {"IsLocal",		qlua_islocal},
+  {"IsAdmin",		qlua_islocal},
   {"Classname",		qlua_getclass},
   {"Remove",		qlua_removeentity},
   {"EntIndex",		qlua_entityid},

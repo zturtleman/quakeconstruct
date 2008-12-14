@@ -456,6 +456,7 @@ typedef struct {
 	int		clientnum;
 } luamsg_t;
 
+qboolean LuaTeamChanged(gentity_t *luaentity,int team);
 void G_InitLuaMessages(lua_State *L);
 void InitServerLua( void );
 void CloseServerLua( void );
@@ -482,6 +483,7 @@ qboolean Cmd_Check_Lua( gentity_t *ent, char cmd[] );
 
 void G_InitLuaVector(lua_State *L);
 void G_InitLuaEnts(lua_State *L);
+void G_InitLuaTeam(lua_State *L);
 
 static qboolean qlua_lockdamage = qfalse;
 
@@ -654,7 +656,7 @@ int TeamLeader( int team );
 team_t PickTeam( int ignoreClientNum );
 void SetClientViewAngle( gentity_t *ent, vec3_t angle );
 gentity_t *SelectSpawnPoint ( vec3_t avoidPoint, vec3_t origin, vec3_t angles );
-void CopyToBodyQue( gentity_t *ent );
+gentity_t *CopyToBodyQue( gentity_t *ent );
 void respawn (gentity_t *ent);
 void BeginIntermission (void);
 void InitClientPersistant (gclient_t *client);

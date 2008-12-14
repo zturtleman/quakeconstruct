@@ -87,7 +87,7 @@ Entity Functions:
   {"GetPos",		qlua_getpos},		 		entity:GetPos() --Returns a vector
   {"SetPos",		qlua_setpos},		 		entity:SetPos(vector)
   {"GetMuzzlePos",	qlua_getmuzzlepos},	 		entity:GetMuzzlePos() --Returns a vector
-  {"GetAimVector",		qlua_aimvec},	 		entity:GetAimVector() (might want to normalize it)
+  {"GetAimAngles",		qlua_aimvec},	 		entity:GetAimAngles() (might want to normalize it)
   {"GetVelocity",		qlua_getvel},    		entity:GetVelocity() --Returns a vector
   {"SetVelocity",		qlua_setvel},	  		entity:SetVelocity(vector)
   {"SetWeapon",		qlua_setweapon},      		entity:SetWeapon(weaponid)

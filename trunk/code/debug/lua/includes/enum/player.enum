@@ -15,6 +15,13 @@ typedef enum {
 } team_t;
 
 typedef enum {
+	SPECTATOR_NOT,
+	SPECTATOR_FREE,
+	SPECTATOR_FOLLOW,
+	SPECTATOR_SCOREBOARD
+} spectator_t;
+
+typedef enum {
 	MOD_UNKNOWN,
 	MOD_SHOTGUN,
 	MOD_GAUNTLET,

@@ -47,6 +47,13 @@ function GetAllPlayers()
 	return GetEntitiesByClass("player")
 end
 
+function GetOwner()
+	for k,v in pairs(GetEntitiesByClass("player")) do
+		if(v:IsAdmin()) then return v end
+	end
+	return nil
+end
+
 local function UnlinkEntity(ent)
 	if(ent == nil) then return end
 	if(string.find(ent:Classname(),"func_")) then return end

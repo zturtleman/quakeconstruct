@@ -12,6 +12,54 @@ message.Precache("itempickup")
 message.Precache("playerdamage")
 message.Precache("playerrespawn")
 
+local function Killed(pl)
+	if(pl:IsBot()) then return end
+	local team = pl:GetTeam()
+	local aim = pl:GetAimAngles()
+	pl:GetTable().dpos = pl:GetPos()
+	--Timer(.03,function()
+		local pos = pl:GetTable().dpos
+		pl:GetTable().spawnlock = true
+		pl:SetTeam(TEAM_SPECTATOR)
+		pl:GetTable().body = pl:Respawn()
+		pl:SetPos(pos)
+		pl:SetAimAngles(aim)
+	--end)
+	Timer(4,function()
+		local aimx = pl:GetAimAngles()
+		local pos = pl:GetPos()
+		local body = pl:GetTable().body
+		if(body != nil) then
+			CreateTempEntity(vAdd(body:GetPos(),Vector(0,0,-5)),EV_PLAYER_TELEPORT_OUT)
+			body:Remove()
+			--pos = pl:GetTable().body:GetPos()
+		end
+		if(pl:GetSpectatorType() == SPECTATOR_FOLLOW) then
+			pl:SetSpectatorType(SPECTATOR_FREE)
+			pos = nil
+		end
+		pl:GetTable().spawnlock = false
+		pl:SetTeam(team)
+		pl:Respawn()
+		pl:SetAimAngles(aimx)
+		if(pos != nil) then
+			pl:SetPos(pos + Vector(0,0,25))
+		end
+		CreateTempEntity(vAdd(pl:GetPos(),Vector(0,0,-5)),EV_PLAYER_TELEPORT_IN)
+	end)
+end
+hook.add("PlayerKilled","teamtest",Killed)
+
+local function deny(pl,team)
+	if(team == TEAM_SPECTATOR) then
+		return true
+	elseif(pl:GetTable().spawnlock) then
+		pl:SendMessage("You gotta wait man.",true)
+		return false
+	end
+end
+hook.add("PlayerTeamChanged","init",deny)
+
 --downloader.add("lua/sh_notify.lua")
 --downloader.add("lua/tests/cl_gibchooser.lua")
 --downloader.add("lua/tests/cl_newgibs.lua")

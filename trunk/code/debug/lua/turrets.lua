@@ -405,7 +405,7 @@ end
 function etest(ent)
 	if(ent == nil or ent:IsPlayer() == false) then return end
 	if(ent:GetInfo().team == TEAM_SPECTATOR) then return end
-	local forward = VectorForward(ent:GetAimVector())
+	local forward = VectorForward(ent:GetAimAngles())
 	local startpos = vAdd(ent:GetMuzzlePos(),vMul(forward,12))
 	local ignore = ent
 	local mask = 1
