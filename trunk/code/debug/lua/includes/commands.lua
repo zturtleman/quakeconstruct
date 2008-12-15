@@ -31,9 +31,18 @@ module("concommand")
 local ccmds = {}
 
 function Call(ent,cmd,args)
+	if(ent == nil) then return end
+	if(type(ent) != "userdata") then return end
+	if(ent:IsPlayer() == false) then return end
 	if(ccmds[cmd]) then
 		for k,v in pairs(ccmds[cmd]) do
-			if(ent:EntIndex() == 0 or v.adminonly != true) then
+			local allow = false
+			if(SERVER) then
+				if(ent:IsAdmin() or v.adminonly != true) then allow = true end
+			else
+				allow = true
+			end
+			if(allow) then
 				local b, e = pcall(v.func,ent,cmd,args)
 				if(!b) then
 					if(SERVER) then
@@ -58,6 +67,10 @@ function Add(cmd,func,adminonly)
 		--end
 		table.insert(ccmds[cmd],{func=func,adminonly=adminonly})
 	end
+end
+
+function add(cmd,func,adminonly)
+	Add(cmd,func,adminonly)
 end
 
 function woo(ent,cmd,args)

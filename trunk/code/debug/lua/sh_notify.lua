@@ -1,4 +1,5 @@
 if(SERVER) then
+	//__DL_BLOCK
 	--SendScript("lua/sh_notify.lua")
 	downloader.add("lua/sh_notify.lua")
 	message.Precache("deathnotify")
@@ -15,6 +16,7 @@ if(SERVER) then
 		SendDataMessageToAll(msg,"deathnotify")
 	end
 	hook.add("PlayerKilled","sh_notify",death)
+	//__DL_UNBLOCK
 else
 	local function weapIco(str) return LoadModel("models/weapons2/" .. str .. "/" .. str .. ".md3") end
 	local skull = LoadModel("models/gibs/skull.md3")

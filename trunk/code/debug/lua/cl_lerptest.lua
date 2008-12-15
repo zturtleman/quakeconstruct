@@ -28,7 +28,7 @@ local frames = 34
 local seq = Sequence(35,28)
 seq = Sequence(0,34)
 --seq = Sequence(64,30)
-local legs,torso,head = LoadCharacter("sorlag","armored")
+local legs,torso,head = LoadCharacter("sorlag")
 PlaySound(lp,LoadSound("sound/player/sorlag/death1.wav"))
 local start = LevelTime()
 local delay = (1000*seq:GetLength())/20 --1 Second * Number Of Frames / Frames Per Second

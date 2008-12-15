@@ -47,6 +47,7 @@ function hook.add(event,name,func,priority)
 	end
 	hook.sort(event)
 end
+hook.Add = hook.add
 
 function hook.lock(event)
 	hook.locked[event] = true
