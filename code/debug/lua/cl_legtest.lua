@@ -12,10 +12,18 @@ local spin = 0
 local gibpos = Vector()
 local look = Vector()
 local look2 = Vector()
+local headtween = nil
 leganim:SetType(ANIM_ACT_LOOP_LERP)
 legidle:SetType(ANIM_ACT_LOOP_LERP)
 local function trDown(pos)
 	local endpos = vAdd(pos,Vector(0,0,-1000))
+	local res = TraceLine(pos,endpos,nil,1)
+	return res.endpos
+end
+
+local function trAlong(pos,angle,dist)
+	local off = VectorForward(angle)*dist
+	local endpos = vAdd(pos,off)
 	local res = TraceLine(pos,endpos,nil,1)
 	return res.endpos
 end
@@ -122,7 +130,7 @@ local function d3d()
 		legs:Render()
 		if(hp <= 0) then
 			torso:Render()
-			head:Render()
+			--head:Render()
 		end
 	else
 		local ref = RefEntity()
@@ -215,11 +223,28 @@ local function legview(pos,ang,fovx,fovy)
 			pos.z = LocalPlayer():GetPos().z + 4
 		end
 		
-		look2 = vAdd(look2,vMul(getDeltaAngle3(look,look2),.03))
+		if(headtween == nil) then headtween = headang end
 		
-		ang.z = ang.z - 25
+		pos = headpos
+		ang = headtween
+		ang = ang + look2
+		
+		pos = trAlong(pos,headang,10)
+		pos = pos - VectorForward(headang)*8
+		
+		pos = trAlong(pos,ang,10)
+		pos = pos - VectorForward(ang)*10
+		
+		pos = pos + VectorUp(ang)*8
+		pos = pos + VectorUp(headang)*5
+		
+		look2 = vAdd(look2,vMul(getDeltaAngle3(look,look2),.03))
+		headtween = headtween + (getDeltaAngle3(headang,headtween)*.2)
+		
+		--ang.z = ang.z - 25
 	else
 		look = Vector()
+		headtween = nil
 	end
 	
 	ApplyView(pos,ang)
@@ -228,8 +253,11 @@ hook.add("CalcView","cl_legtest",legview)
 
 local function moused(x,y)
 	look = vAdd(look,Vector(y/6,-x/6,0))
-	if(look.x < -90) then look.x = -90 end
-	if(look.x > 90) then look.x = 90 end
+	if(look.x < -70) then look.x = -70 end
+	if(look.x > 100) then look.x = 100 end
+	
+	if(look.y < -80) then look.y = -80 end
+	if(look.y > 80) then look.y = 80 end
 end
 hook.add("MouseEvent","cl_legtest",moused)
 

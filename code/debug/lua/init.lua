@@ -12,19 +12,41 @@ message.Precache("itempickup")
 message.Precache("playerdamage")
 message.Precache("playerrespawn")
 
+function plspawn(v)
+	if(v:GetHealth() > 0 and v:GetTeam() != TEAM_SPECTATOR) then
+		v:AddEvent(EV_TAUNT)
+		v:SetAnim(TORSO_GESTURE,ANIM_TORSO,2500)
+		v:SetAnim(LEGS_JUMP,ANIM_LEGS,0)
+		v:SetVelocity(Vector(0,0,350))
+	end
+end
+hook.add("PlayerSpawned","animtest",plspawn)
+
+local function rdeath()
+	local a = math.random(1,3)
+	print(a .. "\n")
+	if(a == 1) then return BOTH_DEATH1 end
+	if(a == 2) then return BOTH_DEATH2 end
+	if(a == 3) then return BOTH_DEATH3 end
+	return BOTH_DEATH1
+end
+
 local function Killed(pl)
-	if(pl:IsBot()) then return end
+	--if(pl:IsBot()) then return end
+	if(true) then return end
 	local team = pl:GetTeam()
 	local aim = pl:GetAimAngles()
 	pl:GetTable().dpos = pl:GetPos()
-	--Timer(.03,function()
+	Timer(1,function()
 		local pos = pl:GetTable().dpos
 		pl:GetTable().spawnlock = true
 		pl:SetTeam(TEAM_SPECTATOR)
 		pl:GetTable().body = pl:Respawn()
 		pl:SetPos(pos)
 		pl:SetAimAngles(aim)
-	--end)
+		--pl:SetAnim(BOTH_DEATH1,ANIM_LEGS,6000)
+		--pl:SetAnim(BOTH_DEATH1,ANIM_TORSO,6000)
+	end)
 	Timer(4,function()
 		local aimx = pl:GetAimAngles()
 		local pos = pl:GetPos()

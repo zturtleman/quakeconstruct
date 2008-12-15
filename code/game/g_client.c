@@ -411,6 +411,7 @@ gentity_t *CopyToBodyQue( gentity_t *ent ) {
 	body->s.powerups = 0;	// clear powerups
 	body->s.loopSound = 0;	// clear lava burning
 	body->s.number = body - g_entities;
+	body->s.eType = ET_PLAYER;
 	body->timestamp = level.time;
 	body->physicsObject = qtrue;
 	body->physicsBounce = 0;		// don't bounce

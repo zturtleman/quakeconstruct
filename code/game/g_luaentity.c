@@ -413,6 +413,48 @@ int qlua_removepowerups(lua_State *L) {
 	return 1;
 }
 
+int qlua_setanim(lua_State *L) {
+	gentity_t	*luaentity;
+	int anim = 0;
+	int leg = 0;
+	int torso = 0;
+	int target = 0;
+	int time = 1000;
+
+	luaL_checkint(L,2);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		anim = lua_tointeger(L,2);
+		if(lua_type(L,3) == LUA_TNUMBER) target = lua_tointeger(L,3);
+		if(lua_type(L,4) == LUA_TNUMBER) time = lua_tointeger(L,4);
+		if(anim >= MAX_ANIMATIONS) anim = MAX_ANIMATIONS-1;
+		if(anim < 0) anim = 0;
+		luaentity->timestamp = level.time;
+		trap_UnlinkEntity(luaentity);
+		trap_LinkEntity(luaentity);
+		if(target == 0) {
+			luaentity->s.legsAnim = ( ( luaentity->s.legsAnim & ANIM_TOGGLEBIT ) ^ ANIM_TOGGLEBIT ) | anim;
+			G_Printf("Set Leg Animation To: %i\n",luaentity->s.legsAnim);
+		} else if (target == 1) {
+			luaentity->s.torsoAnim = ( ( luaentity->s.torsoAnim & ANIM_TOGGLEBIT ) ^ ANIM_TOGGLEBIT ) | anim;
+			G_Printf("Set Torso Animation To: %i\n",luaentity->s.torsoAnim);
+		}
+		if(luaentity->client != NULL) {
+			if(target == 0) {
+				leg = ( ( luaentity->client->ps.legsAnim & ANIM_TOGGLEBIT ) ^ ANIM_TOGGLEBIT ) | anim;
+				luaentity->client->ps.legsAnim = leg;
+				luaentity->client->ps.legsTimer = time;
+			} else if (target == 1) {
+				torso = ( ( luaentity->client->ps.torsoAnim & ANIM_TOGGLEBIT ) ^ ANIM_TOGGLEBIT ) | anim;
+				luaentity->client->ps.torsoAnim = torso;
+				luaentity->client->ps.torsoTimer = time;
+			}
+		}
+	}
+	return 0;
+}
+
 int qlua_setpowerup(lua_State *L) {
 	gentity_t	*luaentity;
 	int pw = PW_NONE;
@@ -1554,6 +1596,7 @@ static const luaL_reg Entity_methods[] = {
   {"HasAmmo",		qlua_hasammo},
   {"SetAmmo",		qlua_setammo},
   {"GetAmmo",		qlua_getammo},
+  {"SetAnim",		qlua_setanim},
   {"SetPowerup",	qlua_setpowerup},
   {"GetMaxHealth",	qlua_getmaxhealth},
   {"SetMaxHealth",	qlua_setmaxhealth},
