@@ -7,6 +7,16 @@ function killGaps(line)
 	return line
 end
 
+function boolToInt(b)
+	if(b == true) then return 1 end
+	return 0
+end
+
+function intToBool(i)
+	if(i == 0) then return false end
+	return true
+end
+
 function lastChar(v)
 	return string.sub(v,string.len(v),string.len(v))
 end
@@ -104,26 +114,64 @@ if(CLIENT) then
 		draw.Rect(x+v,y+(h-v),v+(w-v*3),v,shader,d,d*2,d*2,d*3)
 		draw.Rect(x+(w-v),y+(h-v),v,v,shader,d*2,d*2,d*3,d*3)
 	end
-
-	function LoadCharacter(char,skin)
-		skin = skin or "default"
-		local ghead = LoadModel("models/players/" .. char .. "/head.md3")
-		local gtorso = LoadModel("models/players/" .. char .. "/upper.md3")
-		local glegs = LoadModel("models/players/" .. char .. "/lower.md3")
-
-		local headskin = util.LoadSkin("models/players/" .. char .. "/head_" .. skin .. ".skin")
-		local torsoskin = util.LoadSkin("models/players/" .. char .. "/upper_" .. skin .. ".skin")
-		local legskin = util.LoadSkin("models/players/" .. char .. "/lower_" .. skin .. ".skin")
-		
+	
+	function LoadPlayerModels(pl)
 		local legs = RefEntity()
-		legs:SetModel(glegs)
-		legs:SetSkin(legskin)
-
 		local torso = RefEntity()
+		local head = RefEntity()
+		local info = pl:GetInfo()
+
+		local ghead = info.headModel
+		local gtorso = info.torsoModel
+		local glegs = info.legsModel
+		
+		local headskin = info.headSkin
+		local torsoskin = info.torsoSkin
+		local legsskin = info.legsSkin
+		
+		legs:SetModel(glegs)
+		legs:SetSkin(legsskin)
+
 		torso:SetModel(gtorso)
 		torso:SetSkin(torsoskin)
 
+		head:SetModel(ghead)
+		head:SetSkin(headskin)
+		
+		return legs,torso,head
+	end
+
+	function LoadCharacter(char,skin)
+		local legs = RefEntity()
+		local torso = RefEntity()
 		local head = RefEntity()
+		local info = LocalPlayer():GetInfo()
+
+		local ghead = info.headModel
+		local gtorso = info.torsoModel
+		local glegs = info.legsModel
+		
+		local headskin = info.headSkin
+		local torsoskin = info.torsoSkin
+		local legsskin = info.legsSkin
+		
+		if(char != nil) then
+			skin = skin or "default"
+			ghead = LoadModel("models/players/" .. char .. "/head.md3")
+			gtorso = LoadModel("models/players/" .. char .. "/upper.md3")
+			glegs = LoadModel("models/players/" .. char .. "/lower.md3")
+			
+			headskin = util.LoadSkin("models/players/" .. char .. "/head_" .. skin .. ".skin")
+			torsoskin = util.LoadSkin("models/players/" .. char .. "/upper_" .. skin .. ".skin")
+			legsskin = util.LoadSkin("models/players/" .. char .. "/lower_" .. skin .. ".skin")
+		end
+		
+		legs:SetModel(glegs)
+		legs:SetSkin(legsskin)
+
+		torso:SetModel(gtorso)
+		torso:SetSkin(torsoskin)
+
 		head:SetModel(ghead)
 		head:SetSkin(headskin)
 		

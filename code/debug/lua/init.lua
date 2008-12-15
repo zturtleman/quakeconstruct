@@ -1,5 +1,3 @@
---SendScript("lua/cl_debugbar.lua")
---SendScript("lua/cl_marks.lua")
 --includesimple("sctest")
 
 --SendScript("lua/vampiric_cl.lua")
@@ -12,75 +10,17 @@ message.Precache("itempickup")
 message.Precache("playerdamage")
 message.Precache("playerrespawn")
 
-function plspawn(v)
-	if(v:GetHealth() > 0 and v:GetTeam() != TEAM_SPECTATOR) then
-		v:AddEvent(EV_TAUNT)
-		v:SetAnim(TORSO_GESTURE,ANIM_TORSO,2500)
-		v:SetAnim(LEGS_JUMP,ANIM_LEGS,0)
-		v:SetVelocity(Vector(0,0,350))
-	end
-end
-hook.add("PlayerSpawned","animtest",plspawn)
+--downloader.add("lua/cl_lerptest.lua",true)
+--downloader.add("lua/tests/cl_small.lua",true)
+--downloader.add("lua/tests/cl_small2.lua",true)
+--downloader.add("lua/tests/cl_small3.lua",true)
 
-local function rdeath()
-	local a = math.random(1,3)
-	print(a .. "\n")
-	if(a == 1) then return BOTH_DEATH1 end
-	if(a == 2) then return BOTH_DEATH2 end
-	if(a == 3) then return BOTH_DEATH3 end
-	return BOTH_DEATH1
+local function Fuse(v)
+	if(v == nil) then return end
+	if(v:Classname() != "grenade") then return end
+	v:SetNextThink(LevelTime() + 500)
 end
-
-local function Killed(pl)
-	--if(pl:IsBot()) then return end
-	if(true) then return end
-	local team = pl:GetTeam()
-	local aim = pl:GetAimAngles()
-	pl:GetTable().dpos = pl:GetPos()
-	Timer(1,function()
-		local pos = pl:GetTable().dpos
-		pl:GetTable().spawnlock = true
-		pl:SetTeam(TEAM_SPECTATOR)
-		pl:GetTable().body = pl:Respawn()
-		pl:SetPos(pos)
-		pl:SetAimAngles(aim)
-		--pl:SetAnim(BOTH_DEATH1,ANIM_LEGS,6000)
-		--pl:SetAnim(BOTH_DEATH1,ANIM_TORSO,6000)
-	end)
-	Timer(4,function()
-		local aimx = pl:GetAimAngles()
-		local pos = pl:GetPos()
-		local body = pl:GetTable().body
-		if(body != nil) then
-			CreateTempEntity(vAdd(body:GetPos(),Vector(0,0,-5)),EV_PLAYER_TELEPORT_OUT)
-			body:Remove()
-			--pos = pl:GetTable().body:GetPos()
-		end
-		if(pl:GetSpectatorType() == SPECTATOR_FOLLOW) then
-			pl:SetSpectatorType(SPECTATOR_FREE)
-			pos = nil
-		end
-		pl:GetTable().spawnlock = false
-		pl:SetTeam(team)
-		pl:Respawn()
-		pl:SetAimAngles(aimx)
-		if(pos != nil) then
-			pl:SetPos(pos + Vector(0,0,25))
-		end
-		CreateTempEntity(vAdd(pl:GetPos(),Vector(0,0,-5)),EV_PLAYER_TELEPORT_IN)
-	end)
-end
-hook.add("PlayerKilled","teamtest",Killed)
-
-local function deny(pl,team)
-	if(team == TEAM_SPECTATOR) then
-		return true
-	elseif(pl:GetTable().spawnlock) then
-		pl:SendMessage("You gotta wait man.",true)
-		return false
-	end
-end
-hook.add("PlayerTeamChanged","init",deny)
+hook.add("EntityLinked","super",Fuse)
 
 --downloader.add("lua/sh_notify.lua")
 --downloader.add("lua/tests/cl_gibchooser.lua")

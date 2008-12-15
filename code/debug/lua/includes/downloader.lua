@@ -45,6 +45,7 @@ if(SERVER) then
 	message.Precache("__fileheader")
 	message.Precache("__fileline")
 	message.Precache("__queuefile")
+	message.Precache("__runfile")
 	
 	local lastNumPlayers = 0
 	
@@ -58,7 +59,12 @@ if(SERVER) then
 		return ex[#ex]
 	end
 
+	local block = false
+	
 	local function fixLine(line)
+		if(line == "//__DL_BLOCK") then block = true return end
+		if(line == "//__DL_UNBLOCK") then block = false return end
+		if(block == true) then return nil end
 		if(line != "" and line != " " and line != "\n") then
 			line = string.Replace(line,"\t","")
 			line = string.Replace(line,"\r","")
@@ -69,25 +75,27 @@ if(SERVER) then
 		return nil
 	end
 
-	function downloader.add(filename)
+	function downloader.add(filename,force)
 		if(filename != nil and type(filename) == "string") then
 			if(fileExists(filename)) then
 				local md5sum = fileMD5(filename)
 				local lines = countFileLines(filename,function(l,n) return (fixLine(l) != nil) end)
 				local file = newFile(filename,md5sum,lines)
-				if(!table.HasValue(downloader.queue,file)) then
+				if(!table.HasValue(downloader.queue,file) or force) then
 					local exist = getFileByName(file,downloader.queue)
 					if(exist) then
 						exist.status = FILE_PENDING
 						exist.md5 = md5sum
 						exist.lines = lines
-						print("File updated in queue: '" .. file.name .. "'\n")
-						downloader.notify()
+						debugprint("File updated in queue: '" .. file.name .. "'\n")
+						downloader.notify(force)
 						return 
 					end
 					table.insert(downloader.queue,file)
-					print("File added to queue: '" .. file.name .. "'\n")
+					debugprint("File added to queue: '" .. file.name .. "'\n")
 					downloader.notify()
+				else
+					debugprint("Did nothing with file: '" .. file.name .. "'\n")
 				end
 			else
 				error("File not found: '" .. filename .. "'.")
@@ -96,6 +104,7 @@ if(SERVER) then
 			error("String expected got '" .. type(filename) .. "'.")
 		end
 	end
+	downloader.Add = downloader.add
 	
 	function downloader.playerready(pl)
 		if(pl == nil) then return false end
@@ -111,22 +120,33 @@ if(SERVER) then
 		SendDataMessage(msg)
 	end
 	
-	function downloader.putplayerfile(pl,filex)
+	function downloader.runfile(pl,file)
+		local msg = Message(pl,"__runfile")
+		message.WriteString(msg,base64.enc(file.name))
+		SendDataMessage(msg)
+	end
+	
+	function downloader.putplayerfile(pl,filex,force)
 		if(!downloader.playerready(pl)) then return end
 		local ptab = pl:GetTable()
 		local fqueue = ptab.files
-		if(!table.HasValue(fqueue,filex) or filex.status == FILE_PENDING) then
+		if(!table.HasValue(fqueue,filex) or filex.status == FILE_PENDING or force) then
 			local pfile = getFileByName(filex,fqueue)
 			if(pfile != nil) then
+				if(pfile.status == FILE_FINISHED and !force and pfile.md5 == filex.md5) then
+					debugprint("Executed Player File " .. pfile.name .. ".\n")
+					downloader.runfile(pl,pfile)
+					return
+				end
 				if(pfile.status != FILE_DOWNLOADING) then
-					print("Updated Player File " .. pfile.name .. ".\n")
+					debugprint("Updated Player File " .. pfile.name .. ".\n")
 					pfile.status = FILE_PENDING
 					pfile.md5 = filex.md5
 					pfile.lines = filex.lines
 					downloader.putqueue(pl,pfile)
 				end
 			else
-				print("Added Player File " .. filex.name .. ".\n")
+				debugprint("Added Player File " .. filex.name .. ".\n")
 				filex = filex:Copy()
 				table.insert(ptab.files,filex:Copy())
 				downloader.putqueue(pl,filex)
@@ -159,8 +179,10 @@ if(SERVER) then
 		if(file != nil) then
 			local lines = 0
 			for line in file:lines() do
-				Timer(.08*lines,downloader.sendline,pl,line)
-				lines = lines + 1
+				if(fixLine(line) != nil) then
+					Timer(.08*lines,downloader.sendline,pl,line)
+					lines = lines + 1
+				end
 			end
 			Timer((.08*lines) + 0.2,downloader.stopdownload,pl,filex)
 			file:close()
@@ -172,7 +194,7 @@ if(SERVER) then
 	function downloader.stopdownload(pl,file)
 		local ptab = pl:GetTable()
 		if(!ptab.downloading) then return end
-		print("Finished Downloading: " .. file.name .. "\n")
+		debugprint("Finished Downloading: " .. file.name .. "\n")
 		file.status = FILE_FINISHED
 		ptab.downloading = false
 		downloader.notify()
@@ -181,12 +203,12 @@ if(SERVER) then
 	function downloader.begindownload(pl,file)
 		local ptab = pl:GetTable()
 		if(ptab.downloading) then return end
-		print("Sending File: " .. file.name .. "[" .. file.md5 .. "] - " .. file.lines .. " lines.\n")
+		debugprint("Sending File: " .. file.name .. "[" .. file.md5 .. "] - " .. file.lines .. " lines.\n")
 		file.status = FILE_DOWNLOADING
 		ptab.downloading = true
 		ptab.currentdownload = file
-		Timer(.5,downloader.sendheader,pl,file)
-		Timer(.6,downloader.beginlines,pl,file)
+		Timer(.2,downloader.sendheader,pl,file)
+		Timer(.4,downloader.beginlines,pl,file)
 	end
 	
 	function downloader.updateplayer(pl)
@@ -203,10 +225,10 @@ if(SERVER) then
 		end
 	end
 	
-	function downloader.notify()
+	function downloader.notify(force)
 		for _,pl in pairs(GetAllPlayers()) do
 			for k,v in pairs(downloader.queue) do
-				downloader.putplayerfile(pl,v)
+				downloader.putplayerfile(pl,v,force)
 			end
 			downloader.updateplayer(pl)
 		end
@@ -222,7 +244,7 @@ if(SERVER) then
 			ptab.ready = true
 			ptab.downloading = false
 			ptab.currentdownload = nil
-			print("Initialized Player: " .. pl:GetInfo().name .. " " .. #ptab.files .. " " .. pl:EntIndex() .. "\n")
+			debugprint("Initialized Player: " .. pl:GetInfo().name .. " " .. #ptab.files .. " " .. pl:EntIndex() .. "\n")
 			downloader.notify()
 		end
 	end
@@ -250,13 +272,23 @@ elseif(CLIENT) then
 			local per = math.floor((LINEITER / LINECOUNT)*100)
 			if(LINEITER == 0) then per = 0 end
 			local text = "Downloading: " .. FILENAME .. "(" .. per .. "%)"
+			local w = 10*string.len(text)
+			draw.SetColor(0,.4,1,.5)
+			draw.Rect(320-(w/2),240-5,w*(per/100),10)
 			draw.SetColor(1,1,1,1)
-			draw.Text(320-(5*string.len(text)),240-5,text,10,10)
+			draw.Text(320-(w/2),240-5,text,10,10)
+			
+			text = "Downloading " .. #QUEUE .. " Files:"
+			w = 10*string.len(text)
+			draw.SetColor(1,1,1,1)
+			draw.Text(320-(w/2),240-15,text,10,10)
 		end
 		for k,v in pairs(QUEUE) do
 			if(k != 1) then
+				local al = 1 - (k/5)
+				if(al < 0) then al = 0 end
 				local text = v[1] .. " - " .. v[2] .. " lines"
-				draw.SetColor(1,1,1,1)
+				draw.SetColor(1,1,1,al)
 				draw.Text(320-(5*string.len(text)),(240-15)+(10*k),text,10,10)
 			end
 		end
@@ -269,7 +301,7 @@ elseif(CLIENT) then
 	
 	local function writeToFile()
 		local rez = "lua/downloads/" .. localFile(FILENAME)
-		print("Writing File: '" .. rez .. "'\n")
+		debugprint("Writing File: '" .. rez .. "'\n")
 		local file = io.open(rez,"w")
 		if(file != nil) then
 			file:write(CONTENTS)
@@ -283,8 +315,9 @@ elseif(CLIENT) then
 		end
 	end
 	
-	local function include()
+	local function includeFile()
 		local rez = "lua/downloads/" .. localFile(FILENAME)
+		debugprint("Execute: " .. rez .. "\n")
 		local b,e = pcall(include,rez)
 		if(!b) then
 			debugprint("^1Script Downloader Error (Script Execution): " .. e .. "\n")
@@ -324,6 +357,10 @@ elseif(CLIENT) then
 			if(LINEITER == LINECOUNT) then
 				finished()
 			end
+		elseif(msgid == "__runfile") then
+			local name = base64.dec(message.ReadString())
+			FILENAME = name
+			includeFile()
 		end
 	end
 	hook.add("HandleMessage","__downloader.lua",HandleMessage)

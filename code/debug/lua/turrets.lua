@@ -170,7 +170,7 @@ function aimTurret(ent)
 	--if(true) then return false end
 	for k,v in pairs(players) do
 		if(v != owner and v:GetInfo().health > 0 and checkteam(v,owner)) then
-			if(v:GetInfo().health > 0) then
+			if(v:GetInfo().health > 0 and v:GetTeam() != TEAM_SPECTATOR) then
 				local pos = v:GetPos()
 				if(pos.z > ent:GetPos().z) then
 					pos.z = pos.z + 4
