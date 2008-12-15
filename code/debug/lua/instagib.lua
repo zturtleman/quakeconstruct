@@ -20,6 +20,7 @@ local let = {
 
 message.Precache("igrailfire")
 message.Precache("igstat")
+message.Precache("igbeam")
 
 local function fullHealth(self) 
 	--Simple function set's player's health to full and set's a timer to do so after damage
@@ -52,6 +53,13 @@ local function sendStat(pl,s)
 	message.WriteShort(msg,s)
 	message.WriteShort(msg,pl:GetTable().stats[s])
 	SendDataMessage(msg,pl,"igstat")
+end
+
+local function sendBeam(pl,s,e)
+	local msg = Message()
+	message.WriteVector(s)
+	message.WriteVector(e)
+	SendDataMessageToAll(msg,"igbeam")
 end
 
 local function setStat(pl,s,i)
@@ -108,7 +116,9 @@ local function PreDamage(self,inflictor,attacker,damage,dtype)
 		return 0 --If we don't have an exception (aka hazard) then don't damage the player
 		--This makes it so that the player doesn't take falling damage
 	else
-		return 200
+		fullHealth(self)
+		self:Respawn()
+		return 0
 	end
 end
 

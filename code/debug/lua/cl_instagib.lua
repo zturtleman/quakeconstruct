@@ -32,7 +32,7 @@ local function drawHud()
 		stats[STAT_ACCURACY][1] = 0
 	end
 	draw.SetColor(1,1,1,.8)
-	local y = 0
+	local y = 100
 	for i=1, #stats do
 		local v = stats[i]
 		local txt = v[2] .. ": " .. v[1]
