@@ -1,4 +1,4 @@
---require "tests/cl_gibchooser"
+require "tests/cl_gibchooser"
 
 local gibs = {
 	LoadModel("models/gibs/abdomen.md3"),
@@ -36,6 +36,11 @@ local lastPos = Vector()
 local bob = 0
 local nxt = 0
 
+local impact = {}
+impact[1] = LoadSound("sound/player/gibimp1.wav")
+impact[2] = LoadSound("sound/player/gibimp2.wav")
+impact[3] = LoadSound("sound/player/gibimp3.wav")
+
 local blood = {}
 for i=1,5 do
 	table.insert(blood,LoadShader("BloodMarkN" .. i))
@@ -50,6 +55,7 @@ end
 
 local particles = {}
 local localents = {}
+local tgtime = 0
 function newParticle(pos,dir,model,scale,skin,head)
 	--if(!flesh) then return end
 	local ex = 0
@@ -80,14 +86,22 @@ function newParticle(pos,dir,model,scale,skin,head)
 	le:SetRefEntity(r)
 	le:SetVelocity(vMul(dir,300))
 	le:SetStartTime(LevelTime())
-	le:SetEndTime(LevelTime() + (8000 + ex) + math.random(1000,4000))
+	le:SetEndTime(LevelTime() + (15000 + ex) + math.random(1000,4000))
 	le:SetType(LE_FRAGMENT)
 	le:SetColor(1,.5,.3,1)
 	le:SetRadius(r:GetRadius())
 	le:SetAngleVelocity(Vector(math.random(-360,360),math.random(-360,360),math.random(-360,360)))
 	le:SetCallback(LOCALENTITY_CALLBACK_TOUCH,function(le,tr)
-		if(VectorLength(le:GetVelocity()) < 10 or math.random(0,2) == 1) then
-			util.CreateMark(blood[math.random(1,#blood)],tr.endpos,tr.normal,math.random(360),1,1,1,1,math.random(30,60),true)
+		if(le:GetTable()) then
+			le:GetTable().lgtime = le:GetTable().lgtime or LevelTime()
+			if(le:GetTable().lgtime <= LevelTime() and tgtime < LevelTime()) then
+				PlaySound(le:GetPos(),impact[math.random(1,3)])
+				le:GetTable().lgtime = LevelTime() + math.random(800,1200)
+				tgtime = LevelTime() + math.random(100,400)
+			end
+		end
+		if(VectorLength(le:GetVelocity()) > 10 or math.random(0,2) == 1) then
+			util.CreateMark(blood[math.random(1,#blood)],tr.endpos,tr.normal,math.random(360),1,1,1,1,math.random(30,60),true,math.random(8000,10000))
 		end
 		if(!le:GetTable().stopped) then
 		local ref = le:GetRefEntity()
@@ -163,7 +177,7 @@ local function event(entity,event,pos,dir)
 		--newParticle(pos,vMul(entity:GetByteDir(),.2),gibs[5])
 	end
 	if(event == EV_GIB_PLAYER) then
-		local vel = entity:GetTrajectory():GetDelta()/800
+		local vel = entity:GetTrajectory():GetDelta()/1000
 		if(vel.z < 0) then vel.z = vel.z * -1 end
 		PlaySound(entity,explodeSound)
 		
@@ -176,7 +190,7 @@ local function event(entity,event,pos,dir)
 		local legs = entity:GetInfo().legsModel or skull
 		local legsskin = entity:GetInfo().legsSkin
 		
-		newParticle(pos,Vector(0,0,1.2) + vel,mdl,1.4,skin,true)
+		newParticle(pos,Vector(0,0,.8) + vel,mdl,1.4,skin,true)
 		if(math.random(0,1) == 1) then
 			--newParticle(pos+Vector(0,0,20) + vel,Vector(0,0,.2),torso,1,torsoskin,false)
 		else
@@ -189,7 +203,7 @@ local function event(entity,event,pos,dir)
 				local mdl = list[i]
 				local skin = skins[i]
 				-- + ((math.random(1,6))/20)
-				newParticle(pos,Vector(0,0,.4) + vel,mdl,1.25,skin)
+				newParticle(pos,Vector(0,0,.2) + vel,mdl,1.4,skin)
 			end
 		--end
 		return true

@@ -18,9 +18,14 @@ local let = {
 	--Hazards respawn the player
 }
 
+local tr_flags = 1
+tr_flags = bitOr(tr_flags,33554432)
+tr_flags = bitOr(tr_flags,67108864)
+
 message.Precache("igrailfire")
 message.Precache("igstat")
 message.Precache("igbeam")
+message.Precache("igdeath")
 
 local function fullHealth(self) 
 	--Simple function set's player's health to full and set's a timer to do so after damage
@@ -88,7 +93,7 @@ local function setupPlayer(pl)
 		pl:SetAmmo(WP_RAILGUN,-1) -- -1 will make the ammo numbers go away :)
 		pl:SetWeapon(WP_RAILGUN) --Set the railgun as the active weapon
 	end
-	pl:SetSpeed(1.5)
+	if(!pl:IsBot()) then pl:SetSpeed(1.2) end
 	if(pl:IsBot()) then pl:SetAmmo(WP_RAILGUN,999) end --Bots need full ammo or they won't shoot
 	pl:SetPowerup(PW_INVIS,3000)
 	pl:GetTable().gi_invistime = LevelTime() + 3000
@@ -109,6 +114,11 @@ local function PreDamage(self,inflictor,attacker,damage,dtype)
 			addStat(self,STAT_DEATHS,1)
 			local d = VectorLength(attacker:GetPos() - self:GetPos())
 			setStat(attacker,STAT_LONGSHOT,d)
+			
+			local msg = Message()
+			message.WriteShort(msg,self:EntIndex())
+			SendDataMessageToAll(msg,"igdeath")
+			
 			return 200 --Just gib the player (loads of damage)
 		end
 	end
@@ -144,7 +154,7 @@ local function FiredWeapon(player,weapon,delay,pos,angle)
 		mpos = mpos + f*8
 		mpos = mpos + u*-8
 		mpos = mpos + r*6
-		local tr = TraceLine(pos,(pos+f*10000))
+		local tr = TraceLine(pos,(pos+f*10000),player,tr_flags)
 		for i=0, 2 do
 			if(tr and tr.hit and pos and tr.endpos) then
 				sendBeam(player,mpos,tr.endpos,color)
@@ -152,9 +162,10 @@ local function FiredWeapon(player,weapon,delay,pos,angle)
 					if(tr.entity:IsPlayer()) then
 						if(tr.entity != player) then
 							tr.entity:Damage(player,player,1000,MOD_RAILGUN)
+						else
+							local vel = f * -800
+							tr.entity:SetVelocity(tr.entity:GetVelocity() + vel)
 						end
-						local vel = f * -800
-						tr.entity:SetVelocity(tr.entity:GetVelocity() + vel)
 						break
 					end
 				end
@@ -164,7 +175,7 @@ local function FiredWeapon(player,weapon,delay,pos,angle)
 				local dot = DotProduct( f, tr.normal );
 				local ref = VectorNormalize(vAdd(f,vMul(tr.normal,-2*dot)))
 				pos = tr.endpos
-				tr = TraceLine(pos,(pos+ref*10000))
+				tr = TraceLine(pos,(pos+ref*10000),nil,tr_flags)
 				mpos = pos
 			end
 		end
@@ -174,9 +185,9 @@ local function FiredWeapon(player,weapon,delay,pos,angle)
 end
 
 local function CLThink(pl)
-	if(pl:GetHealth() <= 0) then
-		pl:Damage(1000)
-	end
+	--if(pl:GetHealth() <= 0) then
+		--pl:Damage(1000)
+	--end
 end
 
 local function plcolor(p,c,a)
@@ -198,7 +209,7 @@ hook.add("PlayerKilled","instagib",function(p)  end)
 --Remove pickups and outfit players
 removePickups()
 for k,v in pairs(GetAllPlayers()) do
-	--setupPlayer(v)
+	setupPlayer(v)
 	setStat(v,STAT_SHOTS,0)
 	setStat(v,STAT_HITS,0)
 	setStat(v,STAT_LONGSHOT,0)

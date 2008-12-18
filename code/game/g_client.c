@@ -376,6 +376,10 @@ gentity_t *CopyToBodyQue( gentity_t *ent ) {
 
 	qlua_UnlinkEntity (ent);
 
+	if(ent->s.health < GIB_HEALTH) {
+		return NULL;
+	}
+
 	// if client is in a nodrop area, don't leave the body
 	contents = trap_PointContents( ent->s.origin, -1 );
 	if ( contents & CONTENTS_NODROP ) {

@@ -3,6 +3,10 @@ local mark = LoadShader("BloodMark")
 local flare = LoadShader("flareShader")
 local clicksound = LoadSound("sound/weapons/noammo.wav")
 local landsound = LoadSound("sound/player/land1.wav")
+local tr_flags = 1
+tr_flags = bitOr(tr_flags,33554432)
+tr_flags = bitOr(tr_flags,67108864)
+
 STAT_SHOTS = 1
 STAT_HITS = 2
 STAT_ACCURACY = 3
@@ -141,6 +145,7 @@ end
 hook.add("Draw2D","cl_instagib",draw2d)
 
 local function rvec() return Vector(math.random(-100,100),math.random(-100,100),math.random(-100,100))/100 end
+local nxtsnd = {}
 
 local function HandleMessage(msgid)
 	if(msgid == "igrailfire") then
@@ -151,6 +156,17 @@ local function HandleMessage(msgid)
 		railStart = message.ReadLong()
 		railEnd = message.ReadLong()
 	end
+	if(msgid == "igdeath") then
+		local id = message.ReadShort()
+		local pl = GetEntityByIndex(id)
+		if(pl != nil) then
+			nxtsnd[id] = nxtsnd[id] or 1
+			local snd = LoadCustomSound(pl,"*death" .. nxtsnd[id] .. ".wav")
+			PlaySound(pl,snd)
+			nxtsnd[id] = nxtsnd[id] + 1
+			if(nxtsnd[id] > 3) then nxtsnd[id] = 1 end
+		end
+	end
 	if(msgid == "igstat") then
 		stats[message.ReadShort()][1] = message.ReadShort()
 	end
@@ -158,7 +174,7 @@ local function HandleMessage(msgid)
 		local s = message.ReadVector()
 		local e = message.ReadVector()
 		local hue = message.ReadShort()
-		local tr = TraceLine(s,e+VectorNormalize(e-s)*1000)
+		local tr = TraceLine(s,e+VectorNormalize(e-s)*1000,nil,tr_flags)
 		local r,g,b = hsv(hue,1,1)
 		local len = VectorLength(e-s)
 		local forward,right,up = AngleVectors(VectorToAngles(e-s))
@@ -203,9 +219,9 @@ hook.add("HandleMessage","cl_instagib",HandleMessage)
 
 local function event(entity,event,pos,dir)
 	if(event == EV_FALL_MEDIUM or event == EV_FALL_FAR) then
-		PlaySound(landsound)
+		if(entity == LocalPlayer()) then PlaySound(landsound) end
 		return true --No fall pain sounds
 	end
 	if(event == EV_RAILTRAIL) then return true end
 end
-hook.add("EventReceived","cl_newgibs",event)
+hook.add("EventReceived","cl_instagib",event)
