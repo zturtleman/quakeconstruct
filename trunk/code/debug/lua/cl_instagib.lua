@@ -183,7 +183,7 @@ local function HandleMessage(msgid)
 		qbeam(s,e,r/2,g/2,b/2,8,false,850)
 		qbeam(s,e,r/5,g/5,b/5,12,false,1000)
 		qbeam(s,e,1,1,1,5,false,600)
-		
+//__DL_BLOCK
 		--[[local last = s
 		local step = 20
 		for i=0,len,step do
@@ -197,7 +197,7 @@ local function HandleMessage(msgid)
 				last = new
 			end
 		end]]
-		
+//__DL_UNBLOCK
 		for x=1, 6 do
 			local last = e
 			for i=0,40,20 do
