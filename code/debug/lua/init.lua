@@ -14,14 +14,14 @@ message.Precache("playerrespawn")
 --downloader.add("lua/tests/cl_small.lua",true)
 --downloader.add("lua/tests/cl_small2.lua",true)
 --downloader.add("lua/tests/cl_small3.lua",true)
-
+--[[
 local function Fuse(v)
 	if(v == nil) then return end
 	if(v:Classname() != "grenade") then return end
 	v:SetNextThink(LevelTime() + 500)
 end
 hook.add("EntityLinked","super",Fuse)
-
+]]
 --downloader.add("lua/sh_notify.lua")
 --downloader.add("lua/tests/cl_gibchooser.lua")
 --downloader.add("lua/tests/cl_newgibs.lua")

@@ -55,10 +55,11 @@ local function sendStat(pl,s)
 	SendDataMessage(msg,pl,"igstat")
 end
 
-local function sendBeam(pl,s,e)
+local function sendBeam(pl,s,e,color)
 	local msg = Message()
-	message.WriteVector(s)
-	message.WriteVector(e)
+	message.WriteVector(msg,s)
+	message.WriteVector(msg,e)
+	message.WriteShort(msg,color)
 	SendDataMessageToAll(msg,"igbeam")
 end
 
@@ -124,6 +125,7 @@ end
 
 local function FiredWeapon(player,weapon,delay,pos,angle)
 	if(weapon == WP_RAILGUN and player != nil) then
+		local color = player:GetTable().color or math.random(0,360)
 		local rt = IG_RELOADTIME
 		local maxv = 800
 		local rv = maxv - VectorLength(player:GetVelocity())
@@ -136,6 +138,37 @@ local function FiredWeapon(player,weapon,delay,pos,angle)
 		message.WriteLong(msg,LevelTime() + rv)
 		SendDataMessage(msg,player,"igrailfire")
 		addStat(player,STAT_SHOTS,1)
+		
+		local f,r,u = AngleVectors(angle)
+		local mpos = pos
+		mpos = mpos + f*8
+		mpos = mpos + u*-8
+		mpos = mpos + r*6
+		local tr = TraceLine(pos,(pos+f*10000))
+		for i=0, 2 do
+			if(tr and tr.hit and pos and tr.endpos) then
+				sendBeam(player,mpos,tr.endpos,color)
+				if(tr.entity) then
+					if(tr.entity:IsPlayer()) then
+						if(tr.entity != player) then
+							tr.entity:Damage(player,player,1000,MOD_RAILGUN)
+						end
+						local vel = f * -800
+						tr.entity:SetVelocity(tr.entity:GetVelocity() + vel)
+						break
+					end
+				end
+				
+				angle = VectorToAngles(VectorNormalize(tr.endpos - pos))
+				f,r,u = AngleVectors(angle)
+				local dot = DotProduct( f, tr.normal );
+				local ref = VectorNormalize(vAdd(f,vMul(tr.normal,-2*dot)))
+				pos = tr.endpos
+				tr = TraceLine(pos,(pos+ref*10000))
+				mpos = pos
+			end
+		end
+		
 		return rv --fire rate
 	end
 end
@@ -145,6 +178,15 @@ local function CLThink(pl)
 		pl:Damage(1000)
 	end
 end
+
+local function plcolor(p,c,a)
+	local num = tonumber(a[1])
+	if(num == nil) then
+		print("useage: /mycolor [number 0-360]\n")
+	end
+	p:GetTable().color = num
+end
+concommand.add("mycolor",plcolor)
 
 hook.add("ClientThink","instagib",CLThink)
 hook.add("PlayerSpawned","instagib",setupPlayer)
@@ -156,7 +198,7 @@ hook.add("PlayerKilled","instagib",function(p)  end)
 --Remove pickups and outfit players
 removePickups()
 for k,v in pairs(GetAllPlayers()) do
-	setupPlayer(v)
+	--setupPlayer(v)
 	setStat(v,STAT_SHOTS,0)
 	setStat(v,STAT_HITS,0)
 	setStat(v,STAT_LONGSHOT,0)
