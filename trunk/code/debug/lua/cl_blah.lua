@@ -107,7 +107,7 @@ local function draw2d()
 		local spr = v[1]
 		local dmg = v[2]
 		local dt = 1 - (LevelTime() - t) / v[6]
-		if(health <= 0) then dt = 1 end
+		--if(health <= 0) then dt = 1 end
 		if(dt > 0) then
 			local targ = (100+(dmg*2)) - dt * 20
 			v[5] = v[5] + (targ - v[5])*.4
