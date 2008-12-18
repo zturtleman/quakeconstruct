@@ -1,5 +1,6 @@
 if(SERVER) then
 	//__DL_BLOCK
+	--a
 	--SendScript("lua/sh_notify.lua")
 	downloader.add("lua/sh_notify.lua")
 	message.Precache("deathnotify")

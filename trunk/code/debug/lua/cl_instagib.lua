@@ -1,4 +1,6 @@
 local shd = LoadShader("railCore")
+local mark = LoadShader("BloodMark")
+local flare = LoadShader("flareShader")
 local clicksound = LoadSound("sound/weapons/noammo.wav")
 local landsound = LoadSound("sound/player/land1.wav")
 STAT_SHOTS = 1
@@ -13,6 +15,50 @@ local stats = {
 	[STAT_DEATHS] = {0,"Deaths"},
 	[STAT_LONGSHOT] = {0,"Shot Distance"}
 }
+
+local fx = LoadShader("railCore")
+local function getBeamRef(v1,v2,r,g,b,size)
+	local st1 = RefEntity()
+	st1:SetType(RT_RAIL_CORE)
+	st1:SetPos(v1)
+	st1:SetPos2(v2)
+	st1:SetColor(r,g,b,1)
+	st1:SetRadius(size or 12)
+	st1:SetShader(fx)
+	return st1
+end
+
+local function rpoint(pos,size)
+	local s = RefEntity()
+	s:SetType(RT_SPRITE)
+	s:SetPos(pos)
+	s:SetColor(1,1,1,1)
+	s:SetRadius(size or 8)
+	s:SetShader(flare)
+	return s
+end
+
+local function qbeam(v1,v2,r,g,b,size,np,delay,stdelay)
+	local ref = getBeamRef(v1,v2,r,g,b,size)
+	
+	for i=1,3 do
+		if(!np or i==3) then
+			local le = LocalEntity()
+			le:SetPos(v1)
+			
+			le:SetRefEntity(ref)
+			if(i == 1) then le:SetRefEntity(rpoint(v1,size)) end
+			if(i == 2) then le:SetRefEntity(rpoint(v2,size)) end
+			le:SetRadius(ref:GetRadius())
+			le:SetStartTime(LevelTime() + (stdelay or 0))
+			le:SetEndTime(LevelTime() + (delay or 500))
+			le:SetType(LE_FADE_RGB)
+			--if(point) then le:SetType(LE_FRAGMENT) end --LE_FRAGMENT
+			le:SetColor(r,g,b,1)
+			le:SetTrType(TR_STATIONARY)
+		end
+	end
+end
 
 local function shouldDraw(str)
 	if(str == "HUD_STATUSBAR_HEALTH") then return false end
@@ -94,6 +140,8 @@ local function draw2d()
 end
 hook.add("Draw2D","cl_instagib",draw2d)
 
+local function rvec() return Vector(math.random(-100,100),math.random(-100,100),math.random(-100,100))/100 end
+
 local function HandleMessage(msgid)
 	if(msgid == "igrailfire") then
 		fading = false
@@ -106,6 +154,50 @@ local function HandleMessage(msgid)
 	if(msgid == "igstat") then
 		stats[message.ReadShort()][1] = message.ReadShort()
 	end
+	if(msgid == "igbeam") then
+		local s = message.ReadVector()
+		local e = message.ReadVector()
+		local hue = message.ReadShort()
+		local tr = TraceLine(s,e+VectorNormalize(e-s)*1000)
+		local r,g,b = hsv(hue,1,1)
+		local len = VectorLength(e-s)
+		local forward,right,up = AngleVectors(VectorToAngles(e-s))
+		qbeam(s,e,r/3,g/3,b/3,5,true,8000)
+		qbeam(s,e,r,g,b,5,false,700)
+		qbeam(s,e,r/2,g/2,b/2,8,false,850)
+		qbeam(s,e,r/5,g/5,b/5,12,false,1000)
+		qbeam(s,e,1,1,1,5,false,600)
+		
+		--[[local last = s
+		local step = 20
+		for i=0,len,step do
+			if(i != 0) then
+				local m = 180
+				local new = s + (forward*step) * ((i/len) * (len/step))
+				new = new + (right * math.cos((i/20) + m)) * 6
+				new = new + (up * math.sin((i/20) + m)) * 6
+				qbeam(last,new,r,g,b,4,true,600)
+				qbeam(last,new,1,1,1,2,true,500)
+				last = new
+			end
+		end]]
+		
+		for x=1, 6 do
+			local last = e
+			for i=0,40,20 do
+				local new = last + rvec()*60
+				qbeam(last,new,r,g,b,4,true,500)
+				qbeam(last,new,1,1,1,2,true,300)
+				last = new
+			end
+		end
+		
+		if(!tr.normal) then return end
+		util.CreateMark(mark,e,tr.normal,math.random(360),0,0,0,1,math.random(15,20),true)
+		util.CreateMark(mark,e,tr.normal,math.random(360),0,0,0,.5,math.random(25,35),true)
+		util.CreateMark(mark,e,tr.normal,math.random(360),0,0,0,.3,math.random(45,50),true)
+		util.CreateMark(mark,e,tr.normal,math.random(360),0,0,0,.2,math.random(60,75),true)
+	end
 end
 hook.add("HandleMessage","cl_instagib",HandleMessage)
 
@@ -114,5 +206,6 @@ local function event(entity,event,pos,dir)
 		PlaySound(landsound)
 		return true --No fall pain sounds
 	end
+	if(event == EV_RAILTRAIL) then return true end
 end
 hook.add("EventReceived","cl_newgibs",event)
