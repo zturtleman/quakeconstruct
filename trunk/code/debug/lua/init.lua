@@ -58,14 +58,12 @@ local function PlayerDamaged(self,inflictor,attacker,damage,meansOfDeath,dir,pos
 		message.WriteLong(msg,damage)
 		message.WriteShort(msg,meansOfDeath)
 		message.WriteShort(msg,self:EntIndex())
-		message.WriteLong(msg,self:GetHealth())	
+		message.WriteShort(msg,self:GetHealth())
+		message.WriteVector(msg,pos or Vector(0,0,0))
 		if(attacker) then
-			message.WriteShort(msg,1)
-			message.WriteString(msg,attacker:GetInfo().name or "")
-			writeVector(msg,pos or attacker:GetPos())
-			message.WriteShort(msg,attacker:EntIndex())
+			message.WriteShort(msg,attacker:EntIndex() or -1)
 		else
-			message.WriteShort(msg,0)
+			message.WriteShort(msg,-1)
 		end
 		SendDataMessage(msg)
 	end

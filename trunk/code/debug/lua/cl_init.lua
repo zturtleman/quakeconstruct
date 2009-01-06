@@ -88,14 +88,19 @@ local function ParseDamage()
 	local self = (id == LocalPlayer():EntIndex())
 	local self2 = GetEntityByIndex(id)
 	local suicide = false
-	local hp = message.ReadLong()
-	if(message.ReadShort() != 0) then
-		attacker = message.ReadString()
-		pos = readVector()
-		suicide = (message.ReadShort() == LocalPlayer():EntIndex())
+	local hp = message.ReadShort()
+	local pos = message.ReadVector()
+	local atkid = message.ReadShort()
+	local atkname = ""
+	if(atkid != -1) then
+		attacker = GetEntityByIndex(atkid)
+		suicide = (atkid == LocalPlayer():EntIndex())
 	end
-	CallHook("Damaged",attacker,pos,dmg,death,self,suicide,hp-dmg)
-	CallHook("PlayerDamaged",self2,attacker,pos,dmg,death,self,suicide,hp-dmg,id)
+	if(attacker != nil) then
+		atkname = attacker:GetInfo().name
+	end
+	CallHook("Damaged",atkname,pos,dmg,death,self,suicide,hp-dmg)
+	CallHook("PlayerDamaged",self2,atkname,pos,dmg,death,self,suicide,hp-dmg,id,pos)
 	attacker = attacker or ""
 	--print("Attacked: " .. dmg .. " " .. EnumToString(meansOfDeath_t,death) .. " " .. attacker .. "\n")
 end

@@ -5,8 +5,54 @@ if(!hook) then
 	hook.locked = {}
 end
 
+HOOKS = {}
+HOOKS.SV = {
+	"ClientThink",
+	"FlagCaptured",
+	"FlagDropped",
+	"FlagStatus",
+	"FiredWeapon",
+	"ItemPickup",
+	"MessageReceived",
+	"PlayerDamaged",
+	"PlayerDisconnected",
+	"PlayerJoined",
+	"PlayerKilled",
+	"PlayerSpawned",
+	"PlayerTeamChanged",
+	"PostPlayerDamaged",
+	"PrePlayerDamaged",
+	"ShouldDropItem",
+	"TeamScored",
+}
+
+HOOKS.SHARED = {
+	"Think",
+	"EntityLinked",
+	"EntityUnLinked",
+}
+
+HOOKS.CL = {
+	"ClientInfoLoaded",
+	"ClientInfoChanged",
+	"DemoStarted",
+	"Draw2D",
+	"Draw3D",
+	"EventReceived",
+	"HandleMessage",
+	"InitialSnapshot",
+	"ItemPickup",
+	"KeyEvent",
+	"Loaded",
+	"MessageReceived",
+	"ModelLoaded",
+	"MouseEvent",
+	"ShaderLoaded",
+	"SoundLoaded",
+}
+
 function hook.sort(event)
-	table.sort(hook.events[event],function(a,b) return a.priority > b.priority end)
+	table.sort(hook.events[event],function(a,b) return a.priority < b.priority end)
 end
 
 function hook.replacehook(tab,event)
