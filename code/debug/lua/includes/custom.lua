@@ -28,5 +28,6 @@ function FindCustomFiles(dir)
 end
 
 include("lua/includes/custom_ents.lua")
+include("lua/includes/custom_games.lua")
 
 FindCustomFiles = nil

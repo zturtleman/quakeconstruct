@@ -320,7 +320,12 @@ local function drawx()
 		for i=0, #UI_Active-1 do
 			local v = UI_Active[i+1]
 			if(v:IsVisible() and v:ShouldDraw()) then
+				if(v.type == "frame") then
+					v:DrawShadow()
+				end
+				
 				local m = v:MaskMe()
+				
 				v:Draw()
 				if(m) then
 					draw.EndMask()

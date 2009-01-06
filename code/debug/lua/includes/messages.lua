@@ -259,9 +259,9 @@ if(CLIENT) then
 		
 		if(d == nil) then
 			if(lastInStack == -1) then
-				error("^5MESSAGE ERROR[I]: Empty DataMessage\n")
+				print("^5MESSAGE ERROR[I]: Empty DataMessage\n")
 			else
-				error("^5MESSAGE ERROR[J]: Overread Data After " .. strings[lastInStack] .. "\n")
+				print("^5MESSAGE ERROR[J]: Overread Data After " .. strings[lastInStack] .. "\n")
 			end
 			return
 		end
@@ -274,7 +274,7 @@ if(CLIENT) then
 		
 		if(dtype == t or t == nil) then return data end
 		
-		error("^5MESSAGE ERROR[K]: Invalid Data[" .. #stack+2 .. "] (Skipped?)\n" .. 
+		print("^5MESSAGE ERROR[K]: Invalid Data[" .. #stack+2 .. "] (Skipped?)\n" .. 
 		      "Attempted to read " .. strings[t] .. " got " .. strings[dtype] .. "\n")
 		
 		if(t == D_STRING) then return "" end
@@ -311,6 +311,7 @@ if(CLIENT) then
 	
 	local function handle(msgid)
 		if(msgid == 1) then
+			stack = {}
 			local contents = tostring(_message.ReadLong())
 			local strid = _message.ReadShort()
 			if(msgIDs[strid] == nil) then
