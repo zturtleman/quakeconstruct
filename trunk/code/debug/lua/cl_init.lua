@@ -99,8 +99,8 @@ local function ParseDamage()
 	if(attacker != nil) then
 		atkname = attacker:GetInfo().name
 	end
-	CallHook("Damaged",atkname,pos,dmg,death,self,suicide,hp-dmg)
-	CallHook("PlayerDamaged",self2,atkname,pos,dmg,death,self,suicide,hp-dmg,id,pos)
+	CallHook("Damaged",atkname,pos,dmg,death,self,suicide,hp)
+	CallHook("PlayerDamaged",self2,atkname,pos,dmg,death,self,suicide,hp,id,pos)
 	attacker = attacker or ""
 	--print("Attacked: " .. dmg .. " " .. EnumToString(meansOfDeath_t,death) .. " " .. attacker .. "\n")
 end
