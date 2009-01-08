@@ -99,6 +99,26 @@ function purgeTable(tab,param,val)
 	return tab
 end
 
+function PlayerTrace(...)
+	local forward = nil
+	local startpos = nil
+	local pl = nil
+	if(SERVER) then
+		pl = arg[1]
+		forward = VectorForward(pl:GetAimAngles())
+		startpos = pl:GetMuzzlePos()
+	else
+		pl = LocalPlayer()
+		forward = _CG.refdef.forward
+		startpos = _CG.refdef.origin
+	end
+	local mask = 1 or arg[2] --Solid
+	if(CLIENT) then mask = 1 or arg[1] end
+	
+	local endpos = vAdd(startpos,vMul(forward,16000))
+	return TraceLine(startpos,endpos,pl,mask)
+end
+
 if(CLIENT) then
 	function drawNSBox(x,y,w,h,v,shader,nocenter)
 		local d = 1/3
