@@ -58,7 +58,7 @@ function AnimationT:Animate()
 			end
 		end
 		
-		if ( self.frameTime > LevelTime() + 200 ) then
+		if ( self.frameTime > LevelTime() + self.lerp ) then
 			self.frameTime = LevelTime();
 		end
 
@@ -108,6 +108,14 @@ function AnimationT:GetFrame()
 	return self.frame
 end
 
+function AnimationT:SetFPS(f)
+	self.lerp = f/1000
+end
+
+function AnimationT:GetFPS()
+	return self.fps
+end
+
 function Animation(_start,_end,_lerp)
 	local o = {}
 
@@ -117,10 +125,89 @@ function Animation(_start,_end,_lerp)
 	o.start = _start
 	o.endf = _start + _end
 	o.length = _end
+	o.fps = _lerp
 	o.lerp = 1000/_lerp
 	
 	o:Init()
 	o.Init = nil
 	
 	return o;
+end
+
+
+local function parseSingleAnim(animtab,line)
+	local args = string.Explode("\t",line)
+	local temp = {}
+	for k,v in pairs(args) do
+		v = string.Replace(v," ","")
+		local fc = firstChar(v)
+		local n = tonumber(fc)
+		if(fc == "/") then
+			v = string.sub(v,3,string.len(v))
+			if(lastChar(v) == "\r") then
+				v = string.sub(v,0,string.len(v)-1)
+			end
+			print("Anim:" .. v .. "|" .. temp[4] .. "|\n")
+			animtab[v] = Animation(temp[1],temp[2],temp[4])
+			--animtab[v]:Play()
+			return
+		end
+		if(n) then
+			--print(tonumber(v) .. "\n")
+			table.insert(temp,tonumber(v))
+		end
+	end
+end
+
+local function fixLegs(tab)
+	local torsoStart = 9999
+	local torsoEnd = 0
+	animtab = table.Copy(tab)
+	for k,v in pairs(animtab) do
+		if(string.find(k,"TORSO")) then
+			if(v:GetStart() < torsoStart) then
+				torsoStart = v:GetStart()-1
+			end
+			if(v:GetStart() > torsoEnd) then
+				torsoEnd = v:GetStart()
+			end
+		end
+	end
+	for k,v in pairs(animtab) do
+		if(string.find(k,"LEGS")) then
+			local start = v:GetStart()
+			local len = v:GetLength()
+			v:SetStart(start - (torsoEnd - torsoStart))
+			v:SetEnd(v:GetLength())
+			--print("Fixed Leg Anim: " .. k .. "\n")
+			--print("- " .. start .. " " .. len .. "\n")
+			--print("- " .. v:GetStart() .. " " .. v:GetLength() .. "\n")
+			animtab[k] = v
+		end
+	end
+	return animtab
+end
+
+local function parseAnims(txt)
+	local animtab = {}
+	local list = string.Explode("\n",txt)
+	for k,v in pairs(list) do
+		if(v != "\r" and firstChar(v) != "/" and 
+			string.find(v,"footsteps") == nil and
+			string.find(v,"sex") == nil) then
+			parseSingleAnim(animtab,v)
+		end
+	end
+	return fixLegs(animtab)
+end
+
+function loadPlayerAnimations(name)
+	local path = "models/players/" .. name .. "/animation.cfg"
+	local txt = packRead(path)
+	if(txt == nil) then 
+		error("Could Not Read File: " .. f .. ".\n") 
+		return {} 
+	end
+	
+	return parseAnims(txt)
 end
