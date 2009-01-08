@@ -8,7 +8,11 @@ local lastplmoved = Vector()
 local smoothvel = 0
 local smoothfall = 0
 local ddir = 0
+local sdir = 0
 local hp = 100
+local look = Vector()
+local look2 = Vector()
+local shake = 0
 
 local function maxvel(v)
 	return math.min(math.max(v,-320),320)/320;
@@ -28,8 +32,8 @@ local function bobview(pos,ang,fovx,fovy)
 	nang.x = ang.x + (math.cos(VectorLength(plmoved)/2000)*1) * maxvel(lvel)
 	pos.z = pos.z + (math.cos(VectorLength(plmoved)/1000)*1) * maxvel(lvel)
 	
-	nang.z = nang.z - smoothvel*5
-	nang.x = nang.x + smoothfall
+	nang.z = nang.z - smoothvel*2
+	nang.x = nang.x + (smoothfall/2)
 	
 	if(hp <= 0) then nang.z = nang.z + (30*ddir) else ddir = (math.random(0,1)*2)-1 end
 	
@@ -42,6 +46,28 @@ local function bobview(pos,ang,fovx,fovy)
 	smoothvel = smoothvel + (rvel - smoothvel)*.2
 	smoothfall = smoothfall + (f - smoothfall)*.2
 	
+	if(hp <= 0) then
+		ang.p = ang.p - look2.y
+		ang.y = ang.y + look2.x
+	else
+		look = Vector()
+	end
+	look2 = look2 + (look - look2)*.1
+	--ang.z = ang.z + 90
+	
+	if(shake > 0) then
+		pos = pos + _CG.refdef.right*(math.random(-shake*100,shake*100)/100)
+		pos = pos + _CG.refdef.up*(math.random(-shake*100,shake*100)/100)
+		shake = shake / 1.4
+		if(shake < .1) then shake = 0 end
+		local r = shake*2
+		if(r > 90) then r = 90 end
+		if(r < -90) then r = -90 end
+		ang.z = ang.z + (sdir * r)
+		if(ang.z < -30) then ang.z = -30 end
+		if(ang.z > 30) then ang.z = 30 end
+	end
+	
 	ApplyView(pos,ang)
 	
 	if(lastTarget != LocalPlayer()) then
@@ -52,13 +78,28 @@ local function bobview(pos,ang,fovx,fovy)
 end
 hook.add("CalcView","cl_viewtest",bobview)
 
+local function moused(x,y)
+	look = vAdd(look,Vector(-x/10,-y/10,0))
+end
+hook.add("MouseEvent","cl_legtest",moused)
+
+local function shakeIt(p,c,a)
+	shake = shake + 5
+	sdir = ddir
+end
+concommand.Add("shake",shakeIt)
+
 local function respawn()
 	hp = 100
 end
 
 local function processDamage(attacker,pos,dmg,death,waslocal,wasme,health)
+	print("TOOK DAMAGE: " .. dmg .. "\n")
+	if(dmg > 50) then dmg = 50 end
 	if(waslocal) then
 		hp = health
+		shake = shake + (dmg/3)
+		sdir = ddir
 	end
 end
 
