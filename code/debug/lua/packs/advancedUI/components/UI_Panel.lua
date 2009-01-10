@@ -7,7 +7,6 @@ Panel.w = 0
 Panel.h = 0
 Panel.bgcolor = {.4,.4,.4,1}
 Panel.fgcolor = {1,1,1,1}
-Panel.shader = LoadShader("9slice1")
 Panel.pset = false
 Panel.visible = true
 Panel.constToParent = false
@@ -25,7 +24,7 @@ local function qcolor(tab)
 	draw.SetColor(tab[1],tab[2],tab[3],tab[4])
 end
 
-local function coloradjust(tab,amt,alpha)
+--[[local function coloradjust(tab,amt,alpha)
 	local out = {}
 	for k,v in pairs(tab) do
 		out[k] = math.min(math.max(v + amt,0),1)
@@ -35,7 +34,7 @@ local function coloradjust(tab,amt,alpha)
 		out[4] = alpha
 	end
 	qcolor(out)
-end
+end]]
 
 function Panel:ColorAdjust(tab,amt)
 	tab = table.Copy(tab)
@@ -52,27 +51,19 @@ function Panel:Initialize()
 end
 
 function Panel:DoFGColor()
-	qcolor(self.fgcolor)
+	SkinCall("DoFG")
 end
 
 function Panel:DoBGColor()
-	qcolor(self.bgcolor)
+	SkinCall("DoBG")
 end
 
 function Panel:DrawShadow()
 	self:DoBGColor()
-	coloradjust(self.bgcolor,-.3,.2)
-	
-	local x,y = self:GetPos()
-	drawNSBox(x-2,y-2,self.w+4,self.h+4,5,self.shader)
-	drawNSBox(x-3,y-3,self.w+6,self.h+6,5,self.shader)
-	drawNSBox(x-4,y-4,self.w+8,self.h+8,5,self.shader)
+	SkinCall("DrawShadow")
 end
 
 function Panel:DrawBackground()
-	local x,y = self:GetPos()
-	self:DoBGColor()
-	
 	--[[coloradjust(self.bgcolor,-.3,1)
 	draw.Rect(x,y,self.w,self.h)
 	
@@ -91,10 +82,8 @@ function Panel:DrawBackground()
 	--if(self:MouseOver()) then
 		--draw.Rect(x,y,self.w,self.h)
 	--end
-	
-	drawNSBox(x,y,self.w,self.h,5,self.shader)
-	
-	RECT_DRAW = RECT_DRAW + 9
+	self:DoBGColor()
+	SkinCall("DrawBackground")
 end
 
 function Panel:SetDelegate(d)

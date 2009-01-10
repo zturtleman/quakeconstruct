@@ -73,23 +73,8 @@ function Panel:TextWidth()
 end
 
 function Panel:Draw()
-	local ts = self.textsize
-	local x,y = self:GetPos()
 	self:DrawBackground()
-	
-	y = y + (self.h/2) - (ts/2)	
-	
-	if(self.align == 0) then
-		x = x + (self.w/2) - (ts * self:StrLen())/2
-	elseif(self.align == 2) then
-		x = x + (self.w) - (ts * self:StrLen())
-		x = x - 2
-	else
-		x = x + 2
-	end
-	
-	self:DoFGColor()
-	draw.Text(x,y,self.text,ts,ts)
+	SkinCall("DrawLabelForeground")
 end
 
 registerComponent(Panel,"label","panel")

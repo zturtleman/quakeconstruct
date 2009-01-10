@@ -8,6 +8,8 @@ local white = LoadShader("white")
 local enablekey = false
 
 P:include("cursor.lua")
+P:include("painting/cl_skins.lua")
+P:include("painting/cl_skinutil.lua")
 
 local letters = string.alphabet
 
@@ -320,6 +322,7 @@ local function drawx()
 		for i=0, #UI_Active-1 do
 			local v = UI_Active[i+1]
 			if(v:IsVisible() and v:ShouldDraw()) then
+				SkinPanel(v)
 				if(v.type == "frame") then
 					v:DrawShadow()
 				end
