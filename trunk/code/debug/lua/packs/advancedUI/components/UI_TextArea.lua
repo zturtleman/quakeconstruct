@@ -72,16 +72,7 @@ function Panel:SetTextSize(w,h)
 end
 
 function Panel:Draw()
-	self.BaseClass.Draw(self)
-	self:DoFGColor()
-	for k,v in pairs(self.lines) do
-		k = k * self.spacing
-		draw.Text(self:GetX(),(self:GetY() + ((k-self.spacing)*self.th)),v,self.tw,self.th)
-	end
-	
-	if((LevelTime() % 500) > 200) then
-		draw.Text(self:GetX() + self.caret[1]*self.tw,self:GetY() + self.caret[2]*self.th,"\t",self.tw,self.th)
-	end
+	SkinCall("DrawTextArea")
 end
 
 function Panel:MousePressed(x,y)

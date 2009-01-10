@@ -41,29 +41,7 @@ function Panel:DrawModel()
 end
 
 function Panel:DrawBackground()
-	if(self.model != nil) then
-		render.CreateScene()
-
-		self:DrawModel()		
-
-		local refdef = {}
-		
-		refdef.origin = self.org
-
-		local aim = VectorNormalize(refdef.origin)
-		aim = vMul(aim,-1)
-		aim = VectorToAngles(aim)
-
-		refdef.angles = aim
-
-		refdef.x = self:GetX()
-		refdef.y = self:GetY()
-		refdef.width = self:GetWidth()
-		refdef.height = self:GetHeight()
-		render.RenderScene(refdef)
-
-		self.rot = self.rot + 1
-	end
+	SkinCall("DrawModelPane")
 end
 
 registerComponent(Panel,"modelpane","panel")
