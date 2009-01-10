@@ -92,6 +92,7 @@ local function ParseDamage()
 	local pos = message.ReadVector()
 	local atkid = message.ReadShort()
 	local atkname = ""
+	print("Got HP: " .. hp .. "\n")
 	if(atkid != -1) then
 		attacker = GetEntityByIndex(atkid)
 		suicide = (atkid == LocalPlayer():EntIndex())

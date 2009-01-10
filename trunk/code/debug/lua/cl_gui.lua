@@ -36,7 +36,7 @@ function MakeModelFrame(mdl)
 			test:SetSkin(0)
 			local pl = "models/players"
 			if(string.sub(mdl,0,string.len(pl)) == pl) then
-				test:SetSkin(1)
+				test:SetSkin(LocalPlayer():GetInfo().torsoSkin)
 				print("SetSkin\n")
 			end
 			test:SetCamOrigin(Vector(45,0,0))
@@ -57,7 +57,7 @@ function MakeModelFrame(mdl)
 		local pl = "models/players"
 		if(string.sub(mdl,0,string.len(pl)) == pl) then
 			--local skin = util.LoadSkin("")
-			MDL_MODEL:SetSkin(1)
+			MDL_MODEL:SetSkin(LocalPlayer():GetInfo().torsoSkin)
 			print("SetSkin\n")
 		end
 	end

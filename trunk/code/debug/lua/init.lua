@@ -60,6 +60,7 @@ local function PlayerDamaged(self,inflictor,attacker,damage,meansOfDeath,dir,pos
 		message.WriteShort(msg,self:EntIndex())
 		message.WriteShort(msg,self:GetHealth())
 		message.WriteVector(msg,pos or Vector(0,0,0))
+		print("Sent HP: " .. self:GetHealth() .. "\n")
 		if(attacker) then
 			message.WriteShort(msg,attacker:EntIndex() or -1)
 		else

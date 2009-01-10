@@ -91,6 +91,13 @@ function ListCustomGames()
 	return out
 end
 
+function GetCustomGameStatus(name)
+	if(GAMES[name] != nil) then
+		return GAMES[name]._active
+	end
+	return false
+end
+
 if(SERVER) then
 	function NetStartGame(GAME)
 		local msg = Message(v,"__customgame")
@@ -163,6 +170,18 @@ if(CLIENT) then
 		end
 	end
 	hook.add("HandleMessage","__custom_games",report)
+else
+	concommand.Add("StartCustomGame",function(p,c,a) 
+		if(type(a[1]) == "string") then
+			StartCustomGame(a[1])
+		end
+	end,true)
+	
+	concommand.Add("EndCustomGame",function(p,c,a) 
+		if(type(a[1]) == "string") then
+			EndCustomGame(a[1])
+		end
+	end,true)
 end
 
 function EndCustomGames()

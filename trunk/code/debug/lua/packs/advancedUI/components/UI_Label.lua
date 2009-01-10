@@ -37,22 +37,9 @@ function Panel:TextAlignCenter()
 	self.align = 0
 end
 
-function Panel:MaskMe()
+function Panel:ShouldMask()
 	local par = self:GetDelegate()
-	if(par) then
-		local w,h = par:GetSize()
-		if(w < 0) then w = 0 end
-		if(h < 0) then h = 0 end
-		if(self:TouchingEdges(par) or self.w < self:TextWidth()) then
-			draw.MaskRect(
-			par:GetX(),
-			par:GetY(),
-			w,
-			h)
-			return true
-		end
-	end
-	return false
+	return (self:TouchingEdges(par) or self.w < self:TextWidth())
 end
 
 function Panel:StrLen()

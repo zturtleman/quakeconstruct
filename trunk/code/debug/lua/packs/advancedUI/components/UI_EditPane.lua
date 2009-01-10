@@ -19,8 +19,8 @@ function Panel:Initialize()
 		end
 	end
 	self.hscrollbar = UI_Create("scrollbar",self)
-	self.hscrollbar:SetSize(12,12)
 	self.hscrollbar:SetAxis(1)
+	self.hscrollbar:SetSize(12,12)
 	self.hscrollbar.OnScroll = function(sb,v)
 		if(self.canvas != nil) then
 			self.canvas.x = -(self.canvas:GetWidth() - self:GetWidth())*v

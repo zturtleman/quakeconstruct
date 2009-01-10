@@ -58,7 +58,7 @@ local function bobview(pos,ang,fovx,fovy)
 	if(shake > 0) then
 		pos = pos + _CG.refdef.right*(math.random(-shake*100,shake*100)/100)
 		pos = pos + _CG.refdef.up*(math.random(-shake*100,shake*100)/100)
-		shake = shake / 1.4
+		shake = shake / 1.1
 		if(shake < .1) then shake = 0 end
 		local r = shake*2
 		if(r > 90) then r = 90 end
@@ -94,7 +94,7 @@ local function respawn()
 end
 
 local function processDamage(attacker,pos,dmg,death,waslocal,wasme,health)
-	print("TOOK DAMAGE: " .. dmg .. "\n")
+	print("TOOK DAMAGE: " .. dmg .. " -> " .. health .. "\n")
 	if(dmg > 50) then dmg = 50 end
 	if(waslocal) then
 		hp = health
