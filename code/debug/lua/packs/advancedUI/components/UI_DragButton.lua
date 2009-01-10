@@ -42,9 +42,10 @@ function Panel:Think()
 		ny = ny - self:GetHeight()/2
 		
 		--Smooth out the movement
-		self:SetPos(
-			self.x + (nx - self.x)*.3, 
-			self.y + (ny - self.y)*.3)
+		--self:SetPos(
+			--self.x + (nx - self.x)*.3, 
+			--self.y + (ny - self.y)*.3)
+		self:SetPos(nx,ny)
 	end
 	
 	self:Affect(dx,dy)

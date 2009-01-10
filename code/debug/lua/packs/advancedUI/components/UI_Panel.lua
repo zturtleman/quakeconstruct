@@ -5,8 +5,8 @@ Panel.x = 0
 Panel.y = 0
 Panel.w = 0
 Panel.h = 0
-Panel.bgcolor = {.4,.4,.4,1}
-Panel.fgcolor = {1,1,1,1}
+Panel.bgcolor = SkinCall("DefaultBG")
+Panel.fgcolor = SkinCall("DefaultFG")
 Panel.pset = false
 Panel.visible = true
 Panel.constToParent = false
@@ -100,16 +100,17 @@ function Panel:MaskMe()
 		local w,h = par:GetSize()
 		if(w < 0) then w = 0 end
 		if(h < 0) then h = 0 end
-		if(self:TouchingEdges(par)) then
-			draw.MaskRect(
-			par:GetX(),
-			par:GetY(),
-			w,
-			h)
+		if(self:ShouldMask()) then
+			SkinCall("StartMask",par:GetX(),par:GetY(),w,h)
 			return true
 		end
 	end
 	return false
+end
+
+function Panel:ShouldMask()
+	local par = self:GetDelegate()
+	return self:TouchingEdges(par)
 end
 
 function Panel:GetMaskedRect()
@@ -376,11 +377,7 @@ function Panel:ScaleToContents() end
 
 function Panel.__eq(p1,p2)
 	--Quick and dirty fixes here, beware.
-	return (p1.ID == p2.ID) and 
-	(p1:GetX() == p2:GetX()) and 
-	(p1:GetY() == p2:GetY()) and
-	(p1:GetWidth() == p2:GetWidth()) and
-	(p1:GetHeight() == p2:GetHeight())
+	return (p1.IDX == p2.IDX)
 end
 
 registerComponent(Panel,"panel")

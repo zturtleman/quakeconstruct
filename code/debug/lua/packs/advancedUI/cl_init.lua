@@ -4,12 +4,14 @@ UI_Active = {}
 local kcache = {}
 local toRegister = 0
 local nxtID = 0
+local nextIDX = 0
 local white = LoadShader("white")
 local enablekey = false
 
 P:include("cursor.lua")
 P:include("painting/cl_skins.lua")
 P:include("painting/cl_skinutil.lua")
+P:include("painting/cl_softwaremask.lua")
 
 local letters = string.alphabet
 
@@ -125,6 +127,8 @@ local function doPanel(o,parent,force)
 	local id = getNewId()
 	o.rlID = id
 	o.ID = tostring(correctId(id))
+	o.IDX = nextIDX
+	nextIDX = nextIDX + 1
 	
 	o.isPanel = true
 	
@@ -147,7 +151,7 @@ local function doPanel(o,parent,force)
 	currentInit = name
 	o:Initialize()
 	currentInit = nil
-	
+	o.rmvx = 0
 	--print("Create ID: " .. o.ID .. " -> " .. level .. "\n")
 end
 
@@ -279,20 +283,44 @@ local function garbageCollect()
 	UI_EnableKeyboard(false)
 	debugprint("^2Garbage Collected -> " .. rm .. "\n")
 end
+concommand.Add("ui_fcollect",garbageCollect)
+
+local function softRemove(v)
+	v.removeme = true
+	v.rmvx = 1
+	if(v.name != nil) then print("Soft Removed: " .. v.name .. "\n") end
+end
 
 local function checkRemove(v)
+	local batch = {}
 	if(v.removeme) then
 		for i=0, #UI_Active-1 do
 			local other = UI_Active[#UI_Active - i]
-			if(other != v) then
-				if(other:GetParent() == v and other.removeme != true) then
-					if(other.name != nil) then print("Removed: " .. other.name .. "\n") end
-					other:Remove()
-					didrmv = true
+			if(other != nil) then
+				if(other != v) then
+					if(other:GetParent() == v and other.removeme != true) then
+						if(other.name != nil) then print("Removed: " .. other.name .. "\n") end
+						table.insert(batch,other)
+						didrmv = true
+					end
 				end
+			else
+				--Oh Shit
+				--Remove the empty table index and start over
+				debugprint("^1Oh Shit What Happen[" .. i .. "]!\n")
+				table.remove(UI_Active,#UI_Active - i)
+				checkRemove(v)
+				return
 			end
 		end
 	end
+	if(#batch > 0) then
+		for	i=1, #batch do
+			softRemove(batch[i])
+			checkRemove(batch[i])
+		end
+	end
+	batch = nil
 end
 
 function UI_RemovePanel(v)
@@ -300,6 +328,7 @@ function UI_RemovePanel(v)
 	v.rmvx = 1
 	if(v.name != nil) then print("Removed: " .. v.name .. "\n") end
 	checkRemove(v)
+	garbageCollect()
 end
 
 local drawtime = 0
@@ -320,23 +349,7 @@ local function drawx()
 	t = ticks()
 	if(#UI_Active > 0) then
 		for i=0, #UI_Active-1 do
-			local v = UI_Active[i+1]
-			if(v:IsVisible() and v:ShouldDraw()) then
-				SkinPanel(v)
-				if(v.type == "frame") then
-					v:DrawShadow()
-				end
-				
-				local m = v:MaskMe()
-				
-				v:Draw()
-				if(m) then
-					draw.EndMask()
-					mcount = mcount + 1
-				end
-			end
-		
-			v = UI_Active[#UI_Active - i]
+			local v = UI_Active[#UI_Active - i]
 			if(v:IsVisible() and v:ShouldDraw()) then
 				thinks = thinks + 1
 				if(v.parent and v.parent.valid != true) then
@@ -348,7 +361,25 @@ local function drawx()
 				end
 				v:Think()
 			end
-			if(v.rmvx == 1) then collect = true end
+			if(v and v.rmvx == 1) then collect = true end
+		end
+			
+		for i=0, #UI_Active-1 do
+			local v = UI_Active[i+1]
+			if(v:IsVisible() and v:ShouldDraw()) then
+				SkinPanel(v)
+				v:DoLayout()
+				if(v.type == "frame") then
+					v:DrawShadow()
+				end
+				
+				local m = v:MaskMe()
+				v:Draw()
+				if(m) then
+					SkinCall("EndMask")
+					mcount = mcount + 1
+				end
+			end
 		end
 	end
 	t = (ticks()) - t
