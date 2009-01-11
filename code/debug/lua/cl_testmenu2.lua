@@ -73,5 +73,6 @@ function menutest.main()
 	altmenu.addButton("Cheats",menutest.cheats)
 	altmenu.addButton("Client Scripts",menutest.scripts,"client","./lua",0,10)
 	altmenu.addButton("Server Scripts",menutest.scripts,"server","./lua",0,10)
+	altmenu.addButton("Custom Games",include,"lua/cl_gamelist.lua")
 end
 menutest.main()

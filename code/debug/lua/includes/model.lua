@@ -1,12 +1,18 @@
 local models = {}
+local strings = {}
 
 local function loaded(str,i)
 	debugprint("Loaded Model: " .. str .. " | " .. i .. "\n")
 	if(i != 0) then
+		strings[i] = str
 		table.insert(models,{str,i})
 	end
 end
 hook.add("ModelLoaded","models",loaded)
+
+function GetModelFile(i)
+	return strings[i] or ""
+end
 
 function LoadModel(str)
 	for k,v in pairs(models) do

@@ -341,6 +341,56 @@ int qlimit(lua_State *L) {
 	return 0;
 }
 
+int qprof_tabletest(lua_State *L) {
+	int size = 0;
+	int i = 0;
+	int v = 0;
+
+	luaL_checktype(L,1,LUA_TTABLE);
+	size = luaL_getn(L,1);
+
+	for(i=0;i<size;i++) {
+		lua_pushinteger(L,i+1);
+		lua_gettable(L,1);
+		
+		if(lua_type(L,lua_gettop(L)) == LUA_TNUMBER) {
+			v = lua_tointeger(L,lua_gettop(L));
+		}
+	}
+
+	lua_pushinteger(L,v);
+	return 1;
+}
+
+int qprof_argtest(lua_State *L) {
+	int size = 0;
+	int i = 0;
+	int v = 0;
+
+	luaL_checktype(L,1,LUA_TNUMBER);
+	size = lua_tointeger(L,1);
+
+	for(i=0;i<size;i++) {
+		if(lua_type(L,i) == LUA_TNUMBER) {
+			v = lua_tointeger(L,i+2);
+		}
+	}
+
+	lua_pushinteger(L,v);
+	return 1;
+}
+
+int qprof_functest(lua_State *L) {
+	int v = 0;
+
+	luaL_checktype(L,1,LUA_TNUMBER);
+	v = lua_tointeger(L,1);
+
+	lua_pushinteger(L,v);
+
+	return 1;
+}
+
 void InitClientLua( void ) {
 	CloseClientLua();
 	L = lua_open();
@@ -372,7 +422,9 @@ void InitClientLua( void ) {
 	lua_register(L,"MD5",qlua_md5);
 	lua_register(L,"ServerTime",qlua_servertime);
 	lua_register(L,"_qlimit",qlimit);
-
+	lua_register(L,"_profTable",qprof_tabletest);
+	lua_register(L,"_profArgs",qprof_argtest);
+	lua_register(L,"_profFunc",qprof_functest);
 
 	CG_Printf("----------------Done-----------------\n");
 }

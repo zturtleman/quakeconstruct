@@ -100,8 +100,8 @@ int lua_newvector(lua_State *L)
 	lua_settop(L,3);
 	v=lua_pushLVector(L);
 	v[0]=luaL_optnumber(L,1,0);
-	v[1]=luaL_optnumber(L,2,0);
-	v[2]=luaL_optnumber(L,3,0);
+	v[1]=luaL_optnumber(L,2,v[0]);
+	v[2]=luaL_optnumber(L,3,v[1]);
 	return 1;
 }
 

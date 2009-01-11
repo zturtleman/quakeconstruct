@@ -52,13 +52,13 @@ local function bobview(pos,ang,fovx,fovy)
 	else
 		look = Vector()
 	end
-	look2 = look2 + (look - look2)*.1
+	look2 = look2 + (look - look2)*(.03*Lag())
 	--ang.z = ang.z + 90
 	
 	if(shake > 0) then
 		pos = pos + _CG.refdef.right*(math.random(-shake*100,shake*100)/100)
 		pos = pos + _CG.refdef.up*(math.random(-shake*100,shake*100)/100)
-		shake = shake / 1.1
+		shake = shake / (1 + (0.07 * Lag()))
 		if(shake < .1) then shake = 0 end
 		local r = shake*2
 		if(r > 90) then r = 90 end

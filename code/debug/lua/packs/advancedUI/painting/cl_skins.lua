@@ -175,6 +175,7 @@ function Skin:DrawModelPane()
 end
 
 function Skin:DrawShadow()
+	if(true) then return end
 	panel:DoBGColor()
 	sk.coloradjust(panel.bgcolor,-.3,.2)
 	
