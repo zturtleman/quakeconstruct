@@ -34,7 +34,7 @@ end
 
 local subpane = UI_Create("panel",panel)
 if(subpane != nil) then
-	--subpane.Draw = function() end --Don't draw this one
+	subpane.Draw = function() end --Don't draw this one
 	subpane.DoLayout = function(self)
 		self:SetSize(self:GetParent():GetWidth(),self:GetParent():GetHeight() - 25)
 		self:SetPos(0,0)

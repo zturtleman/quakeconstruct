@@ -31,7 +31,13 @@ function StopTimer(t)
 	end
 end
 
+local t = 0
+local last = nil
 function CheckTimers()
+	last = last or ticks()
+	t = ticks() - last
+	last = ticks()
+	
 	for k,v in pairs(timers) do
 		if(v.time < CurTime()) then
 			local b, e = pcall(v.func,unpack(v.args))
@@ -43,5 +49,16 @@ function CheckTimers()
 	end
 end
 hook.add("Think","Timers",CheckTimers)
+
+function Lag()
+	return math.floor(t/1000)/30
+end
+
+if(CLIENT) then
+	function ftd()
+		draw.Text(10,10,"Lag: " .. Lag(),10,10)
+	end
+	hook.add("Draw2D","Timers",ftd)
+end
 
 debugprint("^3Timer code loaded.\n")

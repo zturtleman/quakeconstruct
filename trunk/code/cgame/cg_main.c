@@ -1958,6 +1958,27 @@ int qlua_loadcustomsound(lua_State *L) {
 	return 0;
 }
 
+int qlua_playbg(lua_State *L) {
+	const char *intro = NULL;
+	const char *loop = NULL;
+
+	if(lua_type(L,1) == LUA_TSTRING) {
+		intro = lua_tostring(L,1);
+	}
+
+	if(lua_type(L,2) == LUA_TSTRING) {
+		loop = lua_tostring(L,2);
+	}
+
+	trap_S_StartBackgroundTrack(intro,loop);
+	return 0;
+}
+
+int qlua_stopbg(lua_State *L) {
+	trap_S_StopBackgroundTrack();
+	return 0;
+}
+
 int qlua_playsound(lua_State *L) {
 	centity_t *ent;
 	vec3_t	origin;
@@ -2013,6 +2034,8 @@ void CG_InitLua() {
 	lua_register(L,"LoadCustomSound",qlua_loadcustomsound);
 	lua_register(L,"PlaySound",qlua_playsound);
 	lua_register(L,"grabarg",qlua_grabarg);
+	lua_register(L,"StartMusic",qlua_playbg);
+	lua_register(L,"StopMusic",qlua_stopbg);
 
 	pushents(L);
 

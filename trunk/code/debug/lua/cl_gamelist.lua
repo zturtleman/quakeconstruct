@@ -3,14 +3,16 @@ template:SetPos(0,20)
 template:SetSize(100,20)
 template:SetTextSize(8)		
 template:SetText("<nothing here>")
-template:TextAlignLeft()
+template:TextAlignCenter()
 template:Remove()
 
 local panel = UI_Create("frame")
 if(panel != nil) then
+	local w,h = 640,480
+	local pw,ph = w/2,h/2
 	panel.name = "base"
-	panel:SetPos(10,150)
-	panel:SetSize(200,275)
+	panel:SetPos((w/2) - pw/2,(h/2) - ph/2)
+	panel:SetSize(pw,ph)
 	panel:SetTitle("Games")
 	panel:CatchMouse(true)
 	panel:SetVisible(true)

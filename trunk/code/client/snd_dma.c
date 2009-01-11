@@ -1497,7 +1497,10 @@ void S_StartBackgroundTrack( const char *intro, const char *loop ){
 	}
 
 	if ( s_backgroundInfo.channels != 2 || s_backgroundInfo.rate != 22050 ) {
-		Com_Printf(S_COLOR_YELLOW "WARNING: music file %s is not 22k stereo\n", name );
+		FS_FCloseFile( s_backgroundFile );
+		s_backgroundFile = 0;
+		Com_Printf(S_COLOR_RED "FATAL ERROR: music file %s is not 22k stereo\n", name );
+		return;
 	}
 
 	if ( ( len = S_FindWavChunk( s_backgroundFile, "data" ) ) == 0 ) {

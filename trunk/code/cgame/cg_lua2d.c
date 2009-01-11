@@ -62,6 +62,62 @@ float quickfloat(lua_State *L, int i, float def) {
 	return def;
 }
 
+float pullfloat1(lua_State *L, int i, float def, int m) {
+	float v = def;
+	lua_pushinteger(L,i);
+	lua_gettable(L,m);
+	if(lua_type(L,lua_gettop(L)) == LUA_TNUMBER) {
+		v = lua_tonumber(L,lua_gettop(L));
+	}
+	return v;
+}
+
+float pullint1(lua_State *L, int i, int def, int m) {
+	int v = def;
+	lua_pushinteger(L,i);
+	lua_gettable(L,m);
+	if(lua_type(L,lua_gettop(L)) == LUA_TNUMBER) {
+		v = lua_tointeger(L,lua_gettop(L));
+	}
+	return v;
+}
+
+int qlua_rects(lua_State *L) {
+	float x,y,w,h,s,t,s2,t2;
+	qhandle_t shader = cgs.media.whiteShader;
+	int size = 0;
+	int i = 0;
+	int idx = 0;
+
+	luaL_checktype(L,1,LUA_TTABLE);
+
+	size = luaL_getn(L,1);
+	if(size > 1024) return 0;
+
+	for(i=0;i<size;i++) {
+		lua_pushinteger(L,i+1);
+		lua_gettable(L,1);
+
+		idx = lua_gettop(L);
+		
+		x = pullfloat1(L,1,0,idx);
+		y = pullfloat1(L,2,0,idx);
+		w = pullfloat1(L,3,0,idx);
+		h = pullfloat1(L,4,0,idx);
+
+		shader = pullint1(L,5,shader,idx);
+
+		s = pullfloat1(L,6,0,idx);
+		t = pullfloat1(L,7,0,idx);
+		s2 = pullfloat1(L,8,1,idx);
+		t2 = pullfloat1(L,9,1,idx);
+
+		CG_AdjustFrom640( &x, &y, &w, &h );
+		trap_R_DrawStretchPic( x, y, w, h, s, t, s2, t2, shader );
+	}
+	return 0;
+}
+
 int qlua_rect(lua_State *L) {
 	float x,y,w,h,s,t,s2,t2;
 
@@ -148,6 +204,7 @@ static const luaL_reg Draw_methods[] = {
   {"SetColor",		qlua_setcolor},
   {"Rect",			qlua_rect},
   {"RectRotated",	qlua_rectrotated},
+  {"Rects",			qlua_rects},
   {"Text",			qlua_text},
   {"EndMask",		qlua_endmask},
   {"MaskRect",		qlua_maskrect},
