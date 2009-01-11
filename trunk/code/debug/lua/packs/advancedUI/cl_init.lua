@@ -7,6 +7,7 @@ local nxtID = 0
 local nextIDX = 0
 local white = LoadShader("white")
 local enablekey = false
+local mouseIsDown = false
 
 P:include("cursor.lua")
 P:include("painting/cl_skins.lua")
@@ -217,6 +218,7 @@ local function panelCollide(p,x,y)
 end
 
 local function mDown()
+	mouseIsDown = true
 	local mx = GetMouseX()
 	local my = GetMouseY()
 	for i=0, #UI_Active-1 do
@@ -231,6 +233,7 @@ end
 hook.add("MouseDown","uimouse",mDown)
 
 local function mUp()
+	mouseIsDown = false
 	local mx = GetMouseX()
 	local my = GetMouseY()
 	for k,v in pairs(UI_Active) do
@@ -257,7 +260,9 @@ local function checkMouse()
 	for i=0, #UI_Active-1 do
 		local v = UI_Active[#UI_Active - i]
 		if(v:IsVisible() and panelCollide(v,mx,my)) then
-			v.__mouseInside = true
+			if(!mouseIsDown) then
+				v.__mouseInside = true
+			end
 			return
 		end
 	end
@@ -332,6 +337,7 @@ function UI_RemovePanel(v)
 end
 
 local drawtime = 0
+local thinktime = 0
 local mcount = 0
 local collect = false
 local layoutvalidate = {}
@@ -345,30 +351,36 @@ local function drawx()
 	thinks = 0
 	
 	RECT_DRAW = 0
+	TOUGH_DRAW = 0
+	TEXT_DRAW = 0
 	
-	t = ticks()
 	if(#UI_Active > 0) then
+		t1 = ticks()
+		
 		for i=0, #UI_Active-1 do
 			local v = UI_Active[#UI_Active - i]
 			if(v:IsVisible() and v:ShouldDraw()) then
 				thinks = thinks + 1
-				if(v.parent and v.parent.valid != true) then
+				--[[if(v.parent and v.parent.valid != true) then
 					v:DoLayout()
 					v:InvalidateLayout()
 					if(!table.HasValue(layoutvalidate,v.parent)) then
 						table.insert(layoutvalidate,v.parent)
 					end
-				end
+				end]]
 				v:Think()
 			end
-			if(v and v.rmvx == 1) then collect = true end
+			--if(v and v.rmvx == 1) then collect = true end
 		end
-			
+		
+		t1 = (ticks()) - t1
+		t2 = ticks()
+		
 		for i=0, #UI_Active-1 do
 			local v = UI_Active[i+1]
 			if(v:IsVisible() and v:ShouldDraw()) then
-				SkinPanel(v)
 				v:DoLayout()
+				SkinPanel(v)
 				if(v.type == "frame") then
 					v:DrawShadow()
 				end
@@ -381,21 +393,29 @@ local function drawx()
 				end
 			end
 		end
+		
+		if(QLUA_DEBUG) then 
+			softmask.Draw()
+		else
+			softmask.Clear()
+		end
+		
+		t2 = (ticks()) - t2
+		
+		if(ticks() > tickdelay + 500000) then
+			thinktime = t1 / 1000
+			drawtime = t2 / 1000
+			tickdelay = ticks()
+		end
 	end
-	t = (ticks()) - t
 	
-	if(ticks() > tickdelay + 500000) then
-		drawtime = t
-		tickdelay = ticks()
-	end
-	
-	if(#layoutvalidate > 0) then
+	--[[if(#layoutvalidate > 0) then
 		for k,v in pairs(layoutvalidate) do
 			v.valid = true
 			--v:Think()
 		end
 		layoutvalidate = {}
-	end
+	end]]
 	
 	if(collect) then
 		garbageCollect()
@@ -405,12 +425,15 @@ end
 
 local function profd()
 	local dtime = ProfileFunction(drawx)
-	--[[draw.SetColor(1,1,1,1)
-	draw.Text(0,100,"TotalTime: " .. dtime,12,12)
-	draw.Text(0,112,"Rects: " .. RECT_DRAW,12,12)
-	draw.Text(0,124,"DrawTime: " .. drawtime,12,12)
-	draw.Text(0,136,"MaskCount: " .. mcount,12,12)
-	draw.Text(0,148,"Thinks: " .. thinks,12,12)]]
+	if(QLUA_DEBUG) then 
+		draw.SetColor(1,1,1,1)
+		draw.Text(0,100,"TotalTime: " .. dtime,12,12)
+		draw.Text(0,112,"Rects: " .. RECT_DRAW .. " - " .. TOUGH_DRAW .. " - " .. TEXT_DRAW,12,12)
+		draw.Text(0,124,"DrawTime: " .. drawtime,12,12)
+		draw.Text(0,136,"ThinkTime: " .. thinktime,12,12)
+		draw.Text(0,148,"MaskCount: " .. mcount,12,12)
+		draw.Text(0,160,"Thinks: " .. thinks,12,12)
+	end
 end
 hook.add("Draw2D","uidraw",profd)
 

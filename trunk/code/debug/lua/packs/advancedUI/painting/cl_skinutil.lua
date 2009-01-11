@@ -8,6 +8,10 @@ function sk.qcolor(tab)
 	draw.SetColor(tab[1],tab[2],tab[3],tab[4])
 end
 
+function sk.current()
+	return curTab
+end
+
 function sk.coloradjust(tab,amt,alpha)
 	if(tab == nil) then
 		if(curTab != nil) then

@@ -82,41 +82,79 @@ float pullint1(lua_State *L, int i, int def, int m) {
 	return v;
 }
 
-int qlua_rects(lua_State *L) {
-	float x,y,w,h,s,t,s2,t2;
-	qhandle_t shader = cgs.media.whiteShader;
-	int size = 0;
-	int i = 0;
-	int idx = 0;
-
-	luaL_checktype(L,1,LUA_TTABLE);
-
-	size = luaL_getn(L,1);
-	if(size > 1024) return 0;
-
-	for(i=0;i<size;i++) {
-		lua_pushinteger(L,i+1);
-		lua_gettable(L,1);
-
-		idx = lua_gettop(L);
-		
-		x = pullfloat1(L,1,0,idx);
-		y = pullfloat1(L,2,0,idx);
-		w = pullfloat1(L,3,0,idx);
-		h = pullfloat1(L,4,0,idx);
-
-		shader = pullint1(L,5,shader,idx);
-
-		s = pullfloat1(L,6,0,idx);
-		t = pullfloat1(L,7,0,idx);
-		s2 = pullfloat1(L,8,1,idx);
-		t2 = pullfloat1(L,9,1,idx);
-
-		CG_AdjustFrom640( &x, &y, &w, &h );
-		trap_R_DrawStretchPic( x, y, w, h, s, t, s2, t2, shader );
+void checkColor(vec4_t color) {
+	int i=0;
+	for(i=0;i<4;i++) {
+		if(color[i] > 1) color[i] = 1;
+		if(color[i] < 0) color[i] = 0;
 	}
+	trap_R_SetColor(color);
+}
+
+void adjustColor(vec4_t color, float amt) {
+	vec4_t color2;
+
+	color2[0] = (color[0] + amt);
+	color2[1] = (color[1] + amt);
+	color2[2] = (color[2] + amt);
+	color2[3] = color[3];
+	
+	checkColor(color2);
+}
+
+int qlua_beveledRect(lua_State *L) {
+	float x,y,w,h,factor,inset;
+	vec4_t	color;
+
+	qhandle_t shader = cgs.media.whiteShader;
+
+	luaL_checktype(L,1,LUA_TNUMBER);
+	luaL_checktype(L,2,LUA_TNUMBER);
+	luaL_checktype(L,3,LUA_TNUMBER);
+	luaL_checktype(L,4,LUA_TNUMBER);
+	
+	luaL_checktype(L,5,LUA_TNUMBER);
+	luaL_checktype(L,6,LUA_TNUMBER);
+	luaL_checktype(L,7,LUA_TNUMBER);
+	luaL_checktype(L,8,LUA_TNUMBER);
+	luaL_checktype(L,9,LUA_TNUMBER);
+
+	x = lua_tonumber(L,1);
+	y = lua_tonumber(L,2);
+	w = lua_tonumber(L,3);
+	h = lua_tonumber(L,4);
+
+	color[0] = lua_tonumber(L,5);
+	color[1] = lua_tonumber(L,6);
+	color[2] = lua_tonumber(L,7);
+	color[3] = lua_tonumber(L,8);
+
+	factor = lua_tonumber(L,9);
+
+	inset = 2;
+	if(lua_type(L,10) == LUA_TNUMBER) {
+		inset = lua_tonumber(L,10);
+	}
+
+	checkColor(color);
+
+	CG_AdjustFrom640( &x, &y, &w, &h );
+	trap_R_DrawStretchPic( x, y, w, h, 0, 0, 1, 1, shader );
+
+	adjustColor(color,2*factor);
+	trap_R_DrawStretchPic( x, y, w, inset, 0, 0, 1, 1, shader );
+
+	adjustColor(color,1*factor);
+	trap_R_DrawStretchPic( x, y, inset, h, 0, 0, 1, 1, shader );
+
+	adjustColor(color,-1*factor);
+	trap_R_DrawStretchPic( x+(w-inset), y, inset, h, 0, 0, 1, 1, shader );
+
+	adjustColor(color,-2*factor);
+	trap_R_DrawStretchPic( x, y+(h-inset), w, inset, 0, 0, 1, 1, shader );
 	return 0;
 }
+
 
 int qlua_rect(lua_State *L) {
 	float x,y,w,h,s,t,s2,t2;
@@ -204,7 +242,7 @@ static const luaL_reg Draw_methods[] = {
   {"SetColor",		qlua_setcolor},
   {"Rect",			qlua_rect},
   {"RectRotated",	qlua_rectrotated},
-  {"Rects",			qlua_rects},
+  {"BeveledRect",	qlua_beveledRect},
   {"Text",			qlua_text},
   {"EndMask",		qlua_endmask},
   {"MaskRect",		qlua_maskrect},

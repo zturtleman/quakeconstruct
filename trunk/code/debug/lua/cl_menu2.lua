@@ -10,7 +10,7 @@ local s_menu_fail = LoadSound("sound/misc/menu4.wav")
 
 local template = UI_Create("button")
 template:SetPos(0,20)
-template:SetSize(100,20)
+template:SetSize(100,15)
 template:SetTextSize(8)		
 template:SetText("<nothing here>")
 template:TextAlignRight()
@@ -90,8 +90,9 @@ function altmenu.addButton(name,func,...)
 		pcall(func,unpack(arg))
 	end
 	
-	panel2:AddPanel(template,true)
+	local pane = panel2:AddPanel(template,true)
 	panel2:DoLayout()
+	return pane
 end
 
 function altmenu.clearButtons()

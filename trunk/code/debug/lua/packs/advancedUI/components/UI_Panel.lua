@@ -58,6 +58,14 @@ function Panel:DoBGColor()
 	SkinCall("DoBG")
 end
 
+function Panel:GetFGColor()
+	return self.fgcolor
+end
+
+function Panel:GetBGColor()
+	return self.bgcolor
+end
+
 function Panel:DrawShadow()
 	self:DoBGColor()
 	SkinCall("DrawShadow")
@@ -180,10 +188,18 @@ function Panel:Think()
 end
 
 function Panel:SetBGColor(r,g,b,a)
+	if(type(r) == "table") then
+		self.bgcolor = r
+		return
+	end
 	self.bgcolor = {r,g,b,a}
 end
 
 function Panel:SetFGColor(r,g,b,a)
+	if(type(r) == "table") then
+		self.fgcolor = r
+		return
+	end
 	self.fgcolor = {r,g,b,a}
 end
 
