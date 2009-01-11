@@ -77,6 +77,9 @@ if(SERVER) then
 		if(str == "_clientready") then
 			CallHook("ClientReady",pl)
 			--Timer(3.8,CallHook,"ClientReady",pl)
+			if(pl:IsAdmin()) then
+				pl:SendString("_admin")
+			end
 		elseif(str == "_demostarted") then
 			CallHook("DemoStarted",pl)
 		end
@@ -89,4 +92,18 @@ else
 		SendString("_demostarted")
 	end
 	hook.add("DemoStarted","includes",demo)	
+	
+	local ADMIN = false
+	local function message(str,pl)
+		if(str == "_admin") then
+			print("Admin Verified!\n")
+			ADMIN = true
+			CallHook("ClientReady")
+		end
+	end
+	hook.add("MessageReceived","includes",message)
+	
+	function IsAdmin()
+		return ADMIN
+	end
 end

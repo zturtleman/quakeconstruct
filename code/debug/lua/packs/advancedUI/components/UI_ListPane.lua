@@ -8,7 +8,7 @@ function Panel:Initialize()
 	self.panes = {}
 	self.np = 1
 	self.canvas = UI_Create("panel",self)
-	self.canvas.Draw = function() end
+	self.canvas.ShouldDraw = function() return false end
 	self.scrollbar = UI_Create("scrollbar",self)
 	self.scrollbar:SetSize(12,12)
 	self.scrollbar.OnScroll = function(sb,v)
@@ -55,6 +55,7 @@ function Panel:AddPanel(add,autoscale)
 	end
 	
 	table.insert(self.panes,{pane,autoscale})
+	return pane
 end
 
 function Panel:OnRemove()

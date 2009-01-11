@@ -64,6 +64,48 @@ function menutest.cheats()
 	altmenu.setBack(menutest.main)
 end
 
+local function listMusic()
+	local test = packList("music","")
+	local out = {}
+	table.sort(test,function(a,b) return a < b end)
+	for k,v in pairs(test) do
+		if(v != nil and v != "") then
+			if(string.find(v,"intro.wav") and
+			   string.find(test[k+1],"loop.wav")) then
+				table.insert(out,{string.sub(v,0,string.len(v) - 10),"music/" .. v,"music/" .. test[k+1]})
+			else
+				if(!string.find(v,"loop.wav")) then
+				--string.sub(v,0,string.len(v) - 4)
+					table.insert(out,{v,"music/" .. v,nil})
+				end
+			end
+		end
+	end
+	return out
+end
+
+function menutest.music()
+	currmenu = "music"
+	altmenu.textSize(12,10)
+	altmenu.clearButtons()
+
+	altmenu.addButton("[StopMusic]",function() 
+		StopMusic()
+	end):SetBGColor(.4,.1,.1,1)
+	
+	for k,v in pairs(listMusic()) do
+		altmenu.addButton(v[1],function() 
+			StartMusic(v[2],v[3])
+		end)
+	end
+	altmenu.setBack(menutest.main)
+end
+
+function menutest.disable(pane)
+	pane:SetBGColor(.2,.2,.2,.4)
+	pane:SetFGColor(.6,.6,.6,.5)
+end
+
 function menutest.main()
 	currmenu = "main"
 	altmenu.textSize(10,12)
@@ -72,7 +114,12 @@ function menutest.main()
 	altmenu.addButton("Speech Menu",menutest.speech)
 	altmenu.addButton("Cheats",menutest.cheats)
 	altmenu.addButton("Client Scripts",menutest.scripts,"client","./lua",0,10)
-	altmenu.addButton("Server Scripts",menutest.scripts,"server","./lua",0,10)
+	if(!IsAdmin()) then
+		altmenu.addButton("Server Scripts",menutest.scripts,"server","./lua",0,10)
+	else
+		menutest.disable(altmenu.addButton("Server Scripts",function() end))
+	end
 	altmenu.addButton("Custom Games",include,"lua/cl_gamelist.lua")
+	altmenu.addButton("Music",menutest.music)
 end
-menutest.main()
+hook.add("ClientReady","menutest",menutest.main)

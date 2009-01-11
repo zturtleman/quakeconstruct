@@ -50,9 +50,14 @@ function Skin:DoBG()
 	sk.qcolor(panel.bgcolor)
 end
 
+local function textSize(x,y,str,tw,th)
+	return x,y,tw*string.len(str),th
+end
+
 function Skin:Text(...)
+	local x,y,w,h = textSize(unpack(arg))
 	if(softwaremask) then
-		if(maskOn) then
+		if(softmask.IsMasked(x,y,w,h)) then
 			softmask.Text(unpack(arg))
 		else
 			draw.Text(unpack(arg))
@@ -72,22 +77,47 @@ function Skin:DrawBGRect(...)
 	RECT_DRAW = RECT_DRAW + 1
 end
 
-function Skin:DrawBevelRect(x,y,w,h,d)
+function Skin:DrawSoftBevelRect(x,y,w,h,d,i)
+	SkinCall("DrawBGRect",x,y,w,h)
+	
 	sk.coloradjust(nil,2*d)
-	SkinCall("DrawBGRect",x,y,w,2)
+	SkinCall("DrawBGRect",x,y,w,i)
 	sk.restore()
 	
 	sk.coloradjust(nil,1*d)
-	SkinCall("DrawBGRect",x,y,2,h)
+	SkinCall("DrawBGRect",x,y,i,h)
 	sk.restore()
 	
 	sk.coloradjust(nil,-1*d)
-	SkinCall("DrawBGRect",x+(w-2),y,2,h)
+	SkinCall("DrawBGRect",x+(w-i),y,i,h)
 	sk.restore()
 	
 	sk.coloradjust(nil,-2*d)
-	SkinCall("DrawBGRect",x,y+(h-2),w,2)
+	SkinCall("DrawBGRect",x,y+(h-i),w,i)
 	sk.restore()
+	TOUGH_DRAW = TOUGH_DRAW + 1
+end
+
+function Skin:DrawBevelRect(x,y,w,h,d,i)
+	i=i or 2
+	if(softwaremask) then
+		if(softmask.IsMasked(x,y,w,h)) then
+			SkinCall("DrawSoftBevelRect",x,y,w,h,d,i)
+			--SkinCall("DrawBGRect",x,y,w,h)
+		else
+			RECT_DRAW = RECT_DRAW + 1
+			local r,g,b,a = unpack(sk.current())
+			draw.BeveledRect(x,y,w,h,
+							 r,g,b,a,
+							 d,i)
+		end
+	else
+		RECT_DRAW = RECT_DRAW + 1
+		local r,g,b,a = unpack(sk.current())
+		draw.BeveledRect(x,y,w,h,
+						 r,g,b,a,
+						 d,i)	
+	end
 end
 
 function Skin:DrawNeon(x,y,w,h,i)
@@ -104,8 +134,7 @@ end
 function Skin:DrawBackground(d)
 	local x,y = panel:GetPos()
 	d = d or .04
-	SkinCall("DrawBGRect",x,y,panel.w,panel.h)
-	SkinCall("DrawBevelRect",x,y,panel.w,panel.h,d)
+	SkinCall("DrawBevelRect",x,y,panel.w,panel.h,d,1)
 	--SkinCall("DrawNeon",x,y,panel.w,panel.h,-1)
 end
 
@@ -113,10 +142,10 @@ function Skin:DrawButtonBackground(over,down)
 	local nbg = {panel.bgcolor[1],panel.bgcolor[2],panel.bgcolor[3],panel.bgcolor[4]}
 	
 	if(down) then
-		panel.bgcolor = sk.coloradjust(nbg,-.2)
+		panel.bgcolor = sk.coloradjust(nbg,-.08)
 		SkinCall("DrawBackground",-.1)
 	elseif(over) then
-		panel.bgcolor = sk.coloradjust(nbg,.1)
+		panel.bgcolor = sk.coloradjust(nbg,.08)
 		SkinCall("DrawBackground",.1)
 	else
 		sk.qcolor(panel.bgcolor)
@@ -175,7 +204,7 @@ function Skin:DrawModelPane()
 end
 
 function Skin:DrawShadow()
-	if(true) then return end
+	--if(true) then return end
 	panel:DoBGColor()
 	sk.coloradjust(panel.bgcolor,-.3,.2)
 	

@@ -4,7 +4,7 @@ local Panel = {}
 function Panel:Initialize()
 	--self:ColorAdjust(self.bgcolor,.3)
 	self.contentPane = UI_Create("panel",self)
-	self.contentPane.bgcolor = self:ColorAdjust(self.contentPane.bgcolor,-.2)
+	self.contentPane.bgcolor = self:ColorAdjust(self.contentPane.bgcolor,.5)
 	
 	self.dragbar = UI_Create("dragbutton",self,true)
 	self.dragbar:AffectParent(true)
@@ -18,7 +18,7 @@ function Panel:Initialize()
 	end
 	
 	self.dragbar2 = UI_Create("dragbutton",self,true)
-	self.dragbar2:SetSize(12,10)
+	self.dragbar2:SetSize(12,12)
 	self.dragbar2:LockCenter(true)
 	self.dragbar2.Affect = function(db,dx,dy)
 		--db.x = db.x + dx
@@ -57,8 +57,8 @@ end
 
 function Panel:PositionBar()
 	self.dragbar:SetPos(2,2)
-	self.dragbar:SetSize(self:GetWidth() - 4,10)
-	self.close:SetSize(20,10)
+	self.dragbar:SetSize(self:GetWidth() - 4,15)
+	self.close:SetSize(20,15)
 	
 	self.dragbar2:SetPos(self:GetWidth() - self.dragbar2:GetWidth() - 2,
 						 self:GetHeight() - self.dragbar2:GetHeight() - 2)

@@ -2,6 +2,30 @@ softmask = {}
 
 local mask = {x=0,y=0,w=640,h=480}
 local charmap = LoadShader("gfx/2d/bigchars")
+local masklist = {}
+
+local function drawOutlineRect(x,y,w,h,s,shd,color)
+	if(color) then draw.SetColor(unpack(color)) end
+	draw.Rect(x,y,w-s,s,shd)
+	draw.Rect(x+(w-s),y,s,h-s,shd)
+	draw.Rect(x+s,y+(h-s),w-s,s,shd)
+	draw.Rect(x,y,s,h,shd)
+	if(color) then draw.SetColor(1,1,1,1) end
+end
+
+function softmask.Get()
+	return mask.x,mask.y,mask.w,mask.h
+end
+
+function softmask.IsMasked(x,y,w,h)
+	local mx,my,mw,mh = softmask.Get()
+	return (x < mx or y < my or x+w > mx+mw or y+h > my+mh)
+end
+
+function softmask.IsOutside(x,y,w,h)
+	local mx,my,mw,mh = softmask.Get()
+	return (x+w < mx or y+h < my or x > mx+mw or y > my+mh)
+end
 
 function softmask.Set(x,y,w,h)
 	x = x or mask.x
@@ -9,6 +33,19 @@ function softmask.Set(x,y,w,h)
 	w = w or mask.w
 	h = h or mask.h
 	mask = {x=x,y=y,w=w,h=h}
+	
+	if(QLUA_DEBUG) then table.insert(masklist,mask) end
+end
+
+function softmask.Draw()
+	for k,v in pairs(masklist) do
+		drawOutlineRect(v.x,v.y,v.w,v.h,2,nil,{1,0,0,1})
+	end
+	masklist = {}
+end
+
+function softmask.Clear()
+	masklist = {}
 end
 
 function softmask.Reset()
@@ -51,8 +88,14 @@ function softmask.Rect(rx,ry,rw,rh,shader,s,t,s1,t1,noReMap)
 end
 
 local function drawChar(x,y,ch,tw,th)
-	local row,col,s = util.CharData(ch)
-	softmask.Rect(x,y,tw,th,charmap,col,row,col+s,row+s,true)
+	if(softmask.IsOutside(x,y,tw,th)) then return end
+	if(softmask.IsMasked(x,y,tw,th)) then
+		local row,col,s = util.CharData(ch)
+		softmask.Rect(x,y,tw,th,charmap,col,row,col+s,row+s,true)
+		TEXT_DRAW = TEXT_DRAW + 1
+	else
+		draw.Text(x,y,ch,tw,th)
+	end
 end
 
 local function color(ch)
