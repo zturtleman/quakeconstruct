@@ -114,7 +114,7 @@ function menutest.main()
 	altmenu.addButton("Speech Menu",menutest.speech)
 	altmenu.addButton("Cheats",menutest.cheats)
 	altmenu.addButton("Client Scripts",menutest.scripts,"client","./lua",0,10)
-	if(!IsAdmin()) then
+	if(IsAdmin()) then
 		altmenu.addButton("Server Scripts",menutest.scripts,"server","./lua",0,10)
 	else
 		menutest.disable(altmenu.addButton("Server Scripts",function() end))
