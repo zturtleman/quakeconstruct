@@ -65,8 +65,10 @@ local function AddGameHook(GAME,h)
 end
 
 local function GetHooks()
-	if(SERVER) then return HOOKS.SV end
-	return HOOKS.CL
+	local list = table.Copy(HOOKS.SHARED)
+	if(SERVER) then list = table.Add(list,HOOKS.SV) end
+	if(CLIENT) then list = table.Add(list,HOOKS.CL) end
+	return list
 end
 
 local function HookGame(GAME)
@@ -180,6 +182,12 @@ else
 	concommand.Add("EndCustomGame",function(p,c,a) 
 		if(type(a[1]) == "string") then
 			EndCustomGame(a[1])
+		end
+	end,true)
+	
+	concommand.Add("ReloadCustomGame",function(p,c,a) 
+		if(type(a[1]) == "string") then
+			ReloadCustomGame(a[1])
 		end
 	end,true)
 end
