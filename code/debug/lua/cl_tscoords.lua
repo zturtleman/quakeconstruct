@@ -118,13 +118,13 @@ local function draw()
 	if(lhpx != ohpx and lhpx < ohpx and ohpx >= 0) then
 		local v = ((ohpx - lhpx)*1600)
 		if(lr[2000] != nil) then
-			lr[2000].t = 255*hpx
+			lr[2000].t = 0 --255*hpx
 			lr[2000].v = lr[2000].v + v
 			if(lr[2000].v > 255) then lr[2000].v = 255 end
 		end
 	end
 	
-	local nh2 = (lrtest2(2000,0,255*hpx) )
+	local nh2 = (lrtest2(2000,0,0) ) --255*hpx
 	
 	for k,v in pairs(verts) do
 		local nhx = nh2 * 1.4

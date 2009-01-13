@@ -504,9 +504,10 @@ respawn
 */
 void respawn( gentity_t *ent ) {
 	gentity_t	*tent;
+	gentity_t	*body;
 
-	CopyToBodyQue (ent);
-	ClientSpawn(ent);
+	body = CopyToBodyQue (ent);
+	ClientSpawn(ent,body);
 
 	// add a teleportation effect
 	tent = G_TempEntity( ent->client->ps.origin, EV_PLAYER_TELEPORT_IN );
@@ -1035,7 +1036,7 @@ void ClientBegin( int clientNum ) {
 	qlua_pcall(GetServerLuaState(),1,0,qtrue);
 
 	// locate ent at a spawn point
-	ClientSpawn( ent );
+	ClientSpawn( ent, NULL );
 
 	if ( client->sess.sessionTeam != TEAM_SPECTATOR ) {
 		// send event
@@ -1061,7 +1062,7 @@ after the first ClientBegin, and after each respawn
 Initializes all non-persistant parts of playerState
 ============
 */
-void ClientSpawn(gentity_t *ent) {
+void ClientSpawn(gentity_t *ent, gentity_t *plbody) {
 	int		index;
 	vec3_t	spawn_origin, spawn_angles;
 	gclient_t	*client;
@@ -1275,9 +1276,16 @@ void ClientSpawn(gentity_t *ent) {
 
 	//trap_SendServerCommand( -1, va("playerhealth %i %i", ent->s.number, ent->health) );
 
+	if(GetServerLuaState() == NULL) return;
+
 	qlua_gethook(GetServerLuaState(), "PlayerSpawned");
 	lua_pushentity(GetServerLuaState(),ent);
-	qlua_pcall(GetServerLuaState(),1,0,qtrue);
+	if(plbody != NULL) {
+		lua_pushentity(GetServerLuaState(),plbody);
+		qlua_pcall(GetServerLuaState(),2,0,qtrue);
+	} else {
+		qlua_pcall(GetServerLuaState(),1,0,qtrue);
+	}
 }
 
 

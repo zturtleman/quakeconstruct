@@ -57,6 +57,7 @@ if(SERVER) then
 		--if(pl:IsBot()) then return end
 		--if(true) then return end
 		if(restrict[means]) then return end
+		if(pl and pl:IsBot()) then return end
 		local team = pl:GetTeam()
 		local aim = pl:GetAimAngles()
 		pl:GetTable().dpos = pl:GetPos()

@@ -52,7 +52,7 @@ HOOKS.CL = {
 }
 
 function hook.sort(event)
-	table.sort(hook.events[event],function(a,b) return a.priority < b.priority end)
+	table.sort(hook.events[event],function(a,b) return a.priority > b.priority end)
 end
 
 function hook.replacehook(tab,event)
@@ -127,6 +127,11 @@ if(SERVER) then concommand.Add("PrintHooks_SV",printhooks) end
 if(CLIENT) then concommand.Add("PrintHooks_CL",printhooks) end
 
 function CallHook(event,...)
+	for k,v in pairs(arg) do
+		if(type(v) == "vector3") then
+			arg[k] = Vectorv(v)
+		end
+	end
 	if(hook.events[event] == nil) then return end
 	local retVal = nil
 	for k,v in pairs(hook.events[event]) do

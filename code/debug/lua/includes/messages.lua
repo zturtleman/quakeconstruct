@@ -198,6 +198,7 @@ if(SERVER) then
 					end
 				end
 			end
+			if(contents == "") then contents = "9" end
 			--print("Sent Contents: " .. contents .. "\n")
 			_message.WriteLong(msg,tonumber(contents))
 			_message.WriteShort(msg,msgid)
@@ -318,19 +319,26 @@ if(CLIENT) then
 				print("^5MESSAGE ERROR[L]: Invalid Message ID: " .. strid .. "\n")
 			end
 			--print("Message Contents: " .. contents .. "\n")
-			contents = string.ToTable(contents)
-			lastInStack = -1
-			for k,v in pairs(contents) do
-				v = tonumber(v)
-				--print("Content: " .. k .. " " .. v .. "\n")
-				local b,e = pcall(funcs[v])
-				if(!b) then
-					error("^5MESSAGE ERROR[M]: " .. e .. "\n")
-				else
-					if(e != nil) then
-						table.insert(stack,{e,v})
+			if(contents != "9") then
+				contents = string.ToTable(contents)
+				lastInStack = -1
+				for k,v in pairs(contents) do
+					v = tonumber(v)
+					--print("Content: " .. k .. " " .. v .. "\n")
+					if(v != nil and funcs[v] != nil) then
+						local b,e = pcall(funcs[v])
+						if(!b) then
+							error("^5MESSAGE ERROR[M]: " .. e .. "\n")
+						else
+							if(e != nil) then
+								table.insert(stack,{e,v})
+							end
+						end
 					end
 				end
+			else
+				contents = {}
+				stack = {}
 			end
 			CallHook("HandleMessage",msgIDs[strid],contents)
 			stack = {}
@@ -358,7 +366,9 @@ if(CLIENT) then
 		debugprint("Message Received: " .. msgid .. "\nContents:\n")
 		for k,v in pairs(contents) do
 			v = tonumber(v)
-			debugprint(strings[v] .. ",")
+			if(v != 9) then
+				debugprint(strings[v] .. ",")
+			end
 		end
 		debugprint("EOM\n")
 	end

@@ -78,15 +78,30 @@ if(SERVER) then
 	function downloader.add(filename,force)
 		if(filename != nil and type(filename) == "string") then
 			if(fileExists(filename)) then
-				local md5sum = fileMD5(filename)
-				local lines = countFileLines(filename,function(l,n) return (fixLine(l) != nil) end)
-				local file = newFile(filename,md5sum,lines)
+				local md5sum = fileMD5(filename,function(l,n) return (fixLine(l) != nil) end)
+				local flines = {}--countFileLines(filename,function(l,n) return (fixLine(l) != nil) end)
+				
+				file = io.open(filename, "r")
+				if(file != nil) then
+					local lines = 0
+					for line in file:lines() do
+						if(fixLine(line) != nil) then
+							table.insert(flines,fixLine(line))
+						end
+					end
+					file:close()
+				else
+					error("File not found: '" .. filename .. "'.")
+					return
+				end	
+				
+				local file = newFile(filename,md5sum,flines)
 				if(!table.HasValue(downloader.queue,file) or force) then
 					local exist = getFileByName(file,downloader.queue)
 					if(exist) then
 						exist.status = FILE_PENDING
 						exist.md5 = md5sum
-						exist.lines = lines
+						exist.lines = flines
 						debugprint("File updated in queue: '" .. file.name .. "'\n")
 						downloader.notify(force)
 						return 
@@ -116,7 +131,7 @@ if(SERVER) then
 	function downloader.putqueue(pl,file)
 		local msg = Message(pl,"__queuefile")
 		message.WriteString(msg,base64.enc(file.name))
-		message.WriteShort(msg,file.lines)
+		message.WriteShort(msg,#file.lines)
 		SendDataMessage(msg)
 	end
 	
@@ -159,7 +174,7 @@ if(SERVER) then
 		local fl = fixLine(line)
 		if(fl != nil) then
 			local msg = Message(pl,"__fileline")
-			message.WriteString(msg,base64.enc(fl))
+			message.WriteString(msg,base64.enc(fl) or "")
 			SendDataMessage(msg)
 		end
 	end
@@ -167,7 +182,7 @@ if(SERVER) then
 	function downloader.sendheader(pl,file)
 		local msg = Message(pl,"__fileheader")
 		message.WriteString(msg,base64.enc(file.name))
-		message.WriteShort(msg,file.lines)
+		message.WriteShort(msg,#file.lines)
 		message.WriteString(msg,base64.enc(file.md5))
 		SendDataMessage(msg)
 	end
@@ -175,17 +190,14 @@ if(SERVER) then
 	function downloader.beginlines(pl,filex)
 		if(filex == nil) then return end
 		if(!fileExists(filex.name)) then return end
-		file = io.open(filex.name, "r")
-		if(file != nil) then
+		--file = io.open(filex.name, "r")
+		if(filex.lines != nil) then
 			local lines = 0
-			for line in file:lines() do
-				if(fixLine(line) != nil) then
-					Timer(.08*lines,downloader.sendline,pl,line)
-					lines = lines + 1
-				end
+			for _,line in pairs (filex.lines) do
+				Timer(.08*lines,downloader.sendline,pl,line)
+				lines = lines + 1
 			end
 			Timer((.08*lines) + 0.2,downloader.stopdownload,pl,filex)
-			file:close()
 		else
 			downloader.stopdownload(pl,filex)
 		end	
@@ -198,12 +210,15 @@ if(SERVER) then
 		file.status = FILE_FINISHED
 		ptab.downloading = false
 		downloader.notify()
+		
+		local msg = Message(pl,"__fileheader")
+		SendDataMessage(msg)
 	end
 	
 	function downloader.begindownload(pl,file)
 		local ptab = pl:GetTable()
 		if(ptab.downloading) then return end
-		debugprint("Sending File: " .. file.name .. "[" .. file.md5 .. "] - " .. file.lines .. " lines.\n")
+		debugprint("Sending File: " .. file.name .. "[" .. file.md5 .. "] - " .. #file.lines .. " lines.\n")
 		file.status = FILE_DOWNLOADING
 		ptab.downloading = true
 		ptab.currentdownload = file
@@ -265,35 +280,71 @@ elseif(CLIENT) then
 	local LINECOUNT = 0
 	local LINEITER = 0
 	local QUEUE = {}
+	local frame = nil
+	local flist = nil
+	local template = nil
+	local queuebuttons = {}
+	local start = false
+	
+	local function makeFrame()
+		queuebuttons = {}
+		frame = UI_Create("frame")
+		local w,h = 640,480
+		local pw,ph = w/2,h/3
+		frame.name = "base"
+		frame:SetPos((w/2) - pw/2,460 - ph)
+		frame:SetSize(pw,ph)
+		frame:SetTitle("Awaiting Files...")
+		frame:CatchMouse(true)
+		frame:SetVisible(true)
+		frame:EnableCloseButton(false)
+		
+		flist = UI_Create("listpane",frame)
+		flist.name = "base->listpane"
+		
+		if(template != nil) then return end
+		
+		template = UI_Create("label")
+		template:SetSize(100,15)
+		template:SetTextSize(6)
+		template:SetText("<nothing here>")
+		template:TextAlignCenter()
+		template:Remove()
+	end
 
-	local function draw2D()
-		if(#QUEUE == 0) then return end
-		if(DL_FILENAME != "") then
-			local per = math.floor((LINEITER / LINECOUNT)*100)
-			if(LINEITER == 0) then per = 0 end
-			local text = "Downloading: " .. FILENAME .. "(" .. per .. "%)"
-			local w = 10*string.len(text)
-			draw.SetColor(0,.4,1,.5)
-			draw.Rect(320-(w/2),240-5,w*(per/100),10)
-			draw.SetColor(1,1,1,1)
-			draw.Text(320-(w/2),240-5,text,10,10)
-			
-			text = "Downloading " .. #QUEUE .. " Files:"
-			w = 10*string.len(text)
-			draw.SetColor(1,1,1,1)
-			draw.Text(320-(w/2),240-15,text,10,10)
+	local function update()
+		local per = math.floor((LINEITER / LINECOUNT)*100)
+		if(LINEITER <= 0) then per = 0 end
+		if(LINECOUNT <= 0) then per = 0 end
+		frame:SetTitle("Downloading...")
+		local text2 = FILENAME .. "(" .. per .. "%)"
+		
+		if(#queuebuttons > #QUEUE) then 
+			flist:Clear()
+			queuebuttons = {}
 		end
+		
+		while(#queuebuttons < #QUEUE) do
+			template:SetFGColor(1,1,1,.6)
+			template:SetText("")
+			local pane = flist:AddPanel(template,true)
+			table.insert(queuebuttons,pane)
+		end
+		
 		for k,v in pairs(QUEUE) do
-			if(k != 1) then
-				local al = 1 - (k/5)
-				if(al < 0) then al = 0 end
-				local text = v[1] .. " - " .. v[2] .. " lines"
-				draw.SetColor(1,1,1,al)
-				draw.Text(320-(5*string.len(text)),(240-15)+(10*k),text,10,10)
+			local panel = queuebuttons[k]
+			if(panel != nil) then
+				if(k != 1) then
+					local text = v[1] .. "[-" .. v[2] .. "-]"
+					panel:SetFGColor(1,1,1,.6)
+					panel:SetText(text)
+				else
+					panel:SetFGColor(1,1,1,1)
+					panel:SetText(text2)
+				end
 			end
 		end
 	end
-	hook.add("Draw2D","scriptmanager2d",draw2D)
 	
 	local function localFile(f)
 		return string.Replace(f,"/",".")
@@ -326,39 +377,56 @@ elseif(CLIENT) then
 	
 	local function finished()
 		if(#QUEUE > 0) then table.remove(QUEUE,1) end
+		if(#QUEUE == 0 and frame != nil) then 
+			frame:Remove()
+			frame = nil
+			flist = nil
+		end
 		writeToFile()
 		LINECOUNT = 0
 		LINEITER = 0
 		FILENAME = "Please Wait..."
+		start = false
 	end
 
-	local function HandleMessage(msgid)
+	local function HandleMessage(msgid,tab)
 		if(msgid == "__queuefile") then
-			local name = base64.dec(message.ReadString())
+			local name = base64.dec(message.ReadString() or "")
 			local lines = message.ReadShort()
 			for k,v in pairs(QUEUE) do
 				if(v[1] == name) then v[2] = lines return end
 			end
 			table.insert(QUEUE,{name,lines})
+			if(frame == nil) then
+				makeFrame()
+			end
+			--print("F_QUEUE: " .. name .. " - " .. lines .. " lines.\n")
 		elseif(msgid == "__fileheader") then
-			local name = base64.dec(message.ReadString())
+			if(#tab == 0 and start) then
+				--print("CL_FINISH\n")
+				finished()
+				return
+			end
+			start = true
+			local name = base64.dec(message.ReadString() or "")
 			local lines = message.ReadShort()
-			local md5 = base64.dec(message.ReadString())
+			local md5 = base64.dec(message.ReadString() or "")
 			--print("F_HEADER: " .. name .. " - " .. lines .. " lines.\n")
 			CONTENTS = ""
 			FILENAME = name
 			LINECOUNT = lines
 			LINEITER = 0
 		elseif(msgid == "__fileline") then
-			local str = base64.dec(message.ReadString())
+			local str = base64.dec(message.ReadString() or "")
 			CONTENTS = CONTENTS .. str .. "\n"
 			LINEITER = LINEITER + 1
 			--print("F_LINE: " .. str .. " [X] " .. LINEITER .. "/" .. LINECOUNT .. "\n")
+			update()
 			if(LINEITER == LINECOUNT) then
-				finished()
+				--finished()
 			end
 		elseif(msgid == "__runfile") then
-			local name = base64.dec(message.ReadString())
+			local name = base64.dec(message.ReadString() or "")
 			FILENAME = name
 			includeFile()
 		end
