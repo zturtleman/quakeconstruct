@@ -79,26 +79,34 @@ function countFileLines(n,condition)
 	return 0
 end
 
-function fileMD5(n)
+function fileMD5(n,condition)
 	if(fileExists(n)) then
 		file = io.open(n, "r")
 		if(file != nil) then
 			local dat = ""
 			local lines = 0
-			for line in file:lines() do
-				lines = lines + 1
-				line = string.Replace(line,"\n","")
-				line = string.Replace(line,"\t","")
-				--line = string.Replace(line,"\"","'")
-				--line = string.Trim(line)
-				
-				if(line != "") then
-					dat = dat .. line
-					--[[if(fmd5cnt == 0) then
-						print("^2|" .. line .. "|\n")
-					else
-						print("^3|" .. line .. "|\n")
-					end]]
+			for line in file:lines() do			
+				local c = true
+				if(condition) then
+					local b,e = pcall(condition,line,lines)
+					if(!b) then error(e) end
+					c = e
+				end
+				if(c) then	
+					lines = lines + 1
+					line = string.Replace(line,"\n","")
+					line = string.Replace(line,"\t","")
+					--line = string.Replace(line,"\"","'")
+					--line = string.Trim(line)
+					
+					if(line != "") then
+						dat = dat .. line
+						--[[if(fmd5cnt == 0) then
+							print("^2|" .. line .. "|\n")
+						else
+							print("^3|" .. line .. "|\n")
+						end]]
+					end
 				end
 			end
 			--fmd5cnt = fmd5cnt + 1

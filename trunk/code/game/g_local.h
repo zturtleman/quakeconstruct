@@ -662,7 +662,7 @@ void BeginIntermission (void);
 void InitClientPersistant (gclient_t *client);
 void InitClientResp (gclient_t *client);
 void InitBodyQue (void);
-void ClientSpawn( gentity_t *ent );
+void ClientSpawn( gentity_t *ent, gentity_t *plbody );
 void player_die (gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int mod);
 void AddScore( gentity_t *ent, vec3_t origin, int score );
 void CalculateRanks( void );

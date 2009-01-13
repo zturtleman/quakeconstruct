@@ -46,7 +46,9 @@ local function blood(pl,pos,t,big,sizex)
 	le2:SetCallback(LOCALENTITY_CALLBACK_TOUCH,function(le,tr)
 		if(VectorLength(le:GetVelocity()) < 10 or math.random(0,5) == 1) then
 			if(big) then
-				util.CreateMark(bloodtex[math.random(1,#bloodtex)],tr.endpos,tr.normal,math.random(360),1,1,1,1,math.random(10,25),true,math.random(700,1000))
+				if(math.random(0,5) == 1) then
+					util.CreateMark(bloodtex[math.random(1,#bloodtex)],tr.endpos,tr.normal,math.random(360),1,1,1,1,math.random(10,25),true,math.random(700,1000))
+				end
 			else
 				util.CreateMark(bloodtex[math.random(1,#bloodtex)],tr.endpos,tr.normal,math.random(360),1,1,1,1,math.random(6,20),true,math.random(400,2000))
 			end
@@ -114,9 +116,9 @@ local function d3d()
 	for k,v in pairs(points) do
 		local t = v.t
 		local dt = 1 - ((LevelTime() - v.t) / (4000 + (v.dmg*10)))
-		if(v.pl:GetInfo().health <= 0) then
-				dt = .4
-		end
+		--if(v.pl:GetInfo().health <= 0) then
+				--dt = .4
+		--end
 		if(dt < 0) then
 			dt = 0
 		else

@@ -826,7 +826,7 @@ int qlua_respawn(lua_State *L) {
 	if(luaentity != NULL) {
 		if(luaentity->client) {
 			if(luaentity->health <= 0) body = CopyToBodyQue(luaentity);
-			ClientSpawn(luaentity);
+			ClientSpawn(luaentity,NULL);
 			if(body != NULL) {
 				lua_pushentity(L,body);
 				return 1;

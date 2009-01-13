@@ -5,15 +5,16 @@
 
 require "turrets"
 require "explosion"
+--require "sh_notify"
 
 message.Precache("itempickup")
 message.Precache("playerdamage")
 message.Precache("playerrespawn")
 
---downloader.add("lua/cl_lerptest.lua",true)
 --downloader.add("lua/tests/cl_small.lua",true)
---downloader.add("lua/tests/cl_small2.lua",true)
---downloader.add("lua/tests/cl_small3.lua",true)
+--downloader.add("lua/cl_lerptest.lua",true)
+--downloader.add("lua/cl_localtest.lua",true)
+
 --[[
 local function Fuse(v)
 	if(v == nil) then return end
@@ -60,7 +61,6 @@ local function PlayerDamaged(self,inflictor,attacker,damage,meansOfDeath,dir,pos
 		message.WriteShort(msg,self:EntIndex())
 		message.WriteShort(msg,self:GetHealth())
 		message.WriteVector(msg,pos or Vector(0,0,0))
-		print("Sent HP: " .. self:GetHealth() .. "\n")
 		if(attacker) then
 			message.WriteShort(msg,attacker:EntIndex() or -1)
 		else

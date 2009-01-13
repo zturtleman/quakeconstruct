@@ -29,8 +29,8 @@ local function bobview(pos,ang,fovx,fovy)
 	cvel.z = 0
 	plmoved = plmoved + vAbs(cvel)
 	
-	nang.x = ang.x + (math.cos(VectorLength(plmoved)/2000)*1) * maxvel(lvel)
-	pos.z = pos.z + (math.cos(VectorLength(plmoved)/1000)*1) * maxvel(lvel)
+	--nang.x = ang.x + (math.cos(VectorLength(plmoved)/2000)*1) * maxvel(lvel)
+	--pos.z = pos.z + (math.cos(VectorLength(plmoved)/1000)*1) * maxvel(lvel)
 	
 	nang.z = nang.z - smoothvel*2
 	nang.x = nang.x + (smoothfall/2)
@@ -94,7 +94,6 @@ local function respawn()
 end
 
 local function processDamage(attacker,pos,dmg,death,waslocal,wasme,health)
-	print("TOOK DAMAGE: " .. dmg .. " -> " .. health .. "\n")
 	if(dmg > 50) then dmg = 50 end
 	if(waslocal) then
 		hp = health

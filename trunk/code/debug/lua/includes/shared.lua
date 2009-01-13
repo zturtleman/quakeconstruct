@@ -86,7 +86,7 @@ if(SERVER) then
 	end
 	hook.add("MessageReceived","includes",message)
 else
-	hook.add("InitialSnapshot","includes",function() Timer(.1,SendString,"_clientready") end)
+	hook.add("InitialSnapshot","includes",function() Timer(.6,SendString,"_clientready") end)
 	
 	local function demo()
 		SendString("_demostarted")
