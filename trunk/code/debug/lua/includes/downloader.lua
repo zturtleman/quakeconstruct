@@ -295,7 +295,7 @@ elseif(CLIENT) then
 		frame:SetPos((w/2) - pw/2,460 - ph)
 		frame:SetSize(pw,ph)
 		frame:SetTitle("Awaiting Files...")
-		frame:CatchMouse(true)
+		--frame:CatchMouse(true)
 		frame:SetVisible(true)
 		frame:EnableCloseButton(false)
 		

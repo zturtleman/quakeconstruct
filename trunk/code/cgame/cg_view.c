@@ -234,10 +234,10 @@ static void CG_OffsetThirdPersonView( void ) {
 	VectorCopy( cg.refdefViewAngles, focusAngles );
 
 	// if dead, look at killer
-	if ( cg.predictedPlayerState.stats[STAT_HEALTH] <= 0 ) {
+	/*if ( cg.predictedPlayerState.stats[STAT_HEALTH] <= 0 ) {
 		focusAngles[YAW] = cg.predictedPlayerState.stats[STAT_DEAD_YAW];
 		cg.refdefViewAngles[YAW] = cg.predictedPlayerState.stats[STAT_DEAD_YAW];
-	}
+	}*/
 
 	if ( focusAngles[PITCH] > 45 ) {
 		focusAngles[PITCH] = 45;		// don't go too far overhead
@@ -322,18 +322,16 @@ static void CG_OffsetFirstPersonView( void ) {
 	if ( cg.snap->ps.pm_type == PM_INTERMISSION ) {
 		return;
 	}
-
 	origin = cg.refdef.vieworg;
 	angles = cg.refdefViewAngles;
-
 	// if dead, fix the angle and don't add any kick
-	if ( cg.snap->ps.stats[STAT_HEALTH] <= 0 ) {
+	/*if ( cg.snap->ps.stats[STAT_HEALTH] <= 0 ) {
 		angles[ROLL] = 40;
 		angles[PITCH] = -15;
 		angles[YAW] = cg.snap->ps.stats[STAT_DEAD_YAW];
 		origin[2] += cg.predictedPlayerState.viewheight;
 		return;
-	}
+	}*/
 
 	// add angles based on weapon kick
 	VectorAdd (angles, cg.kick_angles, angles);
@@ -684,7 +682,6 @@ static int CG_CalcViewValues( void ) {
 
 	// position eye reletive to origin
 	AnglesToAxis( cg.refdefViewAngles, cg.refdef.viewaxis );
-
 	if(L != NULL) {
 		lua_getglobal(L, "_ViewCalc");
 		lua_pushvector(L,cg.refdef.vieworg);

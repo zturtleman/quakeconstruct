@@ -2019,6 +2019,7 @@ void CG_InitLua() {
 	L = GetClientLuaState();
 	
 	BG_InitLuaTrajectory(L);
+	BG_InitLuaPMove(L);
 	CG_InitLuaVector(L);
 	CG_InitLuaEnts(L);
 	CG_InitLuaREnts(L);

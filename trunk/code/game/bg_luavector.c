@@ -82,8 +82,8 @@ void lua_tovector(lua_State *L, int i, vec3_t in) {
 	//}
 }*/
 
-float *lua_getLVector(lua_State *L, int i) {
-	if (luaL_checkudata(L,i,MYTYPE)==NULL) luaL_typerror(L,i,MYTYPE);
+float *lua_getLVector(lua_State *L, int i, qboolean force) {
+	if (luaL_checkudata(L,i,MYTYPE)==NULL && !force) luaL_typerror(L,i,MYTYPE);
 	return lua_touserdata(L,i);
 }
 
@@ -116,7 +116,15 @@ void lua_pushvector(lua_State *L, vec3_t vec)
 
 void lua_tovector(lua_State *L, int i, vec3_t vec)
 {
-	float *v = lua_getLVector(L,i);
+	float *v = lua_getLVector(L,i,qfalse);
+	vec[0] = v[0];
+	vec[1] = v[1];
+	vec[2] = v[2];
+}
+
+void lua_tovector_forced(lua_State *L, int i, vec3_t vec)
+{
+	float *v = lua_getLVector(L,i,qtrue);
 	vec[0] = v[0];
 	vec[1] = v[1];
 	vec[2] = v[2];
@@ -124,7 +132,7 @@ void lua_tovector(lua_State *L, int i, vec3_t vec)
 
 static int Lget(lua_State *L)
 {
-	float *v=lua_getLVector(L,1);
+	float *v=lua_getLVector(L,1,qfalse);
 	const char* i=luaL_checkstring(L,2);
 		switch (*i) {
 			case '1': case 'x': case 'p': case 'u': lua_pushnumber(L,v[0]); break;
@@ -136,7 +144,7 @@ static int Lget(lua_State *L)
 }
 
 static int Lset(lua_State *L) {
-	float *v=lua_getLVector(L,1);
+	float *v=lua_getLVector(L,1,qfalse);
 	const char* i=luaL_checkstring(L,2);
 	float t=luaL_checknumber(L,3);
 		switch (*i) {

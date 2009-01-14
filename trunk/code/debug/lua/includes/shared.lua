@@ -78,7 +78,7 @@ if(SERVER) then
 			CallHook("ClientReady",pl)
 			--Timer(3.8,CallHook,"ClientReady",pl)
 			if(pl:IsAdmin()) then
-				pl:SendString("_admin")
+				Timer(2,pl.SendString,pl,"_admin")
 			end
 		elseif(str == "_demostarted") then
 			CallHook("DemoStarted",pl)
@@ -87,6 +87,8 @@ if(SERVER) then
 	hook.add("MessageReceived","includes",message)
 else
 	hook.add("InitialSnapshot","includes",function() Timer(.6,SendString,"_clientready") end)
+	
+	local called = false
 	
 	local function demo()
 		SendString("_demostarted")
@@ -99,9 +101,12 @@ else
 			print("Admin Verified!\n")
 			ADMIN = true
 			CallHook("ClientReady")
+			called = true
 		end
 	end
 	hook.add("MessageReceived","includes",message)
+	
+	Timer(10,function() if(!called) then CallHook("ClientReady") end end)
 	
 	function IsAdmin()
 		return ADMIN

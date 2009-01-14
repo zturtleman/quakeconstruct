@@ -192,8 +192,25 @@ typedef struct {
 } pmove_t;
 
 // if a full pmove isn't done on the client, you can just update the angles
+void PM_Accelerate( vec3_t wishdir, float wishspeed, float accel );
+float PM_CmdScale( usercmd_t *cmd );
+pmove_t *PM_GetMove();
+void PM_MovePlayer( void );
+void PM_Friction( void );
+void PM_FlyMove( void );
+void PM_AirMove( void );
+void PM_GrappleMove( void );
+void PM_WalkMove( void );
+void PM_WaterMove( void );
+void PM_WaterJumpMove( void );
+void PM_DeadMove( void );
+void PM_NoclipMove( void );
+void PM_CrashLand( void );
+void PM_Drop( void );
+void PM_DropTimers( void );
 void PM_UpdateViewAngles( playerState_t *ps, const usercmd_t *cmd );
-void Pmove (pmove_t *pmove);
+void PM_StepSlideMove( qboolean gravity );
+void Pmove (pmove_t *pmove, lua_State *L);
 
 //===================================================================================
 
@@ -710,15 +727,23 @@ void	BG_PlayerStateToEntityStateExtraPolate( playerState_t *ps, entityState_t *s
 qboolean	BG_PlayerTouchesItem( playerState_t *ps, entityState_t *item, int atTime );
 
 //LUA
+void qlua_gethook(lua_State *L, const char *hook);
+void qlua_pcall(lua_State *L, int nargs, int nresults, qboolean washook);
+
 void BG_InitLuaVector(lua_State *L);
 void BG_InitLuaTrajectory(lua_State *L);
+void BG_InitLuaPMove(lua_State *L);
 
 void lua_pushvector(lua_State *L, vec3_t vec);
 void lua_tovector(lua_State *L, int i, vec3_t in);
+void lua_tovector_forced(lua_State *L, int i, vec3_t vec);
 qboolean IsVector(lua_State *L, int i);
 
 trajectory_t *lua_totrajectory(lua_State *L, int i);
 void lua_pushtrajectory(lua_State *L, trajectory_t *tr);
+
+pmove_t *lua_toPM(lua_State *L, int i);
+void lua_pushPM(lua_State *L, pmove_t *pm);
 
 #define ARENAS_PER_TIER		4
 #define MAX_ARENAS			1024

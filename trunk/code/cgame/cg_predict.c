@@ -417,6 +417,7 @@ void CG_PredictPlayerState( void ) {
 	qboolean	moved;
 	usercmd_t	oldestCmd;
 	usercmd_t	latestCmd;
+	lua_State	*L = GetClientLuaState();
 
 	cg.hyperspace = qfalse;	// will be set if touching a trigger_teleport
 
@@ -581,7 +582,7 @@ void CG_PredictPlayerState( void ) {
 			cg_pmove.cmd.serverTime = ((cg_pmove.cmd.serverTime + pmove_msec.integer-1) / pmove_msec.integer) * pmove_msec.integer;
 		}
 
-		Pmove (&cg_pmove);
+		Pmove (&cg_pmove,L);
 
 		moved = qtrue;
 
