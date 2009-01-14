@@ -470,6 +470,7 @@ void G_InitLua() {
 	L = GetServerLuaState();
 	
 	BG_InitLuaTrajectory(L);
+	BG_InitLuaPMove(L);
 	G_InitLuaEnts(L);
 	G_InitLuaVector(L);
 	G_InitLuaMessages(L);

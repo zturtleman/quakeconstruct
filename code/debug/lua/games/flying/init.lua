@@ -3,7 +3,7 @@ function GAME:Think()
 		if(v:IsPlayer() and v:GetHealth() > 0) then
 			--v:SetPowerup(PW_FLIGHT,POWERUP_FOREVER)
 			local bits = v:GetInfo()["buttons"];
-			print(bits .. "\n")
+			--print(bits .. "\n")
 			if(bitAnd(bits,16) != 0) then 
 			
 			end

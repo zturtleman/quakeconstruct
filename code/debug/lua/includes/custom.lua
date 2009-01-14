@@ -8,10 +8,11 @@ end
 
 function Execute(dir)
 	if(SERVER) then
-		include(dir .. "/init.lua")
+		pcall(include,dir .. "/init.lua")
 	else
-		include(dir .. "/cl_init.lua")
+		pcall(include,dir .. "/cl_init.lua")
 	end
+	pcall(include,dir .. "/shared.lua")
 end
 
 function FindCustomFiles(dir)

@@ -252,12 +252,12 @@ end
 hook.add("CalcView","cl_legtest",legview)
 
 local function moused(x,y)
-	look = vAdd(look,Vector(y/6,-x/6,0))
+	--[[look = vAdd(look,Vector(y/6,-x/6,0))
 	if(look.x < -70) then look.x = -70 end
 	if(look.x > 100) then look.x = 100 end
 	
 	if(look.y < -80) then look.y = -80 end
-	if(look.y > 80) then look.y = 80 end
+	if(look.y > 80) then look.y = 80 end]]
 end
 hook.add("MouseEvent","cl_legtest",moused)
 
