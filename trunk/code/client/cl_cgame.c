@@ -637,6 +637,8 @@ int CL_CgameSystemCalls( int *args ) {
 		return CL_GetCurrentCmdNumber();
 	case CG_GETUSERCMD:
 		return CL_GetUserCmd( args[1], VMA(2) );
+	case CG_GETCURRENTUSERCMD:
+		CL_GetRealCommand( VMA(1) );
 	case CG_SETUSERCMDVALUE:
 		CL_SetUserCmdValue( args[1], VMF(2) );
 		return 0;
@@ -729,6 +731,14 @@ int CL_CgameSystemCalls( int *args ) {
 
 	case CG_R_REMAP_SHADER:
 		re.RemapShader( VMA(1), VMA(2), VMA(3) );
+		return 0;
+
+	case CG_SET_USERCMD:
+		CL_ChangeCommand( VMA(1) );
+		return 0;
+
+	case CG_ENABLE_COMMAND_OVERRIDE:
+		CL_SetCommandOverride ( args[1] );
 		return 0;
 
 /*

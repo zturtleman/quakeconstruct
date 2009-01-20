@@ -405,6 +405,9 @@ void CL_InitInput (void);
 void CL_SendCmd (void);
 void CL_ClearState (void);
 void CL_ReadPackets (void);
+void CL_ChangeCommand (usercmd_t *cmd);
+void CL_SetCommandOverride (qboolean b);
+void CL_GetRealCommand (usercmd_t *cmd);
 
 void CL_WritePacket( void );
 void IN_CenterView (void);

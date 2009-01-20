@@ -228,6 +228,18 @@ int qlua_playerangles(lua_State *L) {
 	return 0;
 }
 
+int qlua_playerweapon(lua_State *L) {
+	refEntity_t	*parent;
+	centity_t	*player;
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	
+	player = lua_toentity(L,1);
+	parent = lua_torefentity(L,2);
+
+	CG_AddPlayerWeapon( parent, NULL, player, TEAM_FREE );
+	return 0;
+}
+
 int qlua_localpos(lua_State *L) {
 	lua_pushvector(L,cg.predictedPlayerEntity.lerpOrigin);
 	return 1;
@@ -249,6 +261,7 @@ static const luaL_reg Util_methods[] = {
   {"CreateMark",		qlua_createmark},
   {"AnimatePlayer",		qlua_playeranim},
   {"AnglePlayer",		qlua_playerangles},
+  {"PlayerWeapon",		qlua_playerweapon},
   {"LocalPos",			qlua_localpos},
   {"LocalAngles",		qlua_localang},
   {"CharData",			qlua_chardata},

@@ -485,16 +485,25 @@ SetClientViewAngle
 */
 void SetClientViewAngle( gentity_t *ent, vec3_t angle ) {
 	int			i;
+	lua_State	*L = GetServerLuaState();
+
+	if(L != NULL) {
+		qlua_gethook(L,"ShouldAdjustAngle");
+		qlua_pcall(L,0,1,qtrue);
+		if(lua_type(L,-1) == LUA_TBOOLEAN && lua_toboolean(L,-1) == qfalse) {
+			return;
+		}
+	}
 
 	// set the delta angle
 	for (i=0 ; i<3 ; i++) {
-		int		cmdAngle;
+		//int		cmdAngle;
 
-		cmdAngle = ANGLE2SHORT(angle[i]);
-		ent->client->ps.delta_angles[i] = cmdAngle - ent->client->pers.cmd.angles[i];
+		//cmdAngle = ANGLE2SHORT(angle[i]);
+		//ent->client->ps.delta_angles[i] = cmdAngle - ent->client->pers.cmd.angles[i];
 	}
-	VectorCopy( angle, ent->s.angles );
-	VectorCopy (ent->s.angles, ent->client->ps.viewangles);
+	//VectorCopy( angle, ent->s.angles );
+	//VectorCopy (ent->s.angles, ent->client->ps.viewangles);
 }
 
 /*

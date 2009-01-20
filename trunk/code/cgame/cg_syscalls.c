@@ -240,6 +240,14 @@ void	trap_R_LoadWorldMap( const char *mapname ) {
 	syscall( CG_R_LOADWORLDMAP, mapname );
 }
 
+void	trap_SetUserCommand( usercmd_t *cmd ) {
+	syscall( CG_SET_USERCMD, cmd );
+}
+
+void	trap_EnableCommandOverride( qboolean b ) {
+	syscall( CG_ENABLE_COMMAND_OVERRIDE, b );
+}
+
 qhandle_t trap_R_RegisterModel( const char *name ) {
 	int load = syscall( CG_R_REGISTERMODEL, name );
 	lua_State *L = GetClientLuaState();
@@ -389,6 +397,10 @@ int			trap_GetCurrentCmdNumber( void ) {
 
 qboolean	trap_GetUserCmd( int cmdNumber, usercmd_t *ucmd ) {
 	return syscall( CG_GETUSERCMD, cmdNumber, ucmd );
+}
+
+void		trap_GetCurrentUserCommand(usercmd_t *ucmd) {
+	syscall( CG_GETCURRENTUSERCMD, ucmd );
 }
 
 void		trap_SetUserCmdValue( int stateValue, float sensitivityScale ) {

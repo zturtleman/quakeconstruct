@@ -1702,6 +1702,7 @@ qboolean	trap_GetServerCommand( int serverCommandNumber );
 int			trap_GetCurrentCmdNumber( void );	
 
 qboolean	trap_GetUserCmd( int cmdNumber, usercmd_t *ucmd );
+void		trap_GetCurrentUserCommand( usercmd_t *ucmd );
 
 // used for the weapon select and zoom
 void		trap_SetUserCmdValue( int stateValue, float sensitivityScale );
@@ -1722,6 +1723,8 @@ int			trap_N_ReadShort();
 int			trap_N_ReadLong();
 char		*trap_N_ReadString();
 float		trap_N_ReadFloat();
+void		trap_SetUserCommand( usercmd_t *cmd );
+void		trap_EnableCommandOverride( qboolean b );
 
 typedef enum {
   SYSTEM_PRINT,
