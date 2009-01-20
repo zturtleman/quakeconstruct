@@ -87,8 +87,8 @@ local function drawHud()
 		local v = stats[i]
 		local txt = v[2] .. ": " .. v[1]
 		if(v[3]) then txt = txt .. "%" end
-		draw.Text(640 - (string.len(txt) * 15),y,txt,15,15)
-		y = y + 20
+		draw.Text(640 - (string.len(txt) * 10),y,txt,10,10)
+		y = y + 15
 	end
 end
 

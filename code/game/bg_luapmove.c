@@ -58,11 +58,43 @@ int pm_setvel(lua_State *L) {
 	return 0;
 }
 
+int pm_getang(lua_State *L) {
+	pmove_t	*pm = PM_GetMove();//lua_toPM(L,1);
+
+	if(pm != NULL) {
+		lua_pushvector(L,pm->ps->viewangles);
+		return 1;
+	}
+
+	return 0;
+}
+
+int pm_setang(lua_State *L) {
+	pmove_t	*pm = PM_GetMove();//lua_toPM(L,1);
+
+	if(pm != NULL) {
+		lua_tovector(L,2,pm->ps->viewangles);
+	}
+
+	return 0;
+}
+
 int pm_getcmdscale(lua_State *L) {
 	pmove_t	*pm = PM_GetMove();//lua_toPM(L,1);
 
 	if(pm != NULL) {
 		lua_pushnumber(L,PM_CmdScale(&pm->cmd));
+		return 1;
+	}
+
+	return 0;
+}
+
+int pm_gettype(lua_State *L) {
+	pmove_t	*pm = PM_GetMove();//lua_toPM(L,1);
+
+	if(pm != NULL) {
+		lua_pushnumber(L,pm->ps->pm_type);
 		return 1;
 	}
 
@@ -97,8 +129,11 @@ static const luaL_reg PM_meta[] = {
 static const luaL_reg PM_methods[] = {
   {"GetMove",pm_getmove},
   {"GetScale",pm_getcmdscale},
+  {"GetType",pm_gettype},
   {"SetVelocity",pm_setvel},
   {"GetVelocity",pm_getvel},
+  {"SetAngles",pm_setang},
+  {"GetAngles",pm_getang},
   {"Walking", pm_walking},
   {"WaterLevel", pm_waterlevel},
   {0,0}

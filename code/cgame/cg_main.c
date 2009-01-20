@@ -33,10 +33,9 @@ int forceModelModificationCount = -1;
 
 void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum );
 void CG_Shutdown( void );
+void qlua_HandleUsercmd( void );
 
 int		qlua_nextarg = 1;
-
-
 /*
 ================
 vmMain
@@ -80,6 +79,9 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 	case CG_LUA_MSG:
 		//Handle Messages. -Hxrmn
 		qlua_HandleMessage();
+		return 0;
+	case CG_LUA_USERCMD:
+		qlua_HandleUsercmd();
 		return 0;
 	case CG_DEMOSTARTED:
 		CG_DemoStarted();
@@ -1867,6 +1869,55 @@ Will perform callbacks to make the loading info screen update.
 =================
 */
 
+void qlua_HandleUsercmd() {
+	usercmd_t	cmd;
+	lua_State	*L = GetClientLuaState();
+	vec3_t		angles;
+
+	trap_GetCurrentUserCommand( &cmd );
+
+	angles[0] = SHORT2ANGLE(cmd.angles[0]);
+	angles[1] = SHORT2ANGLE(cmd.angles[1]);
+	angles[2] = SHORT2ANGLE(cmd.angles[2]);
+
+	trap_EnableCommandOverride(qfalse);
+	if(L != NULL) {
+		qlua_gethook(L,"UserCommand");
+		lua_pushentity(L,&cg.predictedPlayerEntity);
+		lua_pushvector(L,angles);
+		lua_pushnumber(L,(float)cmd.forwardmove);
+		lua_pushnumber(L,(float)cmd.rightmove);
+		lua_pushnumber(L,(float)cmd.upmove);
+		lua_pushinteger(L,cmd.buttons);
+		lua_pushinteger(L,(int)cmd.weapon);
+		qlua_pcall(L,7,0,qtrue);
+	}
+}
+
+int qlua_SetUserCommand(lua_State *L) {
+	usercmd_t	cmd;
+	vec3_t		angles;
+
+	trap_GetCurrentUserCommand( &cmd );
+
+	if(lua_gettop(L) >= 1) {
+		lua_tovector(L,1,angles);
+		cmd.angles[0] = ANGLE2SHORT(angles[0]);
+		cmd.angles[1] = ANGLE2SHORT(angles[1]);
+		cmd.angles[2] = ANGLE2SHORT(angles[2]);
+		VectorCopy(angles,cg.predictedPlayerState.viewangles);
+	}
+	if(lua_gettop(L) >= 2) cmd.forwardmove = (signed char) lua_tonumber(L,2);
+	if(lua_gettop(L) >= 3) cmd.rightmove = (signed char) lua_tonumber(L,3);
+	if(lua_gettop(L) >= 4) cmd.upmove = (signed char) lua_tonumber(L,4);
+	if(lua_gettop(L) >= 5) cmd.buttons = lua_tointeger(L,5);
+	if(lua_gettop(L) >= 6) cmd.weapon = (byte) lua_tointeger(L,6);
+
+	trap_EnableCommandOverride(qtrue);
+	trap_SetUserCommand( &cmd );
+	return 0;
+}
+
 qboolean Cmd_Check_Lua( const char cmd[] ) {
 	lua_State *L = GetClientLuaState();
 	
@@ -2037,6 +2088,7 @@ void CG_InitLua() {
 	lua_register(L,"grabarg",qlua_grabarg);
 	lua_register(L,"StartMusic",qlua_playbg);
 	lua_register(L,"StopMusic",qlua_stopbg);
+	lua_register(L,"SetUserCommand",qlua_SetUserCommand);
 
 	pushents(L);
 

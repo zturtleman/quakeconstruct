@@ -26,6 +26,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 unsigned	frame_msec;
 int			old_com_frameTime;
 qboolean	lockmouse = qfalse;
+qboolean	use_replace = qfalse;
+usercmd_t	replace;
+usercmd_t	real;
 
 /*
 ===============================================================================
@@ -574,6 +577,29 @@ usercmd_t CL_CreateCmd( void ) {
 	// store out the final values
 	CL_FinishMove( &cmd );
 
+	real.angles[0] = cmd.angles[0];
+	real.angles[1] = cmd.angles[1];
+	real.angles[2] = cmd.angles[2];
+	real.buttons = cmd.buttons;
+	real.forwardmove = cmd.forwardmove;
+	real.rightmove = cmd.rightmove;
+	real.upmove = cmd.upmove;
+	real.weapon = cmd.weapon;
+
+	VM_Call (cgvm, CG_LUA_USERCMD);
+
+	if(use_replace) {
+		cmd.angles[0] = replace.angles[0];
+		cmd.angles[1] = replace.angles[1];
+		cmd.angles[2] = replace.angles[2];
+		cmd.buttons = replace.buttons;
+		cmd.forwardmove = replace.forwardmove;
+		cmd.rightmove = replace.rightmove;
+		cmd.upmove = replace.upmove;
+		cmd.weapon = replace.weapon;
+		//memcpy(&cmd,&replace,sizeof(usercmd_t));
+	}
+
 	// draw debug graphs of turning for mouse testing
 	if ( cl_debugMove->integer ) {
 		if ( cl_debugMove->integer == 1 ) {
@@ -587,7 +613,17 @@ usercmd_t CL_CreateCmd( void ) {
 	return cmd;
 }
 
+void CL_ChangeCommand (usercmd_t *cmd) {
+	memcpy(&replace,cmd,sizeof(usercmd_t));
+}
 
+void CL_SetCommandOverride (qboolean b) {
+	use_replace = b;
+}
+
+void CL_GetRealCommand (usercmd_t *cmd) {
+	*cmd = real;
+}
 /*
 =================
 CL_CreateNewCommands
