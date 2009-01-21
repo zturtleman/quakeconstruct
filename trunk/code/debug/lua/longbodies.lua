@@ -52,10 +52,12 @@ if(SERVER) then
 //__DL_UNBLOCK
 else
 	local d_ents = {}
+	local d_hues = {}
 	local function HandleMessage(msgid)
 		if(msgid == "bodydissolve") then
 			local ent = message.ReadShort()
 			d_ents[ent] = LevelTime()
+			d_hues[ent] = math.random(1,360)
 		end
 	end
 	hook.add("HandleMessage","longbodies",HandleMessage)
@@ -65,7 +67,14 @@ else
 		local tab = GetEntitiesByClass("player")
 		table.insert(tab,LocalPlayer())
 		for k,v in pairs(tab) do
-			local tx = d_ents[v:EntIndex()]
+			local index = v:EntIndex()
+			local tx = d_ents[index]
+			local h = d_hues[index] or 0
+			local team = v:GetInfo().team
+			h = h + 1
+			if(h > 360) then h = 1 end
+			d_hues[index] = h
+			local hr,hg,hb = hsv(h,1,1)
 			if(tx) then
 				if(LevelTime() - stayTime < tx) then
 					v:CustomDraw(true)
@@ -81,10 +90,18 @@ else
 						head:PositionOnTag(torso,"tag_head")
 
 						local dtx = (1-(dt*.7))
+						local dtz = dt/1.4
+						local c = {hr*dtz,hg*dtz,hb*dtz,1*dtx}
 						
-						legs:SetColor(.3*dt,1*dt,.5*dt,1*dtx)
-						torso:SetColor(.3*dt,1*dt,.5*dt,1*dtx)
-						head:SetColor(.3*dt,1*dt,.5*dt,1*dtx)
+						if(team == TEAM_RED) then
+							c = {1*dtz,.1*dtz,.1*dtz,1*dtx}
+						elseif(team == TEAM_BLUE) then
+							c = {.1*dtz,.1*dtz,1*dtz,1*dtx}
+						end
+						
+						legs:SetColor(unpack(c))
+						torso:SetColor(unpack(c))
+						head:SetColor(unpack(c))
 						
 						legs:SetShader(fire)
 						torso:SetShader(fire)

@@ -64,6 +64,7 @@ function newParticle(pos,dir,model,scale)
 	dir = vMul(dir,math.random(60,120)/60)
 
 	local le = LocalEntity()
+	le:SetAngleVelocity(Vector(math.random(-360,360),math.random(-360,360),math.random(-360,360)))
 	le:SetPos(pos)
 	le:SetRefEntity(r)
 	le:SetVelocity(vMul(dir,300))
@@ -73,13 +74,19 @@ function newParticle(pos,dir,model,scale)
 	le:SetColor(1,1,1,1)
 	le:SetRadius(r:GetRadius())
 	le:SetCallback(LOCALENTITY_CALLBACK_TOUCH,function(le)
-		local ref = le:GetRefEntity()
-		ref:SetAngles(Vector(math.random(360),math.random(360),math.random(360)))
-		ref:Scale(Vector(scale,scale,scale))
-		le:SetRefEntity(ref)
+		if(!le:GetTable().stopped) then
+			local ref = le:GetRefEntity()
+			ref:Scale(Vector(scale,scale,scale))
+			le:SetRefEntity(ref)
+			le:SetAngleVelocity(Vector(math.random(-360,360),math.random(-360,360),math.random(-360,360)))
+		end
 	end)
 	le:SetCallback(LOCALENTITY_CALLBACK_THINK,function(le)
 		makeConfetti(le,scale)
+	end)
+	le:SetCallback(LOCALENTITY_CALLBACK_STOPPED,function(le)
+		le:GetTable().stopped = true
+		le:SetAngleVelocity(Vector(0,0,0))
 	end)
 	
 	local re = le:GetRefEntity()
@@ -97,7 +104,7 @@ local function event(entity,event,pos,dir)
 			origin.x = origin.x + math.random(-10,10)
 			origin.y = origin.y + math.random(-10,10)
 			origin.z = origin.z + math.random(0,5)
-			newParticle(pos,Vector(0,0,1),gibs[math.random(1,#gibs)],2.5)
+			newParticle(pos,Vector(0,0,1),gibs[math.random(1,#gibs)],.4)
 		end
 		return true --Returning True Overrides
 	end
