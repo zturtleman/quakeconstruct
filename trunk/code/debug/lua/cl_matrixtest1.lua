@@ -8,7 +8,7 @@ local function line(x1,y1,x2,y2)
 	local cy = y1 + dy/2
 	local rot = math.atan2(dy,dx)*57.3
 	
-	draw.RectRotated(cx,cy,math.sqrt(dx*dx + dy*dy),50,mark,rot)
+	draw.RectRotated(cx,cy,math.sqrt(dx*dx + dy*dy),2,mark,rot)
 end
 
 function identity()
@@ -135,7 +135,7 @@ local mposition = matrix {{0,0,0},{0,0,0},{0,0,0}}
 local translation = identityx(0,0,0)
 local rotation = identity()
 local lrotation = identity()
-local scale = identityx(50,10,20)
+local scale = identityx(10,10,10)
 local camera = identityx(0,0,3)
 
 local tp = Vector(670.25,729.47,-30)
@@ -243,6 +243,17 @@ local function d2d()
 	lmy = GetMouseY()
 end
 hook.add("Draw2D","cl_matrixtest1",d2d)
+
+local function fov_grabber(pos,ang,fovx,fovy)
+	fov = _CG.refdef.fov_x/2
+	
+	--print(_CG.refdef.fov_x .. " x " .. _CG.refdef.fov_y .. "\n")
+	--print(1/math.tan(fov/2) .. "  " .. (3.58 - (fov/25.2))*2 .. "\n")
+	fov = ((3.58 - (fov/25.2))*5) - (3.58 + 1.79 + 1.79)
+	--fov = 1/math.tan(fov/2)
+	
+end
+hook.add("CalcView","cl_matrixtest1",fov_grabber);
 
 local function event(entity,event,pos,dir)
 	if(event == EV_BULLET_HIT_WALL) then
