@@ -131,6 +131,16 @@ if(CLIENT) then
 	end
 	hook.add("Draw3D","sidescroller",draw3d)
 
+	local function line(x1,y1,x2,y2)
+		local dx = x2 - x1
+		local dy = y2 - y1
+		local cx = x1 + dx/2
+		local cy = y1 + dy/2
+		local rot = math.atan2(dy,dx)*57.3
+		
+		draw.RectRotated(cx,cy,math.sqrt(dx*dx + dy*dy),2,LoadShader("white"),rot)
+	end
+	
 	local function draw2d()
 		draw.SetColor(1,1,1,1)
 		
@@ -140,11 +150,41 @@ if(CLIENT) then
 		for k,v in pairs(players) do
 			local hp = v:GetInfo().health
 			if(hp > 0 and v:IsPlayer()) then
+				local off = false
 				local p,d = VectorToScreen(v:GetPos() + Vector(0,0,50))
+				if(p.y > 480) then p.y = 480 off=true end
+				if(p.y < 0) then p.y = 0 off=true end				
+				if(p.x > 640) then p.x = 640 off=true end
+				if(p.x < 0) then p.x = 0 off=true end
 				if(d) then
-					local n = pl:GetInfo().name .. " " .. hp
-					draw.Text(p.x-(string.len(n)*10)/2,p.y-20,n,10,10)
-					draw.Rect(p.x,p.y-10,2,10)
+					if(off) then
+						local dx,dy = 320 - p.x,240 - p.y
+						local ang = math.atan2(dy,dx)
+						local vdx,vdy = math.cos(ang),math.sin(ang)
+						
+						draw.SetColor(1,1,1,1)
+						line(p.x,p.y,p.x + vdx*20,p.y + vdy*20)
+						
+						p.x = p.x + vdx*50
+						p.y = p.y + vdy*30
+					end
+					draw.SetColor(1,1,1,1)
+					local n = v:GetInfo().name
+					local ny = p.y-20
+					if(off) then
+						ny = p.y
+					end
+					draw.Text(p.x-(string.len(n)*10)/2,ny,n,10,10)
+					if(!off) then
+						draw.Rect(p.x,p.y-10,2,10)
+					end
+					
+					local amt = hp/5
+					local amtx = amt
+					if(hp > 100) then amtx = 40 end
+					local r,g,b = hsv(amtx*5,1,1)
+					draw.SetColor(r,g,b,1)
+					draw.Rect(p.x-((string.len(n)*10)/2)-5,(ny-amt)+10,5,amt)
 				end
 			end
 		end
@@ -203,6 +243,8 @@ if(CLIENT) then
 		local vx,vy = unpack(vdelta)
 		local dx,dy = vx-GetXMouse(),vy-GetYMouse()
 		mdelta = {dx/320,dy/240}
+		--mdelta[1] = mdelta[1] * 3
+		--mdelta[2] = mdelta[2] * 2
 		
 		if(dx < 0) then 
 			flip = true 
