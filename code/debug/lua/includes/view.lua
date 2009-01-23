@@ -15,15 +15,18 @@ function ApplyView(pos,ang,fovx,fovy)
 end
 
 function _ViewCalc(pos,ang,fovx,fovy)
+	if(_CG == nil) then return end
 	vpos = Vectorv(pos)
 	vang = Vectorv(ang)
-	vfovx = fovx
-	vfovy = fovy
-	CallHook("CalcView",pos,ang,fovx,fovy)
+	vfovx = _CG.refdef.fov_x
+	vfovy = _CG.refdef.fov_y
+	CallHook("CalcView",pos,ang,_CG.refdef.fov_x,_CG.refdef.fov_y)
 
 	local def = {
 		origin = vpos,
 		angles = vang,
+		fov_x = vfovx,
+		fov_y = vfovy,
 	}
 	render.SetRefDef(def)
 end

@@ -50,7 +50,6 @@ if(CLIENT) then
 	local aim = 0
 	local flip = false
 	local newbits = 0
-	local txt = ""
 	local realyaw = 0
 	local ddist = 0
 	local mdelta = {0,0}
@@ -134,31 +133,61 @@ if(CLIENT) then
 
 	local function draw2d()
 		draw.SetColor(1,1,1,1)
-		draw.Text(0,150,txt,10,10)
+		
+		local players = GetAllPlayers()
+		local pl = LocalPlayer()
+		table.insert(players,pl)
+		for k,v in pairs(players) do
+			local hp = v:GetInfo().health
+			if(hp > 0 and v:IsPlayer()) then
+				local p,d = VectorToScreen(v:GetPos() + Vector(0,0,50))
+				if(d) then
+					local n = pl:GetInfo().name .. " " .. hp
+					draw.Text(p.x-(string.len(n)*10)/2,p.y-20,n,10,10)
+					draw.Rect(p.x,p.y-10,2,10)
+				end
+			end
+		end
+		
+		--draw.Rect(vdelta[1],vdelta[2],2,2)
+		--draw.Text(vdelta[1],vdelta[2],"Pos",10,10)
 	end
 	hook.add("Draw2D","sidescroller",draw2d)
 	
 	local function view(pos,ang,fovx,fovy)
-	
 		ang = VectorToAngles(Vector(-1,0,0))
 		--ang = Vector(0,90,0)
 		local f,r,u = AngleVectors(ang)
 		
 		realyaw = ang.y
 		pos = pos + f*(-400 + ddist)
-		pos = pos + Vector(0,0,20)
-		ang.p = ang.p + 8
 		
-		ang.p = ang.p + (ddist/10)
+		pos = pos + Vector(0,0,20)
 		pos.z = pos.z + (ddist/8)
 		
-		pos = pos + r * (mdelta[1]*-100)
-		pos = pos + u * (mdelta[2]*100)
+		ang.p = ang.p + 8
+		ang.p = ang.p + (ddist/10)
 		
-		vdelta[1] = (mdelta[1]*60) - 10
-		vdelta[2] = (mdelta[2]*60) - 20
+		local pl_pos = LocalPlayer():GetPos() + Vector(0,0,25)
+		if(LocalPlayer():GetInfo().health > 0) then
+			pl_pos.y = pl_pos.y + (mdelta[1]*-100)
+			pl_pos.z = pl_pos.z + (mdelta[2]*-100)
+		else
+			vdelta[1] = GetXMouse()
+			vdelta[1] = GetYMouse()
+		end
 		
-		ApplyView(pos,ang)
+		local ts = VectorToScreen(pl_pos,pos,ang,90)
+		if(LocalPlayer():GetInfo().health > 0) then
+			vdelta[1] = ts.x
+			vdelta[2] = ts.y
+		
+			pos = pos + r * (mdelta[1]*-100)
+			pos = pos + u * (mdelta[2]*100)
+		end
+		
+		ApplyView(pos,ang,90,73.73)
+		
 		
 		if(LocalPlayer():GetInfo().health <= 0) then
 			ddist = ddist + (300 - ddist)*(.02 * Lag())
@@ -168,24 +197,12 @@ if(CLIENT) then
 	
 	end
 	hook.add("CalcView","sidescroller",view)
-
-	
-	local function moused(x,y)
-		--aim = aim + y/2
-		--if(aim > 90) then aim = 90 end
-		--if(aim < -90) then aim = -90 end
-	end
-	hook.add("MouseEvent","sidescroller",moused)
 	
 	local wasmouse = false
 	local function think()
 		local vx,vy = unpack(vdelta)
-		vx = 320 + vx
-		vy = 240 + vy
 		local dx,dy = vx-GetXMouse(),vy-GetYMouse()
 		mdelta = {dx/320,dy/240}
-		mdelta[1] = mdelta[1]
-		mdelta[2] = mdelta[2]
 		
 		if(dx < 0) then 
 			flip = true 
@@ -235,7 +252,6 @@ if(CLIENT) then
 		
 		if(flip == false) then fm = fm * -1 end
 		if(flip == false) then rm = rm * -1 end
-		txt = "" .. fm
 		rm = 0
 		
 		--buttons = newbits
