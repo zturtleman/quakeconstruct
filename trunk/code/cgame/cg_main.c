@@ -1994,6 +1994,13 @@ int qlua_loadcustomsound(lua_State *L) {
 		if(lua_type(L,2) == LUA_TSTRING) {
 			snd = lua_tostring(L,2);
 		}
+	} else if (lua_type(L,1) == LUA_TNUMBER) {
+		out = lua_tointeger(L,1);
+		if(out < 0 || out > 1024) return 0;
+		ent = &cg_entities[out];
+		if(lua_type(L,1) == LUA_TSTRING) {
+			snd = lua_tostring(L,1);
+		}
 	} else {
 		ent = &cg_entities[ cg.snap->ps.clientNum ];	
 		if(lua_type(L,1) == LUA_TSTRING) {

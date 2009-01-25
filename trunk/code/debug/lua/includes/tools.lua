@@ -17,6 +17,15 @@ function intToBool(i)
 	return true
 end
 
+function gOR(...)
+	if(#arg < 2) then return arg[1] or 0 end
+	local v = arg[1]
+	for i=2, #arg do
+		v = bitOr(v,arg[i])
+	end
+	return v
+end
+
 function lastChar(v)
 	return string.sub(v,string.len(v),string.len(v))
 end
