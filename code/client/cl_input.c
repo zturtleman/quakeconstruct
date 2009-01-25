@@ -586,7 +586,9 @@ usercmd_t CL_CreateCmd( void ) {
 	real.upmove = cmd.upmove;
 	real.weapon = cmd.weapon;
 
-	VM_Call (cgvm, CG_LUA_USERCMD);
+	if(cgvm != NULL) {
+		VM_Call (cgvm, CG_LUA_USERCMD);
+	}
 
 	if(use_replace) {
 		cmd.angles[0] = replace.angles[0];

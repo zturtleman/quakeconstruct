@@ -1,3 +1,4 @@
+//__DL_BLOCK
 if(SERVER) then
 	--downloader.add("lua/sidescroller")
 	local function BlockAdjust(pl)
@@ -7,15 +8,73 @@ if(SERVER) then
 	
 	local function spawn(cl)
 		local wp = WP_GRENADE_LAUNCHER
-		cl:GiveWeapon(wp)
-		cl:SetWeapon(wp)
-		cl:SetAmmo(wp,-1)	
+		--cl:GiveWeapon(wp)
+		--cl:SetWeapon(wp)
+		--cl:SetAmmo(wp,-1)	
 	end
 	hook.add("PlayerSpawned","sidescroller",spawn)
+end
+//__DL_UNBLOCK
+
+local contents = gOR(CONTENTS_SOLID,CONTENTS_PLAYERCLIP)
+local ind = {}
+local jump = nil
+
+if(CLIENT) then
+	jump = LoadSound("sound/world/jumppad.wav")
+end
+
+local function OnGround(pm,mask)
+	local start = pm:GetPos()
+	local tr = TraceLine(start,start - Vector(0,0,1),nil,mask,pm:GetMins(),pm:GetMaxs())
+	return tr.fraction != 1
+end
+
+local function CheckDoubleJump(pm,mask)
+	local mx,my,mz = pm:GetMove()
+	local pl = pm:EntIndex()
+	
+	ind[pl] = ind[pl] or {}
+	ind[pl].last_up = ind[pl].last_up or 0
+	ind[pl].canJump = false
+	ind[pl].jumpcount = ind[pl].jumpcount or 0
+	ind[pl].jumptimer = ind[pl].jumptimer or 0
+	if(ind[pl].last_up != 127 and mz == 127) then
+		ind[pl].canJump = true
+	end
+	ind[pl].last_up = mz
+	
+	if(ind[pl].canJump and ind[pl].jumptimer < LevelTime() and ind[pl].jumpcount < 2) then
+		local v = pm:GetVelocity()
+		if(v.z < 0) then
+			pm:SetVelocity(Vector(v.x,v.y,400))
+		else
+			pm:SetVelocity(Vector(v.x,v.y,v.z + 400))
+		end
+		ind[pl].jumptimer = LevelTime() + 300
+		ind[pl].jumpcount = ind[pl].jumpcount + 1
+		if(CLIENT) then
+			local ent = GetEntityByIndex(pl)
+			if(ent != nil) then
+				local jump2 = LoadCustomSound(ent,"*jump1.wav")
+				if(ent != LocalPlayer()) then
+					PlaySound(pm:GetPos(),jump2)
+				else
+					PlaySound(jump2)
+				end
+			end
+		end
+	end
+	
+	if(OnGround(pm,mask)) then
+		ind[pl].jumptimer = LevelTime() + 250
+		ind[pl].jumpcount = 0
+	end
 end
 
 function PlayerMove(pm,walk,forward,right)
 	--PM_Accelerate(Vector(0,0,1),4,10)
+	pm:SetMask(contents)
 	if(pm:GetType() == PM_DEAD) then
 		PM_Drop()
 		PM_AirMove()
@@ -38,9 +97,7 @@ function PlayerMove(pm,walk,forward,right)
 	--v.x = 0
 	pm:SetVelocity(v)
 
-	if(SERVER) then
-		--print(scale .. "\n")
-	end
+	CheckDoubleJump(pm,contents)
 	
 	return true
 end
@@ -54,6 +111,7 @@ if(CLIENT) then
 	local ddist = 0
 	local mdelta = {0,0}
 	local vdelta = {0,0}
+	local FLIP_AXIS = true
 	
 	local fx = LoadShader("railCore")
 	local flare = LoadShader("flareShader")
@@ -107,12 +165,12 @@ if(CLIENT) then
 		torso:Render()
 		head:Render()
 		
-		local brt = 1
+		local brt = .4
 		if(LocalPlayer() != pl) then brt = .2 end
 		local r,g,b = hsv(1,1,brt)
 		local forward = VectorForward(pl:GetLerpAngles())
 		local pos = pl:GetPos() + Vector(0,0,25)
-		local ep = pos + forward * 1000
+		local ep = pos + forward * 3000
 		local tr = TraceLine(pos,ep,pl,1)
 		pos.z = pos.z - 2
 		pos = pos + forward*30
@@ -141,6 +199,7 @@ if(CLIENT) then
 		draw.RectRotated(cx,cy,math.sqrt(dx*dx + dy*dy),2,LoadShader("white"),rot)
 	end
 	
+	local sptimes = {}
 	local function draw2d()
 		draw.SetColor(1,1,1,1)
 		
@@ -189,13 +248,38 @@ if(CLIENT) then
 			end
 		end
 		
+		for k,v in pairs(GetEntitiesByClass("item")) do
+			local id = v:EntIndex()
+			sptimes[id] = sptimes[id] or 0
+			sptimes[id] = sptimes[id] + .05
+			if(sptimes[id] > 1) then sptimes[id] = 1 end
+			
+			local ts,clip = VectorToScreen(v:GetPos())
+			local index = v:GetModelIndex()
+			local n = util.GetItemName(index)
+			local v = n or index
+			draw.SetColor(0,0,0,sptimes[id])
+			draw.Text(ts.x-1,ts.y-1,v,8,8)
+			draw.SetColor(1,1,1,sptimes[id])
+			draw.Text(ts.x,ts.y,v,8,8)
+		end
+		
+		for k,v in pairs(sptimes) do
+			sptimes[k] = sptimes[k] - .01
+			if(sptimes[k] < 0) then sptimes[k] = 0 end
+		end
+		
 		--draw.Rect(vdelta[1],vdelta[2],2,2)
 		--draw.Text(vdelta[1],vdelta[2],"Pos",10,10)
 	end
 	hook.add("Draw2D","sidescroller",draw2d)
 	
+	local dcam = nil
+	local lastpos = Vector(0,0,0)
 	local function view(pos,ang,fovx,fovy)
-		ang = VectorToAngles(Vector(-1,0,0))
+		local ax = -1
+		if(FLIP_AXIS) then ax = 1 end
+		ang = VectorToAngles(Vector(ax,0,0))
 		--ang = Vector(0,90,0)
 		local f,r,u = AngleVectors(ang)
 		
@@ -208,33 +292,35 @@ if(CLIENT) then
 		ang.p = ang.p + 8
 		ang.p = ang.p + (ddist/10)
 		
+		pos = pos + u * (mdelta[2]*100)
+		pos = pos + r * (mdelta[1]*100)
+		
+		dcam = dcam or pos
+		dcam = dcam + (pos - dcam) * (.02 * Lag())
+		local npos = dcam
+		--npos = pos
+		
+		
 		local pl_pos = LocalPlayer():GetPos() + Vector(0,0,25)
-		if(LocalPlayer():GetInfo().health > 0) then
-			pl_pos.y = pl_pos.y + (mdelta[1]*-100)
-			pl_pos.z = pl_pos.z + (mdelta[2]*-100)
-		else
-			vdelta[1] = GetXMouse()
-			vdelta[1] = GetYMouse()
+		
+		local ts = VectorToScreen(pl_pos)
+		vdelta[1] = ts.x
+		vdelta[2] = ts.y
+		
+		ApplyView(npos,ang,90,73.73)
+		
+		local vel = LocalPlayer():GetTrajectory():GetDelta()
+		if(VectorLength(lastpos - pl_pos) > 100 and VectorLength(vel) < 500) then
+			dcam = pos
+			ddist = -300
 		end
-		
-		local ts = VectorToScreen(pl_pos,pos,ang,90)
-		if(LocalPlayer():GetInfo().health > 0) then
-			vdelta[1] = ts.x
-			vdelta[2] = ts.y
-		
-			pos = pos + r * (mdelta[1]*-100)
-			pos = pos + u * (mdelta[2]*100)
-		end
-		
-		ApplyView(pos,ang,90,73.73)
-		
+		lastpos = Vectorv(pl_pos)
 		
 		if(LocalPlayer():GetInfo().health <= 0) then
 			ddist = ddist + (300 - ddist)*(.02 * Lag())
 		else
 			ddist = ddist + (0 - ddist)*(.02 * Lag())
 		end
-	
 	end
 	hook.add("CalcView","sidescroller",view)
 	
@@ -242,9 +328,14 @@ if(CLIENT) then
 	local function think()
 		local vx,vy = unpack(vdelta)
 		local dx,dy = vx-GetXMouse(),vy-GetYMouse()
-		mdelta = {dx/320,dy/240}
-		--mdelta[1] = mdelta[1] * 3
-		--mdelta[2] = mdelta[2] * 2
+		local mx,my = GetXMouse()/640,GetYMouse()/480
+		mdelta = {mx-.5,my-.5}
+		mdelta[1] = mdelta[1] * 3
+		mdelta[2] = mdelta[2] * -3
+		
+		if(FLIP_AXIS) then 
+			dx = dx * -1
+		end
 		
 		if(dx < 0) then 
 			flip = true 
@@ -287,28 +378,21 @@ if(CLIENT) then
 		
 		if(flip) then qyaw = qyaw + 180 end
 		
-		--fm = 100
 		local temp = rm
 		rm = fm*-1
 		fm = temp
 		
-		if(flip == false) then fm = fm * -1 end
-		if(flip == false) then rm = rm * -1 end
-		rm = 0
+		if(FLIP_AXIS) then 
+			fm = fm * -1
+		end
 		
-		--buttons = newbits
+		if(flip == false) then fm = fm * -1 end
+		rm = 0
+
 		buttons = bitOr(buttons,newbits)
 		angle = Vector(aim,qyaw,0)
 				
 		SetUserCommand(angle,fm,rm,um,buttons,weapon)
-		--BUTTON_ATTACK
 	end
 	hook.add("UserCommand","sidescroller",UserCmd)
 end
-
---[[if(SERVER) then
-	function ClientThink(pl)
-		pl:SetVelocity(pl:GetVelocity() + Vector(0,0,-50))
-	end
-	hook.add("ClientThink","sidescroller",ClientThink)
-end]]

@@ -79,6 +79,27 @@ int pm_setang(lua_State *L) {
 	return 0;
 }
 
+int pm_getpos(lua_State *L) {
+	pmove_t	*pm = PM_GetMove();//lua_toPM(L,1);
+
+	if(pm != NULL) {
+		lua_pushvector(L,pm->ps->origin);
+		return 1;
+	}
+
+	return 0;
+}
+
+int pm_setpos(lua_State *L) {
+	pmove_t	*pm = PM_GetMove();//lua_toPM(L,1);
+
+	if(pm != NULL) {
+		lua_tovector(L,2,pm->ps->origin);
+	}
+
+	return 0;
+}
+
 int pm_getcmdscale(lua_State *L) {
 	pmove_t	*pm = PM_GetMove();//lua_toPM(L,1);
 
@@ -101,6 +122,39 @@ int pm_gettype(lua_State *L) {
 	return 0;
 }
 
+int pm_myindex(lua_State *L) {
+	pmove_t	*pm = PM_GetMove();//lua_toPM(L,1);
+
+	if(pm != NULL) {
+		lua_pushnumber(L,pm->ps->clientNum);
+		return 1;
+	}
+
+	return 0;
+}
+
+int pm_getmask(lua_State *L) {
+	pmove_t	*pm = PM_GetMove();//lua_toPM(L,1);
+
+	if(pm != NULL) {
+		lua_pushnumber(L,pm->tracemask);
+		return 1;
+	}
+
+	return 0;
+}
+
+int pm_setmask(lua_State *L) {
+	pmove_t	*pm = PM_GetMove();//lua_toPM(L,1);
+
+	luaL_checkinteger(L,2);
+
+	pm->tracemask = lua_tointeger(L,2);
+	//Com_Printf("Set Tracemask to %i.\n", pm->tracemask);
+
+	return 0;
+}
+
 int pm_getmove(lua_State *L) {
 	pmove_t	*pm = PM_GetMove();//lua_toPM(L,1);
 
@@ -112,6 +166,22 @@ int pm_getmove(lua_State *L) {
 	}
 
 	return 0;
+}
+
+int pm_getmins(lua_State *L) {
+	pmove_t	*pm = PM_GetMove();//lua_toPM(L,1);
+	if(pm != NULL) {
+		lua_pushvector(L,pm->mins);
+	}
+	return 1;
+}
+
+int pm_getmaxs(lua_State *L) {
+	pmove_t	*pm = PM_GetMove();//lua_toPM(L,1);
+	if(pm != NULL) {
+		lua_pushvector(L,pm->maxs);
+	}
+	return 1;
 }
 
 static int PM_tostring (lua_State *L)
@@ -130,10 +200,17 @@ static const luaL_reg PM_methods[] = {
   {"GetMove",pm_getmove},
   {"GetScale",pm_getcmdscale},
   {"GetType",pm_gettype},
+  {"GetMask",pm_getmask},
+  {"SetMask",pm_setmask},
+  {"GetMins",pm_getmins},
+  {"GetMaxs",pm_getmaxs},
   {"SetVelocity",pm_setvel},
   {"GetVelocity",pm_getvel},
   {"SetAngles",pm_setang},
   {"GetAngles",pm_getang},
+  {"SetPos",pm_setpos},
+  {"GetPos",pm_getpos},
+  {"EntIndex",pm_myindex},
   {"Walking", pm_walking},
   {"WaterLevel", pm_waterlevel},
   {0,0}
