@@ -1,10 +1,17 @@
 //__DL_BLOCK
 if(SERVER) then
-	--downloader.add("lua/sidescroller")
+	--downloader.add("lua/sidescroller.lua")
 	local function BlockAdjust(pl)
 		return false
 	end
 	hook.add("ShouldAdjustAngle","sidescroller",BlockAdjust)
+	
+	local function NoFallDamage(self,inflictor,attacker,damage,meansOfDeath)
+		if(meansOfDeath == MOD_FALLING) then
+			return 0
+		end
+	end
+	hook.add("PlayerDamaged","RemoveFallDamage",NoFallDamage)
 	
 	local function spawn(cl)
 		local wp = WP_GRENADE_LAUNCHER
@@ -19,9 +26,31 @@ end
 local contents = gOR(CONTENTS_SOLID,CONTENTS_PLAYERCLIP)
 local ind = {}
 local jump = nil
+local smoker = nil
 
 if(CLIENT) then
 	jump = LoadSound("sound/world/jumppad.wav")
+	local flare = LoadShader("smokePuff")
+	
+	smoker = function(pos,vel)
+		local le2 = LocalEntity()
+		le2:SetVelocity(Vector(0,0,100))
+		local ref = RefEntity()
+		ref:SetRotation(math.random(360))
+		ref:SetType(RT_SPRITE)
+		ref:SetShader(flare)
+		ref:SetRadius(15 + math.random(0,10))
+		ref:SetPos(pos)
+
+		le2:SetRefEntity(ref)
+		le2:SetStartTime(LevelTime())
+		le2:SetEndTime(LevelTime() + 600)
+		le2:SetType(LE_FADE_RGB)
+		le2:SetColor(1,1,1,1)
+		le2:SetPos(pos)
+		le2:SetVelocity(vel * .36)
+		le2:SetTrType(TR_LINEAR)	
+	end
 end
 
 local function OnGround(pm,mask)
@@ -33,35 +62,53 @@ end
 local function CheckDoubleJump(pm,mask)
 	local mx,my,mz = pm:GetMove()
 	local pl = pm:EntIndex()
+	local pos = pm:GetPos()
 	
 	ind[pl] = ind[pl] or {}
 	ind[pl].last_up = ind[pl].last_up or 0
 	ind[pl].canJump = false
 	ind[pl].jumpcount = ind[pl].jumpcount or 0
 	ind[pl].jumptimer = ind[pl].jumptimer or 0
+	ind[pl].range = ind[pl].range or 0
 	if(ind[pl].last_up != 127 and mz == 127) then
 		ind[pl].canJump = true
 	end
 	ind[pl].last_up = mz
 	
+	if(mz == -127) then 
+		local v = pm:GetVelocity()
+		local range = ind[pl].range
+		
+		if(range < 500 and v.z < -range) then
+			v.z = -range
+			
+			pm:SetVelocity(v)
+			
+			if(!OnGround(pm,mask)) then
+				ind[pl].smtime = ind[pl].smtime or LevelTime()
+				if(ind[pl].smtime < LevelTime()) then
+					if(smoker) then smoker(pos - Vector(0,0,30),v) end
+					ind[pl].range = ind[pl].range + (ind[pl].range/2)
+					ind[pl].smtime = LevelTime() + (ind[pl].range)
+				end
+			end
+		end
+	end
+	
 	if(ind[pl].canJump and ind[pl].jumptimer < LevelTime() and ind[pl].jumpcount < 2) then
 		local v = pm:GetVelocity()
 		if(v.z < 0) then
-			pm:SetVelocity(Vector(v.x,v.y,400))
+			pm:SetVelocity(Vector(v.x,v.y,450))
 		else
-			pm:SetVelocity(Vector(v.x,v.y,v.z + 400))
+			pm:SetVelocity(Vector(v.x,v.y,v.z + 450))
 		end
 		ind[pl].jumptimer = LevelTime() + 300
 		ind[pl].jumpcount = ind[pl].jumpcount + 1
+		PM_AddEvent(EV_JUMP)
 		if(CLIENT) then
 			local ent = GetEntityByIndex(pl)
 			if(ent != nil) then
-				local jump2 = LoadCustomSound(ent,"*jump1.wav")
-				if(ent != LocalPlayer()) then
-					PlaySound(pm:GetPos(),jump2)
-				else
-					PlaySound(jump2)
-				end
+				if(smoker) then smoker(pos - Vector(0,0,30),v) end
 			end
 		end
 	end
@@ -69,11 +116,11 @@ local function CheckDoubleJump(pm,mask)
 	if(OnGround(pm,mask)) then
 		ind[pl].jumptimer = LevelTime() + 250
 		ind[pl].jumpcount = 0
+		ind[pl].range = 30
 	end
 end
 
 function PlayerMove(pm,walk,forward,right)
-	--PM_Accelerate(Vector(0,0,1),4,10)
 	pm:SetMask(contents)
 	if(pm:GetType() == PM_DEAD) then
 		PM_Drop()
@@ -94,7 +141,6 @@ function PlayerMove(pm,walk,forward,right)
 	end
 	
 	local v = pm:GetVelocity()
-	--v.x = 0
 	pm:SetVelocity(v)
 
 	CheckDoubleJump(pm,contents)
