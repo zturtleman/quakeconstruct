@@ -210,6 +210,7 @@ void PM_Drop( void );
 void PM_DropTimers( void );
 void PM_UpdateViewAngles( playerState_t *ps, const usercmd_t *cmd );
 void PM_StepSlideMove( qboolean gravity );
+void PM_AddEvent( int newEvent );
 void Pmove (pmove_t *pmove, lua_State *L);
 
 //===================================================================================

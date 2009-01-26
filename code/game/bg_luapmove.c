@@ -309,6 +309,13 @@ int lpm_slidemove(lua_State *L) {
 	return 0;
 }
 
+int lpm_addevent(lua_State *L) {
+	luaL_checkinteger(L,1);
+
+	PM_AddEvent( lua_tonumber(L,1) );
+	return 0;
+}
+
 void BG_InitLuaPMove(lua_State *L) {
 	PM_register(L);
 
@@ -325,4 +332,5 @@ void BG_InitLuaPMove(lua_State *L) {
 	lua_register(L,"PM_Friction",lpm_friction);
 	lua_register(L,"PM_MovePlayer",lpm_movepl);
 	lua_register(L,"PM_StepSlideMove",lpm_slidemove);
+	lua_register(L,"PM_AddEvent",lpm_addevent);
 }
