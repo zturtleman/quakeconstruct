@@ -391,6 +391,23 @@ int qprof_functest(lua_State *L) {
 	return 1;
 }
 
+void CloseClientLua( void ) {
+	if(L != NULL) {
+		qlua_gethook(L,"Shutdown");
+		qlua_pcall(L,0,0,qtrue);
+		lua_close(L);
+
+		CG_Printf("----ClientSide Lua ShutDown-----!\n");
+
+		L = NULL;
+	}
+}
+
+int qclose(lua_State *L) {
+	CloseClientLua();
+	return 0;
+}
+
 void InitClientLua( void ) {
 	CloseClientLua();
 	L = lua_open();
@@ -452,14 +469,4 @@ void DoLuaIncludes( void ) {
 
 lua_State *GetClientLuaState( void ) {
 	return L;
-}
-
-void CloseClientLua( void ) {
-	if(L != NULL) {
-		lua_close(L);
-
-		CG_Printf("----ClientSide Lua ShutDown-----!\n");
-
-		L = NULL;
-	}
 }

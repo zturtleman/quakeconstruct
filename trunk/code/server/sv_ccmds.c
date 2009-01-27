@@ -700,6 +700,18 @@ static void SV_KillServer_f( void ) {
 	SV_Shutdown( "killserver" );
 }
 
+static void SV_LuaShutdown( void ) {
+	if(gvm) {
+		VM_Call(gvm,GAME_SHUTDOWN_LUA);
+	}
+}
+
+static void SV_LuaRestart( void ) {
+	if(gvm) {
+		VM_Call(gvm,GAME_RESTART_LUA);
+	}
+}
+
 //===========================================================
 
 /*
@@ -727,6 +739,8 @@ void SV_AddOperatorCommands( void ) {
 	Cmd_AddCommand ("map_restart", SV_MapRestart_f);
 	Cmd_AddCommand ("sectorlist", SV_SectorList_f);
 	Cmd_AddCommand ("map", SV_Map_f);
+	Cmd_AddCommand ("lua_shutdown", SV_LuaShutdown);
+	Cmd_AddCommand ("lua_restart", SV_LuaRestart);
 #ifndef PRE_RELEASE_DEMO
 	Cmd_AddCommand ("devmap", SV_Map_f);
 	Cmd_AddCommand ("spmap", SV_Map_f);
@@ -757,6 +771,8 @@ void SV_RemoveOperatorCommands( void ) {
 	Cmd_RemoveCommand ("map_restart");
 	Cmd_RemoveCommand ("sectorlist");
 	Cmd_RemoveCommand ("say");
+	Cmd_RemoveCommand ("lua_shutdown");
+	Cmd_RemoveCommand ("lua_restart");
 #endif
 }
 

@@ -505,7 +505,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 		self->client->pers.netname, obit );
 
 
-	if(self->client != NULL) {
+	if(L != NULL && self->client != NULL) {
 		qlua_gethook(L, "PlayerKilled");
 		//lua_pushplayer(L,self->client);
 		lua_pushentity(L,self);
@@ -921,7 +921,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 		VectorNormalize(dir);
 	}
 
-	if(targ->client != NULL && qlua_lockdamage == qfalse) {
+	if(L != NULL && targ->client != NULL && qlua_lockdamage == qfalse) {
 		qlua_gethook(L, "PrePlayerDamaged");
 		lua_pushentity(L,targ);
 		lua_pushentity(L,inflictor);
@@ -1045,7 +1045,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 	asave = CheckArmor (targ, take, dflags);
 	take -= asave;
 
-	if(targ->client != NULL && qlua_lockdamage == qfalse) {
+	if(L != NULL && targ->client != NULL && qlua_lockdamage == qfalse) {
 		callargs = 5;
 		qlua_gethook(L, "PlayerDamaged");
 		lua_pushentity(L,targ);
@@ -1112,7 +1112,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 		targ->health = targ->health - take;
 		//trap_SendServerCommand( -1, va("playerhealth %i %i", targ->s.number, targ->health) );
 		
-		if(targ->client != NULL && qlua_lockdamage == qfalse) {
+		if(L != NULL && targ->client != NULL && qlua_lockdamage == qfalse) {
 			callargs = 6;
 			qlua_gethook(L, "PostPlayerDamaged");
 			lua_pushentity(L,targ);
@@ -1133,7 +1133,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 		}
 
 		if ( targ->health <= 0 ) {
-			if(qlua_getstored(GetServerLuaState(), targ->lua_die)) {
+			if(L != NULL && qlua_getstored(GetServerLuaState(), targ->lua_die)) {
 				lua_pushentity(GetServerLuaState(), targ);
 				lua_pushentity(GetServerLuaState(), inflictor);
 				lua_pushentity(GetServerLuaState(), attacker);
@@ -1142,7 +1142,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 				qlua_pcall(GetServerLuaState(), 5, 0, qfalse);
 			}
 		} else {
-			if(qlua_getstored(GetServerLuaState(), targ->lua_pain)) {
+			if(L != NULL && qlua_getstored(GetServerLuaState(), targ->lua_pain)) {
 				lua_pushentity(GetServerLuaState(), targ);
 				lua_pushentity(GetServerLuaState(), inflictor);
 				lua_pushentity(GetServerLuaState(), attacker);

@@ -31,6 +31,7 @@ HOOKS.SHARED = {
 	"EntityLinked",
 	"EntityUnLinked",
 	"PlayerMove",
+	"Shutdown",
 }
 
 HOOKS.CL = {

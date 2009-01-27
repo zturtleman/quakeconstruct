@@ -1024,8 +1024,10 @@ void ClientBegin( int clientNum ) {
 	ent->pain = 0;
 	ent->client = client;
 
-	qlua_clearfunc(GetServerLuaState(), ent->lua_touch);
-	qlua_clearfunc(GetServerLuaState(), ent->lua_pain);
+	if(GetServerLuaState() != NULL) {
+		qlua_clearfunc(GetServerLuaState(), ent->lua_touch);
+		qlua_clearfunc(GetServerLuaState(), ent->lua_pain);
+	}
 
 	client->pers.connected = CON_CONNECTED;
 	client->pers.enterTime = level.time;
@@ -1040,9 +1042,11 @@ void ClientBegin( int clientNum ) {
 	memset( &client->ps, 0, sizeof( client->ps ) );
 	client->ps.eFlags = flags;
 
-	qlua_gethook(GetServerLuaState(), "PlayerJoined");
-	lua_pushentity(GetServerLuaState(),ent);
-	qlua_pcall(GetServerLuaState(),1,0,qtrue);
+	if(GetServerLuaState() != NULL) {
+		qlua_gethook(GetServerLuaState(), "PlayerJoined");
+		lua_pushentity(GetServerLuaState(),ent);
+		qlua_pcall(GetServerLuaState(),1,0,qtrue);
+	}
 
 	// locate ent at a spawn point
 	ClientSpawn( ent, NULL );
@@ -1377,9 +1381,11 @@ void ClientDisconnect( int clientNum ) {
 		BotAIShutdownClient( clientNum, qfalse );
 	}
 
-	qlua_gethook(GetServerLuaState(), "PlayerDisconnected");
-	lua_pushentity(GetServerLuaState(),ent);
-	qlua_pcall(GetServerLuaState(),1,0,qtrue);
+	if(GetServerLuaState() != NULL) {
+		qlua_gethook(GetServerLuaState(), "PlayerDisconnected");
+		lua_pushentity(GetServerLuaState(),ent);
+		qlua_pcall(GetServerLuaState(),1,0,qtrue);
+	}
 }
 
 

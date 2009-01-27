@@ -2259,6 +2259,18 @@ void CL_SetModel_f( void ) {
 	}
 }
 
+void CL_LuaShutdown( void ) {
+	if(cgvm) {
+		VM_Call(cgvm, CG_SHUTDOWN_LUA);
+	}
+}
+
+void CL_LuaRestart( void ) {
+	if(cgvm) {
+		VM_Call(cgvm, CG_RESTART_LUA);
+	}
+}
+
 /*
 ====================
 CL_Init
@@ -2394,6 +2406,8 @@ void CL_Init( void ) {
 	Cmd_AddCommand ("fs_openedList", CL_OpenedPK3List_f );
 	Cmd_AddCommand ("fs_referencedList", CL_ReferencedPK3List_f );
 	Cmd_AddCommand ("model", CL_SetModel_f );
+	Cmd_AddCommand ("lua_shutdown_cl", CL_LuaShutdown );
+	Cmd_AddCommand ("lua_restart_cl", CL_LuaRestart );
 	CL_InitRef();
 
 	SCR_Init ();
@@ -2449,6 +2463,8 @@ void CL_Shutdown( void ) {
 	Cmd_RemoveCommand ("serverstatus");
 	Cmd_RemoveCommand ("showip");
 	Cmd_RemoveCommand ("model");
+	Cmd_RemoveCommand ("lua_shutdown_cl");
+	Cmd_RemoveCommand ("lua_restart_cl");
 
 	Cvar_Set( "cl_running", "0" );
 

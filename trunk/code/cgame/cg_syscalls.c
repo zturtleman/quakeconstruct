@@ -544,3 +544,7 @@ float trap_N_ReadFloat() {
 	free(f);
 	return out;
 }
+
+int	trap_IsUI() {
+	return syscall(CG_ISUI);
+}

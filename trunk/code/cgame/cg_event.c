@@ -498,14 +498,16 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 	}
 	ci = &cgs.clientinfo[ clientNum ];
 
-	qlua_gethook(L, "EventReceived");
-	lua_pushentity(L,cent);
-	lua_pushinteger(L,event);
-	lua_pushvector(L,position);
-	lua_pushvector(L,dir);
-	qlua_pcall(L,4,1,qtrue);
-	if(lua_type(L,-1) == LUA_TBOOLEAN && lua_toboolean(L,-1)) {
-		return;
+	if(L != NULL) {
+		qlua_gethook(L, "EventReceived");
+		lua_pushentity(L,cent);
+		lua_pushinteger(L,event);
+		lua_pushvector(L,position);
+		lua_pushvector(L,dir);
+		qlua_pcall(L,4,1,qtrue);
+		if(lua_type(L,-1) == LUA_TBOOLEAN && lua_toboolean(L,-1)) {
+			return;
+		}
 	}
 
 	switch ( event ) {

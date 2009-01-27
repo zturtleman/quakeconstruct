@@ -221,22 +221,26 @@ void ClientImpacts( gentity_t *ent, pmove_t *pm ) {
 		}
 		other = &g_entities[ pm->touchents[i] ];
 
-		if(qlua_getstored(GetServerLuaState(), ent->lua_touch)) {
-			lua_pushentity(GetServerLuaState(), ent);
-			lua_pushentity(GetServerLuaState(), other);
-			lua_pushtrace(GetServerLuaState(), trace);
-			qlua_pcall(GetServerLuaState(), 3, 0, qfalse);
+		if(GetServerLuaState() != NULL) {
+			if(qlua_getstored(GetServerLuaState(), ent->lua_touch)) {
+				lua_pushentity(GetServerLuaState(), ent);
+				lua_pushentity(GetServerLuaState(), other);
+				lua_pushtrace(GetServerLuaState(), trace);
+				qlua_pcall(GetServerLuaState(), 3, 0, qfalse);
+			}
 		}
 
 		if ( ( ent->r.svFlags & SVF_BOT ) ) {
 			if(ent->touch) ent->touch( ent, other, &trace );
 		}
 
-		if(qlua_getstored(GetServerLuaState(), other->lua_touch)) {
-			lua_pushentity(GetServerLuaState(), other);
-			lua_pushentity(GetServerLuaState(), ent);
-			lua_pushtrace(GetServerLuaState(), trace);
-			qlua_pcall(GetServerLuaState(), 3, 0, qfalse);
+		if(GetServerLuaState() != NULL) {
+			if(qlua_getstored(GetServerLuaState(), other->lua_touch)) {
+				lua_pushentity(GetServerLuaState(), other);
+				lua_pushentity(GetServerLuaState(), ent);
+				lua_pushtrace(GetServerLuaState(), trace);
+				qlua_pcall(GetServerLuaState(), 3, 0, qfalse);
+			}
 		}
 
 		if ( !other->touch ) {
@@ -323,22 +327,26 @@ void	G_TouchTriggers( gentity_t *ent ) {
 
 		memset( &trace, 0, sizeof(trace) );
 
-		if(qlua_getstored(GetServerLuaState(), hit->lua_touch)) {
-			lua_pushentity(GetServerLuaState(), hit);
-			lua_pushentity(GetServerLuaState(), ent);
-			lua_pushtrace(GetServerLuaState(), trace);
-			qlua_pcall(GetServerLuaState(), 3, 0, qfalse);
+		if(GetServerLuaState() != NULL) {
+			if(qlua_getstored(GetServerLuaState(), hit->lua_touch)) {
+				lua_pushentity(GetServerLuaState(), hit);
+				lua_pushentity(GetServerLuaState(), ent);
+				lua_pushtrace(GetServerLuaState(), trace);
+				qlua_pcall(GetServerLuaState(), 3, 0, qfalse);
+			}
 		}
 
 		if ( ent->client && ent->client->ps.stats[STAT_HEALTH] > 0 && hit->touch ) {
 			hit->touch (hit, ent, &trace);
 		}
 
-		if(qlua_getstored(GetServerLuaState(), ent->lua_touch)) {
-			lua_pushentity(GetServerLuaState(), ent);
-			lua_pushentity(GetServerLuaState(), hit);
-			lua_pushtrace(GetServerLuaState(), trace);
-			qlua_pcall(GetServerLuaState(), 3, 0, qfalse);
+		if(GetServerLuaState() != NULL) {
+			if(qlua_getstored(GetServerLuaState(), ent->lua_touch)) {
+				lua_pushentity(GetServerLuaState(), ent);
+				lua_pushentity(GetServerLuaState(), hit);
+				lua_pushtrace(GetServerLuaState(), trace);
+				qlua_pcall(GetServerLuaState(), 3, 0, qfalse);
+			}
 		}
 
 		if ( ( ent->r.svFlags & SVF_BOT ) ) {

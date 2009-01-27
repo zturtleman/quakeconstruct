@@ -236,6 +236,13 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 		return 0;
 	case GAME_CONSOLE_COMMAND:
 		return ConsoleCommand();
+	case GAME_SHUTDOWN_LUA:
+		CloseServerLua();
+		return 0;
+	case GAME_RESTART_LUA:
+		CloseServerLua();
+		G_InitLua();
+		return 0;
 	case BOTAI_START_FRAME:
 		return BotAIStartFrame( arg0 );
 	}
@@ -420,13 +427,15 @@ qboolean Cmd_Check_Lua( gentity_t *ent, char cmd[] ) {
 	
 	qlua_nextarg = 1;
 
-	lua_getglobal(L, "__concommand");
-	lua_pushentity(L, ent);
-	lua_pushstring(L, cmd);
-	qlua_pcall(L,1,1,qtrue);
-	if(lua_type(L,-1) == LUA_TBOOLEAN) {
-		if(lua_toboolean(L,-1) != 0) {
-			return qtrue;
+	if(L != NULL) {
+		lua_getglobal(L, "__concommand");
+		lua_pushentity(L, ent);
+		lua_pushstring(L, cmd);
+		qlua_pcall(L,1,1,qtrue);
+		if(lua_type(L,-1) == LUA_TBOOLEAN) {
+			if(lua_toboolean(L,-1) != 0) {
+				return qtrue;
+			}
 		}
 	}
 	return qfalse;
@@ -468,6 +477,7 @@ void G_InitLua() {
 	InitServerLua();
 
 	L = GetServerLuaState();
+	if(L == NULL) return;
 	
 	BG_InitLuaTrajectory(L);
 	BG_InitLuaPMove(L);
@@ -1790,9 +1800,11 @@ void G_RunThink (gentity_t *ent) {
 
 	ent->nextthink = 0;
 	if (ent->lua_think != 0) {
-		if(qlua_getstored(GetServerLuaState(), ent->lua_think)) {
-			lua_pushentity(GetServerLuaState(), ent);
-			qlua_pcall(GetServerLuaState(), 1, 0, qfalse);
+		if(GetServerLuaState() != NULL) {
+			if(qlua_getstored(GetServerLuaState(), ent->lua_think)) {
+				lua_pushentity(GetServerLuaState(), ent);
+				qlua_pcall(GetServerLuaState(), 1, 0, qfalse);
+			}
 		}
 	}
 
@@ -1872,8 +1884,10 @@ void G_RunFrame( int levelTime ) {
 	// get any cvar changes
 	G_UpdateCvars();
 
-	qlua_gethook(L, "Think");
-	qlua_pcall(L,0,0,qtrue);
+	if(L != NULL) {
+		qlua_gethook(L, "Think");
+		qlua_pcall(L,0,0,qtrue);
+	}
 
 	//
 	// go through all allocated objects
@@ -1948,9 +1962,11 @@ void G_RunFrame( int levelTime ) {
 				ent->s.health = ent->health;
 			}
 
-			qlua_gethook(L, "ClientThink");
-			lua_pushentity(L, ent);
-			qlua_pcall(L,1,0,qtrue);
+			if(L != NULL) {
+				qlua_gethook(L, "ClientThink");
+				lua_pushentity(L, ent);
+				qlua_pcall(L,1,0,qtrue);
+			}
 
 			continue;
 		}
