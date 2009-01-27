@@ -1,6 +1,6 @@
 //__DL_BLOCK
 if(SERVER) then
-	--downloader.add("lua/sidescroller.lua")
+	downloader.add("lua/sidescroller.lua")
 	local function BlockAdjust(pl)
 		return false
 	end
@@ -427,6 +427,11 @@ if(CLIENT) then
 		local temp = rm
 		rm = fm*-1
 		fm = temp
+		
+		if(rm != 0) then
+			um = rm * -1
+		end
+		
 		
 		if(FLIP_AXIS) then 
 			fm = fm * -1
