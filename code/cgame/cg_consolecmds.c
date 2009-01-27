@@ -518,15 +518,17 @@ qboolean CG_ConsoleCommand( void ) {
 	lua_State *L = GetClientLuaState();
 
 	cmd = CG_Argv(0);
+	
+	if(L != NULL) {
+		if(Q_stricmp(cmd,"luamsg") == 0) {
+			CG_Printf("^1Cannot Use This As A Console Command.\n");
+			return qtrue;
+		}
 
-	if(Q_stricmp(cmd,"luamsg") == 0) {
-		CG_Printf("^1Cannot Use This As A Console Command.\n");
-		return qtrue;
+		if(Cmd_Check_Lua(cmd)) {
+			return qtrue;	
+		};
 	}
-
-	if(Cmd_Check_Lua(cmd)) {
-		return qtrue;	
-	};
 
 	for ( i = 0 ; i < sizeof( commands ) / sizeof( commands[0] ) ; i++ ) {
 		if ( !Q_stricmp( cmd, commands[i].cmd ) ) {

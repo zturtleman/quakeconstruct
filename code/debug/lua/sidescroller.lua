@@ -8,7 +8,7 @@ if(SERVER) then
 	
 	local function NoFallDamage(self,inflictor,attacker,damage,meansOfDeath)
 		if(meansOfDeath == MOD_FALLING) then
-			return 0
+			--return 0
 		end
 	end
 	hook.add("PlayerDamaged","RemoveFallDamage",NoFallDamage)

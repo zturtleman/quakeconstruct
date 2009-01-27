@@ -250,6 +250,11 @@ int qlua_localang(lua_State *L) {
 	return 1;
 }
 
+int qlua_isUI(lua_State *L) {
+	lua_pushboolean(L,trap_IsUI());
+	return 1;
+}
+
 static const luaL_reg Util_methods[] = {
   {"GetItemIcon",		qlua_getitemicon},
   {"GetItemModel",		qlua_getitemmodel},
@@ -265,6 +270,7 @@ static const luaL_reg Util_methods[] = {
   {"LocalPos",			qlua_localpos},
   {"LocalAngles",		qlua_localang},
   {"CharData",			qlua_chardata},
+  {"IsUI",				qlua_isUI},
   {0,0}
 };
 

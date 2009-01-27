@@ -506,14 +506,16 @@ Marks the entity as free
 void G_FreeEntity( gentity_t *ed ) {
 	qlua_UnlinkEntity (ed);		// unlink from world
 
-	qlua_clearfunc(GetServerLuaState(), ed->lua_blocked);
-	qlua_clearfunc(GetServerLuaState(), ed->lua_die);
-	qlua_clearfunc(GetServerLuaState(), ed->lua_pain);
-	qlua_clearfunc(GetServerLuaState(), ed->lua_reached);
-	qlua_clearfunc(GetServerLuaState(), ed->lua_think);
-	qlua_clearfunc(GetServerLuaState(), ed->lua_touch);
-	qlua_clearfunc(GetServerLuaState(), ed->lua_use);
-	qlua_clearfunc(GetServerLuaState(), ed->lua_persistanttable);
+	if(GetServerLuaState() != NULL) {
+		qlua_clearfunc(GetServerLuaState(), ed->lua_blocked);
+		qlua_clearfunc(GetServerLuaState(), ed->lua_die);
+		qlua_clearfunc(GetServerLuaState(), ed->lua_pain);
+		qlua_clearfunc(GetServerLuaState(), ed->lua_reached);
+		qlua_clearfunc(GetServerLuaState(), ed->lua_think);
+		qlua_clearfunc(GetServerLuaState(), ed->lua_touch);
+		qlua_clearfunc(GetServerLuaState(), ed->lua_use);
+		qlua_clearfunc(GetServerLuaState(), ed->lua_persistanttable);
+	}
 
 	if ( ed->neverFree ) {
 		return;

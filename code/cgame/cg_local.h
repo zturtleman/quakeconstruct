@@ -1725,6 +1725,7 @@ char		*trap_N_ReadString();
 float		trap_N_ReadFloat();
 void		trap_SetUserCommand( usercmd_t *cmd );
 void		trap_EnableCommandOverride( qboolean b );
+int			trap_IsUI(void);
 
 typedef enum {
   SYSTEM_PRINT,

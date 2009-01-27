@@ -293,6 +293,23 @@ int qlimit(lua_State *L) {
 	return 0;
 }
 
+void CloseServerLua( void ) {
+	if(L != NULL) {
+		qlua_gethook(L,"Shutdown");
+		qlua_pcall(L,0,0,qtrue);
+		lua_close(L);
+
+		G_Printf("----ServerSide Lua ShutDown-----!\n");
+
+		L = NULL;
+	}
+}
+
+int qclose(lua_State *L) {
+	CloseServerLua();
+	return 0;
+}
+
 void InitServerLua( void ) {
 	CloseServerLua();
 	L = lua_open();
@@ -375,14 +392,4 @@ void DoLuaIncludes( void ) {
 
 lua_State *GetServerLuaState( void ) {
 	return L;
-}
-
-void CloseServerLua( void ) {
-	if(L != NULL) {
-		lua_close(L);
-
-		G_Printf("----ServerSide Lua ShutDown-----!\n");
-
-		L = NULL;
-	}
 }

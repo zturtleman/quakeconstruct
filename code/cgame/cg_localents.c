@@ -64,16 +64,18 @@ void CG_FreeLocalEntity( localEntity_t *le ) {
 		CG_Error( "CG_FreeLocalEntity: not active" );
 	}
 
-	if(qlua_getstored(GetClientLuaState(), le->lua_die)) {
-		lua_pushlocalentity(GetClientLuaState(), le);
-		qlua_pcall(GetClientLuaState(), 1, 0, qfalse);
-	}
+	if(GetClientLuaState() != NULL) {
+		if(qlua_getstored(GetClientLuaState(), le->lua_die)) {
+			lua_pushlocalentity(GetClientLuaState(), le);
+			qlua_pcall(GetClientLuaState(), 1, 0, qfalse);
+		}
 
-	le->id = 0;
-	qlua_clearfunc(GetClientLuaState(),le->lua_die);
-	qlua_clearfunc(GetClientLuaState(),le->lua_bounce);
-	qlua_clearfunc(GetClientLuaState(),le->lua_think);
-	qlua_clearfunc(GetClientLuaState(),le->lua_stopped);
+		le->id = 0;
+		qlua_clearfunc(GetClientLuaState(),le->lua_die);
+		qlua_clearfunc(GetClientLuaState(),le->lua_bounce);
+		qlua_clearfunc(GetClientLuaState(),le->lua_think);
+		qlua_clearfunc(GetClientLuaState(),le->lua_stopped);
+	}
 
 	le->lua_die = 0;
 	le->lua_think = 0;
@@ -251,18 +253,22 @@ void CG_ReflectVelocity( localEntity_t *le, trace_t *trace ) {
 		( trace->plane.normal[2] > 0 && 
 		( le->pos.trDelta[2] < 40 || le->pos.trDelta[2] < -cg.frametime * le->pos.trDelta[2] ) ) ) {
 		le->pos.trType = TR_STATIONARY;
-		if(qlua_getstored(GetClientLuaState(), le->lua_stopped)) {
-			lua_pushlocalentity(GetClientLuaState(), le);
-			qlua_pcall(GetClientLuaState(), 1, 0, qfalse);
+		if(GetClientLuaState() != NULL) {
+			if(qlua_getstored(GetClientLuaState(), le->lua_stopped)) {
+				lua_pushlocalentity(GetClientLuaState(), le);
+				qlua_pcall(GetClientLuaState(), 1, 0, qfalse);
+			}
 		}
 	} else {
 
 	}
 
-	if(qlua_getstored(GetClientLuaState(), le->lua_bounce)) {
-		lua_pushlocalentity(GetClientLuaState(), le);
-		lua_pushtrace(GetClientLuaState(), *trace);
-		qlua_pcall(GetClientLuaState(), 2, 0, qfalse);
+	if(GetClientLuaState() != NULL) {
+		if(qlua_getstored(GetClientLuaState(), le->lua_bounce)) {
+			lua_pushlocalentity(GetClientLuaState(), le);
+			lua_pushtrace(GetClientLuaState(), *trace);
+			qlua_pcall(GetClientLuaState(), 2, 0, qfalse);
+		}
 	}
 }
 
@@ -877,7 +883,7 @@ void CG_AddLocalEntities( void ) {
 			continue;
 		}
 
-		if(le->lua_nextThink < cg.time) {
+		if(le->lua_nextThink < cg.time && GetClientLuaState() != NULL) {
 			if(qlua_getstored(GetClientLuaState(), le->lua_think)) {
 				lua_pushlocalentity(GetClientLuaState(), le);
 				qlua_pcall(GetClientLuaState(), 1, 0, qfalse);

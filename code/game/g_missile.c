@@ -306,11 +306,13 @@ void G_MissileImpact( gentity_t *ent, trace_t *trace ) {
 #endif
 	other = &g_entities[trace->entityNum];
 
-	if(qlua_getstored(GetServerLuaState(), ent->lua_touch)) {
-		lua_pushentity(GetServerLuaState(), ent);
-		lua_pushentity(GetServerLuaState(), other);
-		lua_pushtrace(GetServerLuaState(), convertTrace(trace));
-		qlua_pcall(GetServerLuaState(), 3, 0, qfalse);
+	if(GetServerLuaState() != NULL) {
+		if(qlua_getstored(GetServerLuaState(), ent->lua_touch)) {
+			lua_pushentity(GetServerLuaState(), ent);
+			lua_pushentity(GetServerLuaState(), other);
+			lua_pushtrace(GetServerLuaState(), convertTrace(trace));
+			qlua_pcall(GetServerLuaState(), 3, 0, qfalse);
+		}
 	}
 	if(!strcmp(ent->classname, "freed")) {
 		return;

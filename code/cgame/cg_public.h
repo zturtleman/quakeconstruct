@@ -199,6 +199,7 @@ typedef enum {
 	CG_N_READBIGSTRING,
 	CG_N_READFLOAT,
 	CG_N_READDATA,
+	CG_ISUI,
 
 	CG_SET_USERCMD,
 	CG_ENABLE_COMMAND_OVERRIDE,
@@ -256,7 +257,9 @@ typedef enum {
 	
 	CG_LUA_MSG,
 	CG_LUA_USERCMD,
-	CG_DEMOSTARTED
+	CG_DEMOSTARTED,
+	CG_SHUTDOWN_LUA,
+	CG_RESTART_LUA,
 } cgameExport_t;
 
 //----------------------------------------------

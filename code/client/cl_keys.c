@@ -1083,7 +1083,7 @@ void CL_KeyEvent (int key, qboolean down, unsigned time) {
 	}
 
 
-	if ( key == K_MOUSE1 && lockmouse && down ) {
+	if ( key == K_MOUSE1 && lockmouse && down && (cls.keyCatchers & KEYCATCH_UI) == 0) {
 		return;
 	}
 

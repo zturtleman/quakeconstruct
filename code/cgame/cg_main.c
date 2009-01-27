@@ -86,6 +86,25 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 	case CG_DEMOSTARTED:
 		CG_DemoStarted();
 		return 0;
+	case CG_SHUTDOWN_LUA:
+		CloseClientLua();
+		return 0;
+	case CG_RESTART_LUA:
+		CloseClientLua();
+		CG_InitLua();
+		if(GetClientLuaState()) {
+			qlua_gethook(GetClientLuaState(),"InitialSnapshot");
+			qlua_pcall(GetClientLuaState(),0,0,qtrue);
+		}
+		if(GetClientLuaState()) {
+			CG_PushCGTab(GetClientLuaState());
+		}
+		DoLuaInit();
+		if(GetClientLuaState()) {
+			qlua_gethook(GetClientLuaState(),"Loaded");
+			qlua_pcall(GetClientLuaState(),0,0,qtrue);
+		}
+		return 0;
 	default:
 		CG_Error( "vmMain: unknown command %i", command );
 		break;
@@ -2075,7 +2094,8 @@ void CG_InitLua() {
 	InitClientLua();
 
 	L = GetClientLuaState();
-	
+	if(L == NULL) return;
+
 	BG_InitLuaTrajectory(L);
 	BG_InitLuaPMove(L);
 	CG_InitLuaVector(L);

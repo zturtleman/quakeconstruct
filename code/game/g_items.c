@@ -632,12 +632,14 @@ gentity_t *Drop_Item( gentity_t *ent, gitem_t *item, float angle ) {
 
 	lua_State *L = GetServerLuaState();
 
-	qlua_gethook(L, "ShouldDropItem");
-	lua_pushstring(L, item->classname);
-	qlua_pcall(L,1,1,qtrue);
-	if(lua_type(L,-1) == LUA_TBOOLEAN) {
-		if(lua_toboolean(L,-1) == 0) {
-			return NULL;
+	if(L != NULL) {
+		qlua_gethook(L, "ShouldDropItem");
+		lua_pushstring(L, item->classname);
+		qlua_pcall(L,1,1,qtrue);
+		if(lua_type(L,-1) == LUA_TBOOLEAN) {
+			if(lua_toboolean(L,-1) == 0) {
+				return NULL;
+			}
 		}
 	}
 

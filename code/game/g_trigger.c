@@ -68,7 +68,9 @@ void multi_trigger( gentity_t *ent, gentity_t *activator ) {
 		// we can't just remove (self) here, because this is a touch function
 		// called while looping through area links...
 		ent->touch = 0;
-		qlua_clearfunc(GetServerLuaState(), ent->lua_touch);
+		if(GetServerLuaState() != NULL) {
+			qlua_clearfunc(GetServerLuaState(), ent->lua_touch);
+		}
 
 		ent->nextthink = level.time + FRAMETIME;
 		ent->think = G_FreeEntity;

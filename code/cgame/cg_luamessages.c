@@ -1,10 +1,12 @@
 #include "cg_local.h"
 
 void qlua_HandleMessage() {
-	int data = trap_N_ReadShort();
-	qlua_gethook(GetClientLuaState(),"_HandleMessage");
-	lua_pushinteger(GetClientLuaState(),data);
-	qlua_pcall(GetClientLuaState(),1,0,qtrue);
+	if(GetClientLuaState() != NULL) {
+		int data = trap_N_ReadShort();
+		qlua_gethook(GetClientLuaState(),"_HandleMessage");
+		lua_pushinteger(GetClientLuaState(),data);
+		qlua_pcall(GetClientLuaState(),1,0,qtrue);
+	}
 }
 
 int qlua_readshort(lua_State *L) {
