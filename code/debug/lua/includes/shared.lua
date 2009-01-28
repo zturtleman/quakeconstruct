@@ -101,12 +101,16 @@ else
 			print("Admin Verified!\n")
 			ADMIN = true
 			CallHook("ClientReady")
+			CLIENT_READY = true
 			called = true
 		end
 	end
 	hook.add("MessageReceived","includes",message)
 	
-	Timer(10,function() if(!called) then CallHook("ClientReady") end end)
+	Timer(10,function() if(!called) then 
+		CallHook("ClientReady")
+		CLIENT_READY = true
+	end end)
 	
 	function IsAdmin()
 		return ADMIN

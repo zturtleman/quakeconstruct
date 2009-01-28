@@ -13,6 +13,10 @@ local gibpos = Vector()
 local look = Vector()
 local look2 = Vector()
 local headtween = nil
+local ddir = 0
+local shake = 0
+local rsx = 0
+local rsy = 0
 leganim:SetType(ANIM_ACT_LOOP_LERP)
 legidle:SetType(ANIM_ACT_LOOP_LERP)
 local function trDown(pos)
@@ -46,6 +50,7 @@ local function sight(pos,ang)
 	local endpos = vAdd(pos,vMul(f,10000))
 	local res = TraceLine(pos,endpos,nil,1)
 	RefFlare(res.endpos)
+	return res.endpos
 end
 
 local function d3d()
@@ -89,6 +94,7 @@ local function d3d()
 		util.AnimatePlayer(LocalPlayer(),legs,torso)
 		util.AnglePlayer(LocalPlayer(),legs,torso,head)
 	end
+
 	
 	legs:SetPos(vSub(pos,off)) --Vector(652,1872,24)
 	legs:SetPos2(vSub(pos,off))
@@ -167,6 +173,7 @@ end
 hook.add("Draw3D","cl_legtest",d3d)
 
 local deadpos = Vector()
+local viewang = Vector()
 
 local function legview(pos,ang,fovx,fovy)
 	local hp = _CG.stats[STAT_HEALTH]
@@ -247,19 +254,40 @@ local function legview(pos,ang,fovx,fovy)
 		headtween = nil
 	end
 	
+	if(shake > 0) then
+		rsx = _CG.refdef.right*(math.random(-shake*100,shake*100)/100)
+		rsy = _CG.refdef.up*(math.random(-shake*100,shake*100)/100)
+		pos = pos + rsx
+		pos = pos + rsy
+		shake = shake / (1 + (0.07 * Lag()))
+		if(shake < .1) then shake = 0 end
+		local r = shake*2
+		if(r > 90) then r = 90 end
+		if(r < -90) then r = -90 end
+		ang.z = ang.z + (sdir * r)
+		if(ang.z < -30) then ang.z = -30 end
+		if(ang.z > 30) then ang.z = 30 end
+	end
+	
 	ApplyView(pos,ang)
 end
 hook.add("CalcView","cl_legtest",legview)
 
 local function moused(x,y)
-	--[[look = vAdd(look,Vector(y/6,-x/6,0))
+	look = vAdd(look,Vector(y/6,-x/6,0))
 	if(look.x < -70) then look.x = -70 end
 	if(look.x > 100) then look.x = 100 end
 	
 	if(look.y < -80) then look.y = -80 end
-	if(look.y > 80) then look.y = 80 end]]
+	if(look.y > 80) then look.y = 80 end
 end
 hook.add("MouseEvent","cl_legtest",moused)
+
+local function shakeIt(p,c,a)
+	shake = shake + 5
+	sdir = ddir
+end
+concommand.Add("shake",shakeIt)
 
 local function processDamage(attacker,pos,dmg,death,waslocal,wasme,hp)
 	if(waslocal) then
@@ -268,6 +296,10 @@ local function processDamage(attacker,pos,dmg,death,waslocal,wasme,hp)
 			gibpos.z = trDown(gibpos).z
 		end
 		health = hp
+		
+		if(dmg > 50) then dmg = 50 end
+		shake = shake + (dmg/3)
+		sdir = ddir
 	end
 end
 

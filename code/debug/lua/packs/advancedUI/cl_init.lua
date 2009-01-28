@@ -236,14 +236,25 @@ local function mUp()
 	mouseIsDown = false
 	local mx = GetMouseX()
 	local my = GetMouseY()
+	local other = nil
 	for k,v in pairs(UI_Active) do
-		if(v:IsVisible() and v.__wasPressed == true) then
+		if(v:IsVisible()) then
 			if(panelCollide(v,mx,my)) then
-				v:MouseReleased(mx,my)
-			else
-				v:MouseReleasedOutside(mx,my)
+				if(v.__wasPressed == true) then
+					v:MouseReleased(mx,my)
+					v.__wasPressed = false
+					other = v
+				end
 			end
-			v.__wasPressed = false
+		end
+	end
+	for k,v in pairs(UI_Active) do
+		if(v:IsVisible() and v != other) then
+			if(!panelCollide(v,mx,my)) then
+				v:MouseReleasedOutside(mx,my,other)
+				v.__mouseInside = false
+				v.__wasPressed = false
+			end
 		end
 	end
 end
@@ -368,6 +379,9 @@ local function drawx()
 						table.insert(layoutvalidate,v.parent)
 					end
 				end]]
+				if(v:GetDelegate() != nil and v:GetDelegate():IsVisible() == false) then
+					v:SetVisible(v:GetDelegate():IsVisible())
+				end
 				v:Think()
 			end
 			--if(v and v.rmvx == 1) then collect = true end

@@ -225,6 +225,8 @@ function Skin:DrawTextArea()
 	end
 	
 	if((LevelTime() % 500) > 200) then
-		SkinCall("Text",panel:GetX() + panel.caret[1]*panel.tw,panel:GetY() + panel.caret[2]*panel.th,"\t",panel.tw,panel.th)
+		if(panel:ShouldDrawCaret()) then
+			SkinCall("Text",panel:GetX() + panel.caret[1]*panel.tw,panel:GetY() + panel.caret[2]*panel.th,"\t",panel.tw,panel.th)
+		end
 	end
 end

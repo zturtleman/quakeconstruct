@@ -235,14 +235,74 @@ if(CLIENT) then
 	end
 	hook.add("Draw3D","sidescroller",draw3d)
 
-	local function line(x1,y1,x2,y2)
+	local function line(x1,y1,x2,y2,size)
 		local dx = x2 - x1
 		local dy = y2 - y1
 		local cx = x1 + dx/2
 		local cy = y1 + dy/2
 		local rot = math.atan2(dy,dx)*57.3
 		
-		draw.RectRotated(cx,cy,math.sqrt(dx*dx + dy*dy),2,LoadShader("white"),rot)
+		draw.RectRotated(cx,cy,math.sqrt(dx*dx + dy*dy),size or 2,nil,rot)
+	end
+	
+	local function highest(el,tab)
+		local v = -99999
+		for i=1, #tab do
+			if(tab[i][el] > v) then v = tab[i][el] end
+		end
+		return v
+	end
+
+	local function lowest(el,tab)
+		local v = 99999
+		for i=1, #tab do
+			if(tab[i][el] < v) then v = tab[i][el] end
+		end
+		return v
+	end
+
+	local function drawLines(tab,label,sx,sy)
+		local min_x = highest('x',tab) + sx
+		local max_x = lowest('x',tab) + sy
+		local min_y = highest('y',tab) + sx
+		local max_y = lowest('y',tab) + sy
+		
+		line(min_x,min_y,max_x,min_y)
+		line(max_x,min_y,max_x,max_y)
+		line(max_x,max_y,min_x,max_y)
+		line(min_x,max_y,min_x,min_y)
+		
+		if(label != nil) then
+			local dx = min_x - max_x
+			local tl = string.len(label)*5
+			draw.Text(max_x + (dx/2) - tl,max_y-10,label,10,10)
+		end
+	end
+	
+	local function BoundingBox(model,pos,angle,label,al)
+		if(VectorLength(LocalPlayer():GetPos() - pos) > 250) then return end
+		if(TraceLine(LocalPlayer():GetPos()+Vector(0,0,20),pos).fraction != 1) then return end
+		local f,r,u = AngleVectors(angle or Vector(0,0,0))
+		local mins,maxs = render.ModelBounds(model)
+		local ts0 = VectorToScreen(pos)
+		
+		if(ts0.z > 0) then return end
+		
+		local ts1 = VectorToScreen(pos + (f*maxs.x) + (r*mins.y) + (u*mins.z))
+		local ts2 = VectorToScreen(pos + (f*maxs.x) + (r*maxs.y) + (u*mins.z))
+		local ts3 = VectorToScreen(pos + (f*mins.x) + (r*maxs.y) + (u*mins.z))
+		local ts4 = VectorToScreen(pos + (f*mins.x) + (r*mins.y) + (u*mins.z))
+		
+		local ts5 = VectorToScreen(pos + (f*maxs.x) + (r*mins.y) + (u*maxs.z))
+		local ts6 = VectorToScreen(pos + (f*maxs.x) + (r*maxs.y) + (u*maxs.z))
+		local ts7 = VectorToScreen(pos + (f*mins.x) + (r*maxs.y) + (u*maxs.z))
+		local ts8 = VectorToScreen(pos + (f*mins.x) + (r*mins.y) + (u*maxs.z))
+		
+		if(ts1.z < 0 and ts2.z < 0 and ts3.z < 0 and ts4.z < 0 and
+		   ts5.z < 0 and ts6.z < 0 and ts7.z < 0 and ts8.z < 0) then
+		    draw.SetColor(1,1,1,al)
+			drawLines({ts1,ts2,ts3,ts4,ts5,ts6,ts7,ts8},label,0,0)
+		end
 	end
 	
 	local sptimes = {}
@@ -300,14 +360,17 @@ if(CLIENT) then
 			sptimes[id] = sptimes[id] + .05
 			if(sptimes[id] > 1) then sptimes[id] = 1 end
 			
-			local ts,clip = VectorToScreen(v:GetPos())
+			local pos = v:GetPos()
+			local ang = v:GetLerpAngles()
 			local index = v:GetModelIndex()
 			local n = util.GetItemName(index)
 			local v = n or index
-			draw.SetColor(0,0,0,sptimes[id])
-			draw.Text(ts.x-1,ts.y-1,v,8,8)
-			draw.SetColor(1,1,1,sptimes[id])
-			draw.Text(ts.x,ts.y,v,8,8)
+			
+			BoundingBox(
+			util.GetItemModel(index),
+			pos,
+			ang,
+			util.GetItemName(index),sptimes[id])
 		end
 		
 		for k,v in pairs(sptimes) do
