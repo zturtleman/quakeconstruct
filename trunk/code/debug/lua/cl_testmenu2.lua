@@ -122,4 +122,9 @@ function menutest.main()
 	altmenu.addButton("Custom Games",include,"lua/cl_gamelist.lua")
 	altmenu.addButton("Music",menutest.music)
 end
-hook.add("ClientReady","menutest",menutest.main)
+
+if(CLIENT_READY) then
+	menutest.main()
+else
+	hook.add("ClientReady","menutest",menutest.main)
+end

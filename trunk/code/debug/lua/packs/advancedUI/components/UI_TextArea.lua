@@ -1,5 +1,6 @@
 local Panel = {}
 Panel.faketab = "    "
+Panel.editable = true
 
 local caps = {}
 caps[7] = '\"'
@@ -98,6 +99,14 @@ function Panel:MousePressed(x,y)
 	
 	local line = self.lines[self.caret[2] + 1]
 	local char = string.sub(line,self.caret[1]+1,self.caret[1]+1)
+end
+
+function Panel:ShouldDrawCaret()
+	return self.editable
+end
+
+function Panel:SetEditable(b)
+	self.editable = b
 end
 
 function Panel:ContrainCaret()

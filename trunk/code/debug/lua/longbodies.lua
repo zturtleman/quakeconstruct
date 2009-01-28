@@ -5,7 +5,7 @@ local function trDown(pos)
 end
 
 local stayTime = 10000
-local fadeTime = 6000
+local fadeTime = 2000
 
 if(SERVER) then
 //__DL_BLOCK

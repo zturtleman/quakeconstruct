@@ -19,6 +19,7 @@ Panel.cc = 0
 Panel.delegate = nil
 Panel.lastsize = {0,0}
 Panel.inLayout = false
+Panel.maskviadelegate = true
 
 local function qcolor(tab)
 	draw.SetColor(tab[1],tab[2],tab[3],tab[4])
@@ -92,6 +93,10 @@ function Panel:DrawBackground()
 	--end
 	self:DoBGColor()
 	SkinCall("DrawBackground")
+end
+
+function Panel:MaskViaDelegate(b)
+	self.maskviadelegate = b
 end
 
 function Panel:SetDelegate(d)
