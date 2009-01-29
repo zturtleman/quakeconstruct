@@ -327,6 +327,30 @@ function DamageInfo(self,inflictor,attacker,damage,meansOfDeath,killed)
 	print("The Target's Name Is: " .. GetPlayerInfo(self)["name"] .. "\n")
 end
 
+function QuickParticle(pos,duration,shader,model,angle,scale)
+	local ref = RefEntity()
+	ref:SetColor(1,1,1,1)
+	ref:SetAngles(angle or Vector(0))
+	ref:Scale(scale or Vector(1,1,1))
+	ref:SetType(RT_SPRITE)
+	if(model != nil) then ref:SetType(RT_MODEL) end
+	ref:SetShader(shader)
+	ref:SetRadius(5)
+	ref:SetPos(pos)
+	
+	local le = LocalEntity()
+	le:SetPos(pos)
+	le:SetRadius(5)
+	le:SetRefEntity(ref)
+	le:SetStartTime(LevelTime())
+	le:SetEndTime(LevelTime() + duration)
+	le:SetType(LE_FADE_RGB)
+	le:SetColor(1,1,1,1)
+	le:SetTrType(TR_LINEAR)
+	
+	return le,ref
+end
+
 POWERUP_FOREVER = 10000*10000
 
 debugprint("^3Tools loaded.\n")
