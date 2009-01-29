@@ -12,7 +12,6 @@ local sdir = 0
 local hp = 100
 local look = Vector()
 local look2 = Vector()
-local shake = 0
 local headang = Vector()
 local headpos = Vector()
 local gibhp = -40
@@ -20,6 +19,10 @@ local skspin = Vector()
 local spin = 0
 local gibpos = Vector()
 local deadpos = Vector()
+local v_kick_pitch = 0
+local v_kick_roll = 0
+local v_kick_time = 0
+local damage_time = 1000
 
 local function trAlong(pos,angle,dist)
 	local off = VectorForward(angle)*dist
@@ -122,6 +125,14 @@ local function d3d()
 end
 hook.add("Draw3D","cl_viewtest",d3d)
 
+local spr = Spring(Vector(0),Vector(0),Vector(.8),Vector(.6),Vector(0))
+local spr2 = Spring(Vector(0),Vector(0),Vector(.04),Vector(.98),Vector(0))
+local function kick(pitch,roll)
+	v_kick_pitch = v_kick_pitch + pitch
+	v_kick_roll = v_kick_roll + roll
+end
+
+
 local function bobview(pos,ang,fovx,fovy)
 	if(!_CG) then return end
 	local crd = _CG.refdef.right
@@ -212,18 +223,28 @@ local function bobview(pos,ang,fovx,fovy)
 	end
 	--DONE
 	
-	if(shake > 0) then
-		pos = pos + _CG.refdef.right*(math.random(-shake*100,shake*100)/100)
-		pos = pos + _CG.refdef.up*(math.random(-shake*100,shake*100)/100)
-		shake = shake / (1 + (0.04 * Lag()))
-		if(shake < .1) then shake = 0 end
-		local r = shake*2
-		if(r > 90) then r = 90 end
-		if(r < -90) then r = -90 end
-		ang.z = ang.z + (sdir * r)
-		if(ang.z < -30) then ang.z = -30 end
-		if(ang.z > 30) then ang.z = 30 end
+	spr.ideal.p = v_kick_pitch
+	spr.ideal.r = v_kick_roll
+	
+	spr2.ideal.p = v_kick_pitch
+	spr2.ideal.r = v_kick_roll
+	
+	v_kick_pitch = v_kick_pitch + (-v_kick_pitch)*.5
+	v_kick_roll = v_kick_roll + (-v_kick_roll)*.5
+	
+	spr:Update(true)
+	spr2:Update(true)
+	
+	ang.p = ang.p + spr.val.p
+	ang.r = ang.r + spr.val.r
+	
+	ang.p = ang.p + spr2.val.p*2
+	ang.r = ang.r + spr2.val.r*2
+	if(hp <= 0) then
+	ang.p = ang.p + spr2.val.p*4
+	ang.r = ang.r + spr2.val.r*4	
 	end
+	
 	
 	ApplyView(pos,ang)
 	
@@ -246,8 +267,8 @@ end
 hook.add("MouseEvent","cl_viewtest",moused)
 
 local function shakeIt(p,c,a)
-	shake = shake + 5
 	sdir = ddir
+	kick(math.random(-20,20),math.random(-20,20))
 end
 concommand.Add("shake",shakeIt)
 
@@ -256,10 +277,13 @@ local function respawn()
 end
 
 local function processDamage(attacker,pos,dmg,death,waslocal,wasme,health)
+	local hpx = math.min(math.max(health,0),100)
+	local hpy = ((1 - (hpx/100))*2) + 1
 	if(dmg > 50) then dmg = 50 end
 	if(waslocal) then
 		hp = health
-		shake = shake + (dmg/3)
+		dmg = dmg*hpy
+		kick(math.random(-dmg,dmg),math.random(-dmg,dmg))
 		sdir = ddir
 	end
 end
