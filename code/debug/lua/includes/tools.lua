@@ -334,12 +334,14 @@ function QuickParticle(pos,duration,shader,model,angle,scale)
 	ref:Scale(scale or Vector(1,1,1))
 	ref:SetType(RT_SPRITE)
 	if(model != nil) then ref:SetType(RT_MODEL) end
+	if(model != nil) then ref:SetModel(model) end
 	ref:SetShader(shader)
 	ref:SetRadius(5)
 	ref:SetPos(pos)
 	
 	local le = LocalEntity()
 	le:SetPos(pos)
+	le:SetAngles(angle or Vector(0))
 	le:SetRadius(5)
 	le:SetRefEntity(ref)
 	le:SetStartTime(LevelTime())
