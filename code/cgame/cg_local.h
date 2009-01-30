@@ -66,7 +66,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define	MAX_STEP_CHANGE		32
 
 #define	MAX_VERTS_ON_POLY	10
-#define	MAX_MARK_POLYS		256
+#define	MAX_MARK_POLYS		512	// 256
 
 #define STAT_MINUS			10	// num frame for '-' stats digit
 
@@ -236,6 +236,7 @@ typedef enum {
 	LE_FADE_RGB,
 	LE_SCALE_FADE,
 	LE_SCOREPLUM,
+	LE_FADE_TWEEN,
 #ifdef MISSIONPACK
 	LE_KAMIKAZE,
 	LE_INVULIMPACT,
@@ -287,8 +288,12 @@ typedef struct localEntity_s {
 	float			bounceFactor;		// 0.0 = no bounce, 1.0 = perfect
 
 	float			color[4];
+	float			start_color[4];
+	float			end_color[4];
 
 	float			radius;
+	float			start_radius;
+	float			end_radius;
 
 	float			light;
 	vec3_t			lightColor;
@@ -1242,6 +1247,9 @@ void lua_pushsfx(lua_State *L, sfxHandle_t *sfx);
 sfxHandle_t *lua_tosfx(lua_State *L, int i);
 
 void lua_pushtrace(lua_State *L, trace_t results);
+void qlua_toColor(lua_State *L, int idx, vec4_t color, qboolean strict);
+void checkColor(vec4_t color, qboolean strict);
+void adjustColor(vec4_t color, float amt);
 
 void CG_InitLuaVector(lua_State *L);
 void CG_InitLuaEnts(lua_State *L);

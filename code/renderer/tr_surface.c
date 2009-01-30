@@ -518,10 +518,48 @@ void RB_SurfaceRailCore( void ) {
 //Hxrmn's Poly Code
 void RB_EntitySurfacePolys( void ) {
 	refEntity_t *e;
-
+	polyVert_t  temp[1024];
+	vec3_t		tempAxis[3];
+	int i=0;
+	int v=0;
+	
 	e = &backEnd.currentEntity->e;
 
-	RE_AddPolyToScene(e->customShader,e->numVerts,e->verts,1);
+	for ( i=0; i<e->numVerts; i++ ) {
+		temp[i].modulate[0] = e->shaderRGBA[0];
+		temp[i].modulate[1] = e->shaderRGBA[1];
+		temp[i].modulate[2] = e->shaderRGBA[2];
+		temp[i].modulate[3] = e->shaderRGBA[3];
+
+		VectorClear(temp[i].xyz);
+
+		for ( v=0; v<3; v++ ) {
+			VectorScale(e->axis[v],e->verts[i].xyz[v],tempAxis[v]);
+		}
+		
+		v=0;
+		for ( v=0; v<3; v++ ) {
+			VectorAdd(tempAxis[v],temp[i].xyz,temp[i].xyz);
+		}
+		VectorAdd(temp[i].xyz,e->origin,temp[i].xyz);
+
+		temp[i].st[0] = e->verts[i].st[0];
+		temp[i].st[1] = e->verts[i].st[1];
+
+		Com_Printf("PolyVert[%i] %f,%f,%f | %i,%i,%i,%i | %f,%f\n", 
+			i,
+			temp[i].xyz[0],
+			temp[i].xyz[1],
+			temp[i].xyz[2],
+			(int)temp[i].modulate[0],
+			(int)temp[i].modulate[1],
+			(int)temp[i].modulate[2],
+			(int)temp[i].modulate[3],
+			temp[i].st[0],
+			temp[i].st[1]);
+	}
+
+	RE_AddPolyToScene(e->customShader,e->numVerts,temp,1);
 }
 
 

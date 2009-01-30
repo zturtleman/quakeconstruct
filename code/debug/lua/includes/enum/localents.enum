@@ -8,6 +8,7 @@ typedef enum {
 	LE_FADE_RGB,
 	LE_SCALE_FADE,
 	LE_SCOREPLUM,
+	LE_FADE_TWEEN,
 } leType_t;
 
 typedef enum {

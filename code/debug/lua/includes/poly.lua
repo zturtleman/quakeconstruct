@@ -159,6 +159,26 @@ function PolyT:Render(flipped)
 	end
 end
 
+function PolyT:ToRef(flip)
+	for i=1, #self.set do
+		local s = self.set[i]
+		if(type(s) == "table") then
+			if(#s[1] >= 3) then
+				local ref = RefEntity()
+				ref:SetType(RT_POLY)
+				if(!flip) then
+					render.PolyRef(s[1],ref)
+				else
+					render.PolyRef(s[2],ref)
+				end
+				return ref
+			else
+				error("Not enough vertices in set[" .. i .. "], " .. #s .. ".\n")
+			end
+		end
+	end
+end
+
 function Poly(tex)
 	local o = {}
 

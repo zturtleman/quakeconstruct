@@ -415,34 +415,7 @@ int qlua_rsetcolor(lua_State *L) {
 
 	luaL_checktype(L,1,LUA_TUSERDATA);
 	luaentity = lua_torefentity(L,1);
-
-	if(lua_type(L,2) == LUA_TNUMBER) {
-		color[0] = lua_tonumber(L,2);
-		if(lua_type(L,3) == LUA_TNUMBER) {
-			color[1] = lua_tonumber(L,3);
-			if(lua_type(L,4) == LUA_TNUMBER) {
-				color[2] = lua_tonumber(L,4);
-				if(lua_type(L,5) == LUA_TNUMBER) {
-					color[3] = lua_tonumber(L,5);
-				}
-			}
-		}
-	}
-	if(color[0] > 1) {color[0] = color[0] / 255;}
-	if(color[1] > 1) {color[1] = color[1] / 255;}
-	if(color[2] > 1) {color[2] = color[2] / 255;}
-	if(color[3] > 1) {color[3] = color[3] / 255;}
-
-	if(color[0] > 1) {err = 1;}
-	if(color[1] > 1) {err = 1;}
-	if(color[2] > 1) {err = 1;}
-	if(color[3] > 1) {err = 1;}
-
-	if(err == 1) {
-		lua_pushstring(L,"Color out of range");
-		lua_error(L);
-		return 1;
-	}
+	qlua_toColor(L,2,color,qfalse);
 
 	if(luaentity != NULL) {
 		luaentity->shaderRGBA[0] = (int)(color[0]*255);

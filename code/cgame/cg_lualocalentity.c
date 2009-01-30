@@ -293,7 +293,7 @@ int qlua_lsettype(lua_State *L) {
 
 	luaentity = lua_tolocalentity(L,1);
 	if(luaentity != NULL) {
-		if(lua_tointeger(L,2) < 0 || lua_tointeger(L,2) > LE_SCOREPLUM) {
+		if(lua_tointeger(L,2) < 0 || lua_tointeger(L,2) > LE_FADE_TWEEN) {
 			lua_pushstring(L,"Index out of range (Local Entity Type).");
 			lua_error(L);
 			return 1;
@@ -356,6 +356,34 @@ int qlua_lsetradius(lua_State *L) {
 	luaentity = lua_tolocalentity(L,1);
 	if(luaentity != NULL) {
 		luaentity->radius = lua_tonumber(L,2);
+		luaentity->start_radius = luaentity->radius;
+		luaentity->end_radius = luaentity->radius;
+	}
+	return 0;
+}
+
+int qlua_lsetstartradius(lua_State *L) {
+	localEntity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TNUMBER);
+
+	luaentity = lua_tolocalentity(L,1);
+	if(luaentity != NULL) {
+		luaentity->start_radius = lua_tonumber(L,2);
+	}
+	return 0;
+}
+
+int qlua_lsetendradius(lua_State *L) {
+	localEntity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TNUMBER);
+
+	luaentity = lua_tolocalentity(L,1);
+	if(luaentity != NULL) {
+		luaentity->end_radius = lua_tonumber(L,2);
 	}
 	return 0;
 }
@@ -438,46 +466,47 @@ int qlua_lsetcallback(lua_State *L) {
 }
 
 int qlua_lsetcolor(lua_State *L) {
-	int err = 0;
 	localEntity_t	*luaentity;
 	vec4_t	color;
-	
-	VectorClear(color);
 
 	luaL_checktype(L,1,LUA_TUSERDATA);
 	luaentity = lua_tolocalentity(L,1);
-
-	if(lua_type(L,2) == LUA_TNUMBER) {
-		color[0] = lua_tonumber(L,2);
-		if(lua_type(L,3) == LUA_TNUMBER) {
-			color[1] = lua_tonumber(L,3);
-			if(lua_type(L,4) == LUA_TNUMBER) {
-				color[2] = lua_tonumber(L,4);
-				if(lua_type(L,5) == LUA_TNUMBER) {
-					color[3] = lua_tonumber(L,5);
-				}
-			}
-		}
-	}
-	if(color[0] > 1) {color[0] = color[0] / 255;}
-	if(color[1] > 1) {color[1] = color[1] / 255;}
-	if(color[2] > 1) {color[2] = color[2] / 255;}
-	if(color[3] > 1) {color[3] = color[3] / 255;}
-
-	if(color[0] > 1) {err = 1;}
-	if(color[1] > 1) {err = 1;}
-	if(color[2] > 1) {err = 1;}
-	if(color[3] > 1) {err = 1;}
-
-	if(err == 1) {
-		lua_pushstring(L,"Color out of range");
-		lua_error(L);
-		return 1;
-	}
+	qlua_toColor(L,2,color,qfalse);
 
 	if(luaentity != NULL) {
-		//Vector4Scale(color,1,color);
 		Vector4Copy(color,luaentity->color);
+		Vector4Copy(color,luaentity->start_color);
+		Vector4Copy(color,luaentity->end_color);
+	}
+
+	return 0;
+}
+
+int qlua_lsetstartcolor(lua_State *L) {
+	localEntity_t	*luaentity;
+	vec4_t	color;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaentity = lua_tolocalentity(L,1);
+	qlua_toColor(L,2,color,qfalse);
+
+	if(luaentity != NULL) {
+		Vector4Copy(color,luaentity->start_color);
+	}
+
+	return 0;
+}
+
+int qlua_lsetendcolor(lua_State *L) {
+	localEntity_t	*luaentity;
+	vec4_t	color;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaentity = lua_tolocalentity(L,1);
+	qlua_toColor(L,2,color,qfalse);
+
+	if(luaentity != NULL) {
+		Vector4Copy(color,luaentity->end_color);
 	}
 
 	return 0;
@@ -566,8 +595,12 @@ static const luaL_reg LEntity_methods[] = {
   {"SetStartTime",	qlua_lsetstart},
   {"SetEndTime",	qlua_lsetend},
   {"SetRadius",		qlua_lsetradius},
+  {"SetStartRadius",	qlua_lsetstartradius},
+  {"SetEndRadius",		qlua_lsetendradius},
   {"GetRadius",		qlua_lgetradius},
   {"SetColor",		qlua_lsetcolor},
+  {"SetStartColor",	qlua_lsetstartcolor},
+  {"SetEndColor",	qlua_lsetendcolor},
   {"SetRefEntity",	qlua_lsetref},
   {"GetRefEntity",	qlua_lgetref},
   {"SetCallback",	qlua_lsetcallback},

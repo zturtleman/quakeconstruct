@@ -8,18 +8,8 @@ int qlua_setcolor(lua_State *L) {
 	
 	VectorClear(color);
 
-	if(lua_type(L,1) == LUA_TNUMBER) {
-		color[0] = lua_tonumber(L,1);
-		if(lua_type(L,2) == LUA_TNUMBER) {
-			color[1] = lua_tonumber(L,2);
-			if(lua_type(L,3) == LUA_TNUMBER) {
-				color[2] = lua_tonumber(L,3);
-				if(lua_type(L,4) == LUA_TNUMBER) {
-					color[3] = lua_tonumber(L,4);
-				}
-			}
-		}
-	}
+	qlua_toColor(L,1,color,qfalse);
+
 	VectorCopy(color,lastcolor);
 	lastcolor[3] = color[3];
 
@@ -82,16 +72,7 @@ float pullint1(lua_State *L, int i, int def, int m) {
 	return v;
 }
 
-void checkColor(vec4_t color) {
-	int i=0;
-	for(i=0;i<4;i++) {
-		if(color[i] > 1) color[i] = 1;
-		if(color[i] < 0) color[i] = 0;
-	}
-	trap_R_SetColor(color);
-}
-
-void adjustColor(vec4_t color, float amt) {
+void adjustColor2(vec4_t color, float amt) {
 	vec4_t color2;
 
 	color2[0] = (color[0] + amt);
@@ -99,7 +80,8 @@ void adjustColor(vec4_t color, float amt) {
 	color2[2] = (color[2] + amt);
 	color2[3] = color[3];
 	
-	checkColor(color2);
+	checkColor(color2,qtrue);
+	trap_R_SetColor(color2);
 }
 
 int qlua_beveledRect(lua_State *L) {
@@ -124,10 +106,7 @@ int qlua_beveledRect(lua_State *L) {
 	w = lua_tonumber(L,3);
 	h = lua_tonumber(L,4);
 
-	color[0] = lua_tonumber(L,5);
-	color[1] = lua_tonumber(L,6);
-	color[2] = lua_tonumber(L,7);
-	color[3] = lua_tonumber(L,8);
+	qlua_toColor(L,5,color,qfalse);
 
 	factor = lua_tonumber(L,9);
 
@@ -136,21 +115,19 @@ int qlua_beveledRect(lua_State *L) {
 		inset = lua_tonumber(L,10);
 	}
 
-	checkColor(color);
-
 	CG_AdjustFrom640( &x, &y, &w, &h );
 	trap_R_DrawStretchPic( x, y, w, h, 0, 0, 1, 1, shader );
 
-	adjustColor(color,2*factor);
+	adjustColor2(color,2*factor);
 	trap_R_DrawStretchPic( x, y, w, inset, 0, 0, 1, 1, shader );
 
-	adjustColor(color,1*factor);
+	adjustColor2(color,1*factor);
 	trap_R_DrawStretchPic( x, y, inset, h, 0, 0, 1, 1, shader );
 
-	adjustColor(color,-1*factor);
+	adjustColor2(color,-1*factor);
 	trap_R_DrawStretchPic( x+(w-inset), y, inset, h, 0, 0, 1, 1, shader );
 
-	adjustColor(color,-2*factor);
+	adjustColor2(color,-2*factor);
 	trap_R_DrawStretchPic( x, y+(h-inset), w, inset, 0, 0, 1, 1, shader );
 	return 0;
 }
