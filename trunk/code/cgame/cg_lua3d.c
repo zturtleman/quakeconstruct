@@ -222,6 +222,41 @@ int qlua_passpoly(lua_State *L) {
 	return 0;
 }
 
+int qlua_polyref(lua_State *L) {
+	int size = 0;
+	int i = 0;
+	refEntity_t *ref;
+	vec3_t	vzero;
+
+	VectorClear(vzero);
+
+	luaL_checktype(L,1,LUA_TTABLE);
+
+	if(lua_type(L,2) == LUA_TUSERDATA) {
+		ref = lua_torefentity(L,2);
+	}
+
+	size = luaL_getn(L,1);
+	if(size > 1024) return 0;
+
+	for(i=0;i<size;i++) {
+		lua_pushinteger(L,i+1);
+		lua_gettable(L,1);
+		
+		//CG_Printf("Read Vert: %i\n",i+1);
+		qlua_readvert(L,&ref->verts[i],vzero);
+	}
+
+	Com_Printf("Sample Lua Data: %f, %f, %f\n", 
+		ref->verts[0].xyz[0],
+		ref->verts[0].xyz[1],
+		ref->verts[0].xyz[2]);
+
+	ref->numVerts = size;
+
+	return 0;
+}
+
 int qlua_modelbounds(lua_State *L) {
 	vec3_t	mins, maxs;
 
@@ -240,6 +275,7 @@ static const luaL_reg Render_methods[] = {
   {"ModelBounds",		qlua_modelbounds},
   {"SetRefDef",			qlua_setrefdef},
   {"DrawPoly",			qlua_passpoly},
+  {"PolyRef",			qlua_polyref},
   {0,0}
 };
 

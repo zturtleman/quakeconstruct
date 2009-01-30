@@ -280,15 +280,16 @@ CG_AddFragment
 void CG_AddFragment( localEntity_t *le ) {
 	vec3_t	newOrigin, newAngle;
 	trace_t	trace;
-	float col;
+	float c;
+	int i;
 
-	col = ( le->endTime - cg.time ) * le->lifeRate;
-	col *= 0xff;
+	c = ( le->endTime - cg.time ) * le->lifeRate;
+	c = 1 - c;
 
-	le->refEntity.shaderRGBA[0] = le->color[0] * col;
-	le->refEntity.shaderRGBA[1] = le->color[1] * col;
-	le->refEntity.shaderRGBA[2] = le->color[2] * col;
-	le->refEntity.shaderRGBA[3] = le->color[3] * col;
+	for(i=0;i<4;i++) {
+		le->refEntity.shaderRGBA[i] = (le->start_color[i] + (le->end_color[i] - le->start_color[i]) * c) * 0xff;
+	}
+	le->refEntity.radius = le->start_radius + (le->end_radius - le->start_radius) * c;
 
 	if ( le->angles.trType == TR_LINEAR ) {
 		BG_EvaluateTrajectory( &le->angles, cg.time, newAngle);
@@ -396,6 +397,30 @@ void CG_AddFadeRGB( localEntity_t *le ) {
 	re->shaderRGBA[1] = le->color[1] * c;
 	re->shaderRGBA[2] = le->color[2] * c;
 	re->shaderRGBA[3] = le->color[3] * c;
+
+	if(le->pos.trType != TR_STATIONARY) {
+		BG_EvaluateTrajectory( &le->pos, cg.time, origin );
+		VectorCopy(origin,re->origin);
+	}
+
+	trap_R_AddRefEntityToScene( re );
+}
+
+void CG_AddFadeTween( localEntity_t *le ) {
+	refEntity_t *re;
+	float c;
+	int i=0;
+	vec3_t origin;
+
+	re = &le->refEntity;
+
+	c = ( le->endTime - cg.time ) * le->lifeRate;
+	c = 1 - c;
+
+	for(i=0;i<4;i++) {
+		re->shaderRGBA[i] = (le->start_color[i] + (le->end_color[i] - le->start_color[i]) * c) * 0xff;
+	}
+	re->radius = le->start_radius + (le->end_radius - le->start_radius) * c;
 
 	if(le->pos.trType != TR_STATIONARY) {
 		BG_EvaluateTrajectory( &le->pos, cg.time, origin );
@@ -916,6 +941,10 @@ void CG_AddLocalEntities( void ) {
 
 		case LE_FADE_RGB:				// teleporters, railtrails
 			CG_AddFadeRGB( le );
+			break;
+
+		case LE_FADE_TWEEN:
+			CG_AddFadeTween( le );
 			break;
 
 		case LE_FALL_SCALE_FADE: // gib blood trails

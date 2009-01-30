@@ -17,6 +17,9 @@ local function m_projection(e,d,out)
 	return out
 end
 
+local function r() return math.random(-100,100) end
+function VectorRandom() return Vector(r(),r(),r())/100 end
+
 function vAdd(v1,v2)
 	return v1 + v2
 end

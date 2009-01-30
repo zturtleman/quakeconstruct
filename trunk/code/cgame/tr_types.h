@@ -108,7 +108,7 @@ typedef struct {
 	qboolean	alwaysRender;
 
 	int numVerts;
-	const polyVert_t *verts;		//Hxrmn's poly code
+	polyVert_t	verts[1024];		//Hxrmn's poly code
 	vec3_t		lua_scale;
 
 } refEntity_t;
