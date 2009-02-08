@@ -367,7 +367,7 @@ if(CLIENT) then
 		for k,v in pairs(contents) do
 			v = tonumber(v)
 			if(v != 9) then
-				debugprint(strings[v] .. ",")
+				--debugprint(strings[v] .. ",")
 			end
 		end
 		debugprint("EOM\n")

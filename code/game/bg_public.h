@@ -332,6 +332,7 @@ typedef enum {
 	WP_PLASMAGUN,
 	WP_BFG,
 	WP_GRAPPLING_HOOK,
+	WP_TEST,
 #ifdef MISSIONPACK
 	WP_NAILGUN,
 	WP_PROX_LAUNCHER,
@@ -665,6 +666,7 @@ typedef struct gitem_s {
 extern	gitem_t	bg_itemlist[];
 extern	int		bg_numItems;
 
+void BG_AddItem(gitem_t *item);
 gitem_t	*BG_FindItem( const char *pickupName );
 gitem_t	*BG_FindItemForWeapon( weapon_t weapon );
 gitem_t	*BG_FindItemForPowerup( powerup_t pw );
@@ -734,6 +736,7 @@ void qlua_pcall(lua_State *L, int nargs, int nresults, qboolean washook);
 void BG_InitLuaVector(lua_State *L);
 void BG_InitLuaTrajectory(lua_State *L);
 void BG_InitLuaPMove(lua_State *L);
+void BG_InitLuaMisc(lua_State *L);
 
 void lua_pushvector(lua_State *L, vec3_t vec);
 void lua_tovector(lua_State *L, int i, vec3_t in);

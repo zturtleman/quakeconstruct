@@ -347,6 +347,7 @@ gitem_t	bg_itemlist[] =
 /* sounds */ ""
 	},
 
+
 	//
 	// AMMO ITEMS
 	//
@@ -916,12 +917,102 @@ Only in One Flag CTF games
 	},
 #endif
 
+	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
+	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
+	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
+	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
+	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
+	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
+	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
+	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
+	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
+	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
+	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
+	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
+	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
+	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
+	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
+	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
+	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
+	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
+	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
+	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
+	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
+	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
+	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
+	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
+	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
+	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
+	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
+	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
+	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
+	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
+	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
+	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
+
 	// end of list marker
 	{NULL}
 };
 
+//Last one is team_CTF_blueflag
+int		custom_band = 32;
+int		customItems = 0;
+
 int		bg_numItems = sizeof(bg_itemlist) / sizeof(bg_itemlist[0]) - 1;
 
+void BG_AddItem(gitem_t *item) {
+	int free = custom_band - customItems;
+	int customid = (bg_numItems - custom_band) + customItems;
+	gitem_t slot;
+
+	if(free <= 0) {
+		Com_Printf("^1No free custom item slots.\n");
+		return;
+	}
+
+	slot = bg_itemlist[customid];
+
+	Com_Printf("^2Pre Slot: %s.\n", slot.classname);
+	slot.classname = item->classname;
+	slot.giTag = item->giTag;
+	slot.giType = item->giType;
+	slot.icon = item->icon;
+	slot.pickup_name = item->pickup_name;
+	slot.pickup_sound = item->pickup_sound;
+	slot.precaches = item->precaches;
+	slot.quantity = item->quantity;
+	slot.sounds = item->sounds;
+	slot.world_model[0] = item->world_model[0];
+	slot.world_model[1] = item->world_model[1];
+	slot.world_model[2] = item->world_model[2];
+	slot.world_model[3] = item->world_model[3];
+
+	
+
+	//memcpy(&bg_itemlist[customid],item,sizeof(*item));
+	
+	Com_Printf("^2Registered Item: %s.\n", slot.classname);
+
+	customItems++;
+	/*memcpy(bg_itemlist[bg_numItems],*item,sizeof(item));*/
+
+
+	//bg_itemlist[bg_numItems] = NULL;
+
+/*	{
+		"weapon_test",
+		"sound/misc/w_pkup.wav",
+        { "models/weapons2/bfg/bfg.md3", 
+		0, 0, 0},
+	"icons/iconw_grapple",
+	"Test Weapon",
+		600,
+		IT_WEAPON,
+		WP_TEST,
+ "",
+ ""
+	},*/
+}
 
 /*
 ==============

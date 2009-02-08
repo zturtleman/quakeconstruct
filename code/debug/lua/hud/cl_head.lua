@@ -1,5 +1,5 @@
 local inf = LocalPlayer():GetInfo()
-local blood1 = LoadShader("viewBloodFilter_HQ")
+local blood1 = LoadShader("dissolve2_mul")
 local blood2 = LoadShader("dissolve")
 
 local skull = LoadModel("models/gibs/skull.md3")
@@ -39,6 +39,7 @@ local lct = CurTime()
 local mvz = 0
 local nalpha = 0
 local calpha = 0
+local calpha2 = 0
 function drawHead(x,y,ICON_SIZE,hp)
 	local inf = LocalPlayer():GetInfo()
 	local nhead = inf.headModel
@@ -164,13 +165,18 @@ function drawHead(x,y,ICON_SIZE,hp)
 	ref:SetPos(Vector(0,headOrigin.y,headOrigin.z))
 	ref2:SetPos(Vector(0,headOrigin.y,headOrigin.z))
 	
+	local hp2x = math.min(math.max(hp/100,0),1)
+	local na2 = math.min((hp2x/3) + .6,1)
+	
 	calpha = calpha + (nalpha - calpha)*.01
+	calpha2 = calpha2 + (na2 - calpha2)*.01
 	if(calpha < 0.5) then calpha = 0.5 end
 	
 	ref:Render()
-	ref2:SetColor(1,1,1,calpha)
+	ref2:SetColor(1,.2,.2,calpha2)
 	ref2:SetShader(blood1)
 	ref2:Render()
+	ref2:SetColor(1,1,1,calpha)
 	ref2:SetShader(blood2)
 	ref2:Render()
 	
@@ -190,6 +196,7 @@ function drawHead(x,y,ICON_SIZE,hp)
 	local forward = VectorForward(angles)
 	
 	local refdef = {}
+	refdef.flags = 1
 	refdef.x = x
 	refdef.y = y
 	refdef.width = size

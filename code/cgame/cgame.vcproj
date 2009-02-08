@@ -327,6 +327,9 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\game\bg_luamisc.c">
+			</File>
+			<File
 				RelativePath="..\game\bg_luapmove.c">
 			</File>
 			<File

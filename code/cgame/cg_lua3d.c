@@ -24,6 +24,17 @@ float qlua_pullfloat_i(lua_State *L, int i, qboolean req, float def, int m) {
 	return v;
 }
 
+int qlua_pullint(lua_State *L, char *str, qboolean req, int def) {
+	int v = def;
+	lua_pushstring(L,str);
+	lua_gettable(L,1);
+	if(req) luaL_checktype(L,lua_gettop(L),LUA_TNUMBER);
+	if(lua_type(L,lua_gettop(L)) == LUA_TNUMBER) {
+		v = lua_tointeger(L,lua_gettop(L));
+	}
+	return v;
+}
+
 int qlua_pullint_i(lua_State *L, int i, qboolean req, int def, int m) {
 	int v = def;
 	lua_pushinteger(L,i);
@@ -77,7 +88,8 @@ int lua_torefdef(lua_State *L, int idx, refdef_t *refdef, qboolean a640) {
 	refdef->fov_y = qlua_pullfloat(L,"fov_y",qfalse,refdef->fov_y);
 	qlua_pullvector(L,"origin",refdef->vieworg,qfalse);
 	qlua_pullvector(L,"angles",angles,qfalse);
-
+	refdef->rdflags = qlua_pullint(L,"flags",qfalse,0);
+	
 	//if(angles[0] != 0 || angles[1] != 0 || angles[2] != 0) {
 		AnglesToAxis(angles,refdef->viewaxis);
 	//}
@@ -133,6 +145,23 @@ int qlua_renderscene(lua_State *L) {
 		//CG_Printf("Rendered Scene: %f, %f, %f, %f\n",refdef.x,refdef.y,refdef.width,refdef.height);
 	}
 	return error;
+}
+
+int qlua_addPacketEnts(lua_State *L) {
+	CG_AddPacketEntities();
+	CG_AddMarks();
+	CG_AddParticles ();
+	CG_AddLocalEntities();
+	return 0;
+}
+int qlua_addMarks(lua_State *L) {
+	CG_AddMarks();
+	return 0;
+}
+int qlua_addLocalEnts(lua_State *L) {
+	CG_AddParticles ();
+	CG_AddLocalEntities();
+	return 0;
 }
 
 int qlua_createscene(lua_State *L) {
@@ -247,11 +276,6 @@ int qlua_polyref(lua_State *L) {
 		qlua_readvert(L,&ref->verts[i],vzero);
 	}
 
-	Com_Printf("Sample Lua Data: %f, %f, %f\n", 
-		ref->verts[0].xyz[0],
-		ref->verts[0].xyz[1],
-		ref->verts[0].xyz[2]);
-
 	ref->numVerts = size;
 
 	return 0;
@@ -276,6 +300,9 @@ static const luaL_reg Render_methods[] = {
   {"SetRefDef",			qlua_setrefdef},
   {"DrawPoly",			qlua_passpoly},
   {"PolyRef",			qlua_polyref},
+  {"AddPacketEntities",	qlua_addPacketEnts},
+  {"AddMarks",			qlua_addMarks},
+  {"AddLocalEntities",	qlua_addLocalEnts},
   {0,0}
 };
 

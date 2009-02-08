@@ -481,6 +481,7 @@ void G_InitLua() {
 	
 	BG_InitLuaTrajectory(L);
 	BG_InitLuaPMove(L);
+	BG_InitLuaMisc(L);
 	G_InitLuaEnts(L);
 	G_InitLuaVector(L);
 	G_InitLuaMessages(L);

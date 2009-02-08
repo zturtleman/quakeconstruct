@@ -23,3 +23,6 @@ typedef enum {
 									// player to get the same lighting
 #define	RF_SHADOW_PLANE		256		// use refEntity->shadowPlane
 #define	RF_WRAP_FRAMES		512		// mod the model frames by the maxframes to allow continuous
+
+#define RDF_NOWORLDMODEL	1		// used for player configuration screen
+#define RDF_HYPERSPACE		4		// teleportation effect
