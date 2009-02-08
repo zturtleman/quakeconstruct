@@ -3,6 +3,7 @@
 --SendScript("lua/vampiric_cl.lua")
 --SendScript("lua/includes/scriptmanager.lua")
 
+require "shared"
 require "turrets"
 require "explosion"
 --require "sh_notify"
@@ -53,14 +54,18 @@ local function ItemPickup(item, other, trace, itemid)
 end
 hook.add("ItemPickup","init",ItemPickup)
 
-local function PlayerDamaged(self,inflictor,attacker,damage,meansOfDeath,dir,pos)
+local function PlayerDamaged(self,inflictor,attacker,damage,meansOfDeath,asave,dir,pos)
 	for k,v in pairs(GetEntitiesByClass("player")) do
+		local db = DirToByte(Vector(0,0,-1))
+		if(dir != nil) then db = DirToByte(dir) end
 		local msg = Message(v,"playerdamage")
-		message.WriteLong(msg,damage)
+		message.WriteShort(msg,damage)
 		message.WriteShort(msg,meansOfDeath)
 		message.WriteShort(msg,self:EntIndex())
 		message.WriteShort(msg,self:GetHealth())
 		message.WriteVector(msg,pos or Vector(0,0,0))
+		message.WriteShort(msg,db)
+		--message.WriteVector(msg,dir or Vector(0,0,0))
 		if(attacker) then
 			message.WriteShort(msg,attacker:EntIndex() or -1)
 		else
@@ -81,6 +86,18 @@ local function PlayerSpawned(pl)
 	end
 end
 hook.add("PlayerSpawned","init",PlayerSpawned)
+
+local function makeEnt(p,c,a)
+	if(a[1] == nil) then return end
+	local tr = PlayerTrace(p)
+	local ent = CreateEntity(a[1])
+	ent:SetPos(tr.endpos + Vector(0,0,20))
+	ent:SetWait(1)
+	ent:SetTrType(TR_STATIONARY)
+	ent:SetSpawnFlags(1)
+end
+concommand.add("entity",makeEnt)
+
 --[[
 local tests = {}
 local ent = CreateEntity("testentity")

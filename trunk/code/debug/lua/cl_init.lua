@@ -3,6 +3,8 @@
 --self.VAriblae
 --include("lua/cl_viewtest.lua")
 
+require "shared"
+
 include("lua/cl_menu2.lua")
 include("lua/cl_testmenu2.lua")
 
@@ -84,7 +86,7 @@ end
 local function ParseDamage()
 	local attacker = nil
 	local pos = Vector()
-	local dmg = message.ReadLong()
+	local dmg = message.ReadShort()
 	local death = message.ReadShort()
 	local id = message.ReadShort()
 	local self = (id == LocalPlayer():EntIndex())
@@ -92,6 +94,7 @@ local function ParseDamage()
 	local suicide = false
 	local hp = message.ReadShort()
 	local pos = message.ReadVector()
+	local dir = ByteToDir(message.ReadShort())
 	local atkid = message.ReadShort()
 	local atkname = ""
 	if(atkid != -1) then
@@ -102,7 +105,8 @@ local function ParseDamage()
 		atkname = attacker:GetInfo().name
 	end
 	CallHook("Damaged",atkname,pos,dmg,death,self,suicide,hp)
-	CallHook("PlayerDamaged",self2,atkname,pos,dmg,death,self,suicide,hp,id,pos)
+	CallHook("PlayerDamaged",self2,atkname,pos,dmg,death,self,suicide,hp,id,pos,dir)
+	CallHook("PlayerDamaged2",self2,dmg,death,pos,dir,hp)
 	attacker = attacker or ""
 	--print("Attacked: " .. dmg .. " " .. EnumToString(meansOfDeath_t,death) .. " " .. attacker .. "\n")
 end

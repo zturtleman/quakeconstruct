@@ -428,13 +428,13 @@ int qlua_rsetcolor(lua_State *L) {
 }
 
 int qlua_rrender(lua_State *L) {
-	refEntity_t	*luaentity;
+	refEntity_t	*e;
 
 	luaL_checktype(L,1,LUA_TUSERDATA);
 
-	luaentity = lua_torefentity(L,1);
-	if(luaentity != NULL) {
-		trap_R_AddRefEntityToScene( luaentity );
+	e = lua_torefentity(L,1);
+	if(e != NULL) {
+		trap_R_AddRefEntityToScene( e );
 	}
 	return 0;
 }

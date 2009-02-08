@@ -518,14 +518,15 @@ void RB_SurfaceRailCore( void ) {
 //Hxrmn's Poly Code
 void RB_EntitySurfacePolys( void ) {
 	refEntity_t *e;
+/*	srfPoly_t	*poly;
 	polyVert_t  temp[1024];
 	vec3_t		tempAxis[3];
 	int i=0;
-	int v=0;
+	int v=0;*/
 	
 	e = &backEnd.currentEntity->e;
 
-	for ( i=0; i<e->numVerts; i++ ) {
+/*	for ( i=0; i<e->numVerts; i++ ) {
 		temp[i].modulate[0] = e->shaderRGBA[0];
 		temp[i].modulate[1] = e->shaderRGBA[1];
 		temp[i].modulate[2] = e->shaderRGBA[2];
@@ -557,9 +558,10 @@ void RB_EntitySurfacePolys( void ) {
 			(int)temp[i].modulate[3],
 			temp[i].st[0],
 			temp[i].st[1]);
-	}
+	}*/
 
-	RE_AddPolyToScene(e->customShader,e->numVerts,temp,1);
+	RE_AddPolyRefToScene(e);
+	//RE_AddPolyToScene(e->customShader,e->numVerts,temp,1);
 }
 
 

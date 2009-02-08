@@ -109,6 +109,77 @@ void R_AddPolygonSurfaces( void ) {
 	}
 }
 
+void RE_AddPolyRefToScene( refEntity_t *e ) {
+	srfPoly_t	*poly;
+	polyVert_t  temp[1024];
+	vec3_t		tempAxis[3];
+	int i=0;
+	int v=0;
+
+	if ( r_numpolyverts + e->numVerts > max_polyverts ) {
+		ri.Printf( PRINT_WARNING, "WARNING: RB_EntitySurfacePolys: r_max_polys or r_max_polyverts reached\n");
+		return;
+	}
+
+	poly = &backEndData[tr.smpFrame]->polys[r_numpolys];
+	poly->surfaceType = SF_POLY;
+	poly->hShader = e->customShader;
+	poly->numVerts = e->numVerts;
+	poly->verts = &backEndData[tr.smpFrame]->polyVerts[r_numpolyverts];
+	
+	Com_Memcpy( poly->verts, &temp[e->numVerts], e->numVerts * sizeof( *temp ) );
+
+	Com_Printf("^1Copied: %i verts.\n",e->numVerts);
+	Com_Printf("^1Last Vert: %f, %f, %f\n",
+		poly->verts->xyz[0],
+		poly->verts->xyz[1],
+		poly->verts->xyz[2]);
+
+	if ( glConfig.hardwareType == GLHW_RAGEPRO ) {
+		poly->verts->modulate[0] = 255;
+		poly->verts->modulate[1] = 255;
+		poly->verts->modulate[2] = 255;
+		poly->verts->modulate[3] = 255;
+	}
+
+	for ( i=r_numpolyverts; i<r_numpolyverts + e->numVerts; i++ ) {
+		poly->verts[i].modulate[0] = e->shaderRGBA[0];
+		poly->verts[i].modulate[1] = e->shaderRGBA[1];
+		poly->verts[i].modulate[2] = e->shaderRGBA[2];
+		poly->verts[i].modulate[3] = e->shaderRGBA[3];
+
+		VectorClear(poly->verts[i].xyz);
+
+		for ( v=0; v<3; v++ ) {
+			VectorScale(e->axis[v],e->verts[i].xyz[v],tempAxis[v]);
+		}
+		
+		v=0;
+		for ( v=0; v<3; v++ ) {
+			VectorAdd(tempAxis[v],poly->verts[i].xyz,poly->verts[i].xyz);
+		}
+		VectorAdd(poly->verts[i].xyz,e->origin,poly->verts[i].xyz);
+
+		poly->verts[i].st[0] = e->verts[i].st[0];
+		poly->verts[i].st[1] = e->verts[i].st[1];
+
+		Com_Printf("PolyVert[%i] %f,%f,%f | %i,%i,%i,%i | %f,%f\n", 
+			i,
+			poly->verts[i].xyz[0],
+			poly->verts[i].xyz[1],
+			poly->verts[i].xyz[2],
+			(int)poly->verts[i].modulate[0],
+			(int)poly->verts[i].modulate[1],
+			(int)poly->verts[i].modulate[2],
+			(int)poly->verts[i].modulate[3],
+			poly->verts[i].st[0],
+			poly->verts[i].st[1]);
+	}
+
+	r_numpolys++;
+	r_numpolyverts += e->numVerts;
+}
+
 /*
 =====================
 RE_AddPolyToScene

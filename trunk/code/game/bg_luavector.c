@@ -392,6 +392,22 @@ int qlua_DotProduct(lua_State *L) {
 	return 1;
 }
 
+int qlua_ByteToDir(lua_State *L) {
+	vec3_t dir;
+	luaL_checkint(L,1);
+	
+	ByteToDir(lua_tointeger(L,1),dir);
+	lua_pushvector(L,dir);
+	return 1;
+}
+
+int qlua_DirToByte(lua_State *L) {
+	vec3_t dir;
+	lua_tovector(L,1,dir);
+	lua_pushinteger(L,DirToByte(dir));
+	return 1;
+}
+
 void BG_InitLuaVector(lua_State *L) {
 	lua_register(L,"VectorToAngles",qlua_VectorToAngles);
 	lua_register(L,"VectorNormalize",qlua_VectorNormalize);
@@ -401,6 +417,8 @@ void BG_InitLuaVector(lua_State *L) {
 	lua_register(L,"VectorUp",qlua_VectorUp);
 	lua_register(L,"AngleVectors",qlua_AngleVectors);
 	lua_register(L,"DotProduct",qlua_DotProduct);
+	lua_register(L,"ByteToDir",qlua_ByteToDir);
+	lua_register(L,"DirToByte",qlua_DirToByte);
 
 	Vector_register(L);
 }

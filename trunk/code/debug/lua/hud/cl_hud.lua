@@ -3,17 +3,19 @@ local y = 470
 local function draw2d()
 	local x = 0
 	local hp = _CG.stats[STAT_HEALTH]
+	local hc = (hp / LocalPlayer():GetInfo().handicap) * 100
+	
 	local armor = _CG.stats[STAT_ARMOR]
 	local ammo = _CG.ammo[_CG.weapon+1]
 	local pk = _CG.itemPickupTime
 	local pi = _CG.itemPickup
 	local pkn = "<invalid>"
 		local size = 150
-		drawHead(x-15,y-size,size,hp)
+		drawHead(x-15,y-size,size,hc)
 		x = x + size
 	
 		if(pi > 0) then pkn = util.GetItemName(pi) end
-		local dhp = math.min(math.max(hp/100,0),1)
+		local dhp = math.min(math.max(hc/100,0),1)
 		local dhp2 = math.min((1-dhp)*2,1)
 		if(hp <= 25) then dhp2 = math.min(dhp2,.5) end
 		

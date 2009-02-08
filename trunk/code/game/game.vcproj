@@ -801,6 +801,9 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\bg_luamisc.c">
+			</File>
+			<File
 				RelativePath=".\bg_luapmove.c">
 			</File>
 			<File

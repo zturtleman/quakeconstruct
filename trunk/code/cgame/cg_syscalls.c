@@ -298,8 +298,40 @@ void	trap_R_ClearScene( void ) {
 	syscall( CG_R_CLEARSCENE );
 }
 
-void	trap_R_AddRefEntityToScene( const refEntity_t *re ) {
-	syscall( CG_R_ADDREFENTITYTOSCENE, re );
+void	trap_R_AddRefEntityToScene( const refEntity_t *e ) {
+	//I'm going to intercept this at the client game level, until I fix it in the renderer.
+	//-Hxrmn
+	polyVert_t  temp[1024];
+	vec3_t		tempAxis[3];
+	int i=0;
+	int v=0;
+
+	if(e->reType == RT_POLY) {
+		for ( i=0; i<e->numVerts; i++ ) {
+			temp[i].modulate[0] = e->shaderRGBA[0];
+			temp[i].modulate[1] = e->shaderRGBA[1];
+			temp[i].modulate[2] = e->shaderRGBA[2];
+			temp[i].modulate[3] = e->shaderRGBA[3];
+
+			VectorClear(temp[i].xyz);
+
+			for ( v=0; v<3; v++ ) {
+				VectorScale(e->axis[v],e->verts[i].xyz[v],tempAxis[v]);
+			}
+			
+			v=0;
+			for ( v=0; v<3; v++ ) {
+				VectorAdd(tempAxis[v],temp[i].xyz,temp[i].xyz);
+			}
+			VectorAdd(temp[i].xyz,e->origin,temp[i].xyz);
+
+			temp[i].st[0] = e->verts[i].st[0];
+			temp[i].st[1] = e->verts[i].st[1];
+		}
+		syscall( CG_R_ADDPOLYTOSCENE, e->customShader, e->numVerts, temp );
+	} else {
+		syscall( CG_R_ADDREFENTITYTOSCENE, e );
+	}
 }
 
 void	trap_R_AddPolyToScene( qhandle_t hShader , int numVerts, const polyVert_t *verts ) {

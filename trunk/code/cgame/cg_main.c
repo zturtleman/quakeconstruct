@@ -2096,6 +2096,7 @@ void CG_InitLua() {
 	L = GetClientLuaState();
 	if(L == NULL) return;
 
+	BG_InitLuaMisc(L);
 	BG_InitLuaTrajectory(L);
 	BG_InitLuaPMove(L);
 	CG_InitLuaVector(L);
