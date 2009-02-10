@@ -378,7 +378,7 @@ elseif(CLIENT) then
 	local function finished()
 		if(#QUEUE > 0) then table.remove(QUEUE,1) end
 		if(#QUEUE == 0 and frame != nil) then 
-			frame:Remove()
+			frame:Close()
 			frame = nil
 			flist = nil
 		end

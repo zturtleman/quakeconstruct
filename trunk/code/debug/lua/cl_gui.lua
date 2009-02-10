@@ -28,7 +28,7 @@ function MakeModelFrame(mdl)
 		end
 	end
 	
-	if(MDL_MODEL == nil and MDL_VIEWPANE != nil) then
+	if(MDL_VIEWPANE != nil and MDL_VIEWPANE.sub == nil) then
 		local test = UI_Create("modelpane",MDL_VIEWPANE)
 		if(test != nil) then
 			local inf = LocalPlayer():GetInfo()
@@ -46,19 +46,9 @@ function MakeModelFrame(mdl)
 				local dist = refSize(ref)
 				self:SetCamOrigin(Vector(math.cos(self.rot/57.3)*dist,-math.sin(self.rot/57.3)*dist,0))
 			end
-			test.OnRemove = function(self)
-				MDL_MODEL = nil
-			end
 		end
-		MDL_MODEL = test
+		MDL_VIEWPANE.sub = test
 	else
-		MDL_MODEL:SetModel(LoadModel(mdl))
-		MDL_MODEL:SetSkin(0)		
-		local pl = "models/players"
-		if(string.sub(mdl,0,string.len(pl)) == pl) then
-			--local skin = util.LoadSkin("")
-			MDL_MODEL:SetSkin(LocalPlayer():GetInfo().torsoSkin)
-			print("SetSkin\n")
-		end
+		MDL_VIEWPANE.sub:SetModel(mdl)
 	end
 end

@@ -14,7 +14,8 @@ function Panel:Initialize()
 	self.close = UI_Create("button",self,true)
 	self.close:SetText("X")
 	self.close.DoClick = function()
-		self:Remove()
+		--self:Remove()
+		self:Close()
 	end
 	
 	self.dragbar2 = UI_Create("dragbutton",self,true)

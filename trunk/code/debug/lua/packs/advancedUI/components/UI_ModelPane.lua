@@ -1,6 +1,7 @@
 local Panel = {}
 Panel.model = nil
 Panel.org = Vector()
+Panel.nofade = true
 
 function Panel:Initialize()
 	self.ref = RefEntity()
