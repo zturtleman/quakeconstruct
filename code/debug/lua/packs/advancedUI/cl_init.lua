@@ -72,7 +72,7 @@ local currentInit = nil
 function UI_EnableCursor(b)
 	local hold = false
 	for k,v in pairs(UI_Active) do
-		if(v.catchm and v.removeme == false and v:IsVisible()) then hold = true end
+		if(v.catchm and v.removeme == false and v:IsVisible() and v.alpha == 1) then hold = true end
 	end
 	if(b != true and hold) then return end
 	EnableCursor(b)
@@ -370,7 +370,7 @@ local function drawx()
 		
 		for i=0, #UI_Active-1 do
 			local v = UI_Active[#UI_Active - i]
-			if(v:IsVisible() and v:ShouldDraw()) then
+			if(v != nil and v:IsVisible() and v:ShouldDraw()) then
 				thinks = thinks + 1
 				--[[if(v.parent and v.parent.valid != true) then
 					v:DoLayout()
@@ -383,6 +383,9 @@ local function drawx()
 					v:SetVisible(v:GetDelegate():IsVisible())
 				end
 				v:Think()
+			end
+			if(v != nil and v:IsVisible()) then
+				pcall(v.ThinkInternal,v)
 			end
 			--if(v and v.rmvx == 1) then collect = true end
 		end
@@ -438,7 +441,7 @@ local function drawx()
 end
 
 local function profd()
-	local dtime = ProfileFunction(drawx)
+	--[[local dtime = ProfileFunction(drawx)
 	if(QLUA_DEBUG) then 
 		draw.SetColor(1,1,1,1)
 		draw.Text(0,100,"TotalTime: " .. dtime,12,12)
@@ -447,7 +450,8 @@ local function profd()
 		draw.Text(0,136,"ThinkTime: " .. thinktime,12,12)
 		draw.Text(0,148,"MaskCount: " .. mcount,12,12)
 		draw.Text(0,160,"Thinks: " .. thinks,12,12)
-	end
+	end]]
+	drawx()
 end
 hook.add("Draw2D","uidraw",profd)
 

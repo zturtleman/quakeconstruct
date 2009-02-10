@@ -24,11 +24,11 @@ function Skin:DefaultFG()
 	return {.75,.8,.7,1}
 end
 
-function Skin:StartMask(...)
+function Skin:StartMask(x,y,w,h)
 	if(softwaremask) then
-		softmask.Set(unpack(arg))
+		softmask.Set(x,y,w,h)
 	else
-		draw.MaskRect(unpack(arg))
+		draw.MaskRect(x,y,w,h)
 	end
 	maskOn = true
 end
@@ -100,6 +100,15 @@ end
 
 function Skin:DrawBevelRect(x,y,w,h,d,i)
 	i=i or 2
+	
+	local al = panel:GetAlpha()
+	
+	x = x + (w/2)*(1-al)
+	y = y + (h/2)*(1-al)
+	
+	w = w * al
+	h = h * al
+	
 	if(softwaremask) then
 		if(softmask.IsMasked(x,y,w,h)) then
 			SkinCall("DrawSoftBevelRect",x,y,w,h,d,i)
@@ -134,6 +143,7 @@ end
 function Skin:DrawBackground(d)
 	local x,y = panel:GetPos()
 	d = d or .04
+	sk.coloradjust(nil,0,panel:GetAlpha())
 	SkinCall("DrawBevelRect",x,y,panel.w,panel.h,d,1)
 	--SkinCall("DrawNeon",x,y,panel.w,panel.h,-1)
 end
@@ -174,6 +184,7 @@ function Skin:DrawLabelForeground()
 	end
 	
 	panel:DoFGColor()
+	sk.coloradjust(nil,0,panel:GetAlpha())
 	SkinCall("Text",x,y,panel.text,ts,ts)
 end
 
@@ -193,6 +204,7 @@ function Skin:DrawModelPane()
 
 		refdef.angles = aim
 
+		refdef.flags = RDF_NOWORLDMODEL
 		refdef.x = panel:GetX()
 		refdef.y = panel:GetY()
 		refdef.width = panel:GetWidth()
@@ -205,20 +217,23 @@ end
 
 function Skin:DrawShadow()
 	--if(true) then return end
+	local al = panel:GetAlpha()
+	local i = 0
 	panel:DoBGColor()
 	sk.coloradjust(panel.bgcolor,-.3,.2)
 	
 	local x,y = panel:GetPos()
-	sk.coloradjust(nil,0,.6)
-	SkinCall("DrawBGRect",x-2,y-2,panel.w+4,panel.h+4)
-	sk.coloradjust(nil,0,.4)
-	SkinCall("DrawBGRect",x-4,y-4,panel.w+8,panel.h+8)
-	sk.coloradjust(nil,0,.2)
-	SkinCall("DrawBGRect",x-6,y-6,panel.w+12,panel.h+12)
+	sk.coloradjust(nil,0,.6*al)
+	SkinCall("DrawBGRect",x-(2+i/2),y-(2+i/2),panel.w+(4+i),panel.h+(4+i))
+	sk.coloradjust(nil,0,.4*al)
+	SkinCall("DrawBGRect",x-(4+i/2),y-(4+i/2),panel.w+(8+i),panel.h+(8+i))
+	sk.coloradjust(nil,0,.2*al)
+	SkinCall("DrawBGRect",x-(6+i/2),y-(6+i/2),panel.w+(12+i),panel.h+(12+i))
 end
 
 function Skin:DrawTextArea()
 	panel:DoFGColor()
+	sk.coloradjust(nil,0,panel:GetAlpha())
 	for k,v in pairs(panel.lines) do
 		k = k * panel.spacing
 		SkinCall("Text",panel:GetX(),(panel:GetY() + ((k-panel.spacing)*panel.th)),v,panel.tw,panel.th)

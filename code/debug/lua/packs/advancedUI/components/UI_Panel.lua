@@ -20,6 +20,9 @@ Panel.delegate = nil
 Panel.lastsize = {0,0}
 Panel.inLayout = false
 Panel.maskviadelegate = true
+Panel.alpha = 0
+Panel.targalpha = 1
+Panel.nofade = false
 
 local function qcolor(tab)
 	draw.SetColor(tab[1],tab[2],tab[3],tab[4])
@@ -192,6 +195,29 @@ function Panel:Think()
 
 end
 
+function Panel:ThinkInternal()
+	if(self.nofade) then self.alpha = 1 return end
+	if(math.abs(self.alpha - self.targalpha) < .005) then
+		self.alpha = self.targalpha
+		return
+	end
+	self.alpha = self.alpha + (self.targalpha - self.alpha) * (.4)
+	if(self.alpha <= .02 and self.hide) then
+		self:_SetVisible(false)
+		if(self.closing == 1) then
+			self.closing = 0
+			
+			UI_EnableCursor(false)
+			
+			self:OnRemove()
+			if(self.parent) then
+				self.parent.cc = self.parent.cc - 1
+			end
+			UI_RemovePanel(self)		
+		end
+	end
+end
+
 function Panel:SetBGColor(r,g,b,a)
 	if(type(r) == "table") then
 		self.bgcolor = r
@@ -324,6 +350,21 @@ end
 
 function Panel:OnRemove() end
 
+function Panel:Close()
+	if(self.nofade) then
+		self:Remove()
+		return
+	end
+	
+	self:SetVisible(false)
+	self.closing = 1
+	self.targalpha = 0
+	if(self.catchm) then
+		UI_EnableCursor(false)
+	end
+	self.catchm = false
+end
+
 function Panel:Remove()
 	self:OnRemove()
 	if(self.parent) then
@@ -336,10 +377,33 @@ function Panel:Remove()
 	UI_RemovePanel(self)
 end
 
-function Panel:SetVisible(b)
+function Panel:_SetVisible(b)
 	self.visible = b
 	if(self.catchm) then
 		UI_EnableCursor(self.visible)
+	end
+end
+
+function Panel:SetVisible(b)
+	if(self.nofade) then
+		self:_SetVisible(b)
+		return
+	end
+	if(b) then
+		if(!self.closing) then
+			self:_SetVisible(true)
+			self.targalpha = 1
+			self.hide = false
+			if(self.catchm) then
+				UI_EnableCursor(true)
+			end
+		end
+	else
+		self.targalpha = 0
+		self.hide = true
+		if(self.catchm) then
+			UI_EnableCursor(false)
+		end
 	end
 end
 
@@ -377,6 +441,16 @@ function Panel:Valid()
 		end
 	end
 	return false
+end
+
+function Panel:GetAlpha()
+	if(self:GetDelegate()) then
+		local al = self:GetDelegate():GetAlpha()
+		if(al < self.alpha) then
+			return al
+		end
+	end
+	return self.alpha
 end
 
 function Panel:InvalidateLayout()
