@@ -92,9 +92,9 @@ local function makeEnt(p,c,a)
 	local tr = PlayerTrace(p)
 	local ent = CreateEntity(a[1])
 	ent:SetPos(tr.endpos + Vector(0,0,20))
-	ent:SetWait(1)
+	--ent:SetWait(1)
 	ent:SetTrType(TR_STATIONARY)
-	ent:SetSpawnFlags(1)
+	--ent:SetSpawnFlags(1)
 end
 concommand.add("entity",makeEnt)
 
