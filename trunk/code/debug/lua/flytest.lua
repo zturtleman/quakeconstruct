@@ -1,5 +1,5 @@
 if(SERVER) then
-	--downloader.add("lua/pmove.lua")
+	downloader.add("lua/flytest.lua")
 	local function PlayerDamaged(self,inflictor,attacker,damage,meansOfDeath,dir,pos)
 		if(self:GetHealth() <= 0 and self:GetHealth() > -50) then
 			self:Damage(attacker,attacker,1000)
