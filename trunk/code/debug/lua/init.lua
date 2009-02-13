@@ -1,20 +1,10 @@
 --includesimple("sctest")
 
---SendScript("lua/vampiric_cl.lua")
---SendScript("lua/includes/scriptmanager.lua")
-
-require "shared"
-require "turrets"
-require "explosion"
 --require "sh_notify"
 
 message.Precache("itempickup")
 message.Precache("playerdamage")
 message.Precache("playerrespawn")
-
---downloader.add("lua/tests/cl_small.lua",true)
---downloader.add("lua/cl_lerptest.lua",true)
---downloader.add("lua/cl_localtest.lua",true)
 
 --[[
 local function Fuse(v)
@@ -24,10 +14,6 @@ local function Fuse(v)
 end
 hook.add("EntityLinked","super",Fuse)
 ]]
---downloader.add("lua/sh_notify.lua")
---downloader.add("lua/tests/cl_gibchooser.lua")
---downloader.add("lua/tests/cl_newgibs.lua")
---downloader.add("lua/cl_lerptest.lua")
 
 local function writeVector(msg,v)
 	message.WriteFloat(msg,v.x)
@@ -97,49 +83,3 @@ local function makeEnt(p,c,a)
 	--ent:SetSpawnFlags(1)
 end
 concommand.add("entity",makeEnt)
-
---[[
-local tests = {}
-local ent = CreateEntity("testentity")
-local pos = Vector(532,1872,100)
-pos = Vector(30,80,100)
-ent:SetPos(pos)
---ent:SetTrType(TR_STATIONARY)
-table.insert(tests,ent)
-
-local ent2 = CreateEntity("item_quad")
-ent2:SetPos(pos + Vector(160,0,150))
-ent2:SetTrType(TR_STATIONARY)
-ent2:SetWait(1)
-ent2:SetSpawnFlags(1)
-table.insert(tests,ent2)
-
-for x=0,4 do
-	local class = "item_armor_body"
-	if(x==0) then
-		class = "item_health_mega"
-	end
-	if(x==1) then
-		class = "weapon_railgun"
-	end
-	if(x==2) then
-		class = "weapon_bfg"
-	end
-	if(x==3) then
-		class = "weapon_shotgun"
-	end
-	local lp = pos + Vector(x*80,0,100)
-	local ent = CreateEntity(class)
-	ent:SetPos(lp)
-	ent:SetTrType(TR_STATIONARY)
-	ent:SetWait(1)
-	ent:SetSpawnFlags(1)
-	table.insert(tests,ent)
-end
-
-local function removeTests()
-	for k,v in pairs(tests) do
-		v:Remove()
-	end
-end
-concommand.Add("RemoveTests",removeTests,true)]]
