@@ -240,6 +240,99 @@ int qlua_playerweapon(lua_State *L) {
 	return 0;
 }
 
+int qlua_playerhand(lua_State *L) {
+	refEntity_t	hand;
+	vec3_t		angles;
+	clientInfo_t	*ci;
+	centity_t	*cent = &cg.predictedPlayerEntity;
+	float		fovOffset;
+	weaponInfo_t	*weapon;
+	playerState_t	*ps = &cg.predictedPlayerState;
+
+	if ( cg_fov.integer > 90 ) {
+		fovOffset = -0.2 * ( cg_fov.integer - 90 );
+	} else {
+		fovOffset = 0;
+	}
+
+	CG_RegisterWeapon( ps->weapon );
+	weapon = &cg_weapons[ ps->weapon ];
+
+	memset (&hand, 0, sizeof(hand));
+
+	// set up gun position
+	CG_CalculateWeaponPosition( hand.origin, angles );
+
+	VectorMA( hand.origin, cg_gun_x.value, cg.refdef.viewaxis[0], hand.origin );
+	VectorMA( hand.origin, cg_gun_y.value, cg.refdef.viewaxis[1], hand.origin );
+	VectorMA( hand.origin, (cg_gun_z.value+fovOffset), cg.refdef.viewaxis[2], hand.origin );
+
+	AnglesToAxis( angles, hand.axis );
+
+	// map torso animations to weapon animations
+	if ( cg_gun_frame.integer ) {
+		// development tool
+		hand.frame = hand.oldframe = cg_gun_frame.integer;
+		hand.backlerp = 0;
+	} else {
+		// get clientinfo for animation map
+		ci = &cgs.clientinfo[ cent->currentState.clientNum ];
+		hand.frame = CG_MapTorsoToWeaponFrame( ci, cent->pe.torso.frame );
+		hand.oldframe = CG_MapTorsoToWeaponFrame( ci, cent->pe.torso.oldFrame );
+		hand.backlerp = cent->pe.torso.backlerp;
+	}
+
+	hand.hModel = weapon->handsModel;
+	hand.renderfx = RF_DEPTHHACK | RF_FIRST_PERSON | RF_MINLIGHT;
+
+	lua_pushrefentity(L,&hand);
+
+	return 1;
+}
+
+int qlua_weaponinfo(lua_State *L) {
+	weaponInfo_t	*weapon;
+	int id = lua_tointeger(L,1);
+
+	if(id < WP_NONE || id > WP_GRAPPLING_HOOK) {
+		lua_pushstring(L,"Weapon out of bounds.");
+		lua_error(L);
+		return 1;
+	}
+	CG_RegisterWeapon( id );
+	weapon = &cg_weapons[ id ];
+
+	lua_newtable(L);
+
+	setTableInt(L,"ammoIcon",weapon->ammoIcon);
+	setTableInt(L,"ammoModel",weapon->ammoModel);
+	setTableInt(L,"barrelModel",weapon->barrelModel);
+	setTableInt(L,"firingSound",weapon->firingSound);
+	setTableFloat(L,"flashDlight",weapon->flashDlight);
+	setTableVector(L,"flashDlightColor",weapon->flashDlightColor);
+	setTableInt(L,"flashModel",weapon->flashModel);
+	setTableTable(L,"flashSound",weapon->flashSound,4);
+	setTableInt(L,"handsModel",weapon->handsModel);
+	setTableBoolean(L,"loopFireSound",weapon->loopFireSound);
+	setTableFloat(L,"missileDlight",weapon->missileDlight);
+	setTableVector(L,"missileDlightColor",weapon->missileDlightColor);
+	setTableInt(L,"missileModel",weapon->missileModel);
+	setTableInt(L,"missileRenderfx",weapon->missileRenderfx);
+	setTableInt(L,"missileSound",weapon->missileSound);
+	setTableInt(L,"readySound",weapon->readySound);
+	setTableBoolean(L,"registered",weapon->registered);
+	setTableFloat(L,"trailRadius",weapon->trailRadius);
+	setTableInt(L,"weaponIcon",weapon->weaponIcon);
+	setTableVector(L,"weaponMidpoint",weapon->weaponMidpoint);
+	setTableInt(L,"weaponModel",weapon->weaponModel);
+	setTableFloat(L,"wiTrailTime",weapon->wiTrailTime);
+	setTableInt(L,"weaponState",cg.predictedPlayerState.weaponstate);
+	setTableInt(L,"weaponTime",cg.predictedPlayerState.weaponTime);
+
+
+	return 1;
+}
+
 int qlua_localpos(lua_State *L) {
 	lua_pushvector(L,cg.predictedPlayerEntity.lerpOrigin);
 	return 1;
@@ -255,6 +348,13 @@ int qlua_isUI(lua_State *L) {
 	return 1;
 }
 
+int qlua_barrelSpin(lua_State *L) {
+	centity_t *cent = lua_toentity(L,1);
+
+	lua_pushnumber(L,CG_MachinegunSpinAngle(cent));
+	return 1;
+}
+
 static const luaL_reg Util_methods[] = {
   {"GetItemIcon",		qlua_getitemicon},
   {"GetItemModel",		qlua_getitemmodel},
@@ -267,6 +367,9 @@ static const luaL_reg Util_methods[] = {
   {"AnimatePlayer",		qlua_playeranim},
   {"AnglePlayer",		qlua_playerangles},
   {"PlayerWeapon",		qlua_playerweapon},
+  {"Hand",				qlua_playerhand},
+  {"WeaponInfo",		qlua_weaponinfo},
+  {"BarrelAngle",		qlua_barrelSpin},
   {"LocalPos",			qlua_localpos},
   {"LocalAngles",		qlua_localang},
   {"CharData",			qlua_chardata},

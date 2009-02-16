@@ -117,15 +117,22 @@ int qlua_rsetpos2(lua_State *L) {
 
 int qlua_rgetangles(lua_State *L) {
 	refEntity_t	*luaentity;
+	vec3_t	angles;
+	vec3_t	angles2;
 
 	luaL_checktype(L,1,LUA_TUSERDATA);
 
 	luaentity = lua_torefentity(L,1);
 	if(luaentity != NULL) {
-		lua_pushvector(L,luaentity->axis[0]);
-		lua_pushvector(L,luaentity->axis[1]);
-		lua_pushvector(L,luaentity->axis[2]);
-		return 3;
+		vectoangles(luaentity->axis[0],angles);
+		vectoangles(luaentity->axis[1],angles2);
+		angles[2] = angles2[0];
+		lua_pushvector(L,angles);
+		return 1;
+		//lua_pushvector(L,luaentity->axis[0]);
+		//lua_pushvector(L,luaentity->axis[1]);
+		//lua_pushvector(L,luaentity->axis[2]);
+		//return 3;
 	}
 	return 0;
 }

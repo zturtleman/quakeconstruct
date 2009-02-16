@@ -448,6 +448,32 @@ int qlua_settrx(lua_State *L) {
 	return 0;
 }
 
+int qlua_getflags(lua_State *L) {
+	centity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		lua_pushinteger(L,luaentity->currentState.eFlags);
+		return 1;
+	}
+	return 0;
+}
+
+int qlua_getflashtime(lua_State *L) {
+	centity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		lua_pushnumber(L,luaentity->muzzleFlashTime);
+		return 1;
+	}
+	return 0;
+}
+
 static int Entity_tostring (lua_State *L)
 {
   lua_pushfstring(L, "Entity: %p", lua_touserdata(L, 1));
@@ -477,6 +503,8 @@ static const luaL_reg Entity_methods[] = {
   {"GetLerpAngles",	qlua_getlerpangles},
   {"SetAngles",		qlua_setangles},
   {"GetInfo",		qlua_getclientinfo},
+  {"GetFlags",		qlua_getflags},
+  {"GetFlashTime",	qlua_getflashtime},
   {"GetOtherEntity",	qlua_getotherentity},
   {"GetOtherEntity2",	qlua_getotherentity},
   {"GetByteDir",		qlua_getbytedir},
