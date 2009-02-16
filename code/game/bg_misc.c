@@ -917,6 +917,7 @@ Only in One Flag CTF games
 	},
 #endif
 
+/*	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
 	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
 	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
 	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
@@ -947,8 +948,7 @@ Only in One Flag CTF games
 	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
 	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
 	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
-	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
-	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
+	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},*/
 
 	// end of list marker
 	{NULL}

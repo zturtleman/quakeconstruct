@@ -883,7 +883,7 @@ CG_MapTorsoToWeaponFrame
 
 =================
 */
-static int CG_MapTorsoToWeaponFrame( clientInfo_t *ci, int frame ) {
+int CG_MapTorsoToWeaponFrame( clientInfo_t *ci, int frame ) {
 
 	// change weapon
 	if ( frame >= ci->animations[TORSO_DROP].firstFrame 
@@ -912,7 +912,7 @@ static int CG_MapTorsoToWeaponFrame( clientInfo_t *ci, int frame ) {
 CG_CalculateWeaponPosition
 ==============
 */
-static void CG_CalculateWeaponPosition( vec3_t origin, vec3_t angles ) {
+void CG_CalculateWeaponPosition( vec3_t origin, vec3_t angles ) {
 	float	scale;
 	int		delta;
 	float	fracsin;
@@ -1153,7 +1153,7 @@ CG_MachinegunSpinAngle
 */
 #define		SPIN_SPEED	0.9
 #define		COAST_TIME	1000
-static float	CG_MachinegunSpinAngle( centity_t *cent ) {
+float	CG_MachinegunSpinAngle( centity_t *cent ) {
 	int		delta;
 	float	angle;
 	float	speed;

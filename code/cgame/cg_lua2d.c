@@ -163,6 +163,45 @@ int qlua_rect(lua_State *L) {
 	return 0;
 }
 
+int qlua_line(lua_State *L) {
+	float x1,y1,x2,y2,w,s,t,s2,t2;
+	float dx,dy,cx,cy,rot;
+
+	qhandle_t shader = cgs.media.whiteShader;
+
+	luaL_checktype(L,1,LUA_TNUMBER);
+	luaL_checktype(L,2,LUA_TNUMBER);
+	luaL_checktype(L,3,LUA_TNUMBER);
+	luaL_checktype(L,4,LUA_TNUMBER);
+
+	x1 = lua_tonumber(L,1);
+	y1 = lua_tonumber(L,2);
+	x2 = lua_tonumber(L,3);
+	y2 = lua_tonumber(L,4);
+
+	if(lua_type(L,5) == LUA_TNUMBER) {
+		shader = lua_tointeger(L,5);
+	}
+
+	w = quickfloat(L,6,1);
+	s = quickfloat(L,7,0);
+	t = quickfloat(L,8,0);
+	s2 = quickfloat(L,9,1);
+	t2 = quickfloat(L,10,1);
+
+	CG_AdjustFrom640( &x1, &y1, &x2, &y2 );
+
+	dx = x2 - x1;
+	dy = y2 - y1;
+	cx = x1 + dx/2;
+	cy = y1 + dy/2;
+	rot = atan2(dy,dx)*57.3;
+
+	trap_R_DrawTransformPic( cx, cy, sqrt(dx*dx + dy*dy), w, s, t, s2, t2, rot, shader );
+
+	return 0;
+}
+
 int qlua_rectrotated(lua_State *L) {
 	float x,y,w,h,s,t,s2,t2,r;
 
@@ -218,6 +257,7 @@ int qlua_text(lua_State *L) {
 static const luaL_reg Draw_methods[] = {
   {"SetColor",		qlua_setcolor},
   {"Rect",			qlua_rect},
+  {"Line",			qlua_line},
   {"RectRotated",	qlua_rectrotated},
   {"BeveledRect",	qlua_beveledRect},
   {"Text",			qlua_text},

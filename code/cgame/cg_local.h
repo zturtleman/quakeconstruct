@@ -1260,6 +1260,15 @@ void CG_InitLua2D(lua_State *L);
 void CG_InitLua3D(lua_State *L);
 void CG_InitLuaUtil(lua_State *L);
 
+void setTableInt(lua_State *L, char *str, int v);
+void setTableFloat(lua_State *L, char *str, float v);
+void setTableVector(lua_State *L, char *str, vec3_t v);
+void setTableString(lua_State *L, char *str, char *v);
+void setTableBoolean(lua_State *L, char *str, qboolean v);
+void setTableRefDef(lua_State *L, char *str, refdef_t refdef);
+void setTableTable(lua_State *L, char *str, int tab[], int size);
+
+
 qboolean CG_ShouldDraw(const char *name);
 
 localEntity_t CG_GetLocalEntityList( void );
@@ -1427,6 +1436,9 @@ void CG_PositionRotatedEntityOnTag( refEntity_t *entity, const refEntity_t *pare
 //
 // cg_weapons.c
 //
+float	CG_MachinegunSpinAngle( centity_t *cent );
+int CG_MapTorsoToWeaponFrame( clientInfo_t *ci, int frame );
+void CG_CalculateWeaponPosition( vec3_t origin, vec3_t angles );
 void CG_NextWeapon_f( void );
 void CG_PrevWeapon_f( void );
 void CG_Weapon_f( void );

@@ -14,3 +14,10 @@ typedef enum {
 
 	WP_NUM_WEAPONS
 } weapon_t;
+
+typedef enum {
+	WEAPON_READY, 
+	WEAPON_RAISING,
+	WEAPON_DROPPING,
+	WEAPON_FIRING
+} weaponstate_t;
