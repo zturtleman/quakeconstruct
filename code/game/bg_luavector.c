@@ -408,6 +408,72 @@ int qlua_DirToByte(lua_State *L) {
 	return 1;
 }
 
+void lerpVector(vec3_t v1, vec3_t v2, vec3_t out, float t) {
+	vec3_t temp;
+	VectorSubtract(v2,v1,temp);
+	VectorMA(v1,t,temp,out);
+}
+
+float interpolateSpline(vec3_t verts[],int count,float lerp,int element) {
+	vec3_t lerped[1024];
+	float e1,e2;
+	int i = 0;
+	if(count > 1) {
+		for(i=0;i<count-1;i++) {
+			e1 = verts[i][element];
+			e2 = verts[i+1][element];
+			lerped[i][element] = e1 + (e2 - e1) * lerp;
+		}
+		return interpolateSpline(lerped, count-1, lerp, element);
+	} else if(count > 0) {
+		return verts[0][element];
+	} else {
+		return 0;
+	}
+}
+
+int qlua_vspline(lua_State *L) {
+	int size = 0;
+	int i = 0;
+	int idx = 0;
+	float t = 0;
+	vec3_t verts[1024];
+	vec3_t out;
+
+	VectorClear(out);
+
+	luaL_checktype(L,1,LUA_TTABLE);
+	luaL_checktype(L,2,LUA_TNUMBER);
+
+	t = lua_tonumber(L,2);
+
+	size = luaL_getn(L,1);
+	if(size > 1024) {
+		lua_pushvector(L,out);
+		return 0;
+	}
+	if(size < 1) {
+		lua_pushvector(L,out);
+		return 1;
+	}
+
+	for(i=0;i<size;i++) {
+		qlua_pullvector_i(L,i+1,verts[i],qfalse,1);
+
+		Com_Printf("Read Vert: %i | %f,%f,%f\n",i+1,verts[i][0],verts[i][1],verts[i][2]);
+	}
+
+	//I am very unhappy with this. -Hxrmn
+	out[0] = interpolateSpline(verts,size,t,0);
+	out[1] = interpolateSpline(verts,size,t,1);
+	out[2] = interpolateSpline(verts,size,t,2);
+
+	Com_Printf("Out: %f,%f,%f\n",out[0],out[1],out[2]);
+	lua_pushvector(L,out);
+	
+	return 1;
+}
+
 void BG_InitLuaVector(lua_State *L) {
 	lua_register(L,"VectorToAngles",qlua_VectorToAngles);
 	lua_register(L,"VectorNormalize",qlua_VectorNormalize);
@@ -419,6 +485,7 @@ void BG_InitLuaVector(lua_State *L) {
 	lua_register(L,"DotProduct",qlua_DotProduct);
 	lua_register(L,"ByteToDir",qlua_ByteToDir);
 	lua_register(L,"DirToByte",qlua_DirToByte);
+	lua_register(L,"VectorSpline",qlua_vspline);
 
 	Vector_register(L);
 }

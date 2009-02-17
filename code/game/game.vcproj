@@ -807,6 +807,9 @@
 				RelativePath=".\bg_luapmove.c">
 			</File>
 			<File
+				RelativePath=".\bg_luatabs.c">
+			</File>
+			<File
 				RelativePath=".\bg_luatrajectory.c">
 			</File>
 			<File

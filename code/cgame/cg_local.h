@@ -1260,14 +1260,7 @@ void CG_InitLua2D(lua_State *L);
 void CG_InitLua3D(lua_State *L);
 void CG_InitLuaUtil(lua_State *L);
 
-void setTableInt(lua_State *L, char *str, int v);
-void setTableFloat(lua_State *L, char *str, float v);
-void setTableVector(lua_State *L, char *str, vec3_t v);
-void setTableString(lua_State *L, char *str, char *v);
-void setTableBoolean(lua_State *L, char *str, qboolean v);
 void setTableRefDef(lua_State *L, char *str, refdef_t refdef);
-void setTableTable(lua_State *L, char *str, int tab[], int size);
-
 
 qboolean CG_ShouldDraw(const char *name);
 

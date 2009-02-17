@@ -69,7 +69,7 @@ local function d2d()
 	draw.SetColor(0,0,0,1)
 	draw.Rect(0,0,640,480)
 	local t = (lt/5000) % 1
-	local vec = interpolatePoints(points,t)
+	local vec = VectorSpline(points,t)
 	draw.SetColor(1,.2,1,.6)
 	for k,v in pairs(points) do
 		draw.Rect(v.x-2,v.y-2,4,4)
