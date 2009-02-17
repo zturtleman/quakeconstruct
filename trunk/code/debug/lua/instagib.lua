@@ -160,14 +160,17 @@ local function FiredWeapon(player,weapon,delay,pos,angle)
 		message.WriteShort(msg,color)
 		message.WriteShort(msg,IG_BOUNCES)
 		message.WriteShort(msg,player:EntIndex())
-		SendDataMessage(msg,player,"igrailfire")
+		SendDataMessageToAll(msg,"igrailfire")
 		
 		for i=0, IG_BOUNCES do
 			if(tr and tr.hit and pos and tr.endpos) then
 				--sendBeam(player,mpos,tr.endpos,color)
+				local norm = VectorNormalize(tr.endpos - pos)
 				if(tr.entity) then
 					if(tr.entity:IsPlayer()) then
 						if(tr.entity != player) then
+							local vel = norm * 800
+							tr.entity:SetVelocity(tr.entity:GetVelocity() + vel)
 							tr.entity:Damage(player,player,1000,MOD_RAILGUN)
 						else
 							local vel = f * -800
@@ -177,7 +180,8 @@ local function FiredWeapon(player,weapon,delay,pos,angle)
 					end
 				end
 				
-				angle = VectorToAngles(VectorNormalize(tr.endpos - pos))
+				
+				angle = VectorToAngles(norm)
 				f,r,u = AngleVectors(angle)
 				local dot = DotProduct( f, tr.normal );
 				local ref = VectorNormalize(vAdd(f,vMul(tr.normal,-2*dot)))
@@ -229,7 +233,7 @@ hook.add("PlayerKilled","instagib",function(p)  end)
 --Remove pickups and outfit players
 removePickups()
 for k,v in pairs(GetAllPlayers()) do
-	setupPlayer(v)
+	--setupPlayer(v)
 	setStat(v,STAT_SHOTS,0)
 	setStat(v,STAT_HITS,0)
 	setStat(v,STAT_LONGSHOT,0)

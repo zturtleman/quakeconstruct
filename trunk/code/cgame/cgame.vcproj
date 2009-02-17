@@ -333,6 +333,9 @@
 				RelativePath="..\game\bg_luapmove.c">
 			</File>
 			<File
+				RelativePath="..\game\bg_luatabs.c">
+			</File>
+			<File
 				RelativePath="..\game\bg_luatrajectory.c">
 			</File>
 			<File

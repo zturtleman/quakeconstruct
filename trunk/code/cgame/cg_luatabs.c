@@ -1,51 +1,5 @@
 #include "cg_local.h"
 
-void setTableInt(lua_State *L, char *str, int v) {
-	lua_pushstring(L, str);
-	lua_pushinteger(L,v);
-	lua_rawset(L, -3);
-}
-
-void setTableFloat(lua_State *L, char *str, float v) {
-	lua_pushstring(L, str);
-	lua_pushnumber(L,v);
-	lua_rawset(L, -3);
-}
-
-void setTableVector(lua_State *L, char *str, vec3_t v) {
-	lua_pushstring(L, str);
-	lua_pushvector(L, v);
-	lua_rawset(L, -3);
-}
-
-void setTableString(lua_State *L, char *str, char *v) {
-	lua_pushstring(L, str);
-	lua_pushstring(L, v);
-	lua_rawset(L, -3);
-}
-
-void setTableBoolean(lua_State *L, char *str, qboolean v) {
-	lua_pushstring(L, str);
-	lua_pushboolean(L, v);
-	lua_rawset(L, -3);
-}
-
-void setTableTable(lua_State *L, char *str, int tab[], int size) {
-	int i;
-	int tabid;
-
-	lua_pushstring(L, str);
-	lua_createtable(L,size,0);
-	tabid = lua_gettop(L);
-
-	for(i=0;i<size;i++) {
-		lua_pushinteger(L,i+1);
-		lua_pushinteger(L,tab[i]);
-		lua_settable(L, tabid);
-	}
-	lua_rawset(L, -3);
-}
-
 void setTableRefDef(lua_State *L, char *str, refdef_t refdef) {
 	int tabid;
 	lua_pushstring(L, str);

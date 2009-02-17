@@ -749,6 +749,20 @@ void lua_pushtrajectory(lua_State *L, trajectory_t *tr);
 pmove_t *lua_toPM(lua_State *L, int i);
 void lua_pushPM(lua_State *L, pmove_t *pm);
 
+void setTableInt(lua_State *L, char *str, int v);
+void setTableFloat(lua_State *L, char *str, float v);
+void setTableVector(lua_State *L, char *str, vec3_t v);
+void setTableString(lua_State *L, char *str, char *v);
+void setTableBoolean(lua_State *L, char *str, qboolean v);
+void setTableTable(lua_State *L, char *str, int tab[], int size);
+
+float qlua_pullfloat(lua_State *L, char *str, qboolean req, float def);
+float qlua_pullfloat_i(lua_State *L, int i, qboolean req, float def, int m);
+int qlua_pullint(lua_State *L, char *str, qboolean req, int def);
+int qlua_pullint_i(lua_State *L, int i, qboolean req, int def, int m);
+void qlua_pullvector(lua_State *L, char *str, vec3_t vec, qboolean req);
+void qlua_pullvector_i(lua_State *L, int i, vec3_t vec, qboolean req, int m);
+
 #define ARENAS_PER_TIER		4
 #define MAX_ARENAS			1024
 #define	MAX_ARENAS_TEXT		8192
