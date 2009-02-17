@@ -207,6 +207,25 @@ if(CLIENT) then
 		return legs,torso,head
 	end
 	
+	function GetMuzzleLocation()
+		local hand = util.Hand()
+		local pl = LocalPlayer()
+		local id = pl:GetInfo().weapon
+		
+		if(id == WP_NONE) then return Vector() end
+		
+		local inf = util.WeaponInfo(id)
+		
+		local ref = RefEntity()
+		ref:SetModel(inf.weaponModel)
+		ref:PositionOnTag(hand,"tag_weapon")
+	
+		local flash = RefEntity()
+		flash:PositionOnTag(ref,"tag_flash")
+		
+		return flash:GetPos()
+	end
+	
 	function hsv(h,s,v,...)
 		h = h % 360
 		local h1 = math.floor((h/60) % 6)

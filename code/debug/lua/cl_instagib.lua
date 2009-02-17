@@ -51,8 +51,8 @@ local function qbeam(v1,v2,r,g,b,size,np,delay,stdelay)
 			le:SetPos(v1)
 			
 			le:SetRefEntity(ref)
-			if(i == 1) then le:SetRefEntity(rpoint(v1,size)) end
-			if(i == 2) then le:SetRefEntity(rpoint(v2,size)) end
+			if(i == 1) then le:SetRefEntity(rpoint(v1,size*i)) end
+			if(i == 2) then le:SetRefEntity(rpoint(v2,size*i)) end
 			le:SetRadius(ref:GetRadius())
 			le:SetStartTime(LevelTime() + (stdelay or 0))
 			le:SetEndTime(LevelTime() + (delay or 500))
@@ -147,14 +147,59 @@ hook.add("Draw2D","cl_instagib",draw2d)
 local function rvec() return Vector(math.random(-100,100),math.random(-100,100),math.random(-100,100))/100 end
 local nxtsnd = {}
 
+local function DoBeam(s,e,hue,tr)
+	local r,g,b = hsv(hue,1,1)
+	qbeam(s,e,r/3,g/3,b/3,5,true,8000)
+	qbeam(s,e,r,g,b,5,false,700)
+	qbeam(s,e,r/2,g/2,b/2,8,false,850)
+	qbeam(s,e,r/5,g/5,b/5,12,false,1000)
+	qbeam(s,e,1,1,1,5,false,600)
+	
+	if(!tr.normal) then return end
+	util.CreateMark(mark,e,tr.normal,math.random(360),0,0,0,.5,math.random(25,35),true)
+end
+
+local function BeamBounce()
+	local s = message.ReadVector()
+	local e = message.ReadVector()
+	local hue = message.ReadShort()
+	local bounces = message.ReadShort()
+	local pl = message.ReadShort()
+	local muzzle = GetMuzzleLocation()
+	
+	local tr = TraceLine(s,e+VectorNormalize(e-s)*100,nil,tr_flags)
+	local pos = s
+	e = tr.endpos
+	
+	for i=0, bounces do
+		if(tr and tr.hit and pos and tr.endpos) then
+			if(i == 0 and pl == LocalPlayer():EntIndex()) then
+				s = muzzle
+			end
+			DoBeam(s,tr.endpos,hue,tr)
+			
+			local angle = VectorToAngles(VectorNormalize(tr.endpos - pos))
+			local f,r,u = AngleVectors(angle)
+			local dot = DotProduct( f, tr.normal );
+			local ref = VectorNormalize(vAdd(f,vMul(tr.normal,-2*dot)))
+			pos = tr.endpos
+			tr = TraceLine(pos,(pos+ref*10000),nil,tr_flags)
+			s = pos
+		end
+	end
+end
+
 local function HandleMessage(msgid)
 	if(msgid == "igrailfire") then
 		fading = false
 		if(railStart != 0 and railEnd != 0) then
 			PlaySound(clicksound)
 		end
-		railStart = message.ReadLong()
-		railEnd = message.ReadLong()
+		railStart = LevelTime()
+		local rtime = message.ReadShort()
+		print(rtime .. "\n")
+		railEnd = railStart + rtime
+		BeamBounce()
 	end
 	if(msgid == "igdeath") then
 		local id = message.ReadShort()
@@ -171,48 +216,7 @@ local function HandleMessage(msgid)
 		stats[message.ReadShort()][1] = message.ReadShort()
 	end
 	if(msgid == "igbeam") then
-		local s = message.ReadVector()
-		local e = message.ReadVector()
-		local hue = message.ReadShort()
-		local tr = TraceLine(s,e+VectorNormalize(e-s)*1000,nil,tr_flags)
-		local r,g,b = hsv(hue,1,1)
-		local len = VectorLength(e-s)
-		local forward,right,up = AngleVectors(VectorToAngles(e-s))
-		qbeam(s,e,r/3,g/3,b/3,5,true,8000)
-		qbeam(s,e,r,g,b,5,false,700)
-		qbeam(s,e,r/2,g/2,b/2,8,false,850)
-		qbeam(s,e,r/5,g/5,b/5,12,false,1000)
-		qbeam(s,e,1,1,1,5,false,600)
-//__DL_BLOCK
-		--[[local last = s
-		local step = 20
-		for i=0,len,step do
-			if(i != 0) then
-				local m = 180
-				local new = s + (forward*step) * ((i/len) * (len/step))
-				new = new + (right * math.cos((i/20) + m)) * 6
-				new = new + (up * math.sin((i/20) + m)) * 6
-				qbeam(last,new,r,g,b,4,true,600)
-				qbeam(last,new,1,1,1,2,true,500)
-				last = new
-			end
-		end]]
-//__DL_UNBLOCK
-		for x=1, 6 do
-			local last = e
-			for i=0,40,20 do
-				local new = last + rvec()*60
-				qbeam(last,new,r,g,b,4,true,500)
-				qbeam(last,new,1,1,1,2,true,300)
-				last = new
-			end
-		end
-		
-		if(!tr.normal) then return end
-		util.CreateMark(mark,e,tr.normal,math.random(360),0,0,0,1,math.random(15,20),true)
-		util.CreateMark(mark,e,tr.normal,math.random(360),0,0,0,.5,math.random(25,35),true)
-		util.CreateMark(mark,e,tr.normal,math.random(360),0,0,0,.3,math.random(45,50),true)
-		util.CreateMark(mark,e,tr.normal,math.random(360),0,0,0,.2,math.random(60,75),true)
+		BeamBounce()
 	end
 end
 hook.add("HandleMessage","cl_instagib",HandleMessage)
