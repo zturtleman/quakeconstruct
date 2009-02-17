@@ -30,7 +30,7 @@ end
 
 local function postpone_ex()
 	examinetime = 0
-	extimer = (LevelTime() + exduration) + math.random(3000,4000)
+	extimer = (LevelTime() + exduration) + math.random(5000,8000)
 end
 
 local function pr(i)
@@ -81,6 +81,7 @@ local function examine()
 	
 	a2 = Vector(-10,100,90)
 	a3 = Vector(-20,-80,-150)
+	
 	
 	examinedata = {a1,a2,a3,a4}
 	examinetime = LevelTime() + exduration

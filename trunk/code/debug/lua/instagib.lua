@@ -1,4 +1,5 @@
 IG_RELOADTIME = 2000
+IG_BOUNCES = 2
 
 STAT_SHOTS = 1
 STAT_HITS = 2
@@ -143,10 +144,6 @@ local function FiredWeapon(player,weapon,delay,pos,angle)
 		rv = rv + 800
 		--rv = rv / 4
 		--if(VectorLength(player:GetVelocity()) > 200) then rt = rt / 2 end
-		local msg = Message()
-		message.WriteLong(msg,LevelTime())
-		message.WriteLong(msg,LevelTime() + rv)
-		SendDataMessage(msg,player,"igrailfire")
 		addStat(player,STAT_SHOTS,1)
 		
 		local f,r,u = AngleVectors(angle)
@@ -155,9 +152,19 @@ local function FiredWeapon(player,weapon,delay,pos,angle)
 		mpos = mpos + u*-8
 		mpos = mpos + r*6
 		local tr = TraceLine(pos,(pos+f*10000),player,tr_flags)
-		for i=0, 2 do
+		
+		local msg = Message()
+		message.WriteShort(msg,rv)
+		message.WriteVector(msg,pos)
+		message.WriteVector(msg,tr.endpos)
+		message.WriteShort(msg,color)
+		message.WriteShort(msg,IG_BOUNCES)
+		message.WriteShort(msg,player:EntIndex())
+		SendDataMessage(msg,player,"igrailfire")
+		
+		for i=0, IG_BOUNCES do
 			if(tr and tr.hit and pos and tr.endpos) then
-				sendBeam(player,mpos,tr.endpos,color)
+				--sendBeam(player,mpos,tr.endpos,color)
 				if(tr.entity) then
 					if(tr.entity:IsPlayer()) then
 						if(tr.entity != player) then
@@ -194,10 +201,23 @@ local function plcolor(p,c,a)
 	local num = tonumber(a[1])
 	if(num == nil) then
 		print("useage: /mycolor [number 0-360]\n")
+	else
+		p:GetTable().color = num
 	end
-	p:GetTable().color = num
 end
 concommand.add("mycolor",plcolor)
+
+local function plcolor(p,c,a)
+	local num = tonumber(a[1])
+	if(num == nil) then
+		print("useage: /ig_bounces [number 0-100]\n")
+	else
+		if(num >= 0 and num <= 100) then
+			IG_BOUNCES = num
+		end
+	end
+end
+concommand.add("ig_bounces",plcolor,true)
 
 hook.add("ClientThink","instagib",CLThink)
 hook.add("PlayerSpawned","instagib",setupPlayer)
