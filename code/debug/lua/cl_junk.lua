@@ -8,6 +8,12 @@ local spintime = LevelTime()
 local pdown = 0
 local smoke = LoadShader("smokePuff")
 local lastflpos = Vector()
+
+local firedata = {}
+local firetime = 0
+local fireduration = 1000
+local firemid = 900
+
 local examinedata = {}
 local examinetime = 0
 local extimer = LevelTime()
@@ -45,7 +51,7 @@ local function railgun(ref,state,wtime)
 	if(f > 1) then f = 1 end
 	local r,g,b = hsv(LevelTime()/10,s,1-f)
 	ref:SetColor(r,g,b,1)
-	ref:SetAngles(ref:GetAngles() + Vector(pdown*-50,pdown*-15,pdown*-20))
+	--ref:SetAngles(ref:GetAngles() + Vector(pdown*-50,pdown*-15,pdown*-20))
 end
 
 local function smokeParticles(ref,partvel)
@@ -65,30 +71,39 @@ local function smokeParticles(ref,partvel)
 	le:SetEndRadius(math.random(3,6)*4)
 end
 
+local function fire()
+	local a1 = Vector(0,0,0)
+	local a2 = Vector(-40,0,5)
+	local a3 = Vector(35,0,22)
+	local a4 = Vector(-8,0,-20)
+	
+	local pt = (fireduration - (firetime - LevelTime()))
+	print(pt .. "\n")
+	
+	firedata = {a1,a2,a3,a4,a1,a1}
+	if(pt < firemid) then
+		firetime = LevelTime() + firemid
+		return
+	end
+	
+	firetime = LevelTime() + fireduration
+end
+
 local function examine()
 	postpone_ex()
 	local a1 = Vector()
-	local a2 = VectorRandom()*35
-	local a3 = VectorRandom()*35
+	local a2 = Vector(-10,50,90)
+	local a3 = Vector(-20,-40,-80)
 	local a4 = Vector()
 	
-	a2.z = a2.z * 2
-	a3.z = a3.z * 2
-	
-	a2.p = a2.p *2
-	
-	a3.z = a2.z * -1
-	
-	a2 = Vector(-10,100,90)
-	a3 = Vector(-20,-80,-150)
-	
-	
-	examinedata = {a1,a2,a3,a4}
+	examinedata = {a1,a2,a2,a3,a3,a3,a4}
 	examinetime = LevelTime() + exduration
 end
-examine()
+--examine()
 
-local function doExamine(ref)
+local function doSplines(ref)
+	local ang = Vector()
+	local pos = Vector()
 	local t = (examinetime - LevelTime()) / exduration
 	if(t > 0) then
 		local t1,t2,t3,t4 = unpack(intervals)
@@ -98,13 +113,24 @@ local function doExamine(ref)
 			examinetime = examinetime - bezier(t1,t2,t3,t4,(t*2)-1)*10
 		end
 		
-		local c1,c2,c3,c4 = unpack(examinedata)
-		local angle = bezier(c1,c2,c3,c4,t)
+		local angle = VectorSpline(examinedata,1-t)
 		local f,r,u = ref:GetAxis()
 	
-		ref:SetAngles(ref:GetAngles() + angle)
-		ref:SetPos(ref:GetPos() + f*-(angle.p/4))
+		ang = ang + angle
+		pos = pos + f*-(angle.p/4)
 	end
+	
+	local t2 = (firetime - LevelTime()) / fireduration
+	if(t2 > 0) then
+		local angle = VectorSpline(firedata,1-t2)
+		local f,r,u = ref:GetAxis()
+	
+		ang = ang + angle
+		pos = pos + f*(angle.p/5)
+	end
+	
+	ref:SetAngles(ref:GetAngles() + ang)
+	ref:SetPos(ref:GetPos() + pos)
 end
 
 local function d3d()
@@ -136,7 +162,7 @@ local function d3d()
 		ref:SetPos(ref:GetPos() + u*-1)
 		ref:SetPos(ref:GetPos() + r*-2)
 		ref:SetAngles(ref:GetAngles() + Vector(math.cos(LevelTime()/400),0,math.sin(LevelTime()/800)*2))
-		doExamine(ref)
+		doSplines(ref)
 	else
 		ref:SetPos(ref:GetPos() + u*-2)
 	end
@@ -205,10 +231,12 @@ local function d3d()
 			if((LevelTime() - fltime) > 20) then return end
 		end
 		
+		fire()
+		
 		postpone_ex()
 		
-		rotspeed = rotspeed + 6
-		if(rotspeed > 18) then rotspeed = 18 end
+		rotspeed = rotspeed + 3
+		if(rotspeed > 15) then rotspeed = 15 end
 		flash:Render()
 	end
 end

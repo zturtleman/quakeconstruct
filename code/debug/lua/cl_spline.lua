@@ -63,11 +63,21 @@ hook.add("KeyEvent","cl_spline",keyed)
 
 local lt = 0
 
-local function d2d()
-	--LevelTime()
+local function drawCurve()
+	if(#points == 0) then return end
+	local last = points[1]
+	
+	local rez = 30
+	for i=1, rez do
+		local t = i/rez
+		local vec = VectorSpline(points,t)
+		draw.Line(vec.x,vec.y,last.x,last.y)
+		last = vec
+	end
+end
+
+local function drawTrace()
 	lt = lt + 100
-	draw.SetColor(0,0,0,1)
-	draw.Rect(0,0,640,480)
 	local t = (lt/5000) % 1
 	local vec = VectorSpline(points,t)
 	draw.SetColor(1,.2,1,.6)
@@ -76,7 +86,6 @@ local function d2d()
 	end
 	draw.SetColor(1,1,1,1)
 	draw.Rect(vec.x-2,vec.y-2,4,4)
-	draw.Text(20,20,"Tension: " .. order,8,8)
 	
 	if(#trails > 0) then
 		for k,v in pairs(trails) do
@@ -85,6 +94,18 @@ local function d2d()
 			draw.Rect(v.x-(2*al),v.y-(2*al),4*al,4*al)
 		end
 	end
+end
+
+local function d2d()
+	--LevelTime()
+	draw.SetColor(0,0,0,1)
+	draw.Rect(0,0,640,480)
+	draw.SetColor(1,1,1,1)
+	
+	draw.Text(20,20,"Tension: " .. order,8,8)
+	
+	draw.SetColor(1,1,1,1)
+	drawCurve()
 	
 	table.insert(trails,vec)
 	if(#trails > 60) then table.remove(trails,1) end

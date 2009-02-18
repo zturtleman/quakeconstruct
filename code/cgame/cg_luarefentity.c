@@ -567,7 +567,7 @@ int qlua_createrefentity (lua_State *L) {
 	}
 
 	memset( &ent, 0, sizeof( ent ) );
-	
+
 	AxisClear( ent.axis );
 	ent.lua_scale[0] = 1;
 	ent.lua_scale[1] = 1;
