@@ -414,21 +414,18 @@ void lerpVector(vec3_t v1, vec3_t v2, vec3_t out, float t) {
 	VectorMA(v1,t,temp,out);
 }
 
-float interpolateSpline(vec3_t verts[],int count,float lerp,int element) {
+void interpolateSpline(vec3_t verts[],luavector_t *out,int count,float lerp) {
 	vec3_t lerped[1024];
-	float e1,e2;
 	int i = 0;
 	if(count > 1) {
 		for(i=0;i<count-1;i++) {
-			e1 = verts[i][element];
-			e2 = verts[i+1][element];
-			lerped[i][element] = e1 + (e2 - e1) * lerp;
+			lerpVector(verts[i], verts[i+1], lerped[i], lerp);
 		}
-		return interpolateSpline(lerped, count-1, lerp, element);
+		interpolateSpline(lerped, out, count-1, lerp);
 	} else if(count > 0) {
-		return verts[0][element];
-	} else {
-		return 0;
+		out->x = verts[0][0];
+		out->y = verts[0][1];
+		out->z = verts[0][2];
 	}
 }
 
@@ -438,38 +435,39 @@ int qlua_vspline(lua_State *L) {
 	int idx = 0;
 	float t = 0;
 	vec3_t verts[1024];
-	vec3_t out;
+	vec3_t vout;
+	luavector_t out;
 
-	VectorClear(out);
+	memset(&out,0,sizeof(out));
 
 	luaL_checktype(L,1,LUA_TTABLE);
 	luaL_checktype(L,2,LUA_TNUMBER);
 
 	t = lua_tonumber(L,2);
 
+	VectorClear(vout);
+
 	size = luaL_getn(L,1);
 	if(size > 1024) {
-		lua_pushvector(L,out);
+		lua_pushvector(L,vout);
 		return 0;
 	}
 	if(size < 1) {
-		lua_pushvector(L,out);
+		lua_pushvector(L,vout);
 		return 1;
 	}
 
 	for(i=0;i<size;i++) {
 		qlua_pullvector_i(L,i+1,verts[i],qfalse,1);
-
-		Com_Printf("Read Vert: %i | %f,%f,%f\n",i+1,verts[i][0],verts[i][1],verts[i][2]);
 	}
 
-	//I am very unhappy with this. -Hxrmn
-	out[0] = interpolateSpline(verts,size,t,0);
-	out[1] = interpolateSpline(verts,size,t,1);
-	out[2] = interpolateSpline(verts,size,t,2);
+	interpolateSpline(verts,&out,size,t);
 
-	Com_Printf("Out: %f,%f,%f\n",out[0],out[1],out[2]);
-	lua_pushvector(L,out);
+	vout[0] = out.x;
+	vout[1] = out.y;
+	vout[2] = out.z;
+
+	lua_pushvector(L,vout);
 	
 	return 1;
 }
