@@ -41,6 +41,22 @@ function getFileByName(file,tab)
 	return nil
 end
 
+local function fixLine(line)
+	if(line == "//__DL_BLOCK") then block = true return end
+	if(line == "//__DL_UNBLOCK") then block = false return end
+	if(line == "--[[") then block = true return end
+	if(line == "]]") then block = false return end
+	if(block == true) then return nil end
+	if(line != "" and line != " " and line != "\n") then
+		line = string.Replace(line,"\t","")
+		line = string.Replace(line,"\r","")
+		if(line != "" and line != " " and line != "\n") then
+			return line
+		end
+	end	
+	return nil
+end
+
 if(SERVER) then
 	message.Precache("__fileheader")
 	message.Precache("__fileline")
@@ -61,19 +77,6 @@ if(SERVER) then
 
 	local block = false
 	
-	local function fixLine(line)
-		if(line == "//__DL_BLOCK") then block = true return end
-		if(line == "//__DL_UNBLOCK") then block = false return end
-		if(block == true) then return nil end
-		if(line != "" and line != " " and line != "\n") then
-			line = string.Replace(line,"\t","")
-			line = string.Replace(line,"\r","")
-			if(line != "" and line != " " and line != "\n") then
-				return line
-			end
-		end	
-		return nil
-	end
 
 	function downloader.add(filename,force)
 		if(filename != nil and type(filename) == "string") then
@@ -252,6 +255,14 @@ if(SERVER) then
 		end
 	end
 	
+	local function message(str,pl)
+		if(str == "__canceldownload") then
+			local ptab = pl:GetTable()
+			downloader.stopdownload(pl,ptab.currentdownload)
+		end
+	end
+	hook.add("MessageReceived","__downloader.lua",message)
+	
 	function downloader.initplayer(pl)
 		if(pl != nil) then
 			local ptab = pl:GetTable()
@@ -285,6 +296,7 @@ elseif(CLIENT) then
 	local template = nil
 	local queuebuttons = {}
 	local start = false
+	local cancelled = false
 	
 	local function makeFrame()
 		queuebuttons = {}
@@ -316,7 +328,7 @@ elseif(CLIENT) then
 		local per = math.floor((LINEITER / LINECOUNT)*100)
 		if(LINEITER <= 0) then per = 0 end
 		if(LINECOUNT <= 0) then per = 0 end
-		frame:SetTitle("Downloading...")
+		if(frame != nil) then frame:SetTitle("Downloading...") else return end
 		local text2 = FILENAME .. "(" .. per .. "%)"
 		
 		if(#queuebuttons > #QUEUE) then 
@@ -351,6 +363,7 @@ elseif(CLIENT) then
 	end
 	
 	local function writeToFile()
+		if(cancelled) then cancelled = false return end
 		local rez = "lua/downloads/" .. localFile(FILENAME)
 		debugprint("Writing File: '" .. rez .. "'\n")
 		local file = io.open(rez,"w")
@@ -389,6 +402,35 @@ elseif(CLIENT) then
 		start = false
 	end
 
+	local function checkMD5(f1,md5)
+		local fmd5 = fileMD5(f1,function(l,n) return (fixLine(l) != nil) end)
+		fmd5 = base64.dec(base64.enc(fmd5))
+		print("^3" .. base64.enc(fmd5) .. "\n")
+		print("^3" .. base64.enc(md5) .. "\n")
+		if(fmd5 == md5) then return true end
+		return false	
+	end
+	
+	local function checkForFile(FILENAME,md5)
+		print("^2" .. FILENAME .. "\n")
+		if(checkMD5(FILENAME,md5)) then return true end
+	
+		local fn1 = string.Replace(FILENAME,"/",".")
+		print("^1finding: ^7" .. fn1 .. "\n")
+		for k in dirtree("lua/downloads") do
+			local len = string.len("lua/downloads")
+			local file = string.sub(k,len+2,string.len(k))
+			if(file == fn1) then
+				print("^2" .. file .. " " .. FILENAME .. "\n")
+				if(checkMD5(k,md5)) then return true end
+				return false
+			else
+				print(file .. "\n")
+			end
+		end
+	end
+	checkForFile("lua/tests/cl_newgibs.lua","asd")
+	
 	local function HandleMessage(msgid,tab)
 		if(msgid == "__queuefile") then
 			local name = base64.dec(message.ReadString() or "")
@@ -416,6 +458,11 @@ elseif(CLIENT) then
 			FILENAME = name
 			LINECOUNT = lines
 			LINEITER = 0
+			if(checkForFile(FILENAME,md5)) then
+				cancelled = true
+				SendString("__canceldownload")
+				includeFile(FILENAME)
+			end
 		elseif(msgid == "__fileline") then
 			local str = base64.dec(message.ReadString() or "")
 			CONTENTS = CONTENTS .. str .. "\n"
