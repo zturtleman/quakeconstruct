@@ -1,0 +1,1 @@
+This is a test of the [link text='QuakeConstruct Markup Language', dest='somedest']. I hope it works out ok.
