@@ -1,7 +1,8 @@
 local Panel = {}
 Panel.text = ""
-Panel.textsize = 10
 Panel.align = 0
+Panel.textwidth = 10
+Panel.textheight = 10
 
 function Panel:Initialize()
 
@@ -17,12 +18,16 @@ function Panel:GetText()
 	return self.text
 end
 
-function Panel:SetTextSize(s)
-	self.textsize = s
+function Panel:SetTextSize(s,h)
+	self.textwidth = s
+	self.textheight = s
+	if(h) then
+		self.textheight = h
+	end
 end
 
 function Panel:GetTextSize()
-	return self.textsize
+	return self.textwidth,self.textheight
 end
 
 function Panel:TextAlignLeft()
@@ -47,14 +52,14 @@ function Panel:StrLen()
 end
 
 function Panel:ScaleToContents()
-	local ts = self.textsize
+	local ts = self.textwidth
 	local sw = (ts * self:StrLen()) + 10
-	local sh = ts + 10
+	local sh = self.textheight + 10
 	self:SetSize(sw,sh)
 end
 
 function Panel:TextWidth()
-	local ts = self.textsize
+	local ts = self.textwidth
 	local sw = (ts * self:StrLen())
 	return sw
 end

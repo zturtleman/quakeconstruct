@@ -93,10 +93,132 @@ function stream(filename,callback,callback_char)
 	end
 end
 
-stream("lua/includes/markuptest.qml",
-function(tag) 
-	print("[^2" .. tag.name .. "^7]->\n") 
-end,
-function(ch) 
-	print(ch) 
-end)
+function doMarkupFile(filename)
+	local frame = UI_Create("frame")
+	frame:SetPos(10,10)
+	frame:SetSize(620,460)
+	frame:SetTitle("QML - " .. filename)
+	frame:CatchMouse(true)
+	frame:SetVisible(true)
+
+	local editpane = UI_Create("editpane",frame)
+	local template = UI_Create("panel",editpane)
+	if(editpane) then
+		--template.Draw = function() end
+		template:SetPos(0,10)
+		template:SetSize(10,10)
+		editpane:SetContent(template)
+	end
+
+	local cx = 0
+	local cy = 2
+	local cw = 0
+	local ch = 0
+
+	function makeLabel(size)
+		local clabel = UI_Create("label",template)
+		clabel:SetPos(cx,cy)
+		clabel:SetTextSize(size or 6,8)
+		clabel:TextAlignLeft()
+		clabel:SetText("")
+		clabel:SetDelegate(editpane)
+		return clabel
+	end
+
+	function makeButton(size,func)
+		local clabel = UI_Create("button",template)
+		clabel.DoClick = func or function() end
+		clabel:SetPos(cx,cy)
+		clabel:SetTextSize(size or 6,8)
+		clabel:TextAlignCenter()
+		clabel:SetText("")
+		clabel:SetDelegate(editpane)
+		return clabel
+	end
+
+	local cl = makeLabel()
+	
+	function resize()
+		if(cx > cw) then cw = cx end
+		if(cw > template:GetWidth()) then
+			template:SetSize(cw,template:GetHeight())
+		end
+		if(cy + ch > template:GetHeight()) then
+			template:SetSize(template:GetWidth(),cy + ch)
+		end
+	end
+
+	function maxs(panel)
+		local w,h = panel:GetSize()
+		if(h > ch) then ch = h end
+		resize()
+	end
+
+	function append(str)
+		cl:SetText(cl:GetText() .. str)
+		cl:ScaleToContents()
+		maxs(cl)
+	end
+
+	function appendPanel(panel)
+		cx = cx + panel:GetWidth()
+		maxs(panel)
+	end
+	
+	function finishLabel()
+		if(cl != nil) then
+			cx = cx + cl:GetWidth()
+		end
+		maxs(cl)
+	end
+
+	function newLine()
+		cy = cy + ch
+		cx = 0
+	end
+	
+	function onLink(file)
+		frame:Remove()
+		doMarkupFile(file)
+	end
+	
+	function onMacro(t)
+		if(t == "closewindow") then frame:Close() end
+	end
+
+	function link(args)
+		local btn = makeButton(nil,function() onLink(args['dest']) end)
+		btn:SetText(args['text'])
+		btn:ScaleToContents()
+		btn:SetFGColor(0,.4,.8,1)
+		appendPanel(btn)
+	end
+	
+	function macro(args)
+		local btn = makeButton(nil,function() onMacro(args['dest']) end)
+		btn:SetText(args['text'])
+		btn:ScaleToContents()
+		btn:SetFGColor(0,.8,.4,1)
+		appendPanel(btn)
+	end
+
+	stream(filename,
+	function(tag)
+		finishLabel()
+		if(tag.name == "newline") then newLine() end
+		if(tag.name == "link") then link(tag.args) end
+		if(tag.name == "macro") then macro(tag.args) end
+		cl = makeLabel()
+	end,
+	function(ch)
+		if(ch == "\n" or ch == "\t" or ch == "\r") then return end
+		append(ch)
+	end)
+	
+	finishLabel()
+	resize()
+	
+	return frame
+end
+
+doMarkupFile("lua/includes/markuptest.qml")
