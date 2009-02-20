@@ -169,15 +169,15 @@ function Skin:DrawButtonBackground(over,down)
 end
 
 function Skin:DrawLabelForeground()
-	local ts = panel:GetTextSize()
+	local tw,th = panel:GetTextSize()
 	local x,y = panel:GetPos()
 	
-	y = y + (panel.h/2) - (ts/2)	
+	y = y + (panel.h/2) - (th/2)	
 	
 	if(panel.align == 0) then
-		x = x + (panel.w/2) - (ts * panel:StrLen())/2
+		x = x + (panel.w/2) - (tw * panel:StrLen())/2
 	elseif(panel.align == 2) then
-		x = x + (panel.w) - (ts * panel:StrLen())
+		x = x + (panel.w) - (tw * panel:StrLen())
 		x = x - 2
 	else
 		x = x + 2
@@ -185,7 +185,7 @@ function Skin:DrawLabelForeground()
 	
 	panel:DoFGColor()
 	sk.coloradjust(nil,0,panel:GetAlpha())
-	SkinCall("Text",x,y,panel.text,ts,ts)
+	SkinCall("Text",x,y,panel.text,tw,th)
 end
 
 function Skin:DrawModelPane()
