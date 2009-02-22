@@ -51,10 +51,10 @@ function Panel:StrLen()
 	return string.len(fixcolorstring(self.text))
 end
 
-function Panel:ScaleToContents()
+function Panel:ScaleToContents(padding)
 	local ts = self.textwidth
-	local sw = (ts * self:StrLen()) + 10
-	local sh = self.textheight + 10
+	local sw = (ts * self:StrLen()) + (padding or 10)
+	local sh = self.textheight + (padding or 10)
 	self:SetSize(sw,sh)
 end
 
