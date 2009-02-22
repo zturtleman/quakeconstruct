@@ -117,3 +117,5 @@ else
 		return ADMIN
 	end
 end
+
+hook.reserve("includes")

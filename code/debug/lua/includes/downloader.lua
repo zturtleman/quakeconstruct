@@ -429,7 +429,6 @@ elseif(CLIENT) then
 			end
 		end
 	end
-	checkForFile("lua/tests/cl_newgibs.lua","asd")
 	
 	local function HandleMessage(msgid,tab)
 		if(msgid == "__queuefile") then
