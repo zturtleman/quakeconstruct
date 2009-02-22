@@ -1,4 +1,4 @@
-local HINT_DURATION = 5000
+local HINT_DURATION = 35000
 local HINT_TIME = LevelTime() + HINT_DURATION
 
 hook.add("InitialSnapshot","includes",function() HINT_TIME = LevelTime() + HINT_DURATION end)
@@ -6,6 +6,7 @@ hook.add("InitialSnapshot","includes",function() HINT_TIME = LevelTime() + HINT_
 local function launchHelp()
 	print("Help Launch.\n")
 	HINT_TIME = -HINT_DURATION
+	doMarkupFile("help/index.qml",true)
 end
 
 local function helpkey(key,state)

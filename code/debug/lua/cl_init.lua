@@ -1,5 +1,6 @@
 include("lua/cl_menu2.lua")
 include("lua/cl_testmenu2.lua")
+include("lua/cl_help.lua")
 
 local flare = LoadShader("flareShader")
 local blood = LoadShader("bloodMark")
