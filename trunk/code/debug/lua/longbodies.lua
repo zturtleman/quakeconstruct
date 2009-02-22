@@ -10,9 +10,9 @@ local fadeTime = 2000
 if(SERVER) then
 //__DL_BLOCK
 	--A
-	downloader.add("lua/longbodies.lua")
-
 	message.Precache("bodydissolve")
+	
+	downloader.add("lua/longbodies.lua")
 	
 	local function Respawn(pl,body)
 		if(body) then

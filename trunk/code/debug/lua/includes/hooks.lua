@@ -3,6 +3,7 @@ if(!hook) then
 	hook.events = {}
 	hook.debugflags = {}
 	hook.locked = {}
+	hook.reserved = {}
 end
 
 HOOKS = {}
@@ -71,7 +72,8 @@ function hook.replacehook(tab,event)
 end
 
 function hook.remove(event,name)
-	if(hook.events[event] == nil) then return end
+	if(hook.reserved[name]) then error("Unable to remove hook: " .. name .. ". -reserved\n") return end
+	if(hook.events[event] == nil) then error("Unable to remove hook: " .. event .. ". -locked\n") return end
 	for k,v in pairs(hook.events[event]) do
 		if(v.name == name) then 
 			table.remove(hook.events[event],k)
@@ -81,7 +83,8 @@ function hook.remove(event,name)
 end
 
 function hook.add(event,name,func,priority)
-	if(hook.locked[event]) then return end
+	if(hook.reserved[name]) then error("Unable to add hook: " .. name .. ". -reserved\n") return end
+	if(hook.locked[event]) then error("Unable to add hook: " .. event .. ". -locked\n") return end
 	priority = priority or 0
 	if(event != nil and name != nil and func != nil) then
 		local tab = {func=func,name=name,priority=priority}
@@ -96,6 +99,10 @@ function hook.add(event,name,func,priority)
 	hook.sort(event)
 end
 hook.Add = hook.add
+
+function hook.reserve(name)
+	hook.reserved[name] = true
+end
 
 function hook.lock(event)
 	hook.locked[event] = true

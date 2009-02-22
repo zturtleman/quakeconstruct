@@ -1,7 +1,7 @@
 local HINT_DURATION = 35000
 local HINT_TIME = LevelTime() + HINT_DURATION
 
-hook.add("InitialSnapshot","includes",function() HINT_TIME = LevelTime() + HINT_DURATION end)
+hook.add("InitialSnapshot","cl_help",function() HINT_TIME = LevelTime() + HINT_DURATION end)
 
 local function launchHelp()
 	print("Help Launch.\n")

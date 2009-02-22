@@ -101,9 +101,12 @@ local function draw2D()
 	refdef.y = y
 	refdef.width = size
 	refdef.height = size
+	refdef.origin = Vector()
+	refdef.angles = Vector()
+	refdef.flags = 1
 	render.RenderScene(refdef)
 end
-hook.add("Draw2D","cl_init",draw2D)
+hook.add("Draw2D","cl_headtest",draw2D)
 
 local function newClientInfo(newinfo)
 	skull = newinfo.headModel
@@ -120,4 +123,4 @@ local function newClientInfo(newinfo)
 
 	ref:SetPos(origin)
 end
-hook.add("ClientInfoLoaded","cl_init",newClientInfo)
+hook.add("ClientInfoLoaded","cl_headtest",newClientInfo)
