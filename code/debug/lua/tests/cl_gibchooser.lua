@@ -94,15 +94,17 @@ function getGibList(pl)
 	return out
 end
 
-function getGibModels(pl)
+function getGibModels(pl,customonly)
 	local out = {}
 	for k,v in pairs(getGibList(pl)) do
-		table.insert(out,LoadModel(v[1]))
+		if(!customonly or v[2]) then
+			table.insert(out,LoadModel(v[1]))
+		end
 	end
 	return out
 end
 
-function getGibSkins(pl)
+function getGibSkins(pl,customonly)
 	local out = {}
 	local name = pl:GetInfo().modelName
 	if(name == nil) then return {} end
@@ -123,7 +125,9 @@ function getGibSkins(pl)
 				table.insert(out,pl:GetInfo().torsoSkin)
 			end
 		else
-			table.insert(out,-1)
+			if(!customonly) then
+				table.insert(out,-1)
+			end
 		end
 	end
 	return out

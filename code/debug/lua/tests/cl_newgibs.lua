@@ -82,13 +82,15 @@ function newParticle(pos,dir,model,scale,skin,head)
 	dir = vMul(dir,math.random(60,120)/60)
 
 	local le = LocalEntity()
+	le:SetBounceFactor((math.random(1,100)/300) + .4)
 	le:SetPos(pos)
 	le:SetRefEntity(r)
 	le:SetVelocity(vMul(dir,300))
 	le:SetStartTime(LevelTime())
-	le:SetEndTime(LevelTime() + (15000 + ex) + math.random(1000,4000))
+	le:SetEndTime(LevelTime() + (5000 + ex) + math.random(1000,4000))
 	le:SetType(LE_FRAGMENT)
-	le:SetColor(1,.5,.3,1)
+	le:SetStartColor(1,.5,.3,1)
+	le:SetEndColor(1,1,1,0)
 	le:SetRadius(r:GetRadius())
 	le:SetAngleVelocity(Vector(math.random(-360,360),math.random(-360,360),math.random(-360,360)))
 	le:SetCallback(LOCALENTITY_CALLBACK_TOUCH,function(le,tr)
@@ -101,48 +103,47 @@ function newParticle(pos,dir,model,scale,skin,head)
 			end
 		end
 		if(VectorLength(le:GetVelocity()) > 10 or math.random(0,2) == 1) then
-			util.CreateMark(blood[math.random(1,#blood)],tr.endpos,tr.normal,math.random(360),1,1,1,1,math.random(30,60),true,math.random(8000,10000))
+			util.CreateMark(blood[math.random(1,#blood)],tr.endpos,tr.normal,math.random(360),1,1,1,1,math.random(18,25),true,math.random(8000,10000)/50)
 		end
 		if(!le:GetTable().stopped) then
 		local ref = le:GetRefEntity()
-			ref:SetAngles(ref:GetAngles()) --Vector(math.random(360),math.random(360),math.random(360))
-			ref:Scale(Vector(scale,scale,scale))
+			--ref:SetAngles(ref:GetAngles()) --Vector(math.random(360),math.random(360),math.random(360))
+			--ref:Scale(Vector(scale,scale,scale))
 			le:SetRefEntity(ref)
 			le:SetAngleVelocity(Vector(math.random(-360,360),math.random(-360,360),math.random(-360,360)))
 		end
 	end)
 	le:SetCallback(LOCALENTITY_CALLBACK_THINK,function(le)
 		if(VectorLength(le:GetVelocity()) > 3) then
-			--[[if(head) then
-				local ref = le:GetRefEntity()
-				ref:SetAngles(ref:GetAngles() + Vector(10,50,30))
-				ref:Scale(Vector(scale,scale,scale))
-				le:SetRefEntity(ref)		
-			end]]
 			local ref = le:GetRefEntity()
 			ref:SetAngles(ref:GetAngles())
 			ref:Scale(Vector(scale,scale,scale))
+			local f,r,u = ref:GetAxis()
 			
-			le:SetNextThink(LevelTime() + 100)
-			--for i=0, 1 do
+			le:SetNextThink(LevelTime() + 50)
 			local le2 = LocalEntity()
 			le2:SetPos(le:GetPos())
-			--le2:SetVelocity(rvel(200))
 			local ref = le:GetRefEntity()
-			--ref:Scale(Vector(.91,.91,.91))
 			ref:SetRotation(math.random(360))
 			le:SetRefEntity(ref)
 			ref:SetColor(1,1,1,1)
 			ref:SetType(RT_SPRITE)
-			ref:SetShader(blood1)
-			ref:SetRadius(15 + math.random(0,10))
-			le2:SetRadius(15 + math.random(0,10))
+			ref:SetShader(blood3)
+			le2:SetBounceFactor(0)
 			le2:SetRefEntity(ref)
+			
+			local vel = (f*-math.random(50,100)) + VectorRandom()*10
+			
+			le2:SetVelocity(vel + Vector(0,0,20))
+			le2:SetStartRadius(12 + math.random(0,5))
+			le2:SetEndRadius(25)
 			le2:SetStartTime(LevelTime())
-			le2:SetEndTime(LevelTime() + 2000)
-			le2:SetType(LE_FADE_RGB) --LE_FRAGMENT
-			le2:SetColor(.7,math.random(0,3)/10,0,.5 + (math.random(0,5)/10))
-			le2:SetTrType(TR_STATIONARY)
+			le2:SetEndTime(LevelTime() + 600)
+			le2:SetType(LE_FRAGMENT) --LE_FRAGMENT
+			--.5 + (math.random(0,5)/8)
+			le2:SetStartColor(1,math.random(0,3)/10,0,.8)
+			le2:SetEndColor(1,0,0,.4)
+			--le2:SetTrType(TR_LINEAR)
 		end
 		--le2:SetTrType(TR_STATIONARY)
 		--end
@@ -171,7 +172,18 @@ end
 
 local function event(entity,event,pos,dir)
 	if(event == EV_BULLET_HIT_WALL) then
-		--newParticle(pos,entity:GetByteDir(),gibs[math.random(1,#gibs)])
+		--[[PlaySound(pos,explodeSound)
+		local list = getGibModels(LocalPlayer())
+		local skins = getGibSkins(LocalPlayer())
+		for i=1, #list do
+			local mdl = list[i]
+			local skin = skins[i]
+			-- + ((math.random(1,6))/20)
+			newParticle(pos,Vector(0,0,.5),mdl,1.5,skin)
+		end
+		local mdl = entity:GetInfo().headModel or skull
+		local skin = entity:GetInfo().headSkin
+		newParticle(pos,Vector(0,0,.8),mdl,1.4,skin,true)]]
 	end
 	if(event == EV_BULLET_HIT_FLESH) then
 		--newParticle(pos,vMul(entity:GetByteDir(),.2),gibs[5])
@@ -203,7 +215,7 @@ local function event(entity,event,pos,dir)
 				local mdl = list[i]
 				local skin = skins[i]
 				-- + ((math.random(1,6))/20)
-				newParticle(pos,Vector(0,0,.2) + vel,mdl,1.4,skin)
+				newParticle(pos,Vector(0,0,.5) + vel,mdl,1.5,skin)
 			end
 		--end
 		return true

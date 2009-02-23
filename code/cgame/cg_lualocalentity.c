@@ -511,6 +511,19 @@ int qlua_lsetendcolor(lua_State *L) {
 
 	return 0;
 }
+
+int qlua_lbounce(lua_State *L) {
+	localEntity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TNUMBER);
+
+	luaentity = lua_tolocalentity(L,1);
+	if(luaentity != NULL) {
+		luaentity->bounceFactor = lua_tonumber(L,2);
+	}
+	return 0;
+}
 /*
 int qlua_lflags(lua_State *L) {
 	localEntity_t	*luaentity;
@@ -605,6 +618,7 @@ static const luaL_reg LEntity_methods[] = {
   {"GetRefEntity",	qlua_lgetref},
   {"SetCallback",	qlua_lsetcallback},
   {"SetNextThink",	qlua_lnextthink},
+  {"SetBounceFactor", qlua_lbounce},
   {"GetTable",		lua_legetentitytable},
   {0,0}
 };
