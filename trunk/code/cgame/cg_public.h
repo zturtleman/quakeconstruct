@@ -203,6 +203,7 @@ typedef enum {
 
 	CG_SET_USERCMD,
 	CG_ENABLE_COMMAND_OVERRIDE,
+	CG_R_CREATESHADER,
 
 } cgameImport_t;
 

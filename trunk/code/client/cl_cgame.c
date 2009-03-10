@@ -569,6 +569,8 @@ int CL_CgameSystemCalls( int *args ) {
 		return re.RegisterShader( VMA(1) );
 	case CG_R_REGISTERSHADERNOMIP:
 		return re.RegisterShaderNoMip( VMA(1) );
+	case CG_R_CREATESHADER:
+		return re.CreateShader( VMA(1), VMA(2) );
 	case CG_R_REGISTERFONT:
 		re.RegisterFont( VMA(1), args[2], VMA(3));
 	case CG_R_CLEARSCENE:

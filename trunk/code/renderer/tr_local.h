@@ -1215,7 +1215,9 @@ qhandle_t		 RE_RegisterShaderLightMap( const char *name, int lightmapIndex );
 qhandle_t		 RE_RegisterShader( const char *name );
 qhandle_t		 RE_RegisterShaderNoMip( const char *name );
 qhandle_t RE_RegisterShaderFromImage(const char *name, int lightmapIndex, image_t *image, qboolean mipRawImage);
+qhandle_t RE_CreateShader( const char *name, char *data );
 
+shader_t *R_CreateShader( const char *name, char *shaderText, int lightmapIndex, qboolean mipRawImage );
 shader_t	*R_FindShader( const char *name, int lightmapIndex, qboolean mipRawImage );
 shader_t	*R_GetShaderByHandle( qhandle_t hShader );
 shader_t	*R_GetShaderByState( int index, long *cycleTime );

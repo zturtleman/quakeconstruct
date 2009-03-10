@@ -939,6 +939,7 @@ int				trap_FS_Seek( fileHandle_t f, long offset, int origin ); // fsOrigin_t
 qhandle_t		trap_R_RegisterModel( const char *name );
 qhandle_t		trap_R_RegisterSkin( const char *name );
 qhandle_t		trap_R_RegisterShaderNoMip( const char *name );
+qhandle_t		trap_R_CreateShader( const char *name, char *data );
 void			trap_R_ClearScene( void );
 void			trap_R_AddRefEntityToScene( const refEntity_t *re );
 void			trap_R_AddPolyToScene( qhandle_t hShader , int numVerts, const polyVert_t *verts );

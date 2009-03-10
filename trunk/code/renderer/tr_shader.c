@@ -2383,6 +2383,59 @@ shader_t *R_FindShaderByName( const char *name ) {
 	return tr.defaultShader;
 }
 
+shader_t *R_CreateShader( const char *name, char *shaderText, int lightmapIndex, qboolean mipRawImage ) {
+	int			i;
+	//image_t		*image;
+	shader_t	*sh;
+
+	if ( name[0] == 0 ) {
+		return tr.defaultShader;
+	}
+
+	// use (fullbright) vertex lighting if the bsp file doesn't have
+	// lightmaps
+	if ( lightmapIndex >= 0 && lightmapIndex >= tr.numLightmaps ) {
+		lightmapIndex = LIGHTMAP_BY_VERTEX;
+	}
+
+	// make sure the render thread is stopped, because we are probably
+	// going to have to upload an image
+	if (r_smp->integer) {
+		R_SyncRenderThread();
+	}
+
+	// clear the global shader
+	Com_Memset( &shader, 0, sizeof( shader ) );
+	Com_Memset( &stages, 0, sizeof( stages ) );
+	Q_strncpyz(shader.name, name, sizeof(shader.name));
+	shader.lightmapIndex = lightmapIndex;
+	for ( i = 0 ; i < MAX_SHADER_STAGES ; i++ ) {
+		stages[i].bundle[0].texMods = texMods[i];
+	}
+
+	// FIXME: set these "need" values apropriately
+	shader.needsNormal = qtrue;
+	shader.needsST1 = qtrue;
+	shader.needsST2 = qtrue;
+	shader.needsColor = qtrue;
+
+	//
+	// attempt to define shader from an explicit parameter file
+	//
+	// shaderText = FindShaderInShaderText( strippedName );
+	if ( shaderText ) {
+		if ( r_printShaders->integer ) {
+			ri.Printf( PRINT_ALL, "*SHADER* %s\n", name );
+		}
+
+		if ( !ParseShader( &shaderText ) ) {
+			shader.defaultShader = qtrue;
+		}
+		sh = FinishShader();
+		return sh;
+	}
+	return FinishShader();
+}
 
 /*
 ===============
@@ -2741,6 +2794,28 @@ qhandle_t RE_RegisterShaderNoMip( const char *name ) {
 	}
 
 	sh = R_FindShader( name, LIGHTMAP_2D, qfalse );
+
+	// we want to return 0 if the shader failed to
+	// load for some reason, but R_FindShader should
+	// still keep a name allocated for it, so if
+	// something calls RE_RegisterShader again with
+	// the same name, we don't try looking for it again
+	if ( sh->defaultShader ) {
+		return 0;
+	}
+
+	return sh->index;
+}
+
+qhandle_t RE_CreateShader( const char *name, char *data ) {
+	shader_t	*sh;
+
+	if ( strlen( name ) >= MAX_QPATH ) {
+		Com_Printf( "Shader name exceeds MAX_QPATH\n" );
+		return 0;
+	}
+
+	sh = R_CreateShader(name,data,LIGHTMAP_2D,qfalse);
 
 	// we want to return 0 if the shader failed to
 	// load for some reason, but R_FindShader should
