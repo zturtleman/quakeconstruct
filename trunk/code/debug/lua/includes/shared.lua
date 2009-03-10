@@ -83,6 +83,8 @@ if(SERVER) then
 			end
 		elseif(str == "_demostarted") then
 			CallHook("DemoStarted",pl)
+		elseif(str == "_clientfinished") then
+			CallHook("ClientShutdownLua",pl)
 		end
 	end
 	hook.add("MessageReceived","includes",message)
@@ -107,6 +109,12 @@ else
 		end
 	end
 	hook.add("MessageReceived","includes",message)
+	
+	local function finish()
+		SendString("_clientfinished")
+	end
+	hook.add("Shutdown","includes",finish)
+	
 	
 	Timer(10,function() if(!called) then 
 		CallHook("ClientReady")

@@ -181,7 +181,8 @@ if(SERVER) then
 			pl = pl or m.pl
 			msgid = msgid or m.msgid
 			if(pl:IsBot()) then return end
-			if(pl == nil) then error("^5MESSAGE ERROR[F]: Nil Player\n") end
+			if(pl == nil) then error("^5MESSAGE ERROR[F-1]: Nil Player\n") end
+			if(pl:GetTable() == nil or pl:GetTable()._mconnected == false) then error("^5MESSAGE ERROR[F-2]: Nil Player Table\n") end
 			if(msgid == nil) then error("^5MESSAGE ERROR[G]: Nil Message Id\n") end
 			msgid = string.lower(msgid)
 			local prev = msgid
@@ -230,12 +231,19 @@ if(SERVER) then
 	end
 	
 	local function PlayerJoined(pl)
-		if(!pl:IsBot()) then pl:GetTable()._mconnected = true end
 		if(pl == nil) then return end
+		if(!pl:IsBot()) then pl:GetTable()._mconnected = true end
 		debugprint("ClientReadyHook:\n")
 		SendCache(pl,true)
 	end
 	hook.add("ClientReady","messages",PlayerJoined,9999)
+	
+	local function PlayerStop(pl)
+		if(pl == nil) then return end
+		if(!pl:IsBot()) then pl:GetTable()._mconnected = false end
+		debugprint("ClientStopHook:\n")
+	end
+	hook.add("ClientShutdownLua","messages",PlayerStop,9999)
 	
 	local function DemoSend(pl)
 		if(pl == nil) then return end
