@@ -1,4 +1,5 @@
 local function clThink(client)
+	if(client:IsBot()) then return end
 	local tab = GetEntityTable(client)
 	if(tab) then
 		tab.lastrecharge = tab.lastrecharge or LevelTime()
@@ -7,9 +8,9 @@ local function clThink(client)
 			local vel = VectorLength(client:GetVelocity())/100
 			vel = math.max(5-vel,1)
 			if(myHp < 100 and myHp > 0) then
-				client:SetInfo(PLAYERINFO_HEALTH,myHp + 1)
+				client:SetInfo(PLAYERINFO_HEALTH,myHp + 5)
 			end
-			tab.lastrecharge = (LevelTime() + 100/vel) + 200 --5 hp every 2 seconds when standing still
+			tab.lastrecharge = (LevelTime() + 100/vel) + 40 --5 hp every 2 seconds when standing still
 		end
 	end
 end
