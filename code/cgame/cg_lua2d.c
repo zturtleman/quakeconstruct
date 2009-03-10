@@ -283,6 +283,19 @@ int qlua_loadshader(lua_State *L) {
 	return 0;
 }
 
+int qlua_createshader(lua_State *L) {
+	const char *shader;
+	char *data;
+
+	if(lua_type(L,1) == LUA_TSTRING) {
+		shader = lua_tostring(L,1);
+		data = (char*) lua_tostring(L,2);
+		lua_pushinteger(L,trap_R_CreateShader( shader, data ));
+		return 1;
+	}
+	return 0;
+}
+
 void CG_KillMasks() {
 	trap_R_EndMask();
 	maskOn = qfalse;
@@ -291,4 +304,5 @@ void CG_KillMasks() {
 void CG_InitLua2D(lua_State *L) {
 	luaL_openlib(L, "draw", Draw_methods, 0);
 	lua_register(L, "__loadshader", qlua_loadshader);
+	lua_register(L, "CreateShader", qlua_createshader);
 }

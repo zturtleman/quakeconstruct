@@ -290,6 +290,11 @@ qhandle_t trap_R_RegisterShaderNoMip( const char *name ) {
 	return load;
 }
 
+qhandle_t trap_R_CreateShader( const char *name, char *data ) {
+	int load = syscall( CG_R_CREATESHADER, name, data );
+	return load;
+}
+
 void trap_R_RegisterFont(const char *fontName, int pointSize, fontInfo_t *font) {
 	syscall(CG_R_REGISTERFONT, fontName, pointSize, font );
 }

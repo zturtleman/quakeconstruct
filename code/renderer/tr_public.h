@@ -49,6 +49,7 @@ typedef struct {
 	qhandle_t (*RegisterSkin)( const char *name );
 	qhandle_t (*RegisterShader)( const char *name );
 	qhandle_t (*RegisterShaderNoMip)( const char *name );
+	qhandle_t (*CreateShader)( const char *name, char *data );
 	void	(*LoadWorld)( const char *name );
 
 	// the vis data is a large enough block of data that we go to the trouble
