@@ -1,5 +1,6 @@
 local outlines = {}
 local n = 40
+local dlights = {}
 for i=1,n do
 	local d = 
 	[[{
@@ -57,6 +58,11 @@ local ref = RefEntity()
 ref:SetPos(pos)
 ref:SetModel(rmodel)
 
+local function addDLight(pos,r,g,b,radius,t)
+	local lt = LevelTime()
+	table.insert(dlights,{pos = pos,r=r,g=g,b=b,rad=radius,time=lt+t,st = t,rmv = 0})
+end
+
 local function drawItem(ent,mdl)
 	local delta = ent:GetPos() - _CG.viewOrigin
 	local d = VectorLength(delta)
@@ -74,6 +80,10 @@ local function drawItem(ent,mdl)
 	if(d < 300) then
 		ref:SetColor(vd/8,vd/8,vd/8,1)
 		ref:SetShader(s3)
+		render.DLight(ref:GetPos(),1*vd,1*vd,1*vd,300)
+		--render.DLight(ref:GetPos(),1*vd,1*vd,1*vd,500)
+		--render.DLight(ref:GetPos(),1*vd,1*vd,1*vd,700)
+		--render.DLight(ref:GetPos(),1*vd,1*vd,1*vd,900)
 		for i=0, 40 do
 			local t = LevelTime() - 300 - ((1 - vd)*1000)
 			ref:SetTime(t + i*5)
@@ -91,6 +101,31 @@ local function drawItem(ent,mdl)
 end
 
 local function d3d()
+	local pt = PlayerTrace()
+	local ep = pt.endpos
+	local normal = VectorNormalize(_CG.viewOrigin - ep)
+	
+	for k,v in pairs(dlights) do
+		local dt = v.time - LevelTime()
+		if(dt <= 0) then
+			v.rmv = 1
+		else
+			local dtx = (dt/v.st)
+			render.DLight(v.pos,v.r*dtx,v.g*dtx,v.b*dtx,math.ceil(v.rad*dtx))
+		end
+	end
+	table.sort(dlights,function(a,b) return a['rmv'] > b['rmv'] end)
+	while(dlights[1] != nil and dlights[1]['rmv'] == 1) do
+		table.remove(dlights,1)
+	end
+	
+	--addDLight(ep+normal*10,1,1,1,100,1000)
+	
+	--render.DLight(ep + normal*6,1,1,1,50)
+	--render.DLight(ep + normal*6,1,1,1,70)
+	--render.DLight(ep + normal*6,1,1,1,90)
+	--render.DLight(ep + normal*6,1,1,1,110)
+
 	--[[ref:SetColor(1,1,1,1)
 	ref:SetShader(0)
 	ref:Render()
@@ -108,6 +143,25 @@ local function d3d()
 	end
 end
 hook.add("Draw3D","cl_shadertest",d3d)
+
+local function unlinked(ent)
+
+end
+hook.add("EntityUnlinked","cl_shadertest",unlinked)
+
+local function HandleMessage(msgid)
+	if(msgid == "itempickup") then
+		local class = message.ReadString()
+		local pos = message.ReadVector()
+		local vel = message.ReadVector()
+		local itemid = message.ReadLong()
+
+		for i=1, 3 do
+		addDLight(pos,1,1,1,i*150,5000)
+		end		
+	end
+end
+hook.add("HandleMessage","cl_shadertest",HandleMessage)
 
 local function d2d()
 	draw.SetColor(1,1,1,1)

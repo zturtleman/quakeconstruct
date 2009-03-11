@@ -348,7 +348,14 @@ if(CLIENT) then
 				contents = {}
 				stack = {}
 			end
+			local tstack = table.Copy(stack)
+			onHookCall = function(event,...)
+				stack = {}
+				table.Add( stack, tstack )
+			end
 			CallHook("HandleMessage",msgIDs[strid],contents)
+			onHookCall = function() end
+			tstack = {}
 			stack = {}
 		elseif(msgid == 2) then
 			local id = _message.ReadShort()

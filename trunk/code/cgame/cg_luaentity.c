@@ -364,6 +364,19 @@ int qlua_getmodelindex(lua_State *L) {
 	return 0;
 }
 
+int qlua_getmisctime(lua_State *L) {
+	centity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		lua_pushinteger(L,luaentity->miscTime);
+		return 1;
+	}
+	return 0;
+}
+
 int lua_customdraw(lua_State *L) {
 	centity_t	*luaentity;
 
@@ -509,6 +522,8 @@ static const luaL_reg Entity_methods[] = {
   {"GetOtherEntity2",	qlua_getotherentity},
   {"GetByteDir",		qlua_getbytedir},
   {"GetModelIndex",		qlua_getmodelindex},
+  {"ModelIndex",		qlua_getmodelindex},
+  {"GetMiscTime",		qlua_getmisctime},
   {"EntIndex",		qlua_entityid},
   {"IsBot",			qlua_isbot},
   {"IsClient",		qlua_isclient},

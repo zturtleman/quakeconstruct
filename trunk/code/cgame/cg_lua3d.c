@@ -209,6 +209,20 @@ int qlua_polyref(lua_State *L) {
 	return 0;
 }
 
+int qlua_dlight(lua_State *L) {
+	vec3_t pos;
+	vec4_t color;
+	float v = 0;
+
+	luaL_checktype(L,1,LUA_TVECTOR);
+	lua_tovector(L,1,pos);
+	qlua_toColor(L,2,color,qfalse);
+	v = lua_tonumber(L,5);
+	trap_R_AddLightToScene( pos, v, color[0], color[1], color[2] );
+	
+	return 0;
+}
+
 int qlua_modelbounds(lua_State *L) {
 	vec3_t	mins, maxs;
 
@@ -223,6 +237,7 @@ int qlua_modelbounds(lua_State *L) {
 
 static const luaL_reg Render_methods[] = {
   {"CreateScene",		qlua_createscene},
+  {"DLight",			qlua_dlight},
   {"RenderScene",		qlua_renderscene},
   {"ModelBounds",		qlua_modelbounds},
   {"SetRefDef",			qlua_setrefdef},

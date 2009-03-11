@@ -175,10 +175,10 @@ function DrawHead(x,y,ICON_SIZE,hp)
 	ref:Render()
 	ref2:SetColor(1,.2,.2,calpha2)
 	ref2:SetShader(blood1)
-	ref2:Render()
+	--ref2:Render()
 	ref2:SetColor(1,1,1,calpha)
 	ref2:SetShader(blood2)
-	ref2:Render()
+	--ref2:Render()
 	
 	if(hp > 100) then hp = 100 end
 	if(hp > 0) then
