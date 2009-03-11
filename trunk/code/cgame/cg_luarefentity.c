@@ -478,6 +478,19 @@ int qlua_rsetalways(lua_State *L) {
 	return 0;	
 }
 
+int qlua_rsettime(lua_State *L) {
+	refEntity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TNUMBER);
+
+	luaentity = lua_torefentity(L,1);
+	if(luaentity != NULL) {
+		luaentity->shaderTime = lua_tonumber(L,2) / 1000.0f;
+	}
+	return 0;
+}
+
 static int Entity_tostring (lua_State *L)
 {
   lua_pushfstring(L, "RefEntity: %p", lua_touserdata(L, 1));
@@ -523,6 +536,7 @@ static const luaL_reg REntity_methods[] = {
   {"GetLerp",		qlua_rgetlerp},
   {"SetColor",		qlua_rsetcolor},
   {"SetRotation",	qlua_rsetrotation},
+  {"SetTime",		qlua_rsettime},
   {"Scale",			qlua_rsetscale},
   {"Render",		qlua_rrender},
   {"AlwaysRender",	qlua_rsetalways},

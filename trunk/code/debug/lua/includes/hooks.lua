@@ -8,6 +8,7 @@ end
 
 HOOKS = {}
 HOOKS.SV = {
+	"ClientShutdownLua",
 	"ClientThink",
 	"FlagCaptured",
 	"FlagDropped",
