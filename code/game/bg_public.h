@@ -658,6 +658,7 @@ typedef struct gitem_s {
 
 	char		*precaches;		// string of all models and images this item will use
 	char		*sounds;		// string of all sounds this item will use
+	int			id;
 } gitem_t;
 
 #define LUA_TVECTOR LUA_TUSERDATA
@@ -666,6 +667,7 @@ typedef struct gitem_s {
 extern	gitem_t	bg_itemlist[];
 extern	int		bg_numItems;
 
+void BG_InitItems(void);
 void BG_AddItem(gitem_t *item);
 gitem_t	*BG_FindItem( const char *pickupName );
 gitem_t	*BG_FindItemForWeapon( weapon_t weapon );

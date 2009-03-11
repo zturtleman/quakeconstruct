@@ -290,8 +290,59 @@ int qlua_playerhand(lua_State *L) {
 	return 1;
 }
 
+int items_size() {
+	gitem_t	*it;
+	int size = 0;
+	
+	for ( it = bg_itemlist + 1 ; it->classname ; it++) {
+		size = size + 1;
+	}
+	return size;
+}
+
+int qlua_numitems(lua_State *L) {
+	lua_pushinteger(L,items_size());
+	return 1;
+}
+
+int qlua_itemInfo(lua_State *L) {
+	int icon = 0;
+	int size = sizeof(cg_items) / sizeof(cg_items[0]);
+	itemInfo_t item;
+	gitem_t item2;
+
+	luaL_checktype(L,1,LUA_TNUMBER);
+
+	icon = lua_tointeger(L,1);
+
+	if(icon <= 0 || icon > size || icon > items_size()) {
+		lua_pushstring(L,"Item Index Out Of Bounds\n");
+		lua_error(L);
+		return 1;
+	}
+
+	item = cg_items[icon];
+	item2 = bg_itemlist[icon];
+
+	CG_RegisterItemVisuals( icon );
+	lua_newtable(L);
+
+	setTableTable(L,"models",item.models,4);
+	setTableInt(L,"icon",item.icon);
+	setTableBoolean(L,"registered",item.registered);
+	setTableString(L,"classname",item2.classname);
+	setTableInt(L,"tag",item2.giTag);
+	setTableInt(L,"type",item2.giType);
+	setTableString(L,"pickupsound",item2.pickup_sound);
+	setTableString(L,"pickupname",item2.pickup_name);
+	setTableInt(L,"quantity",item2.quantity);
+
+	return 1;
+}
+
 int qlua_weaponinfo(lua_State *L) {
 	weaponInfo_t	*weapon;
+	gitem_t *item;
 	int id = lua_tointeger(L,1);
 
 	if(id < WP_NONE || id > WP_GRAPPLING_HOOK) {
@@ -302,8 +353,10 @@ int qlua_weaponinfo(lua_State *L) {
 	CG_RegisterWeapon( id );
 	weapon = &cg_weapons[ id ];
 
-	lua_newtable(L);
+	item = weapon->item;
 
+	lua_newtable(L);
+	
 	setTableInt(L,"ammoIcon",weapon->ammoIcon);
 	setTableInt(L,"ammoModel",weapon->ammoModel);
 	setTableInt(L,"barrelModel",weapon->barrelModel);
@@ -328,7 +381,7 @@ int qlua_weaponinfo(lua_State *L) {
 	setTableFloat(L,"wiTrailTime",weapon->wiTrailTime);
 	setTableInt(L,"weaponState",cg.predictedPlayerState.weaponstate);
 	setTableInt(L,"weaponTime",cg.predictedPlayerState.weaponTime);
-
+	setTableInt(L,"item",item->id);
 
 	return 1;
 }
@@ -356,6 +409,7 @@ int qlua_barrelSpin(lua_State *L) {
 }
 
 static const luaL_reg Util_methods[] = {
+  {"GetNumItems",		qlua_numitems},
   {"GetItemIcon",		qlua_getitemicon},
   {"GetItemModel",		qlua_getitemmodel},
   {"GetItemName",		qlua_getitemname},
@@ -369,6 +423,7 @@ static const luaL_reg Util_methods[] = {
   {"PlayerWeapon",		qlua_playerweapon},
   {"Hand",				qlua_playerhand},
   {"WeaponInfo",		qlua_weaponinfo},
+  {"ItemInfo",			qlua_itemInfo},
   {"BarrelAngle",		qlua_barrelSpin},
   {"LocalPos",			qlua_localpos},
   {"LocalAngles",		qlua_localang},

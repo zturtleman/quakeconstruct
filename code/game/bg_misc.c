@@ -960,6 +960,16 @@ int		customItems = 0;
 
 int		bg_numItems = sizeof(bg_itemlist) / sizeof(bg_itemlist[0]) - 1;
 
+void BG_InitItems(void) {
+	gitem_t	*it;
+	int size = 1;
+	
+	for ( it = bg_itemlist + 1 ; it->classname ; it++) {
+		it->id = size;
+		size = size + 1;
+	}
+}
+
 void BG_AddItem(gitem_t *item) {
 	int free = custom_band - customItems;
 	int customid = (bg_numItems - custom_band) + customItems;

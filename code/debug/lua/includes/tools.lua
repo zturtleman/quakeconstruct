@@ -96,7 +96,8 @@ function purgeTable(tab,param,val)
 			tab[i].__prev = prev
 		end
 	end
-	tab = table.sort(tab,function(a,b) return a[param] > b[param] end)
+	--tab = table.sort(tab,function(a,b) return a[param] > b[param] end)
+	table.sort(tab,function(a,b) return a[param] > b[param] end)
 	while(tab[1] != nil and tab[1][param] == 1) do
 		table.remove(tab,1)
 	end

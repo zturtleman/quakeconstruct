@@ -136,6 +136,10 @@ end
 if(SERVER) then concommand.Add("PrintHooks_SV",printhooks) end
 if(CLIENT) then concommand.Add("PrintHooks_CL",printhooks) end
 
+function onHookCall(event,...)
+
+end
+
 function CallHook(event,...)
 	for k,v in pairs(arg) do
 		if(type(v) == "vector3") then
@@ -148,6 +152,7 @@ function CallHook(event,...)
 		local fname = v.name
 		if (hook.debugflags[event] == true) then debugprint("Calling Function: " .. fname .. "\n") end
 		
+		onHookCall(event,unpack(arg))
 		local b,e = pcall(v.func,unpack(arg))
 		if not b then
 			print("^1HOOK ERROR[" .. event .. "]: " .. e .. "\n")

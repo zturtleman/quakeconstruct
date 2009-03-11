@@ -479,6 +479,7 @@ void G_InitLua() {
 	L = GetServerLuaState();
 	if(L == NULL) return;
 	
+	BG_InitItems();
 	BG_InitLuaTrajectory(L);
 	BG_InitLuaPMove(L);
 	BG_InitLuaMisc(L);
