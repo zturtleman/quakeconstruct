@@ -457,11 +457,11 @@ elseif(CLIENT) then
 			FILENAME = name
 			LINECOUNT = lines
 			LINEITER = 0
-			if(checkForFile(FILENAME,md5)) then
+			--[[if(checkForFile(FILENAME,md5)) then
 				cancelled = true
 				SendString("__canceldownload")
 				includeFile(FILENAME)
-			end
+			end]]
 		elseif(msgid == "__fileline") then
 			local str = base64.dec(message.ReadString() or "")
 			CONTENTS = CONTENTS .. str .. "\n"
