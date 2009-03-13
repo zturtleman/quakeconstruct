@@ -294,7 +294,7 @@ qboolean G_CallSpawn( gentity_t *ent ) {
 			G_SpawnItem( ent, item );
 			return qtrue;
 		} else {
-			G_Printf ("Srch: %s.\n",item->classname);
+			//G_Printf ("Srch: %s.\n",item->classname);
 		}
 	}
 

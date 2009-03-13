@@ -260,15 +260,19 @@ int qlua_setweapon(lua_State *L) {
 		}
 
 		luaentity = lua_toentity(L,1);
-		if(luaentity != NULL && luaentity->client != NULL) {
-			int actuallweap = luaentity->client->ps.weapon;
-			if((luaentity->client->ps.stats[STAT_WEAPONS] & (1 << weap)) && (luaentity->client->ps.ammo[weap] || actuallweap == WP_GAUNTLET)) {
-				luaentity->client->ps.weapon = weap;
-				luaentity->client->ps.weaponstate = WEAPON_READY;
+		if(luaentity != NULL) {
+			if(luaentity->client != NULL) {
+				int actuallweap = luaentity->client->ps.weapon;
+				if((luaentity->client->ps.stats[STAT_WEAPONS] & (1 << weap)) && (luaentity->client->ps.ammo[weap] || actuallweap == WP_GAUNTLET)) {
+					luaentity->client->ps.weapon = weap;
+					luaentity->client->ps.weaponstate = WEAPON_READY;
+				} else {
+					lua_pushstring(L,"Invalid Argument For \"SetPlayerWeapon\"\n (client does not have that weapon or weapon has no ammo).\n");
+					lua_error(L);
+					return 1;				
+				}
 			} else {
-				lua_pushstring(L,"Invalid Argument For \"SetPlayerWeapon\"\n (client does not have that weapon or weapon has no ammo).\n");
-				lua_error(L);
-				return 1;				
+				luaentity->s.weapon = weap;
 			}
 		}
 	} else {
@@ -965,12 +969,8 @@ int qlua_removeentity(lua_State *L) {
 	luaL_checktype(L,1,LUA_TUSERDATA);
 
 	luaentity = lua_toentity(L,1);
-	if(luaentity != NULL && luaentity->client == NULL) {
-		if(!strcmp(luaentity->classname,"bodyque")) {
-			G_FreeEntity(luaentity);
-		} else {
-			qlua_UnlinkEntity(luaentity);
-		}
+	if(luaentity != NULL) { // && luaentity->client == NULL
+		G_FreeEntity(luaentity);
 	}
 	return 0;
 }
@@ -1570,6 +1570,140 @@ int qlua_setbounce(lua_State *L) {
 	return 0;
 }
 
+int qlua_setetype(lua_State *L) {
+	gentity_t	*luaentity;
+	int type = 0;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TNUMBER);
+
+	luaentity = lua_toentity(L,1);
+	type = lua_tointeger(L,2);
+	if(luaentity != NULL && type >= ET_GENERAL && type <= ET_EVENTS) {
+		luaentity->s.eType = type;
+		G_Printf("SetTypeTo: %i\n",luaentity->s.eType);
+	}
+	return 0;
+}
+
+int qlua_getetype(lua_State *L) {
+	gentity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		lua_pushinteger(L,luaentity->s.eType);
+		return 1;
+	}
+	return 0;
+}
+
+int qlua_setflags(lua_State *L) {
+	gentity_t	*luaentity;
+	int flags = 0;
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TNUMBER);
+	luaentity = lua_toentity(L,1);
+	flags = lua_tointeger(L,2);
+	if(luaentity != NULL && flags >= EF_DEAD) {
+		luaentity->s.eType = flags;
+	}
+	return 0;
+}
+
+int qlua_setsvflags(lua_State *L) {
+	gentity_t	*luaentity;
+	int flags = 0;
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TNUMBER);
+	luaentity = lua_toentity(L,1);
+	flags = lua_tointeger(L,2);
+	if(luaentity != NULL && flags >= SVF_NOCLIENT) {
+		luaentity->r.svFlags = flags;
+	}
+	return 0;
+}
+
+int qlua_setdamage(lua_State *L) {
+	gentity_t	*luaentity;
+	int dmg = 0;
+	int dmg2 = -1;
+	int dmg3 = -1;
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TNUMBER);
+	luaentity = lua_toentity(L,1);
+	dmg = lua_tointeger(L,2);
+
+	if(lua_type(L,3) == LUA_TNUMBER) {
+		dmg2 = lua_tointeger(L,3);
+	}
+
+	if(lua_type(L,4) == LUA_TNUMBER) {
+		dmg3 = lua_tointeger(L,4);
+	}
+
+
+	if(luaentity != NULL) {
+		if(dmg >= 0) luaentity->damage = dmg;
+		if(dmg2 >= 0) luaentity->splashDamage = dmg2;
+		if(dmg3 >= 0) luaentity->splashRadius = dmg3;
+	}
+	return 0;
+}
+
+int qlua_setowner(lua_State *L) {
+	gentity_t	*luaentity;
+	gentity_t	*owner;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TUSERDATA);
+	
+	luaentity = lua_toentity(L,1);
+	owner = lua_toentity(L,2);
+	
+	if(luaentity != NULL && owner != NULL && owner->client != NULL) {
+		luaentity->r.ownerNum = owner->s.number;
+		luaentity->parent = owner;
+	}
+	return 0;
+}
+
+int qlua_setmod(lua_State *L) {
+	gentity_t	*luaentity;
+	int dmg = 0;
+	int dmg2 = -1;
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TNUMBER);
+	luaentity = lua_toentity(L,1);
+	dmg = lua_tointeger(L,2);
+
+	if(lua_type(L,3) == LUA_TNUMBER) {
+		dmg2 = lua_tointeger(L,3);
+	}
+
+	if(luaentity != NULL) {
+		if(dmg >= MOD_UNKNOWN && dmg < MOD_MAX) luaentity->methodOfDeath = dmg;
+		if(dmg2 >= MOD_UNKNOWN && dmg2 < MOD_MAX) luaentity->splashMethodOfDeath = dmg;
+	}
+	return 0;
+}
+
+int qlua_espawn(lua_State *L) {
+	gentity_t	*luaentity;
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		qlua_LinkEntity(luaentity);
+		G_Printf("Entity Linked: [%s], type=%i, flags=%i, svflags=%i\n",
+			luaentity->classname,
+			luaentity->s.eType,
+			luaentity->s.eFlags,
+			luaentity->r.svFlags);
+	}
+	return 0;
+}
+
 static const luaL_reg Entity_methods[] = {
   {"GetInfo",		qlua_getclientinfo},
   {"SetInfo",		qlua_setclientinfo},
@@ -1640,6 +1774,14 @@ static const luaL_reg Entity_methods[] = {
   {"SetWait",		qlua_setwait},
   {"SetSpawnFlags",	qlua_setspflags},
   {"SetBounce",		qlua_setbounce},
+  {"SetType",		qlua_setetype},
+  {"GetType",		qlua_getetype},
+  {"SetFlags",		qlua_setflags},
+  {"SetSvFlags",	qlua_setsvflags},
+  {"SetDamage",		qlua_setdamage},
+  {"SetOwner",		qlua_setowner},
+  {"SetDeathMethod", qlua_setmod},
+  {"Spawn",			qlua_espawn},
   {0,0}
 };
 
@@ -1779,6 +1921,32 @@ int qlua_createEntity(lua_State *L) {
 	return bolt;*/
 }
 
+int qlua_firemissile(lua_State *L) {
+	const char	*classname;
+	gentity_t	*self;
+	gentity_t	*out;
+	vec3_t v;
+	
+	luaL_checktype(L,1,LUA_TSTRING);
+	luaL_checktype(L,2,LUA_TUSERDATA);
+
+	classname = lua_tostring(L,1);
+	self = lua_toentity(L,2);
+	if(classname && self != NULL) {
+		if(!strcmp("grenade",classname)) out = fire_grenade(self, v, v);
+		if(!strcmp("rocket",classname)) out = fire_rocket(self, v, v);
+		if(!strcmp("plasma",classname)) out = fire_plasma(self, v, v);
+		if(!strcmp("bfg",classname)) out = fire_bfg(self, v, v);
+		if(!strcmp("grapple",classname)) out = fire_grapple(self, v, v);
+	}
+	if(out != NULL) {
+		//qlua_LinkEntity(out);
+		lua_pushentity(L,out);
+		return 1;
+	}
+	return 0;
+}
+
 void G_InitLuaEnts(lua_State *L) {
 	Entity_register(L);
 	lua_register(L,"CreateTempEntity",qlua_createtentity);
@@ -1787,6 +1955,7 @@ void G_InitLuaEnts(lua_State *L) {
 	lua_register(L,"UnlinkEntity",qlua_unlink);
 	lua_register(L,"LinkEntity",qlua_link);
 	lua_register(L,"CreateEntity",qlua_createEntity);
+	lua_register(L,"CreateMissile",qlua_firemissile);
 }
 
 qboolean IsEntity(lua_State *L, int i) {
