@@ -62,7 +62,6 @@ local function PlayerDamaged(self,inflictor,attacker,damage,meansOfDeath,asave,d
 end
 
 hook.add("PostPlayerDamaged","init",PlayerDamaged)
-hook.remove("PlayerDamaged","init")
 
 local function PlayerSpawned(pl)
 	for k,v in pairs(GetEntitiesByClass("player")) do
@@ -83,3 +82,18 @@ local function makeEnt(p,c,a)
 	--ent:SetSpawnFlags(1)
 end
 concommand.add("entity",makeEnt)
+
+local function makeEnt(p,c,a)
+	local tr = PlayerTrace(p)
+	local ent = CreateMissile("grenade",p)
+	ent:SetPos(tr.endpos + Vector(0,0,20))
+	ent:SetVelocity(Vector(0,0,20))
+	--[[print(ET_MISSILE .. "\n")
+	ent:SetType(ET_MISSILE)
+	ent:SetFlags(EF_BOUNCE_HALF)
+	ent:SetSvFlags(SVF_USE_CURRENT_ORIGIN)
+	ent:SetWeapon(WP_GRENADE_LAUNCHER)
+	ent:SetOwner(p)
+	ent:Spawn()]]
+end
+concommand.add("grenade",makeEnt)
