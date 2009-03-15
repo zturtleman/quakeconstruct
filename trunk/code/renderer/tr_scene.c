@@ -457,6 +457,14 @@ void RE_RenderScene( const refdef_t *fd ) {
 	parms.viewportWidth = tr.refdef.width;
 	parms.viewportHeight = tr.refdef.height;
 	parms.isPortal = qfalse;
+	if(fd->zFar) {
+		parms.zFar = fd->zFar;
+		parms.customFar = qtrue;
+	}
+	if(fd->zNear) {
+		parms.zNear = fd->zNear;
+		parms.customNear = qtrue;
+	}
 
 	parms.fovX = tr.refdef.fov_x;
 	parms.fovY = tr.refdef.fov_y;

@@ -160,6 +160,7 @@ typedef enum {
 	DEFORM_NORMALS,
 	DEFORM_BULGE,
 	DEFORM_MOVE,
+	DEFORM_PUSH,
 	DEFORM_PROJECTION_SHADOW,
 	DEFORM_AUTOSPRITE,
 	DEFORM_AUTOSPRITE2,
@@ -504,6 +505,9 @@ typedef struct {
 	cplane_t	frustum[4];
 	vec3_t		visBounds[2];
 	float		zFar;
+	qboolean	customFar;
+	float		zNear;
+	qboolean	customNear;
 } viewParms_t;
 
 

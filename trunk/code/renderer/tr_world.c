@@ -281,17 +281,24 @@ static int R_DlightSurface( msurface_t *surf, int dlightBits ) {
 R_AddWorldSurface
 ======================
 */
-static void R_AddWorldSurface( msurface_t *surf, int dlightBits ) {
-	if ( surf->viewCount == tr.viewCount ) {
+static void R_AddWorldSurface( msurface_t *surf, int dlightBits, shader_t *shader, qboolean cull ) {
+	shader_t *oldShader = surf->shader;
+	if ( surf->viewCount == tr.viewCount && cull ) {
 		return;		// already in this view
+	}
+
+	if( shader ) {
+		surf->shader = shader;
 	}
 
 	surf->viewCount = tr.viewCount;
 	// FIXME: bmodel fog?
 
 	// try to cull before dlighting or adding
-	if ( R_CullSurface( surf->data, surf->shader ) ) {
-		return;
+	if ( cull ) {
+		if ( R_CullSurface( surf->data, surf->shader ) ) {
+			return;
+		}
 	}
 
 	// check for dlighting
@@ -301,6 +308,8 @@ static void R_AddWorldSurface( msurface_t *surf, int dlightBits ) {
 	}
 
 	R_AddDrawSurf( surf->data, surf->shader, surf->fogIndex, dlightBits );
+
+	surf->shader = oldShader;
 }
 
 /*
@@ -321,20 +330,31 @@ void R_AddBrushModelSurfaces ( trRefEntity_t *ent ) {
 	int			clip;
 	model_t		*pModel;
 	int			i;
+	shader_t	*shader = 0;
+	qboolean	cull = !ent->e.alwaysRender;
+
+	if ( ent->e.customShader ) {
+		shader = R_GetShaderByHandle( ent->e.customShader );
+	}
 
 	pModel = R_GetModelByHandle( ent->e.hModel );
 
 	bmodel = pModel->bmodel;
 
-	clip = R_CullLocalBox( bmodel->bounds );
-	if ( clip == CULL_OUT ) {
-		return;
+	if( cull ) {
+		clip = R_CullLocalBox( bmodel->bounds );
+		if ( clip == CULL_OUT ) {
+			return;
+		}
 	}
 	
 	R_DlightBmodel( bmodel );
 
 	for ( i = 0 ; i < bmodel->numSurfaces ; i++ ) {
-		R_AddWorldSurface( bmodel->firstSurface + i, tr.currentEntity->needDlights );
+		//!surf->shader->isSky
+		if (!(bmodel->firstSurface + i)->shader->isSky) {
+			R_AddWorldSurface( bmodel->firstSurface + i, tr.currentEntity->needDlights, shader, cull );
+		}
 	}
 }
 
@@ -485,7 +505,7 @@ static void R_RecursiveWorldNode( mnode_t *node, int planeBits, int dlightBits )
 			// the surface may have already been added if it
 			// spans multiple leafs
 			surf = *mark;
-			R_AddWorldSurface( surf, dlightBits );
+			R_AddWorldSurface( surf, dlightBits, 0, qtrue );
 			mark++;
 		}
 	}

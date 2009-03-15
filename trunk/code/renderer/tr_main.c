@@ -452,13 +452,19 @@ void R_SetupProjection( void ) {
 	float	zNear, zFar;
 
 	// dynamically compute far clip plane distance
-	SetFarClip();
+	if(!tr.viewParms.customFar) {
+		SetFarClip();
+	}
 
 	//
 	// set up projection matrix
 	//
 	zNear	= r_znear->value;
 	zFar	= tr.viewParms.zFar;
+
+	if(tr.viewParms.customNear) {
+		zNear = tr.viewParms.zNear;
+	}
 
 	ymax = zNear * tan( tr.refdef.fov_y * M_PI / 360.0f );
 	ymin = -ymax;
