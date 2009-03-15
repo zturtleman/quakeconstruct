@@ -1200,6 +1200,30 @@ static void ParseDeform( char **text ) {
 		return;
 	}
 
+	if ( !Q_stricmp( token, "push" ) ) {
+		int		i;
+
+		for ( i = 0 ; i < 3 ; i++ ) {
+			token = COM_ParseExt( text, qfalse );
+			if ( token[0] == 0 ) {
+				ri.Printf( PRINT_WARNING, "WARNING: missing deformVertexes parm in shader '%s'\n", shader.name );
+				return;
+			}
+			ds->moveVector[i] = atof( token );
+		}
+
+		token = COM_ParseExt( text, qfalse );
+		if ( token[0] == 0 )
+		{
+			ri.Printf( PRINT_WARNING, "WARNING: missing deformVertexes push parm in shader '%s'\n", shader.name );
+			return;
+		}
+		ds->bulgeHeight = atof( token );
+
+		ds->deformation = DEFORM_PUSH;
+		return;
+	}
+
 	ri.Printf( PRINT_WARNING, "WARNING: unknown deformVertexes subtype '%s' found in shader '%s'\n", token, shader.name );
 }
 

@@ -1078,6 +1078,7 @@ static void CG_RegisterGraphics( void ) {
 		int				j;
 
 		Com_sprintf( name, sizeof(name), "*%i", i );
+		CG_Printf("Loaded InLine Model: %s\n",name);
 		cgs.inlineDrawModel[i] = trap_R_RegisterModel( name );
 		trap_R_ModelBounds( cgs.inlineDrawModel[i], mins, maxs );
 		for ( j = 0 ; j < 3 ; j++ ) {
@@ -1093,6 +1094,7 @@ static void CG_RegisterGraphics( void ) {
 		if ( !modelName[0] ) {
 			break;
 		}
+		CG_Printf("Loaded Server Required Model: %s\n",modelName);
 		cgs.gameModels[i] = trap_R_RegisterModel( modelName );
 	}
 

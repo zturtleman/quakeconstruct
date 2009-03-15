@@ -251,6 +251,26 @@ void RB_CalcMoveVertexes( deformStage_t *ds ) {
 	}
 }
 
+void RB_CalcPushVertexes( deformStage_t *ds ) {
+	int			i;
+	float		*xyz;
+	//float		*table;
+	float		scale;
+	vec3_t		offset;
+	vec3_t		delta;
+
+	//table = TableForFunc( ds->deformationWave.func );
+
+	scale = ds->bulgeHeight;
+
+	xyz = ( float * ) tess.xyz;
+	for ( i = 0; i < tess.numVertexes; i++, xyz += 4 ) {
+		VectorSubtract( xyz, ds->moveVector, delta );
+		VectorNormalizeFast( delta );
+		VectorScale( delta,scale,offset );
+		VectorAdd( xyz, offset, xyz );
+	}
+}
 
 /*
 =============
@@ -556,6 +576,9 @@ void RB_DeformTessGeometry( void ) {
 			break;
 		case DEFORM_MOVE:
 			RB_CalcMoveVertexes( ds );
+			break;
+		case DEFORM_PUSH:
+			RB_CalcPushVertexes( ds );
 			break;
 		case DEFORM_PROJECTION_SHADOW:
 			RB_ProjectionShadowDeform();

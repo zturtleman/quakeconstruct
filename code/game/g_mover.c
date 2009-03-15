@@ -720,10 +720,13 @@ void InitMover( gentity_t *ent ) {
 	qboolean	lightSet, colorSet;
 	char		*sound;
 
+	G_Printf("Mover Model: %s\n",ent->model);
+
 	// if the "model2" key is set, use a seperate model
 	// for drawing, but clip against the brushes
 	if ( ent->model2 ) {
 		ent->s.modelindex2 = G_ModelIndex( ent->model2 );
+		G_Printf("Mover Model2: %s\n",ent->model2);
 	}
 
 	// if the "loopsound" key is set, use a constant looping sound when moving

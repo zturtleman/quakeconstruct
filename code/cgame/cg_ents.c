@@ -24,7 +24,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "cg_local.h"
 
-
+qhandle_t customShader = 0;
 /*
 ======================
 CG_PositionEntityOnTag
@@ -182,6 +182,7 @@ static void CG_General( centity_t *cent ) {
 	VectorCopy( cent->lerpOrigin, ent.oldorigin);
 
 	ent.hModel = cgs.gameModels[s1->modelindex];
+	if(customShader) ent.customShader = customShader;
 
 	// player model
 	if (s1->number == cg.snap->ps.clientNum) {
@@ -254,6 +255,7 @@ static void CG_Item( centity_t *cent ) {
 		ent.shaderRGBA[1] = 255;
 		ent.shaderRGBA[2] = 255;
 		ent.shaderRGBA[3] = 255;
+		if(customShader) ent.customShader = customShader;
 		trap_R_AddRefEntityToScene(&ent);
 		return;
 	}
@@ -341,6 +343,7 @@ static void CG_Item( centity_t *cent ) {
 	}
 #endif
 
+	if(customShader) ent.customShader = customShader;
 	// add to refresh list
 	trap_R_AddRefEntityToScene(&ent);
 
@@ -390,6 +393,7 @@ static void CG_Item( centity_t *cent ) {
 					VectorScale( ent.axis[2], frac, ent.axis[2] );
 					ent.nonNormalizedAxes = qtrue;
 				}
+				if(customShader) ent.customShader = customShader;
 				trap_R_AddRefEntityToScene( &ent );
 			}
 		}
@@ -503,6 +507,7 @@ static void CG_Missile( centity_t *cent ) {
 	}
 
 	// add to refresh list, possibly with quad glow
+	if(customShader) ent.customShader = customShader;
 	CG_AddRefEntityWithPowerups( &ent, s1, TEAM_FREE );
 }
 
@@ -552,6 +557,7 @@ static void CG_Grapple( centity_t *cent ) {
 		ent.axis[0][2] = 1;
 	}
 
+	if(customShader) ent.customShader = customShader;
 	trap_R_AddRefEntityToScene( &ent );
 }
 
@@ -583,6 +589,8 @@ static void CG_Mover( centity_t *cent ) {
 	} else {
 		ent.hModel = cgs.gameModels[s1->modelindex];
 	}
+
+	if(customShader) ent.customShader = customShader;
 
 	// add to refresh list
 	trap_R_AddRefEntityToScene(&ent);
@@ -619,6 +627,7 @@ void CG_Beam( centity_t *cent ) {
 	ent.renderfx = RF_NOSHADOW;
 
 	// add to refresh list
+	if(customShader) ent.customShader = customShader;
 	trap_R_AddRefEntityToScene(&ent);
 }
 
@@ -652,6 +661,7 @@ static void CG_Portal( centity_t *cent ) {
 	ent.skinNum = s1->clientNum/256.0 * 360;	// roll offset
 
 	// add to refresh list
+	if(customShader) ent.customShader = customShader;
 	trap_R_AddRefEntityToScene(&ent);
 }
 
@@ -979,8 +989,9 @@ CG_AddCEntity
 
 ===============
 */
-static void CG_AddCEntity( centity_t *cent ) {
+static void CG_AddCEntity( centity_t *cent, qhandle_t cShader ) {
 	// event-only entities will have been dealt with already
+	customShader = cShader;
 	if ( cent->currentState.eType >= (ET_EVENTS) ) {
 		return;
 	}
@@ -1046,7 +1057,7 @@ CG_AddPacketEntities
 
 ===============
 */
-void CG_AddPacketEntities( void ) {
+void CG_AddPacketEntities( qhandle_t customShader ) {
 	int					num;
 	centity_t			*cent;
 	playerState_t		*ps;
@@ -1081,7 +1092,7 @@ void CG_AddPacketEntities( void ) {
 	// generate and add the entity from the playerstate
 	ps = &cg.predictedPlayerState;
 	BG_PlayerStateToEntityState( ps, &cg.predictedPlayerEntity.currentState, qfalse );
-	CG_AddCEntity( &cg.predictedPlayerEntity );
+	CG_AddCEntity( &cg.predictedPlayerEntity, 0 );
 
 	// lerp the non-predicted value for lightning gun origins
 	CG_CalcEntityLerpPositions( &cg_entities[ cg.snap->ps.clientNum ] );
@@ -1089,7 +1100,7 @@ void CG_AddPacketEntities( void ) {
 	// add each entity sent over by the server
 	for ( num = 0 ; num < cg.snap->numEntities ; num++ ) {
 		cent = &cg_entities[ cg.snap->entities[ num ].number ];
-		CG_AddCEntity( cent );
+		CG_AddCEntity( cent, customShader );
 	}
 }
 

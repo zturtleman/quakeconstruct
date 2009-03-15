@@ -17,6 +17,8 @@ int lua_torefdef(lua_State *L, int idx, refdef_t *refdef, qboolean a640) {
 	qlua_pullvector(L,"origin",refdef->vieworg,qfalse);
 	qlua_pullvector(L,"angles",angles,qfalse);
 	refdef->rdflags = qlua_pullint(L,"flags",qfalse,0);
+	refdef->zFar = qlua_pullfloat(L,"zFar",qfalse,0);
+	refdef->zNear = qlua_pullfloat(L,"zNear",qfalse,0);
 	
 	//if(angles[0] != 0 || angles[1] != 0 || angles[2] != 0) {
 		AnglesToAxis(angles,refdef->viewaxis);
@@ -76,7 +78,9 @@ int qlua_renderscene(lua_State *L) {
 }
 
 int qlua_addPacketEnts(lua_State *L) {
-	CG_AddPacketEntities();
+	qhandle_t customShader = 0;
+	if(lua_type(L,1) == LUA_TNUMBER) customShader = lua_tointeger(L,1);
+	CG_AddPacketEntities(customShader);
 	CG_AddMarks();
 	CG_AddParticles ();
 	CG_AddLocalEntities();

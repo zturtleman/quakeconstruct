@@ -1415,7 +1415,7 @@ void CG_PainEvent( centity_t *cent, int health );
 // cg_ents.c
 //
 void CG_SetEntitySoundPosition( centity_t *cent );
-void CG_AddPacketEntities( void );
+void CG_AddPacketEntities( qhandle_t customShader );
 void CG_Beam( centity_t *cent );
 void CG_AdjustPositionForMover( const vec3_t in, int moverNum, int fromTime, int toTime, vec3_t out );
 
