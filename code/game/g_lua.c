@@ -385,8 +385,18 @@ void DoLuaIncludes( void ) {
 	//if(luaL_loadfile(L,"lua/includes/init.lua") || lua_pcall(L, 0, 0, 0)) {
     //    error(L, lua_tostring(L, -1));
 	//}
-	if(!FS_doScript("lua/includes/init.lua")) {
-		error(L, lua_tostring(L, -1));
+
+	if(g_compiled.integer) {
+		lua_pushboolean(L,1);
+		lua_setglobal(L,"COMPILED");
+
+		if(!FS_doScript("lua/includes/compiled/init.luc")) {
+			error(L, lua_tostring(L, -1));
+		}
+	} else {
+		if(!FS_doScript("lua/includes/init.lua")) {
+			error(L, lua_tostring(L, -1));
+		}
 	}
 }
 
