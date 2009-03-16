@@ -1209,6 +1209,7 @@ extern  vmCvar_t		cg_recordSPDemoName;
 extern	vmCvar_t		cg_obeliskRespawnDelay;
 #endif
 
+extern  vmCvar_t		cg_compiled;
 
 qboolean Cmd_Check_Lua( const char cmd[] );
 void CG_KillMasks( void );

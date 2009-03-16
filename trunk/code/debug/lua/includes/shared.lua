@@ -3,11 +3,21 @@
 end]]
 
 local function includex(s)
-	local b,e = pcall(include,"lua/includes/" .. s .. ".lua")
+	local ext = "lua"
+	local path = "lua/includes"
+	if(COMPILED) then
+		ext = "luc"
+		path = "lua/includes/compiled"
+	end
+	local b,e = pcall(include,path .. "/" .. s .. "." .. ext)
 	if(!b) then
 		print("^1Failure To Load \"" .. s .. "\":\n" .. e .. "\n")
 	else
-		print("^2Loaded: " .. s .. "\n")
+		if(COMPILED) then
+			print("^2Loaded[compiled]: " .. s .. "\n")
+		else
+			print("^2Loaded: " .. s .. "\n")
+		end
 	end
 end
 
@@ -66,12 +76,6 @@ end
 ENTITYNUM_NONE = 1023
 ENTITYNUM_WORLD	= 1022
 ENTITYNUM_MAX_NORMAL = 1022
-
-CONTENTS_SOLID = 1
-CONTENTS_LAVA = 8
-CONTENTS_SLIME = 16
-CONTENTS_WATER = 32
-CONTENTS_FOG = 64
 
 if(SERVER) then
 	local function message(str,pl)
