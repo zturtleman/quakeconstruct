@@ -572,6 +572,46 @@ int qlua_lsettrx(lua_State *L) {
 	return 0;
 }
 
+int qlua_setemitter(lua_State *L) {
+	localEntity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TNUMBER);
+	luaL_checktype(L,3,LUA_TNUMBER);
+	luaL_checktype(L,4,LUA_TNUMBER);
+
+	luaentity = lua_tolocalentity(L,1);
+	if(luaentity != NULL) {
+		luaentity->emitTime = cg.time;
+		luaentity->startEmit = lua_tointeger(L,2);
+		luaentity->endEmit = lua_tointeger(L,3);
+		luaentity->emitRate = lua_tointeger(L,4);
+		luaentity->emitter = qtrue;
+
+		luaentity->startTime -= cg.time;
+		luaentity->endTime -= cg.time;
+
+		if(lua_gettop(L) >= 5 && lua_type(L,5) == LUA_TFUNCTION) {
+			luaentity->lua_emitted = qlua_storefunc(L,5,luaentity->lua_emitted); 
+		}
+	}
+	return 0;
+}
+
+int qlua_removeme(lua_State *L) {
+	localEntity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	luaentity = lua_tolocalentity(L,1);
+	if(luaentity != NULL) {
+		luaentity->endTime = cg.time-1;
+		luaentity->endEmit = cg.time-1;
+		luaentity->emitter = qfalse;
+	}
+	return 0;
+}
+
 static int Entity_tostring (lua_State *L)
 {
   lua_pushfstring(L, "RefEntity: %p", lua_touserdata(L, 1));
@@ -620,6 +660,8 @@ static const luaL_reg LEntity_methods[] = {
   {"SetNextThink",	qlua_lnextthink},
   {"SetBounceFactor", qlua_lbounce},
   {"GetTable",		lua_legetentitytable},
+  {"Emitter",	qlua_setemitter},
+  {"Remove",	qlua_removeme},
   {0,0}
 };
 
