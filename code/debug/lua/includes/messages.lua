@@ -76,6 +76,11 @@ if(SERVER) then
 		tab.pl = pl
 		tab.msgid = msgid
 		tab.argcount = 0
+		tab.WriteShort = message.WriteShort
+		tab.WriteLong = message.WriteLong
+		tab.WriteString = message.WriteString
+		tab.WriteFloat = message.WriteFloat
+		tab.WriteVector = message.WriteVector
 		return tab
 	end
 	

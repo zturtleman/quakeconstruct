@@ -274,6 +274,15 @@ typedef struct localEntity_s {
 	int				lua_stopped;
 	int				lua_think;
 	int				lua_die;
+	int				lua_emitted;
+
+	float			emitTime;
+	float			emitRate;
+	float			startEmit;
+	float			endEmit;
+
+	qboolean		emitter;
+
 	float			lua_nextThink;
 
 	int				startTime;

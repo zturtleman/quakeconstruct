@@ -1,6 +1,7 @@
-include("lua/cl_menu2.lua")
-include("lua/cl_testmenu2.lua")
-include("lua/cl_help.lua")
+--include("lua/cl_menu2.lua")
+--include("lua/cl_testmenu2.lua")
+--include("lua/cl_help.lua")
+include("lua/cl_emitters.lua")
 
 local flare = LoadShader("flareShader")
 local blood = LoadShader("bloodMark")
@@ -13,49 +14,40 @@ local function rvel(a)
 	math.random(-a,a))
 end
 
-local function newParticle(pos,dir,freeze)
-	--if(!flesh) then return end
+local ref = RefEntity()
+	ref:SetColor(1,1,1,1)
+	ref:SetType(RT_SPRITE)
+	ref:SetShader(flare)
+
+local function newParticle(pos,indir,freeze)
 	scale = scale or 1
-	local r = RefEntity()
-	r:SetColor(1,1,1,1)
-	r:SetType(RT_SPRITE)
-	r:SetRadius(math.random(5,10)*scale)
-	r:SetRotation(math.random(360))
-	r:SetShader(flare)
-	r:SetPos(vAdd(vMul(rvel(2000),.01),pos))
 	
-	dir.x = dir.x + (math.random(-10,10)/30)
-	dir.y = dir.y + (math.random(-10,10)/30)
-	dir.z = dir.z + (math.random(-10,10)/30)
-	
-	dir = vMul(dir,math.random(60,120)/60)
+	ref:SetRotation(math.random(360))
+	ref:SetPos((rvel(2000) * .01) + pos)
 
 	local le = LocalEntity()
-	--le:SetTrType(TR_LINEAR)
-	le:SetPos(vAdd(vMul(rvel(2000),.02),pos))
-	le:SetVelocity(vMul(dir,60))
-	le:SetRefEntity(r)
+	le:SetPos(pos)
+	le:SetRefEntity(ref)
 	le:SetStartTime(LevelTime())
-	le:SetEndTime(LevelTime() + (800) + math.random(300,800))
 	le:SetType(LE_FRAGMENT)
 	le:SetColor(1,1,1,1)
-	le:SetRadius(r:GetRadius())
-	--[[le:SetCallback(LOCALENTITY_CALLBACK_THINK,function(le)
-		le:SetNextThink(LevelTime() + 50 + math.random(50,100))
-		local ref = le:GetRefEntity()
-		ref:SetRadius(ref:GetRadius()*.7)
-		le:SetRefEntity(ref)
-		--le:SetVelocity(vMul(le:GetVelocity(),.9))
-		
-		--local normal = vSub(le:GetPos(),pos)
-		--le:SetVelocity(vAdd(le:GetVelocity(),vMul(normal,-1)))
-	end)]]
+	le:SetEndColor(0,0,0,0)
+	le:Emitter(LevelTime(), LevelTime() + 600, 1, 
+	function(le2,frac)
+		local dir = Vector(indir.x,indir.y,indir.z)
+		dir.x = dir.x + (math.random(-10,10)/10)
+		dir.y = dir.y + (math.random(-10,10)/10)
+		dir.z = dir.z + (math.random(-10,10)/10)
+				
+		dir = dir * (math.random(100,200))	
+		le2:SetVelocity(dir)
+		le2:SetRadius(math.random(15,25) * (1-frac))
+		le2:SetEndTime(LevelTime() + math.random(300,700) * math.random(1,4))
+	end)
 end
 
 local function ItemPickup(class,pos,vel,itemid)
-	for i=0, (50 + math.random(5)) do
-		newParticle(pos,vMul(vel,math.random(-5,5)/1000),false)
-	end
+	newParticle(pos + Vector(0,0,5),(vel * .002) + Vector(0,0,1),false)
 end
 
 local function readVector()

@@ -883,8 +883,58 @@ void CG_AddScorePlum( localEntity_t *le ) {
 
 
 
-
 //==============================================================================
+
+void CG_AddEmitter( localEntity_t *le ) {
+	localEntity_t *newEnt;
+	localEntity_t *next;
+	localEntity_t *prev;
+	int i;
+
+	if(le->startEmit > cg.time) return;
+
+	if(le->endEmit < cg.time) {
+		CG_FreeLocalEntity( le );
+		return;
+	}
+	
+	if(le->emitTime <= cg.time) {
+		le->emitTime = cg.time + le->emitRate;
+	} else {
+		return;
+	}
+
+	newEnt = CG_AllocLocalEntity();
+	
+	next = newEnt->next;
+	prev = newEnt->prev;
+	i = newEnt->id;
+
+	memcpy(newEnt,le,sizeof(localEntity_t));
+	memcpy(&newEnt->refEntity,&le->refEntity,sizeof(refEntity_t));
+
+	newEnt->prev = prev;
+	newEnt->next = next;
+	newEnt->id = i;
+
+	le->pos.trTime = cg.time;
+	le->angles.trTime = cg.time;
+
+	newEnt->startTime = le->startTime + cg.time;
+	newEnt->endTime = le->endTime + cg.time;
+
+	newEnt->emitter = qfalse;
+
+	if(le->lua_emitted && GetClientLuaState() != NULL) {
+		if(qlua_getstored(GetClientLuaState(), le->lua_emitted)) {
+			lua_pushlocalentity(GetClientLuaState(), newEnt);
+			lua_pushnumber(GetClientLuaState(),(cg.time - le->startEmit) / (le->endEmit - le->startEmit));
+			qlua_pcall(GetClientLuaState(), 2, 0, qfalse);
+		}
+	}
+	//CG_Printf("Finished Emit.\n");
+}
+
 
 /*
 ===================
@@ -903,16 +953,21 @@ void CG_AddLocalEntities( void ) {
 		// still have it
 		next = le->prev;
 
-		if ( cg.time >= le->endTime ) {
+		if ( cg.time >= le->endTime && !le->emitter ) {
 			CG_FreeLocalEntity( le );
 			continue;
 		}
 
-		if(le->lua_nextThink < cg.time && GetClientLuaState() != NULL) {
+		if(le->lua_nextThink < cg.time && GetClientLuaState() != NULL && !le->emitter) {
 			if(qlua_getstored(GetClientLuaState(), le->lua_think)) {
 				lua_pushlocalentity(GetClientLuaState(), le);
 				qlua_pcall(GetClientLuaState(), 1, 0, qfalse);
 			}
+		}
+
+		if( le->emitter ) {
+			CG_AddEmitter( le );
+			continue;
 		}
 
 		switch ( le->leType ) {
