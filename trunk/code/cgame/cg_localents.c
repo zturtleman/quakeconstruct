@@ -60,18 +60,14 @@ CG_FreeLocalEntity
 ==================
 */
 void CG_FreeLocalEntity( localEntity_t *le ) {
+	localEntity_t temp = *le;
+
 	if ( !le->prev ) {
 		CG_Error( "CG_FreeLocalEntity: not active" );
 	}
 
 	if(GetClientLuaState() != NULL) {
-		if(qlua_getstored(GetClientLuaState(), le->lua_die)) {
-			lua_pushlocalentity(GetClientLuaState(), le);
-			qlua_pcall(GetClientLuaState(), 1, 0, qfalse);
-		}
-
 		le->id = 0;
-		qlua_clearfunc(GetClientLuaState(),le->lua_die);
 		qlua_clearfunc(GetClientLuaState(),le->lua_bounce);
 		qlua_clearfunc(GetClientLuaState(),le->lua_think);
 		qlua_clearfunc(GetClientLuaState(),le->lua_stopped);
@@ -81,6 +77,12 @@ void CG_FreeLocalEntity( localEntity_t *le ) {
 	le->lua_think = 0;
 	le->lua_bounce = 0;
 	le->lua_stopped = 0;
+	le->lua_parentgone = 0;
+	le->hadparent = qfalse;
+	le->parent = NULL;
+	le->parent_tag = "";
+	le->emitter = qfalse;
+	le->active = qfalse;
 
 	// remove from the doubly linked active list
 	le->prev->next = le->next;
@@ -89,6 +91,14 @@ void CG_FreeLocalEntity( localEntity_t *le ) {
 	// the free list is only singly linked
 	le->next = cg_freeLocalEntities;
 	cg_freeLocalEntities = le;
+
+	if(GetClientLuaState() != NULL) {
+		if(qlua_getstored(GetClientLuaState(), temp.lua_die)) {
+			lua_pushlocalentity(GetClientLuaState(), &temp);
+			qlua_pcall(GetClientLuaState(), 1, 0, qfalse);
+		}
+		qlua_clearfunc(GetClientLuaState(),temp.lua_die);
+	}
 }
 
 /*
@@ -117,6 +127,11 @@ localEntity_t	*CG_AllocLocalEntity( void ) {
 	le->prev = &cg_activeLocalEntities;
 	cg_activeLocalEntities.next->prev = le;
 	cg_activeLocalEntities.next = le;
+
+	le->active = qtrue;
+	le->hadparent = qfalse;
+	le->parent = NULL;
+
 	return le;
 }
 
@@ -885,24 +900,14 @@ void CG_AddScorePlum( localEntity_t *le ) {
 
 //==============================================================================
 
-void CG_AddEmitter( localEntity_t *le ) {
+void CG_LocalEntityEmit( localEntity_t *le ) {
 	localEntity_t *newEnt;
 	localEntity_t *next;
 	localEntity_t *prev;
 	int i;
+	//vec3_t	origin;
 
-	if(le->startEmit > cg.time) return;
-
-	if(le->endEmit < cg.time) {
-		CG_FreeLocalEntity( le );
-		return;
-	}
-	
-	if(le->emitTime <= cg.time) {
-		le->emitTime = cg.time + le->emitRate;
-	} else {
-		return;
-	}
+	if(!le->emitter) return;
 
 	newEnt = CG_AllocLocalEntity();
 	
@@ -917,13 +922,17 @@ void CG_AddEmitter( localEntity_t *le ) {
 	newEnt->next = next;
 	newEnt->id = i;
 
-	le->pos.trTime = cg.time;
-	le->angles.trTime = cg.time;
+	//BG_EvaluateTrajectory(&newEnt->pos,cg.time,origin);
+	//VectorCopy(origin,newEnt->pos.trBase);
+
+	newEnt->pos.trTime = cg.time;
+	newEnt->angles.trTime = cg.time;
 
 	newEnt->startTime = le->startTime + cg.time;
 	newEnt->endTime = le->endTime + cg.time;
 
 	newEnt->emitter = qfalse;
+	newEnt->parent = NULL;
 
 	if(le->lua_emitted && GetClientLuaState() != NULL) {
 		if(qlua_getstored(GetClientLuaState(), le->lua_emitted)) {
@@ -932,9 +941,70 @@ void CG_AddEmitter( localEntity_t *le ) {
 			qlua_pcall(GetClientLuaState(), 2, 0, qfalse);
 		}
 	}
-	//CG_Printf("Finished Emit.\n");
 }
 
+void CG_AddEmitter( localEntity_t *le ) {
+	if(le->startEmit > cg.time) return;
+
+	if(le->endEmit < cg.time) {
+		CG_FreeLocalEntity( le );
+		return;
+	}
+	
+	if(le->emitTime <= cg.time) {
+		le->emitTime = cg.time + le->emitRate;
+	} else {
+		return;
+	}
+
+	CG_LocalEntityEmit( le );
+}
+
+qboolean CG_DoAttachment( localEntity_t *le ) {
+	localEntity_t		*par = le->parent;
+	refEntity_t			other;
+
+	if( le->parent != NULL && le->parent->active ) {
+		le->hadparent = qtrue;
+		if( le->parent_tag && strcmp(le->parent_tag,"") &&
+			par->refEntity.hModel) {
+			other = par->refEntity;
+			CG_PositionEntityOnTag(&le->refEntity,&other,par->refEntity.hModel,(char*)le->parent_tag);
+			VectorCopy(le->refEntity.origin,le->pos.trBase);
+			VectorCopy(le->refEntity.origin,le->refEntity.oldorigin);
+			vectoangles(le->refEntity.axis[0],le->angles.trBase);
+			VectorClear(le->angles.trDelta);
+			le->angles.trTime = cg.time;
+		} else {
+			VectorCopy(par->refEntity.origin,le->pos.trBase);
+			VectorCopy(par->refEntity.origin,le->refEntity.origin);
+			VectorCopy(par->refEntity.origin,le->refEntity.oldorigin);
+			VectorCopy(par->angles.trBase,le->angles.trBase);
+			VectorCopy(par->angles.trDelta,le->angles.trDelta);
+			
+			le->angles.trDuration = par->angles.trDuration;
+			le->angles.trTime = par->angles.trTime;
+			le->angles.trType = par->angles.trType;
+		}
+		VectorClear(le->pos.trDelta);
+		le->pos.trTime = cg.time;
+		return qfalse;
+	} else {
+		/*if(le->hadparent) {
+			//CG_FreeLocalEntity( le );
+			CG_Printf("Parent Removed!\n");
+			le->hadparent = qfalse;
+			if(le->lua_parentgone && GetClientLuaState() != NULL) {
+				if(qlua_getstored(GetClientLuaState(), le->lua_parentgone)) {
+					lua_pushlocalentity(GetClientLuaState(), le);
+					qlua_pcall(GetClientLuaState(), 1, 0, qfalse);
+				}
+			}
+			return qfalse;
+		}*/
+	}
+	return qfalse;
+}
 
 /*
 ===================
@@ -963,6 +1033,10 @@ void CG_AddLocalEntities( void ) {
 				lua_pushlocalentity(GetClientLuaState(), le);
 				qlua_pcall(GetClientLuaState(), 1, 0, qfalse);
 			}
+		}
+
+		if( CG_DoAttachment( le ) ) {
+			continue;
 		}
 
 		if( le->emitter ) {

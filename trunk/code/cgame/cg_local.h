@@ -265,16 +265,19 @@ typedef enum {
 } leBounceSoundType_t;	// fragment local entities can make sounds on impacts
 
 typedef struct localEntity_s {
-	struct localEntity_s	*prev, *next;
+	struct localEntity_s	*prev, *next, *parent;
 	leType_t		leType;
 	int				leFlags;
 	int				id;
+
+	const char		*parent_tag;
 
 	int				lua_bounce;
 	int				lua_stopped;
 	int				lua_think;
 	int				lua_die;
 	int				lua_emitted;
+	int				lua_parentgone;
 
 	float			emitTime;
 	float			emitRate;
@@ -282,6 +285,8 @@ typedef struct localEntity_s {
 	float			endEmit;
 
 	qboolean		emitter;
+	qboolean		hadparent;
+	qboolean		active;
 
 	float			lua_nextThink;
 
@@ -1481,6 +1486,7 @@ void	CG_ImpactMark( qhandle_t markShader,
 void	CG_InitLocalEntities( void );
 localEntity_t	*CG_AllocLocalEntity( void );
 void	CG_AddLocalEntities( void );
+void	CG_LocalEntityEmit( localEntity_t *le );
 
 //
 // cg_effects.c

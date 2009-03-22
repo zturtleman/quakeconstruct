@@ -227,6 +227,12 @@ if(CLIENT) then
 		return flash:GetPos()
 	end
 	
+	function GetTag(ref,tag)
+		local r = RefEntity()
+		r:PositionOnTag(ref,tag)
+		return r:GetPos(),r:GetAxis()
+	end
+	
 	function hsv(h,s,v,...)
 		h = h % 360
 		local h1 = math.floor((h/60) % 6)
