@@ -254,6 +254,45 @@ int qlua_text(lua_State *L) {
 	return 0;
 }
 
+int qlua_text2width(lua_State *L) {
+	const char *text = "text";
+	int width = 0;
+	
+	luaL_checktype(L,1,LUA_TSTRING);
+	text = lua_tostring(L,1);
+
+	width = UI_ProportionalStringWidth( text );
+	lua_pushinteger(L,width);
+	return 2;
+}
+
+int qlua_text2(lua_State *L) {
+	int x,y;
+	float size = 1;
+	const char *text = "text";
+	qboolean glow = qfalse;
+
+	luaL_checktype(L,1,LUA_TNUMBER);
+	luaL_checktype(L,2,LUA_TNUMBER);
+	luaL_checktype(L,3,LUA_TSTRING);
+
+	x = lua_tointeger(L,1);
+	y = lua_tointeger(L,2);
+	text = lua_tostring(L,3);
+	if(lua_type(L,4) == LUA_TNUMBER) size = lua_tonumber(L,4);
+	if(lua_gettop(L) >= 5 && lua_type(L,5) == LUA_TBOOLEAN) {
+		glow = lua_toboolean(L,5);
+	}
+
+	if(glow) {
+		UI_DrawProportionalString2(x, y, text, lastcolor, size, cgs.media.charsetPropGlow);
+	} else {
+		UI_DrawProportionalString2(x, y, text, lastcolor, size, cgs.media.charsetProp);
+	}
+
+	return 0;
+}
+
 static const luaL_reg Draw_methods[] = {
   {"SetColor",		qlua_setcolor},
   {"Rect",			qlua_rect},
@@ -261,6 +300,8 @@ static const luaL_reg Draw_methods[] = {
   {"RectRotated",	qlua_rectrotated},
   {"BeveledRect",	qlua_beveledRect},
   {"Text",			qlua_text},
+  {"Text2",			qlua_text2},
+  {"Text2Width",	qlua_text2width},
   {"EndMask",		qlua_endmask},
   {"MaskRect",		qlua_maskrect},
   {0,0}

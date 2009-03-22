@@ -167,7 +167,7 @@ local function parseSingleAnim(animtab,line)
 			if(lastChar(v) == "\r") then
 				v = string.sub(v,0,string.len(v)-1)
 			end
-			print("Anim:" .. v .. "|" .. temp[4] .. "|\n")
+			--print("Anim:" .. v .. "|" .. temp[4] .. "|\n")
 			animtab[v] = Animation(temp[1],temp[2],temp[4])
 			--animtab[v]:Play()
 			return

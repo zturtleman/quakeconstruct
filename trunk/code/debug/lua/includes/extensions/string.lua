@@ -164,3 +164,13 @@ function string.URLDecode(str)
 	str = string.gsub (str, "\r\n", "\n")
 	return str
 end
+
+function string.CountSlashes(str)
+	local c = 0
+	local tab = string.ToTable(str)
+	for k,v in pairs(tab) do
+		if(v == "/") then c = c + 1 end
+	end
+	return c
+end
+
