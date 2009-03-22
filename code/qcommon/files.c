@@ -2743,10 +2743,11 @@ static void FS_Startup( const char *gameName ) {
 
 	Com_Printf( "----- FS_Startup -----\n" );
 
+	//Sys_DefaultInstallPath()
 	fs_debug = Cvar_Get( "fs_debug", "0", 0 );
 	fs_copyfiles = Cvar_Get( "fs_copyfiles", "0", CVAR_INIT );
 	fs_cdpath = Cvar_Get ("fs_cdpath", "..", CVAR_INIT ); //Sys_DefaultCDPath() 
-	fs_basepath = Cvar_Get ("fs_basepath", Sys_DefaultInstallPath(), CVAR_INIT ); //Sys_DefaultInstallPath()
+	fs_basepath = Cvar_Get ("fs_basepath", Sys_DefaultInstallPath(), CVAR_INIT );
 	fs_basegame = Cvar_Get ("fs_basegame", "", CVAR_INIT );
   homePath = Sys_DefaultHomePath();
   if (!homePath || !homePath[0]) {

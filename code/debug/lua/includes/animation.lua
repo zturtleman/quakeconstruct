@@ -1,6 +1,7 @@
 ANIM_ACT_LOOP = 0
 ANIM_ACT_LOOP_LERP = 1
 ANIM_ACT_STOP = 2
+ANIM_ACT_PINGPONG = 3
 
 local AnimationT = {}
 
@@ -44,7 +45,13 @@ function AnimationT:Animate()
 		self.oldframe = self.frame
 		
 		self.frameTime = LevelTime() + self.lerp
-		self.frame = self.frame + 1
+		
+		if(self.reverse) then
+			self.frame = self.frame - 1
+		else
+			self.frame = self.frame + 1
+		end
+		
 		if(self.frame >= self.endf) then
 			if(self.act == ANIM_ACT_LOOP) then
 				self.frame = self.start
@@ -55,7 +62,19 @@ function AnimationT:Animate()
 				self.frame = self.endf
 				self.oldframe = self.endf
 				self:Stop()
+			elseif(self.act == ANIM_ACT_PINGPONG) then
+				self.frame = self.endf
+				self.oldframe = self.endf
+				self.reverse = !self.reverse
 			end
+		end
+		
+		if(self.frame < self.start) then
+			if(self.act == ANIM_ACT_PINGPONG) then
+				self.frame = self.start
+				self.oldframe = self.start
+				self.reverse = !self.reverse
+			end		
 		end
 		
 		if ( self.frameTime > LevelTime() + self.lerp ) then
@@ -82,7 +101,7 @@ function AnimationT:SetRef(r)
 end
 
 function AnimationT:SetType(t)
-	if(t >= 0 and t <= ANIM_ACT_STOP) then
+	if(t >= 0 and t <= ANIM_ACT_PINGPONG) then
 		self.act = t
 	end
 end
@@ -127,6 +146,7 @@ function Animation(_start,_end,_lerp)
 	o.length = _end
 	o.fps = _lerp
 	o.lerp = 1000/_lerp
+	o.reverse = false
 	
 	o:Init()
 	o.Init = nil

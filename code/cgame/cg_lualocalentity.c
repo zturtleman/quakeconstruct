@@ -3,16 +3,26 @@
 int idx = 1;
 
 localEntity_t *qlua_lgetrealentity( int id ) {
+	int zc = 0;
 	localEntity_t	*le, *next;
 	localEntity_t	cg_activeLocalEntities = CG_GetLocalEntityList();
 
 	// walk the list backwards, so any new local entities generated
 	// (trails, marks, etc) will be present this frame
 	le = cg_activeLocalEntities.prev;
+
 	for ( ; le != &cg_activeLocalEntities ; le = next ) {
 		// grab next now, so if the local entity is freed we
 		// still have it
+
 		next = le->prev;
+
+		if(zc > 100) {
+			CG_Printf("Searched 100x\n");
+			return NULL;
+		}
+
+		if(next->id == 0) zc ++;
 
 		if(le != NULL && le->id == id) {
 			return le;
@@ -107,7 +117,7 @@ localEntity_t *lua_tolocalentity(lua_State *L, int i) {
 
 	luaentity = qlua_lgetrealentity(ptr->id);
 
-	if (luaentity == NULL) luaL_typerror(L, i, "LocalEntity");
+	if (luaentity == NULL) return NULL; //luaL_typerror(L, i, "LocalEntity");
 
 	return luaentity;
 }
@@ -140,6 +150,8 @@ int qlua_lsetpos(lua_State *L) {
 		lua_tovector(L,2,luaentity->pos.trBase);
 		luaentity->pos.trDuration += (cg.time - luaentity->pos.trTime);
 		luaentity->pos.trTime = cg.time;
+
+		VectorCopy(luaentity->pos.trBase,luaentity->refEntity.origin);
 		return 1;
 	}
 	return 0;
@@ -404,6 +416,7 @@ int qlua_lgetradius(lua_State *L) {
 int	qlua_lsetref(lua_State *L) {
 	localEntity_t	*luaentity;
 	refEntity_t		*in;
+	vec3_t			origin;
 
 	luaL_checktype(L,1,LUA_TUSERDATA);
 	luaL_checktype(L,2,LUA_TUSERDATA);
@@ -412,6 +425,9 @@ int	qlua_lsetref(lua_State *L) {
 	in = lua_torefentity(L,2);
 	if(luaentity != NULL && in != NULL) {
 		memcpy(&luaentity->refEntity,in,sizeof(refEntity_t));
+
+		BG_EvaluateTrajectory(&luaentity->pos,cg.time,origin);
+		VectorCopy(origin,luaentity->refEntity.origin);
 	}
 	return 0;
 }
@@ -459,6 +475,7 @@ int qlua_lsetcallback(lua_State *L) {
 				case 1: ent->lua_bounce = qlua_storefunc(L,3,ent->lua_bounce); break;
 				case 2: ent->lua_die = qlua_storefunc(L,3,ent->lua_die); break;
 				case 3: ent->lua_stopped = qlua_storefunc(L,3,ent->lua_stopped); break;
+				case 4: ent->lua_parentgone = qlua_storefunc(L,3,ent->lua_parentgone); break;
 			}		
 		}
 	}
@@ -572,6 +589,43 @@ int qlua_lsettrx(lua_State *L) {
 	return 0;
 }
 
+int qlua_lsetparent(lua_State *L) {
+	localEntity_t	*luaentity, *parent;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TUSERDATA);
+
+	luaentity = lua_tolocalentity(L,1);
+	parent = lua_tolocalentity(L,2);
+	if(luaentity != NULL && parent != NULL) {
+		luaentity->parent = parent;
+
+		if(lua_gettop(L) >= 3 && lua_type(L,3) == LUA_TSTRING) {
+			luaentity->parent_tag = lua_tostring(L,3);
+		}
+	}
+	return 0;
+}
+
+int qlua_lemit(lua_State *L) {
+	localEntity_t	*luaentity;
+	int count = 1;
+	int i = 0;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaentity = lua_tolocalentity(L,1);
+
+	if(lua_gettop(L) > 1 && lua_type(L,2) == LUA_TNUMBER) count = lua_tointeger(L,2);
+	if(count <= 0) count = 1;
+
+	if(luaentity != NULL) {
+		for(i=0;i<count;i++) {
+			CG_LocalEntityEmit(luaentity);
+		}
+	}
+	return 0;
+}
+
 int qlua_setemitter(lua_State *L) {
 	localEntity_t	*luaentity;
 
@@ -604,10 +658,14 @@ int qlua_removeme(lua_State *L) {
 	luaL_checktype(L,1,LUA_TUSERDATA);
 
 	luaentity = lua_tolocalentity(L,1);
-	if(luaentity != NULL) {
-		luaentity->endTime = cg.time-1;
-		luaentity->endEmit = cg.time-1;
-		luaentity->emitter = qfalse;
+	if(luaentity != NULL && luaentity->active) {
+		luaentity->active = qfalse;
+		if(luaentity->emitter) {
+			luaentity->endEmit = cg.time + 10;
+			luaentity->emitTime = cg.time + 1000;
+		} else {
+			luaentity->endTime = cg.time + 10;
+		}
 	}
 	return 0;
 }
@@ -620,10 +678,10 @@ static int Entity_tostring (lua_State *L)
 
 static int Entity_equal (lua_State *L)
 {
-	centity_t *e1 = lua_toentity(L,1);
-	centity_t *e2 = lua_toentity(L,2);
+	localEntity_t *e1 = lua_tolocalentity(L,1);
+	localEntity_t *e2 = lua_tolocalentity(L,2);
 	if(e1 != NULL && e2 != NULL) {
-		lua_pushboolean(L, (e1->currentState.number == e2->currentState.number));
+		lua_pushboolean(L, (e1->id == e2->id));
 	} else {
 		lua_pushboolean(L, 0);
 	}
@@ -660,7 +718,9 @@ static const luaL_reg LEntity_methods[] = {
   {"SetNextThink",	qlua_lnextthink},
   {"SetBounceFactor", qlua_lbounce},
   {"GetTable",		lua_legetentitytable},
+  {"SetParent",		qlua_lsetparent},
   {"Emitter",	qlua_setemitter},
+  {"Emit",		qlua_lemit},
   {"Remove",	qlua_removeme},
   {0,0}
 };
