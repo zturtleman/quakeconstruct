@@ -21,4 +21,4 @@ function Panel:DrawBackground()
 	end
 end
 
-registerComponent(Panel,"image","panel")
+registerComponent(Panel,"image","button")

@@ -15,12 +15,12 @@ function GetModelFile(i)
 end
 
 function LoadModel(str)
-	for k,v in pairs(models) do
+	--[[for k,v in pairs(models) do
 		if(v[1] == str) then
 			--print("Loaded Model From Cache: " .. v[1] .. "(" .. v[2] .. ")\n")
 			return v[2]
 		end
-	end
+	end]]
 	return __loadmodel(str)
 end
 
