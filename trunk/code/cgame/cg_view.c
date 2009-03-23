@@ -819,10 +819,12 @@ void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demo
 
 	// build the render lists
 	if ( !cg.hyperspace ) {
-		CG_AddPacketEntities(0);			// adter calcViewValues, so predicted player state is correct
-		CG_AddMarks();
-		CG_AddParticles ();
-		CG_AddLocalEntities();
+		if(CG_ShouldDraw("ENTITIES")) {
+			if(CG_ShouldDraw("ENTITIES_PACKET")) CG_AddPacketEntities(0);			// adter calcViewValues, so predicted player state is correct
+			if(CG_ShouldDraw("ENTITIES_MARKS")) CG_AddMarks();
+			if(CG_ShouldDraw("ENTITIES_LOCAL")) CG_AddParticles ();
+			if(CG_ShouldDraw("ENTITIES_LOCAL")) CG_AddLocalEntities();
+		}
 	}
 	if (CG_ShouldDraw("HUD_DRAWGUN")) CG_AddViewWeapon( &cg.predictedPlayerState );
 
