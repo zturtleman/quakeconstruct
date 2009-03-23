@@ -2635,7 +2635,9 @@ static void CG_Draw2D( void ) {
 	}
 
 	// don't draw center string if scoreboard is up
-	cg.scoreBoardShowing = CG_DrawScoreboard();
+	if(CG_ShouldDraw("HUD_SCOREBOARD")) {
+		cg.scoreBoardShowing = CG_DrawScoreboard();
+	}
 	if ( !cg.scoreBoardShowing) {
 		CG_DrawCenterString();
 	}
@@ -2709,6 +2711,10 @@ void CG_DrawActive( stereoFrame_t stereoView ) {
 		qlua_gethook(L,"Draw3D");
 		qlua_pcall(L,0,0,qtrue);
 		CG_Lock3D(qfalse);
+	}
+
+	if(!CG_ShouldDraw("WORLD")) {
+		cg.refdef.rdflags = RDF_NOWORLDMODEL;
 	}
 
 	trap_R_RenderScene( &cg.refdef );
