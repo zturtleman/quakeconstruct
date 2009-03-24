@@ -1910,6 +1910,25 @@ image_t	*R_FindImageFile( const char *name, qboolean mipmap, qboolean allowPicmi
 	return image;
 }
 
+void R_ClearImageHash( const char* name ) {
+	long	hash;
+	image_t	*image;
+
+	if (!name) {
+		return;
+	}
+
+	hash = generateHashValue(name);
+	image = hashTable[hash];
+	for (image=hashTable[hash]; image; image=image->next) {
+		if ( !strcmp( name, image->imgName ) ) {
+			Q_strncpyz( image->imgName, "", sizeof(image->imgName) );
+			return;
+		}
+	}
+
+	//memset(hashTable[hash], 0, sizeof(shader_t));
+}
 
 /*
 ================

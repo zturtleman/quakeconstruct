@@ -1650,12 +1650,14 @@ int			trap_CM_MarkFragments( int numPoints, const vec3_t *points,
 // normal sounds will have their volume dynamically changed as their entity
 // moves and the listener moves
 void		trap_S_StartSound( vec3_t origin, int entityNum, int entchannel, sfxHandle_t sfx );
+void		trap_S_StartSoundLua( vec3_t origin, int entityNum, int entchannel, sfxHandle_t sfx );
 void		trap_S_StopLoopingSound(int entnum);
 
 // a local sound is always played full volume
 void		trap_S_StartLocalSound( sfxHandle_t sfx, int channelNum );
 void		trap_S_ClearLoopingSounds( qboolean killall );
 void		trap_S_AddLoopingSound( int entityNum, const vec3_t origin, const vec3_t velocity, sfxHandle_t sfx );
+void		trap_S_AddLoopingSoundLua( int entityNum, const vec3_t origin, const vec3_t velocity, sfxHandle_t sfx );
 void		trap_S_AddRealLoopingSound( int entityNum, const vec3_t origin, const vec3_t velocity, sfxHandle_t sfx );
 void		trap_S_UpdateEntityPosition( int entityNum, const vec3_t origin );
 
@@ -1759,6 +1761,8 @@ float		trap_N_ReadFloat();
 void		trap_SetUserCommand( usercmd_t *cmd );
 void		trap_EnableCommandOverride( qboolean b );
 int			trap_IsUI(void);
+void		trap_R_Screenshot(int x, int y, int w, int h, char *file);
+void		trap_R_ClearImage(const char *file);
 
 typedef enum {
   SYSTEM_PRINT,

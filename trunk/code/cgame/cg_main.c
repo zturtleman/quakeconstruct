@@ -2061,6 +2061,11 @@ int qlua_stopbg(lua_State *L) {
 	return 0;
 }
 
+int qlua_clearloops(lua_State *L) {
+	trap_S_ClearLoopingSounds( qtrue );
+	return 0;
+}
+
 int qlua_playsound(lua_State *L) {
 	centity_t *ent;
 	vec3_t	origin;
@@ -2076,7 +2081,7 @@ int qlua_playsound(lua_State *L) {
 			handle = lua_tointeger(L,2);
 			lua_tovector(L,1,origin);
 			if(handle > 0) {
-				trap_S_StartSound( origin, ENTITYNUM_WORLD, CHAN_AUTO, handle );
+				trap_S_StartSoundLua( origin, ENTITYNUM_WORLD, CHAN_AUTO, handle );
 			}
 		}
 		return 0;
@@ -2088,7 +2093,60 @@ int qlua_playsound(lua_State *L) {
 	}
 
 	if(ent != NULL && handle > 0) {
-		trap_S_StartSound (NULL, ent->currentState.number, CHAN_AUTO, handle );
+		trap_S_StartSoundLua(NULL, ent->currentState.number, CHAN_AUTO, handle );
+	}
+	return 0;
+}
+
+int qlua_loopsound(lua_State *L) {
+	centity_t *ent;
+	vec3_t	origin, vel;
+	sfxHandle_t	handle;
+	
+	if(IsEntity(L,1)) {
+		ent = lua_toentity(L,1);
+		if(lua_type(L,2) == LUA_TNUMBER) {
+			handle = lua_tointeger(L,2);
+		}
+		if(IsVector(L,3)) {
+			lua_tovector(L,3,vel);
+		}
+	} else if(IsVector(L,1)) {
+		if(lua_type(L,2) == LUA_TNUMBER) {
+			handle = lua_tointeger(L,2);
+			lua_tovector(L,1,origin);
+			if(handle > 0) {
+				ent = &cg_entities[ ENTITYNUM_WORLD ];
+				if(ent != NULL) {
+					CG_SetEntitySoundPosition(ent);
+					
+					if(IsVector(L,2)) {
+						lua_tovector(L,2,vel);
+					}
+
+					trap_S_AddLoopingSoundLua(ENTITYNUM_WORLD, origin, vel, handle);
+
+					lua_pushentity(L,ent);
+					return 1;
+				}
+			}
+		}
+		return 0;
+	} else {
+		ent = &cg_entities[ cg.snap->ps.clientNum ];
+		if(lua_type(L,1) == LUA_TNUMBER) {
+			handle = lua_tointeger(L,1);
+		}
+		if(IsVector(L,2)) {
+			lua_tovector(L,2,vel);
+		}
+	}
+
+	if(ent != NULL && handle > 0) {
+		CG_SetEntitySoundPosition(ent);
+		trap_S_AddLoopingSoundLua(ent->currentState.number, ent->lerpOrigin, vel, handle);
+		lua_pushentity(L,ent);
+		return 1;
 	}
 	return 0;
 }
@@ -2122,6 +2180,8 @@ void CG_InitLua() {
 	lua_register(L,"grabarg",qlua_grabarg);
 	lua_register(L,"StartMusic",qlua_playbg);
 	lua_register(L,"StopMusic",qlua_stopbg);
+	lua_register(L,"ClearLoopingSounds",qlua_clearloops);
+	lua_register(L,"LoopSound",qlua_loopsound);
 	lua_register(L,"SetUserCommand",qlua_SetUserCommand);
 
 	pushents(L);

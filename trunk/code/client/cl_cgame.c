@@ -671,7 +671,12 @@ int CL_CgameSystemCalls( int *args ) {
 		return 0;
   case CG_ISUI:
 		return (cls.keyCatchers & KEYCATCH_UI);
-
+  case CG_SCREENSHOT:
+		re.TakeScreenshot(args[1], args[2], args[3], args[4], VMA(5), qtrue);
+		return 0;
+  case CG_CLEARIMAGE:
+		re.ClearImage( VMA(1) );
+		return 0;
 	case CG_MEMSET:
 		Com_Memset( VMA(1), args[2], args[3] );
 		return 0;

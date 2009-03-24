@@ -825,6 +825,27 @@ void S_AddRealLoopingSound( int entityNum, const vec3_t origin, const vec3_t vel
 	loopSounds[entityNum].active = qtrue;
 	loopSounds[entityNum].kill = qfalse;
 	loopSounds[entityNum].doppler = qfalse;
+	loopSounds[entityNum].oldDopplerScale = 1.0;
+	loopSounds[entityNum].dopplerScale = 1.0;
+
+	if (s_doppler->integer && VectorLengthSquared(velocity)>0.0) {
+		float	len = VectorLengthSquared(velocity);
+		if(len > 20) len = 20;
+		if(len < 0) len = 0;
+
+		loopSounds[entityNum].doppler = qtrue;
+		/*if ((loopSounds[entityNum].framenum+1) != cls.framecount) {
+			loopSounds[entityNum].oldDopplerScale = 1.0;
+		} else {*/
+		loopSounds[entityNum].oldDopplerScale = loopSounds[entityNum].dopplerScale;
+		//}
+		loopSounds[entityNum].dopplerScale = len;
+		if (loopSounds[entityNum].dopplerScale<=1.0) {
+			loopSounds[entityNum].doppler = qfalse;			// don't bother doing the math
+		}
+	}
+
+	loopSounds[entityNum].framenum = cls.framecount;
 }
 
 

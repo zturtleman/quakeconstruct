@@ -53,6 +53,10 @@ local function charSize(legs,torso,head,mins,maxs)
 end
 
 function setupModelView(panel,char,skin)
+	if(char == "") then return end
+	
+	ConsoleCommand("model " .. char .. "/" .. (skin or "default") .. "\n")
+	
 	local legs,torso,head = LoadCharacter(char,skin,"default")
 	panel.ref = legs
 	panel.torso = torso
@@ -155,23 +159,23 @@ function MakeModelFrame()
 				MDL_VIEWPANE = nil
 				print("Removed!\n")
 			end
-			MDL_VIEWPANE.Draw = function() end
+			--MDL_VIEWPANE.Draw = function() end
 		end
 		
 		local subpane = UI_Create("panel",MDL_VIEWPANE)
 		if(subpane != nil) then
 			subpane.Draw = function() end --Don't draw this one
 			subpane.DoLayout = function(self)
-				self:SetSize(self:GetParent():GetWidth()-(ICON_SIZE+8),self:GetParent():GetHeight())
+				self:SetSize(self:GetParent():GetWidth()-(ICON_SIZE+8),self:GetParent():GetHeight()-20)
 				self:SetPos(0,0)
 			end
 		end
 
 		local subpane2 = UI_Create("panel",MDL_VIEWPANE)
 		if(subpane2 != nil) then
-			--subpane2.Draw = function() end --Don't draw this one
+			subpane2.Draw = function() end --Don't draw this one
 			subpane2.DoLayout = function(self)
-				self:SetSize((ICON_SIZE+8),self:GetParent():GetHeight())
+				self:SetSize((ICON_SIZE+8),self:GetParent():GetHeight()-20)
 				self:SetPos(self:GetParent():GetWidth()-(ICON_SIZE+8),0)
 			end
 		end
@@ -181,7 +185,7 @@ function MakeModelFrame()
 			local test = UI_Create("modelpane",subpane)
 			if(test != nil) then
 				test:SetCamOrigin(Vector(45,0,0))
-				setupModelView(test,"orbb")
+				setupModelView(test,"")
 				modelpane = test
 			end
 		end	
@@ -211,14 +215,6 @@ function MakeModelFrame()
 							end
 						end):CatchMouse(true)
 					end
-					--[[if(string.CountSlashes(v) == 1 and lastChar(v) == "/") then
-						local model = string.sub(v,0,string.len(v)-1)
-						addButton(model,panel2,function() 
-							if(modelpane) then
-								setupModelView(modelpane,model)
-							end
-						end):CatchMouse(true)
-					end]]
 				end
 			end
 		end

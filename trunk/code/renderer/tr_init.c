@@ -1223,5 +1223,8 @@ refexport_t *GetRefAPI ( int apiVersion, refimport_t *rimp ) {
 	re.Begin2D = RE_Begin2D;
 	re.End2D = RE_End2D;
 
+	re.TakeScreenshot = R_TakeScreenshot;
+	re.ClearImage = R_ClearImageHash;
+
 	return &re;
 }

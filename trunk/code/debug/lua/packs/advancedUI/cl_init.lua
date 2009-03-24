@@ -441,7 +441,7 @@ local function drawx()
 end
 
 local function profd()
-	--[[local dtime = ProfileFunction(drawx)
+	local dtime = ProfileFunction(drawx)
 	if(QLUA_DEBUG) then 
 		draw.SetColor(1,1,1,1)
 		draw.Text(0,100,"TotalTime: " .. dtime,12,12)
@@ -450,8 +450,8 @@ local function profd()
 		draw.Text(0,136,"ThinkTime: " .. thinktime,12,12)
 		draw.Text(0,148,"MaskCount: " .. mcount,12,12)
 		draw.Text(0,160,"Thinks: " .. thinks,12,12)
-	end]]
-	drawx()
+	end
+	--drawx()
 end
 hook.add("Draw2D","uidraw",profd)
 

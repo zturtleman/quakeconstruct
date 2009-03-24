@@ -188,6 +188,19 @@ int		trap_CM_MarkFragments( int numPoints, const vec3_t *points,
 }
 
 void	trap_S_StartSound( vec3_t origin, int entityNum, int entchannel, sfxHandle_t sfx ) {
+	lua_State *L = GetClientLuaState();
+	if(L != NULL && sfx != 0) {
+		qlua_gethook(L,"AllowGameSound");
+		lua_pushinteger(L,sfx);
+		qlua_pcall(L,1,1,qtrue);
+		if(lua_type(L,-1) == LUA_TBOOLEAN && lua_toboolean(L,-1) == qfalse) {
+			return;
+		}
+	}
+	syscall( CG_S_STARTSOUND, origin, entityNum, entchannel, sfx );
+}
+
+void	trap_S_StartSoundLua( vec3_t origin, int entityNum, int entchannel, sfxHandle_t sfx ) {
 	syscall( CG_S_STARTSOUND, origin, entityNum, entchannel, sfx );
 }
 
@@ -200,10 +213,32 @@ void	trap_S_ClearLoopingSounds( qboolean killall ) {
 }
 
 void	trap_S_AddLoopingSound( int entityNum, const vec3_t origin, const vec3_t velocity, sfxHandle_t sfx ) {
+	lua_State *L = GetClientLuaState();
+	if(L != NULL && sfx != 0) {
+		qlua_gethook(L,"AllowGameSound");
+		lua_pushinteger(L,sfx);
+		qlua_pcall(L,1,1,qtrue);
+		if(lua_type(L,-1) == LUA_TBOOLEAN && lua_toboolean(L,-1) == qfalse) {
+			return;
+		}
+	}
 	syscall( CG_S_ADDLOOPINGSOUND, entityNum, origin, velocity, sfx );
 }
 
+void	trap_S_AddLoopingSoundLua( int entityNum, const vec3_t origin, const vec3_t velocity, sfxHandle_t sfx ) {
+	syscall( CG_S_ADDREALLOOPINGSOUND, entityNum, origin, velocity, sfx );
+}
+
 void	trap_S_AddRealLoopingSound( int entityNum, const vec3_t origin, const vec3_t velocity, sfxHandle_t sfx ) {
+	lua_State *L = GetClientLuaState();
+	if(L != NULL && sfx != 0) {
+		qlua_gethook(L,"AllowGameSound");
+		lua_pushinteger(L,sfx);
+		qlua_pcall(L,1,1,qtrue);
+		if(lua_type(L,-1) == LUA_TBOOLEAN && lua_toboolean(L,-1) == qfalse) {
+			return;
+		}
+	}
 	syscall( CG_S_ADDREALLOOPINGSOUND, entityNum, origin, velocity, sfx );
 }
 
@@ -584,4 +619,12 @@ float trap_N_ReadFloat() {
 
 int	trap_IsUI() {
 	return syscall(CG_ISUI);
+}
+
+void trap_R_Screenshot(int x, int y, int w, int h, char *file) {
+	syscall(CG_SCREENSHOT, x, y, w, h, file);
+}
+
+void trap_R_ClearImage(const char *file) {
+	syscall(CG_CLEARIMAGE, file);
 }

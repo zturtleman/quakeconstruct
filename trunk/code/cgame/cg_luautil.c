@@ -408,6 +408,53 @@ int qlua_barrelSpin(lua_State *L) {
 	return 1;
 }
 
+int qlua_clearimage(lua_State *L) {
+	const char *file;
+
+	luaL_checktype(L,1,LUA_TSTRING);
+	file = lua_tostring(L,1);
+
+	if(file == NULL) {
+		lua_pushstring(L,"ClearImage Failed, NULL STRING\n");
+		lua_error(L);
+		return 1;
+	}
+
+	trap_R_ClearImage(file);
+	return 0;
+}
+
+int qlua_screenshot(lua_State *L) {
+	float x,y,w,h;
+	char *file;
+
+	luaL_checktype(L,1,LUA_TNUMBER);
+	luaL_checktype(L,2,LUA_TNUMBER);
+	luaL_checktype(L,3,LUA_TNUMBER);
+	luaL_checktype(L,4,LUA_TNUMBER);
+	luaL_checktype(L,5,LUA_TSTRING);
+
+	x = lua_tonumber(L,1);
+	y = lua_tonumber(L,2);
+	w = lua_tonumber(L,3);
+	h = lua_tonumber(L,4);
+	file = (char*) lua_tostring(L,5);
+
+	if(w < 0) w = 0;
+	if(h < 0) h = 0;
+
+	CG_AdjustFrom640( &x, &y, &w, &h );
+
+	if(file == NULL) {
+		lua_pushstring(L,"Screenshot Failed, NULL STRING\n");
+		lua_error(L);
+		return 1;
+	}
+
+	trap_R_Screenshot((int)x,(int)y,(int)w,(int)h,file);
+	return 0;
+}
+
 static const luaL_reg Util_methods[] = {
   {"GetNumItems",		qlua_numitems},
   {"GetItemIcon",		qlua_getitemicon},
@@ -429,6 +476,8 @@ static const luaL_reg Util_methods[] = {
   {"LocalAngles",		qlua_localang},
   {"CharData",			qlua_chardata},
   {"IsUI",				qlua_isUI},
+  {"Screenshot",		qlua_screenshot},
+  {"ClearImage",		qlua_clearimage},
   {0,0}
 };
 

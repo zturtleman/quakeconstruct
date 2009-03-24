@@ -56,7 +56,7 @@ end
 
 if(CLIENT) then
 	function ftd()
-		draw.Text(10,10,"Lag: " .. Lag(),10,10)
+		--draw.Text(10,10,"Lag: " .. Lag(),10,10)
 	end
 	hook.add("Draw2D","Timers",ftd)
 end
