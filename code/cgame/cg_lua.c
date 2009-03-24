@@ -292,7 +292,8 @@ int qlua_concommand(lua_State *L) {
 	str = lua_tostring(L,1);
 
 	if(Q_stricmp(str,"luamsg") != 0) {
-		trap_SendClientCommand( str );
+		//trap_SendClientCommand( str );
+		trap_SendConsoleCommand( str );
 	} else {
 		CG_Printf("^1Cannot Use This As A Console Command.\n");
 	}

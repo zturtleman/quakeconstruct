@@ -487,6 +487,18 @@ int qlua_getflashtime(lua_State *L) {
 	return 0;
 }
 
+int qlua_stopsounds(lua_State *L) {
+	centity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		trap_S_StopLoopingSound(luaentity->currentState.number);
+	}
+	return 0;
+}
+
 static int Entity_tostring (lua_State *L)
 {
   lua_pushfstring(L, "Entity: %p", lua_touserdata(L, 1));
@@ -532,6 +544,7 @@ static const luaL_reg Entity_methods[] = {
   {"Classname",		lua_classname},
   {"GetWeapon",		lua_getweapon},
   {"CustomDraw",	lua_customdraw},
+  {"StopSound",		qlua_stopsounds},
   {0,0}
 };
 

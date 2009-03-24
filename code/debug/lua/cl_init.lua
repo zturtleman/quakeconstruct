@@ -1,7 +1,7 @@
---include("lua/cl_menu2.lua")
---include("lua/cl_testmenu2.lua")
+include("lua/cl_menu2.lua")
+include("lua/cl_testmenu2.lua")
 --include("lua/cl_help.lua")
-include("lua/cl_emitters.lua")
+--include("lua/cl_emitters.lua")
 
 local flare = LoadShader("flareShader")
 local blood = LoadShader("bloodMark")
@@ -116,3 +116,51 @@ local function HandleMessage(msgid)
 	end
 end
 hook.add("HandleMessage","cl_init",HandleMessage)
+
+local function makeShader(file)
+	local data = [[{
+	{
+		map ]] .. file ..  [[
+		blendFunc blend
+		rgbGen vertex
+		alphaGen vertex
+	}
+	}]]
+	return CreateShader("f",data)
+end
+
+local t = LevelTime()
+local shotTime = 1000
+local sshader = nil
+local sshot = 0
+local function ss2d()
+
+	if(sshader and t > LevelTime()) then
+		local c = (t - LevelTime()) / shotTime
+		draw.SetColor(1,1,1,c)
+		draw.Rect(0,0,640,480,sshader)
+	end
+
+	if(sshot == 2) then
+		sshader = makeShader("screenshots/lua/test.jpg")
+		t = LevelTime() + shotTime
+		sshot = 0
+	end
+	if(sshot == 1) then sshot = 2 end
+end
+hook.add("Draw2D","cl_init",ss2d)
+
+local function shouldDraw(str)
+	if(str == "HUD" and _CG.stats[STAT_HEALTH] <= 0) then return false end
+	return (sshot == 0)
+end
+hook.add("ShouldDraw","cl_init",shouldDraw)
+
+local function takeShot()
+	util.ClearImage("screenshots/lua/test.jpg") --Clear the image from the renderer's cache
+	util.Screenshot(0,0,640,480,"screenshots/lua/test.jpg")
+	sshot = 1
+end
+concommand.add("jpegshot",takeShot)
+
+hook.add("Respawned","cl_init",takeShot)

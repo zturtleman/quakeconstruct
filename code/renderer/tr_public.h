@@ -106,6 +106,9 @@ typedef struct {
 
 	void (*Begin2D)(void);
 	void (*End2D)(void);
+
+	void (*TakeScreenshot)(int x, int y, int w, int h, char* file, qboolean jpeg);
+	void (*ClearImage)(const char* name);
 } refexport_t;
 
 //

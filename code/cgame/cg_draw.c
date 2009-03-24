@@ -2725,9 +2725,9 @@ void CG_DrawActive( stereoFrame_t stereoView ) {
 	}
 
 	// draw status bar and other floating elements
-	//if(CG_ShouldDraw("HUD")) {
+	if(CG_ShouldDraw("HUD")) {
 		CG_Draw2D();
-	//}
+	}
 
 	if(L != NULL) {
 		qlua_gethook(L,"Draw2D");

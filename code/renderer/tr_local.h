@@ -1189,6 +1189,7 @@ model_t		*R_AllocModel( void );
 
 void    	R_Init( void );
 image_t		*R_FindImageFile( const char *name, qboolean mipmap, qboolean allowPicmip, int glWrapClampMode );
+void		R_ClearImageHash( const char* name );
 
 image_t		*R_CreateImage( const char *name, const byte *pic, int width, int height, qboolean mipmap
 					, qboolean allowPicmip, int wrapClampMode );
@@ -1652,6 +1653,7 @@ void RE_TransformPic ( float x, float y, float w, float h,
 void RE_BeginFrame( stereoFrame_t stereoFrame );
 void RE_EndFrame( int *frontEndMsec, int *backEndMsec );
 void SaveJPG(char * filename, int quality, int image_width, int image_height, unsigned char *image_buffer);
+void R_TakeScreenshot( int x, int y, int width, int height, char *name, qboolean jpeg );
 
 // font stuff
 void R_InitFreeType();
