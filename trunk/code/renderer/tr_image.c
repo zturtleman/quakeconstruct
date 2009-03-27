@@ -1330,7 +1330,7 @@ static void LoadTGA ( const char *name, byte **pic, int *width, int *height)
 		}
 	}
 
-#if 0 
+//#if 0 
   // TTimo: this is the chunk of code to ensure a behavior that meets TGA specs 
   // bk0101024 - fix from Leonardo
   // bit 5 set => top-down
@@ -1348,11 +1348,11 @@ static void LoadTGA ( const char *name, byte **pic, int *width, int *height)
     }
     free (flip);
   }
-#endif
+//#endif
   // instead we just print a warning
-  if (targa_header.attributes & 0x20) {
-    ri.Printf( PRINT_WARNING, "WARNING: '%s' TGA file header declares top-down image, ignoring\n", name);
-  }
+  //if (targa_header.attributes & 0x20) {
+    //ri.Printf( PRINT_WARNING, "WARNING: '%s' TGA file header declares top-down image, ignoring\n", name);
+  //}
 
   ri.FS_FreeFile (buffer);
 }
