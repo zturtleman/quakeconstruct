@@ -14,6 +14,7 @@ luac -o compiled\extensions\init.luc extensions\init.lua
 luac -o compiled\extensions\string.luc extensions\string.lua
 luac -o compiled\extensions\table.luc extensions\table.lua
 luac -o compiled\file.luc file.lua
+luac -o compiled\fonts.luc fonts.lua
 luac -o compiled\functiondump.luc functiondump.lua
 luac -o compiled\hooks.luc hooks.lua
 luac -o compiled\init.luc init.lua
