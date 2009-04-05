@@ -478,6 +478,7 @@ void SCR_DrawScreenField( stereoFrame_t stereoFrame ) {
 			break;
 		case CA_LOADING:
 		case CA_PRIMED:
+			//printf("Connecting Screen!\n");
 			// draw the game information screen and loading progress
 			CL_CGameRendering( stereoFrame );
 

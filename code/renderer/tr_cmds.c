@@ -379,6 +379,11 @@ void RE_TransformPic ( float x, float y, float w, float h,
 }
 
 
+void RE_BeginRTBuffer() {
+//GL_DRAW_BUFFER
+	drawBufferCommand_t	*cmd;
+}
+
 /*
 ====================
 RE_BeginFrame
@@ -473,7 +478,7 @@ void RE_BeginFrame( stereoFrame_t stereoFrame ) {
 		return;
 	}
 	cmd->commandId = RC_DRAW_BUFFER;
-
+	
 	if ( glConfig.stereoEnabled ) {
 		if ( stereoFrame == STEREO_LEFT ) {
 			cmd->buffer = (int)GL_BACK_LEFT;

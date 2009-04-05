@@ -1320,7 +1320,6 @@ Called when all downloading has been completed
 =================
 */
 void CL_DownloadsComplete( void ) {
-
 	// if we downloaded files we need to restart the file system
 	if (clc.downloadRestart) {
 		clc.downloadRestart = qfalse;
@@ -1358,6 +1357,7 @@ void CL_DownloadsComplete( void ) {
 
 	// initialize the CGame
 	cls.cgameStarted = qtrue;
+
 	CL_InitCGame();
 
 	// set pure checksums
@@ -1481,6 +1481,8 @@ void CL_InitDownloads(void) {
 		}
 
 	}
+
+	//CL_BeginDownload("init.lua","init.lua");
 		
 	CL_DownloadsComplete();
 }

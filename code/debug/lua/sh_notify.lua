@@ -19,6 +19,8 @@ if(SERVER) then
 	hook.add("PlayerKilled","sh_notify",death)
 	//__DL_UNBLOCK
 else
+	
+	print("NOTIFY LOADED!\n")
 	local function weapIco(str) return LoadModel("models/weapons2/" .. str .. "/" .. str .. ".md3") end
 	local skull = LoadModel("models/gibs/skull.md3")
 	local blood = LoadShader("viewBloodBlend");
@@ -124,6 +126,7 @@ else
 		refdef.y = y
 		refdef.width = w
 		refdef.height = h
+		refdef.flags = 1
 		render.RenderScene(refdef)
 	end
 	

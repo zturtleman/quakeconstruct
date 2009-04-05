@@ -145,7 +145,7 @@ CG_DrawInformation
 Draw all the status / pacifier stuff during level loading
 ====================
 */
-void CG_DrawInformation( void ) {
+void CG_DrawInfoInternal( void ) {
 	const char	*s;
 	const char	*info;
 	const char	*sysInfo;
@@ -169,6 +169,17 @@ void CG_DrawInformation( void ) {
 	// blend a detail texture over it
 	detail = trap_R_RegisterShader( "levelShotDetail" );
 	trap_R_DrawStretchPic( 0, 0, cgs.glconfig.vidWidth, cgs.glconfig.vidHeight, 0, 0, 2.5, 2, detail );
+
+	UI_DrawProportionalString( 320, 16, va( "Loading %s", s ), UI_BIGFONT|UI_CENTER|UI_DROPSHADOW, colorWhite );
+
+	s = Info_ValueForKey( info, "sv_hostname" );
+	
+	trap_Cvar_VariableStringBuffer( "sv_running", buf, sizeof( buf ) );
+	if ( !atoi( buf ) ) {	
+		UI_DrawProportionalString( 320, 64, va("Connecting to %s", s ), UI_CENTER|UI_SMALLFONT|UI_DROPSHADOW, colorWhite );
+	} else {
+		UI_DrawProportionalString( 320, 64, va("Connecting to localhost", s ), UI_CENTER|UI_SMALLFONT|UI_DROPSHADOW, colorWhite );
+	}
 
 	// draw the icons of things as they are loaded
 	CG_DrawLoadingIcons();
@@ -295,3 +306,23 @@ void CG_DrawInformation( void ) {
 	}
 }
 
+void CG_DrawInformation(void) {
+	lua_State *L = GetClientLuaState();
+	
+	CG_DrawInfoInternal();
+
+	if(L != NULL) {
+		qlua_gethook(L,"DrawInfo");
+		lua_newtable(L);
+		
+		setTableTable(L,"playerIcons",loadingPlayerIcons,loadingPlayerIconCount);
+		setTableTable(L,"itemIcons",loadingItemIcons,loadingItemIconCount);
+		setTableString(L,"loadString",cg.infoScreenText);
+
+		qlua_pcall(L,1,0,qtrue);
+		//UI_DrawProportionalString( 10, 450, "Lua Enabled", UI_SMALLFONT|UI_DROPSHADOW, colorWhite );
+	} else {
+		CG_DrawInfoInternal();
+		UI_DrawProportionalString( 10, 450, "Lua Disabled", UI_SMALLFONT|UI_DROPSHADOW, colorRed );
+	}
+}

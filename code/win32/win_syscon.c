@@ -129,8 +129,8 @@ static LONG WINAPI ConWndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 	case WM_CTLCOLORSTATIC:
 		if ( ( HWND ) lParam == s_wcd.hwndBuffer )
 		{
-			SetBkColor( ( HDC ) wParam, RGB( 0x00, 0x00, 0xB0 ) );
-			SetTextColor( ( HDC ) wParam, RGB( 0xff, 0xff, 0x00 ) );
+			SetBkColor( ( HDC ) wParam, RGB( 0x10, 0x10, 0x10 ) );
+			SetTextColor( ( HDC ) wParam, RGB( 0xdc, 0xac, 0x00 ) );
 
 #if 0	// this draws a background in the edit box, but there are issues with this
 			if ( ( hdcScaled = CreateCompatibleDC( ( HDC ) wParam ) ) != 0 )
@@ -190,7 +190,7 @@ static LONG WINAPI ConWndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 	case WM_CREATE:
 //		s_wcd.hbmLogo = LoadBitmap( g_wv.hInstance, MAKEINTRESOURCE( IDB_BITMAP1 ) );
 //		s_wcd.hbmClearBitmap = LoadBitmap( g_wv.hInstance, MAKEINTRESOURCE( IDB_BITMAP2 ) );
-		s_wcd.hbrEditBackground = CreateSolidBrush( RGB( 0x00, 0x00, 0xB0 ) );
+		s_wcd.hbrEditBackground = CreateSolidBrush( RGB( 0x10, 0x10, 0x10 ) );
 		s_wcd.hbrErrorBackground = CreateSolidBrush( RGB( 0x80, 0x80, 0x80 ) );
 		SetTimer( hWnd, 1, 1000, NULL );
 		break;
@@ -336,7 +336,7 @@ void Sys_CreateConsole( void )
 							   DEDCLASS,
 							   "Quake 3 Console",
 							   DEDSTYLE,
-							   ( swidth - 600 ) / 2, ( sheight - 450 ) / 2 , rect.right - rect.left + 1, rect.bottom - rect.top + 1,
+							   ( swidth - 540 ), ( sheight - 500 ) , rect.right - rect.left + 1, rect.bottom - rect.top + 1,
 							   NULL,
 							   NULL,
 							   g_wv.hInstance,

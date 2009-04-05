@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // cl_cgame.c  -- client system interaction with client game
 
 #include "client.h"
+#include "../win32/win_local.h"
 
 #include "../game/botlib.h"
 
@@ -773,6 +774,9 @@ int CL_CgameSystemCalls( int *args ) {
 	return 0;
 }
 
+void CL_InitCGVM( void ) {
+	if ( !cgvm ) cgvm = VM_Create( "cgame", CL_CgameSystemCalls, VMI_NATIVE );
+}
 
 /*
 ====================
@@ -800,12 +804,12 @@ void CL_InitCGame( void ) {
 	// load the dll or bytecode
 	if ( cl_connectedToPureServer != 0 ) {
 		// if sv_pure is set we only allow qvms to be loaded
-		interpret = VMI_COMPILED;
+		interpret = VMI_NATIVE;//VMI_COMPILED;
 	}
 	else {
-		interpret = 0;//Cvar_VariableValue( "vm_cgame" );
+		interpret = VMI_NATIVE;//Cvar_VariableValue( "vm_cgame" );
 	}
-	cgvm = VM_Create( "cgame", CL_CgameSystemCalls, interpret );
+	CL_InitCGVM();
 	if ( !cgvm ) {
 		Com_Error( ERR_DROP, "VM_Create on cgame failed" );
 	}
@@ -814,8 +818,8 @@ void CL_InitCGame( void ) {
 	// init for this gamestate
 	// use the lastExecutedServerCommand instead of the serverCommandSequence
 	// otherwise server commands sent just before a gamestate are dropped
-	VM_Call( cgvm, CG_INIT, clc.serverMessageSequence, clc.lastExecutedServerCommand, clc.clientNum );
 
+	VM_Call( cgvm, CG_INIT, clc.serverMessageSequence, clc.lastExecutedServerCommand, clc.clientNum );
 	// we will send a usercmd this frame, which
 	// will cause the server to send us the first snapshot
 	cls.state = CA_PRIMED;

@@ -90,7 +90,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				OptimizeForProcessor="1"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;BUILDING_REF_GL;DEBUG;GLOBALRANK"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;BUILDING_REF_GL;DEBUG;GLOBALRANK;GAME"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderFile=".\Debug/game.pch"
@@ -811,6 +811,9 @@
 			</File>
 			<File
 				RelativePath=".\bg_luatrajectory.c">
+			</File>
+			<File
+				RelativePath=".\bg_luautil.c">
 			</File>
 			<File
 				RelativePath=".\bg_luavector.c">

@@ -3,6 +3,8 @@ if(downloader == nil) then
 	downloader.queue = {}
 end
 
+DOWNLOAD_BUFFER_SIZE = 256
+
 FILE_PENDING = 1
 FILE_DOWNLOADING = 2
 FILE_FINISHED = 3
@@ -42,16 +44,17 @@ function getFileByName(file,tab)
 end
 
 local function fixLine(line)
-	if(line == "//__DL_BLOCK") then block = true return end
-	if(line == "//__DL_UNBLOCK") then block = false return end
+	if(string.find(line,"//__DL_BLOCK")) then block = true return end
+	if(string.find(line,"//__DL_UNBLOCK")) then block = false return end
 	if(line == "--[[") then block = true return end
 	if(line == "]]") then block = false return end
 	if(block == true) then return nil end
 	if(line != "" and line != " " and line != "\n") then
 		line = string.Replace(line,"\t","")
 		line = string.Replace(line,"\r","")
+		line = string.Replace(line,"\n","")
 		if(line != "" and line != " " and line != "\n") then
-			return line
+			return line .. "\n" --"_NL_"
 		end
 	end	
 	return nil
@@ -87,10 +90,21 @@ if(SERVER) then
 				file = io.open(filename, "r")
 				if(file != nil) then
 					local lines = 0
+					local buffer = ""
 					for line in file:lines() do
-						if(fixLine(line) != nil) then
-							table.insert(flines,fixLine(line))
+						local fixed = fixLine(line)
+						if(fixed != nil) then
+							for k,v in pairs(string.ToTable(fixed)) do
+								buffer = buffer .. v
+								if(string.len(buffer) > DOWNLOAD_BUFFER_SIZE) then
+									table.insert(flines,buffer)
+									buffer = ""
+								end
+							end
 						end
+					end
+					if(string.len(buffer) > 0) then
+						table.insert(flines,buffer)
 					end
 					file:close()
 				else
@@ -174,7 +188,7 @@ if(SERVER) then
 	
 	function downloader.sendline(pl,line)
 		local ptab = pl:GetTable()
-		local fl = fixLine(line)
+		local fl = line
 		if(fl != nil) then
 			local msg = Message(pl,"__fileline")
 			message.WriteString(msg,base64.enc(fl) or "")
@@ -197,10 +211,10 @@ if(SERVER) then
 		if(filex.lines != nil) then
 			local lines = 0
 			for _,line in pairs (filex.lines) do
-				Timer(.08*lines,downloader.sendline,pl,line)
+				Timer(.1*lines,downloader.sendline,pl,line)
 				lines = lines + 1
 			end
-			Timer((.08*lines) + 0.2,downloader.stopdownload,pl,filex)
+			Timer((.1*lines) + 0.2,downloader.stopdownload,pl,filex)
 		else
 			downloader.stopdownload(pl,filex)
 		end	
@@ -329,7 +343,7 @@ elseif(CLIENT) then
 		if(LINEITER <= 0) then per = 0 end
 		if(LINECOUNT <= 0) then per = 0 end
 		if(frame != nil) then frame:SetTitle("Downloading...") else return end
-		local text2 = FILENAME .. "(" .. per .. "%)"
+		local text2 = FILENAME .. "(" .. per .. "%) [" .. LINECOUNT .. " chunks]"
 		
 		if(#queuebuttons > #QUEUE) then 
 			flist:Clear()
@@ -366,6 +380,7 @@ elseif(CLIENT) then
 		if(cancelled) then cancelled = false return end
 		local rez = "lua/downloads/" .. localFile(FILENAME)
 		debugprint("Writing File: '" .. rez .. "'\n")
+		--CONTENTS = string.Replace(CONTENTS,"_NL_","\n")
 		local file = io.open(rez,"w")
 		if(file != nil) then
 			file:write(CONTENTS)
@@ -464,7 +479,7 @@ elseif(CLIENT) then
 			end]]
 		elseif(msgid == "__fileline") then
 			local str = base64.dec(message.ReadString() or "")
-			CONTENTS = CONTENTS .. str .. "\n"
+			CONTENTS = CONTENTS .. str -- .. "\n"
 			LINEITER = LINEITER + 1
 			--print("F_LINE: " .. str .. " [X] " .. LINEITER .. "/" .. LINECOUNT .. "\n")
 			update()
