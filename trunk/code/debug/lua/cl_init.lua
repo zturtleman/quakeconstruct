@@ -1,3 +1,4 @@
+include("lua/cl_ginfo.lua")
 include("lua/cl_menu2.lua")
 include("lua/cl_testmenu2.lua")
 --include("lua/cl_fonts.lua")

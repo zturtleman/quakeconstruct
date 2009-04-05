@@ -27,7 +27,7 @@ local contents = gOR(CONTENTS_SOLID,CONTENTS_PLAYERCLIP)
 local ind = {}
 local jump = nil
 local smoker = nil
-
+--
 if(CLIENT) then
 	jump = LoadSound("sound/world/jumppad.wav")
 	local flare = LoadShader("smokePuff")

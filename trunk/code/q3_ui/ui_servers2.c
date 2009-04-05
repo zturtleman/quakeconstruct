@@ -484,6 +484,10 @@ static void ArenaServers_UpdateMenu( void ) {
 			continue;
 		}
 
+		if( strcmp(servernodeptr->gamename, "qconstruct") ) {
+			continue;
+		}
+
 		switch( g_gametype ) {
 		case GAMES_ALL:
 			break;

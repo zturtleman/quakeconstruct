@@ -92,6 +92,11 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 	case CG_RESTART_LUA:
 		CloseClientLua();
 		CG_InitLua();
+
+		trap_GetGlconfig( &cgs.glconfig );
+		cgs.screenXScale = cgs.glconfig.vidWidth / 640.0;
+		cgs.screenYScale = cgs.glconfig.vidHeight / 480.0;
+
 		if(GetClientLuaState()) {
 			qlua_gethook(GetClientLuaState(),"InitialSnapshot");
 			qlua_pcall(GetClientLuaState(),0,0,qtrue);
@@ -2163,6 +2168,7 @@ void CG_InitLua() {
 	BG_InitLuaMisc(L);
 	BG_InitLuaTrajectory(L);
 	BG_InitLuaPMove(L);
+	BG_InitLuaUtil(L);
 	CG_InitLuaVector(L);
 	CG_InitLuaEnts(L);
 	CG_InitLuaREnts(L);
@@ -2241,6 +2247,9 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum ) {
 
 	CG_ParseServerinfo();
 
+	CG_InitLua();
+	DoLuaInit();
+
 	// load the new map
 	CG_LoadingString( "collision map" );
 
@@ -2251,8 +2260,6 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum ) {
 #endif
 
 	cg.loading = qtrue;		// force players to load instead of defer
-
-	CG_InitLua();
 
 	CG_LoadingString( "sounds" );
 
@@ -2297,7 +2304,7 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum ) {
 	if(GetClientLuaState()) {
 		CG_PushCGTab(GetClientLuaState());
 	}
-	DoLuaInit();
+	
 	if(GetClientLuaState()) {
 		qlua_gethook(GetClientLuaState(),"Loaded");
 		qlua_pcall(GetClientLuaState(),0,0,qtrue);

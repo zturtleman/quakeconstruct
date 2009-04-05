@@ -2662,6 +2662,7 @@ void CG_DrawActive( stereoFrame_t stereoView ) {
 	float		separation;
 	vec3_t		baseOrg;
 	lua_State	*L = GetClientLuaState();
+	//vec4_t		transparent;
 
 	// optionally draw the info screen instead
 	if ( !cg.snap ) {
@@ -2737,6 +2738,14 @@ void CG_DrawActive( stereoFrame_t stereoView ) {
 		qlua_pcall(L,0,0,qtrue);
 	}
 	CG_KillMasks();
+
+	/*if(L != NULL) {
+		transparent[0] = 1;
+		transparent[1] = 1;
+		transparent[2] = 1;
+		transparent[3] = .2f;
+		UI_DrawProportionalString( 10, 405, "Lua Enabled", UI_SMALLFONT|UI_DROPSHADOW, transparent );
+	}*/
 
 	trap_R_SetColor(g_color_table[ColorIndex(COLOR_WHITE)]);
 }
