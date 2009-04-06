@@ -171,3 +171,18 @@ typedef enum {
 #define	CS_ITEMS				27		// string of 0's and 1's that tell which items are present
 
 #define	CS_MODELS				32
+
+typedef enum {
+	GT_FFA,				// free for all
+	GT_TOURNAMENT,		// one on one tournament
+	GT_SINGLE_PLAYER,	// single player ffa
+
+	//-- team games go after this --
+
+	GT_TEAM,			// team deathmatch
+	GT_CTF,				// capture the flag
+	GT_1FCTF,
+	GT_OBELISK,
+	GT_HARVESTER,
+	GT_MAX_GAME_TYPE
+} gametype_t;

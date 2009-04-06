@@ -37,11 +37,14 @@ HOOKS.SHARED = {
 }
 
 HOOKS.CL = {
+	"AllowGameSound",
 	"ClientInfoLoaded",
 	"ClientInfoChanged",
 	"DemoStarted",
 	"Draw2D",
 	"Draw3D",
+	"DrawCustomEntity",
+	"DrawInfo",
 	"EventReceived",
 	"HandleMessage",
 	"InitialSnapshot",
@@ -52,7 +55,9 @@ HOOKS.CL = {
 	"ModelLoaded",
 	"MouseEvent",
 	"ShaderLoaded",
+	"ShouldDraw",
 	"SoundLoaded",
+	"UserCommand",
 }
 
 function hook.sort(event)

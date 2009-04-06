@@ -76,7 +76,9 @@ local function UnlinkEntity(ent)
 	local id = ent:EntIndex()
 	local cent = active[id]
 	if(cent != nil) then
-		cent:Removed()
+		if(cent.Removed) then
+			cent:Removed()
+		end
 	end
 	active[id] = nil
 	
@@ -96,4 +98,36 @@ else
 		end
 	end
 	hook.add("DrawCustomEntity","checkcustom",DrawEntity)
+	
+	local function dlhook(file)
+		if(string.find(file,"/lua.entities.") and
+		   (string.find(file,"shared.lua") or
+		   string.find(file,"cl_init.lua"))) then
+			local strt = string.len("lua/downloads/lua.entities.")
+			local name = string.sub(file,strt+1,string.len(file))
+			local ed = string.find(name,".",0,true)
+			
+			print(name .. " " .. ed .. "\n")
+			if(!ed) then return false end
+			name = string.sub(name,0,ed-1)
+			print(name .. "\n")
+			if(string.len(name) <= 0) then return false end
+			
+			ENT = {}
+			
+			setmetatable(ENT,META)
+			META.__index = META
+		
+			pcall(include,file)
+			
+			ENT._classname = string.lower(name)
+			
+			ENTS[ENT._classname] = ENT
+			table.insert(_CUSTOM,{data=ENT,type="entity"})
+			print("Downloaded Entity '" .. file .. "'\n")	
+			
+			return true
+		end
+	end
+	hook.add("FileDownloaded","checkcustom",dlhook)
 end

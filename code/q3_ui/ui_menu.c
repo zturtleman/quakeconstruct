@@ -219,7 +219,7 @@ static void Main_MenuDraw( void ) {
 	{
 		// standard menu drawing
 		Menu_Draw( &s_main.menu );		
-		UI_DrawProportionalString_AutoWrapped( 320, 400, 600, 20, "Quake Construct", UI_CENTER|UI_SMALLFONT|UI_DROPSHADOW, menu_text_color );
+		UI_DrawProportionalString_AutoWrapped( 320, 400, 600, 20, "Quake Construct", UI_CENTER|UI_DROPSHADOW, menu_text_color );
 	}
 
 	if (uis.demoversion) {
@@ -311,7 +311,7 @@ void UI_MainMenu( void ) {
 	s_main.menu.wrapAround = qtrue;
 	s_main.menu.showlogo = qtrue;
 
-	y = 134;
+	y = 150;
 	s_main.singleplayer.generic.type		= MTYPE_PTEXT;
 	s_main.singleplayer.generic.flags		= QMF_CENTER_JUSTIFY|QMF_PULSEIFFOCUS;
 	s_main.singleplayer.generic.x			= 320;
@@ -380,6 +380,7 @@ void UI_MainMenu( void ) {
 		s_main.teamArena.style					= style;
 	}
 
+#if 0
 	y += MAIN_MENU_VERTICAL_SPACING;
 	s_main.mods.generic.type			= MTYPE_PTEXT;
 	s_main.mods.generic.flags			= QMF_CENTER_JUSTIFY|QMF_PULSEIFFOCUS;
@@ -390,6 +391,7 @@ void UI_MainMenu( void ) {
 	s_main.mods.string					= "MODS";
 	s_main.mods.color					= color_red;
 	s_main.mods.style					= style;
+#endif
 
 	y += MAIN_MENU_VERTICAL_SPACING;
 	s_main.exit.generic.type				= MTYPE_PTEXT;
@@ -410,7 +412,7 @@ void UI_MainMenu( void ) {
 	if (teamArena) {
 		Menu_AddItem( &s_main.menu,	&s_main.teamArena );
 	}
-	Menu_AddItem( &s_main.menu,	&s_main.mods );
+	//Menu_AddItem( &s_main.menu,	&s_main.mods );
 	Menu_AddItem( &s_main.menu,	&s_main.exit );             
 
 	trap_Key_SetCatcher( KEYCATCH_UI );
