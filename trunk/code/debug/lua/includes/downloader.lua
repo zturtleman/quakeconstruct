@@ -376,6 +376,17 @@ elseif(CLIENT) then
 		return string.Replace(f,"/",".")
 	end
 	
+	local function includeFile()
+		local rez = "lua/downloads/" .. localFile(FILENAME)
+		if(!CallHook("FileDownloaded",rez)) then
+			debugprint("Execute: " .. rez .. "\n")
+			local b,e = pcall(include,rez)
+			if(!b) then
+				debugprint("^1Script Downloader Error (Script Execution): " .. e .. "\n")
+			end
+		end
+	end
+	
 	local function writeToFile()
 		if(cancelled) then cancelled = false return end
 		local rez = "lua/downloads/" .. localFile(FILENAME)
@@ -385,21 +396,9 @@ elseif(CLIENT) then
 		if(file != nil) then
 			file:write(CONTENTS)
 			file:close()
-			local b,e = pcall(include,rez)
-			if(!b) then
-				debugprint("^1Script Downloader Error (Script Execution): " .. e .. "\n")
-			end
+			includeFile()
 		else
 			debugprint("^1Script Downloader Error (Script Copy): Unable to write file: " .. rez .. "\n")
-		end
-	end
-	
-	local function includeFile()
-		local rez = "lua/downloads/" .. localFile(FILENAME)
-		debugprint("Execute: " .. rez .. "\n")
-		local b,e = pcall(include,rez)
-		if(!b) then
-			debugprint("^1Script Downloader Error (Script Execution): " .. e .. "\n")
 		end
 	end
 	

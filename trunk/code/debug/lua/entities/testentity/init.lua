@@ -1,5 +1,7 @@
 print("Loaded Init\n")
 
+downloader.add("lua/entities/testentity/cl_init.lua")
+
 local function writeVector(msg,v)
 	message.WriteFloat(msg,v.x)
 	message.WriteFloat(msg,v.y)
@@ -8,12 +10,12 @@ end
 
 function ENT:Initialized()
 	print("Ent Init\n")
-	self.Entity:SetNextThink(-1)
+	self.Entity:SetNextThink(LevelTime() + 1000)
 	self.hp = 100
 	self.nextheal = 0
 	
-	self.Entity:SetMins(Vector(-25,-25,-25))
-	self.Entity:SetMaxs(Vector(25,25,25))
+	self.Entity:SetMins(Vector(-15,-15,-15))
+	self.Entity:SetMaxs(Vector(15,15,15))
 	self.Entity:SetClip(1)
 	self.Entity:SetTakeDamage(true)
 	self.Entity:SetHealth(1000)
@@ -54,7 +56,7 @@ end
 
 function ENT:Touch(other,trace)
 	if(other != nil and other:IsPlayer() and self.nextheal < LevelTime()) then
-		--print("Ent Touched\n")
+		print("Ent Touched\n")
 		if(self.hp > 0) then
 			local hp = other:GetHealth()
 			if(hp < 300) then

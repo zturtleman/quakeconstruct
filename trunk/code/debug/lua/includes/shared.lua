@@ -63,9 +63,9 @@ if(CLIENT) then includex("model") end
 if(CLIENT) then includex("sprite") end
 if(CLIENT) then includex("poly") end
 if(CLIENT) then includex("fonts") end
-if(CLIENT) then includex("input") end
 if(CLIENT) then includex("view") end
 if(CLIENT) then includex("qml") end
+includex("input")
 includex("packs")
 includex("custom")
 --require "includes/functiondump"

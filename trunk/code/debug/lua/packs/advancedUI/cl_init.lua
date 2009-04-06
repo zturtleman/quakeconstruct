@@ -365,11 +365,13 @@ local function drawx()
 	TOUGH_DRAW = 0
 	TEXT_DRAW = 0
 	
-	if(#UI_Active > 0) then
+	local count = #UI_Active
+	
+	if(count > 0) then
 		t1 = ticks()
 		
-		for i=0, #UI_Active-1 do
-			local v = UI_Active[#UI_Active - i]
+		for i=0, count-1 do
+			local v = UI_Active[count - i]
 			if(v != nil and v:IsVisible() and v:ShouldDraw()) then
 				thinks = thinks + 1
 				--[[if(v.parent and v.parent.valid != true) then
@@ -393,7 +395,7 @@ local function drawx()
 		t1 = (ticks()) - t1
 		t2 = ticks()
 		
-		for i=0, #UI_Active-1 do
+		for i=0, count-1 do
 			local v = UI_Active[i+1]
 			if(v:IsVisible() and v:ShouldDraw()) then
 				v:DoLayout()
