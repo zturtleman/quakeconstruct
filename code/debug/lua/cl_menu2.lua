@@ -28,8 +28,10 @@ if(panel != nil) then
 	panel:SetSize(200,275)
 	panel:SetTitle("Alt Menu")
 	panel:CatchMouse(true)
-	panel:SetVisible(false)
+	panel:SetVisible(true)
 	panel:EnableCloseButton(false)
+	
+	Timer(.2,function() panel:SetVisible(false) end)
 end
 
 local subpane = UI_Create("panel",panel)

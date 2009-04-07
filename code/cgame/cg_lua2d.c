@@ -263,7 +263,7 @@ int qlua_text2width(lua_State *L) {
 
 	width = UI_ProportionalStringWidth( text );
 	lua_pushinteger(L,width);
-	return 2;
+	return 1;
 }
 
 int qlua_text2(lua_State *L) {
