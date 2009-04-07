@@ -261,11 +261,17 @@ if(CLIENT) then
 		return v
 	end
 
-	local function drawLines(tab,label,sx,sy)
+	local function drawLines(tab,label,sx,sy,al)
 		local min_x = highest('x',tab) + sx
 		local max_x = lowest('x',tab) + sy
 		local min_y = highest('y',tab) + sx
 		local max_y = lowest('y',tab) + sy
+		
+		local col = {.8,0,0,al}
+		if(string.find(string.lower(label),"health")) then col = {.3,.6,.9,al} end
+		if(string.find(string.lower(label),"armor")) then col = {.3,.9,.3,al} end
+		
+		draw.SetColor(unpack(col))
 		
 		line(min_x,min_y,max_x,min_y)
 		line(max_x,min_y,max_x,max_y)
@@ -274,8 +280,19 @@ if(CLIENT) then
 		
 		if(label != nil) then
 			local dx = min_x - max_x
-			local tl = string.len(label)*5
-			draw.Text(max_x + (dx/2) - tl,max_y-10,label,10,10)
+			local tl = (draw.Text2Width(label)*.4)/2
+			
+			local tx = (max_x + (dx/2) - tl)
+			local ty = max_y-15
+			
+			draw.SetColor(0,0,0,al)
+			draw.Text2(tx-1,ty,label,.4)
+			draw.Text2(tx+1,ty,label,.4)
+			draw.Text2(tx,ty-1,label,.4)
+			draw.Text2(tx,ty+1,label,.4)
+			
+			draw.SetColor(unpack(col))
+			draw.Text2(tx,ty,label,.4)
 		end
 	end
 	
@@ -300,8 +317,7 @@ if(CLIENT) then
 		
 		if(ts1.z < 0 and ts2.z < 0 and ts3.z < 0 and ts4.z < 0 and
 		   ts5.z < 0 and ts6.z < 0 and ts7.z < 0 and ts8.z < 0) then
-		    draw.SetColor(1,1,1,al)
-			drawLines({ts1,ts2,ts3,ts4,ts5,ts6,ts7,ts8},label,0,0)
+			drawLines({ts1,ts2,ts3,ts4,ts5,ts6,ts7,ts8},label,0,0,al)
 		end
 	end
 	
@@ -404,6 +420,11 @@ if(CLIENT) then
 		pos = pos + u * (mdelta[2]*100)
 		pos = pos + r * (mdelta[1]*100)
 		
+		if(_CG.stats[STAT_HEALTH] <= 0) then
+			mdelta[2] = mdelta[2] + (0 - mdelta[2])*.1
+			mdelta[1] = mdelta[1] + (0 - mdelta[1])*.1
+		end
+		
 		dcam = dcam or pos
 		dcam = dcam + (pos - dcam) * (.02 * Lag())
 		local npos = dcam
@@ -438,9 +459,13 @@ if(CLIENT) then
 		local vx,vy = unpack(vdelta)
 		local dx,dy = vx-GetXMouse(),vy-GetYMouse()
 		local mx,my = GetXMouse()/640,GetYMouse()/480
-		mdelta = {mx-.5,my-.5}
-		mdelta[1] = mdelta[1] * 3
-		mdelta[2] = mdelta[2] * -3
+		if(_CG.stats[STAT_HEALTH] > 0) then
+			mdelta = {mx-.5,my-.5}
+			mdelta[1] = mdelta[1] * 3
+			mdelta[2] = mdelta[2] * -3
+		else
+			mdelta = mdelta or {mx-.5,my-.5}
+		end
 		
 		if(FLIP_AXIS) then 
 			dx = dx * -1

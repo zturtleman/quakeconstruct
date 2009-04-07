@@ -79,6 +79,8 @@ function d2d(tab)
 	local w,h = 420,300
 	
 	draw.SetColor(1,1,1,1)
+	draw.RectRotated(600,440,60,60,console,-t*10)
+	
 	local y = centerText2(10,"Connecting to " .. host,1)
 	y = centerText2(y+2,"Loading " .. (tab.loadString or ""),.5)
 	
@@ -116,7 +118,6 @@ function d2d(tab)
 		end
 	end
 	
-	draw.RectRotated(600,440,60,60,console,-t*10)
 	t = t + 2
 end
 hook.add("DrawInfo","cl_ginfo",d2d)

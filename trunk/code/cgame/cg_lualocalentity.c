@@ -426,8 +426,9 @@ int	qlua_lsetref(lua_State *L) {
 	if(luaentity != NULL && in != NULL) {
 		memcpy(&luaentity->refEntity,in,sizeof(refEntity_t));
 
-		BG_EvaluateTrajectory(&luaentity->pos,cg.time,origin);
-		VectorCopy(origin,luaentity->refEntity.origin);
+		//Might Break?
+		//BG_EvaluateTrajectory(&luaentity->pos,cg.time,origin);
+		//VectorCopy(origin,luaentity->refEntity.origin);
 	}
 	return 0;
 }
