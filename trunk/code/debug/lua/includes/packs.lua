@@ -124,13 +124,25 @@ function packlib.List()
 	return packlib.packs;
 end
 
-local function cc(p,c,a)
-	if(a[1] != nil) then
-		packlib.LoadPack(a[1])
-	else
-		print("Please specify a pack.\n")
+if(CLIENT) then
+	local function cc(p,c,a)
+		if(a[1] != nil) then
+			packlib.LoadPack(a[1])
+		else
+			print("Please specify a pack.\n")
+		end
 	end
+	concommand.Add("LoadPack_cl",cc)
+else
+	local function cc(p,c,a)
+		if(a[1] != nil) then
+			packlib.LoadPack(a[1])
+		else
+			print("Please specify a pack.\n")
+		end
+	end
+	concommand.Add("LoadPack",cc)
 end
-concommand.Add("LoadPack",cc)
+
 
 packlib.LoadPacks()

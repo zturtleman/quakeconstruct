@@ -106,6 +106,21 @@ function menutest.disable(pane)
 	pane:SetFGColor(.6,.6,.6,.5)
 end
 
+local maintemp = {}
+function addToAltMenu(label,func)
+	if(label != nil and func != nil) then
+		for k,v in pairs(maintemp) do
+			if(v.label == label) then
+				maintemp[k].func = func
+				menutest.main()
+				return
+			end
+		end
+		altmenu.addButton(label,func)
+		table.insert(maintemp,{label=label,func=func})
+	end
+end
+
 function menutest.main()
 	currmenu = "main"
 	altmenu.textSize(10,12)
@@ -121,6 +136,9 @@ function menutest.main()
 	end
 	altmenu.addButton("Custom Games",include,"lua/cl_gamelist.lua")
 	altmenu.addButton("Music",menutest.music)
+	for k,v in pairs(maintemp) do
+		altmenu.addButton(v.label,v.func)
+	end
 end
 
 if(CLIENT_READY) then
