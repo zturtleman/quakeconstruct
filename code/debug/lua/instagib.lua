@@ -6,6 +6,8 @@ STAT_HITS = 2
 STAT_DEATHS = 4
 STAT_LONGSHOT = 5
 
+RELOAD = RELOAD or false
+
 local let = {
 	[MOD_UNKNOWN] = 1,
 	[MOD_WATER] = 1,
@@ -25,7 +27,7 @@ tr_flags = bitOr(tr_flags,67108864)
 
 message.Precache("igrailfire")
 message.Precache("igstat")
-message.Precache("igbeam")
+--message.Precache("igbeam")
 message.Precache("igdeath")
 
 local function fullHealth(self) 
@@ -233,12 +235,15 @@ hook.add("PlayerKilled","instagib",function(p)  end)
 --Remove pickups and outfit players
 removePickups()
 for k,v in pairs(GetAllPlayers()) do
-	--setupPlayer(v)
+	if(!RELOAD) then
+		setupPlayer(v)
+	end
 	setStat(v,STAT_SHOTS,0)
 	setStat(v,STAT_HITS,0)
 	setStat(v,STAT_LONGSHOT,0)
 end
 
+downloader.add("lua/cl_igweap.lua")
 downloader.add("lua/cl_instagib.lua")
 
 
@@ -248,3 +253,5 @@ local function reloadTime(p,c,a)
 	if(n != nil) then IG_RELOADTIME = n end
 end
 concommand.Add("ReloadTime",reloadTime,true)
+
+RELOAD = true

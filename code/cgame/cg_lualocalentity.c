@@ -610,19 +610,24 @@ int qlua_lsetparent(lua_State *L) {
 
 int qlua_lemit(lua_State *L) {
 	localEntity_t	*luaentity;
-	int count = 1;
+	localEntity_t	*emitted;
+	//int count = 1;
 	int i = 0;
 
 	luaL_checktype(L,1,LUA_TUSERDATA);
 	luaentity = lua_tolocalentity(L,1);
 
-	if(lua_gettop(L) > 1 && lua_type(L,2) == LUA_TNUMBER) count = lua_tointeger(L,2);
-	if(count <= 0) count = 1;
+	//if(lua_gettop(L) > 1 && lua_type(L,2) == LUA_TNUMBER) count = lua_tointeger(L,2);
+	//if(count <= 0) count = 1;
 
 	if(luaentity != NULL) {
-		for(i=0;i<count;i++) {
-			CG_LocalEntityEmit(luaentity);
+		//for(i=0;i<count;i++) {
+		emitted = CG_LocalEntityEmit(luaentity);
+		if(emitted != NULL) {
+			lua_pushlocalentity(L,emitted);
+			return 1;
 		}
+		//}
 	}
 	return 0;
 }

@@ -900,14 +900,14 @@ void CG_AddScorePlum( localEntity_t *le ) {
 
 //==============================================================================
 
-void CG_LocalEntityEmit( localEntity_t *le ) {
+localEntity_t *CG_LocalEntityEmit( localEntity_t *le ) {
 	localEntity_t *newEnt;
 	localEntity_t *next;
 	localEntity_t *prev;
 	int i;
 	//vec3_t	origin;
 
-	if(!le->emitter) return;
+	if(!le->emitter) return NULL;
 
 	newEnt = CG_AllocLocalEntity();
 	
@@ -941,6 +941,8 @@ void CG_LocalEntityEmit( localEntity_t *le ) {
 			qlua_pcall(GetClientLuaState(), 2, 0, qfalse);
 		}
 	}
+
+	return newEnt;
 }
 
 void CG_AddEmitter( localEntity_t *le ) {

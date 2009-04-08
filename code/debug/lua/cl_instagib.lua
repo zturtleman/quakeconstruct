@@ -1,11 +1,25 @@
 local shd = LoadShader("railCore")
-local mark = LoadShader("BloodMark")
+local mark = LoadShader("gfx/damage/hole_lg_mrk")
 local flare = LoadShader("flareShader")
 local clicksound = LoadSound("sound/weapons/noammo.wav")
 local landsound = LoadSound("sound/player/land1.wav")
 local tr_flags = 1
+local spriteEmitter1 = nil
 tr_flags = bitOr(tr_flags,33554432)
 tr_flags = bitOr(tr_flags,67108864)
+
+local fmark_data = [[{
+	nopicmip
+	polygonoffset
+	{
+		//map gfx/misc/flare.tga
+		map gfx/damage/hole_lg_mrk.tga
+		blendfunc add
+		rgbGen vertex
+		alphaGen vertex
+	}
+}]]
+local fmark = CreateShader("fmark",fmark_data)
 
 STAT_SHOTS = 1
 STAT_HITS = 2
@@ -41,6 +55,86 @@ local function rpoint(pos,size)
 	s:SetShader(flare)
 	return s
 end
+
+local function createEmitter()
+	local ref = RefEntity()
+	ref:SetColor(1,1,1,1)
+	ref:SetType(RT_SPRITE)
+	ref:SetShader(flare)
+	ref:SetRotation(math.random(360))
+
+	local le = LocalEntity()
+	le:SetRefEntity(ref)
+	le:SetStartTime(LevelTime())
+	le:SetType(LE_FRAGMENT)
+	le:SetEndColor(0,0,0,0)
+	le:Emitter(LevelTime(), LevelTime()+100, 1000)
+	return le
+end
+
+local function hitFX(pos,indir,hue)
+	--[[local ref = RefEntity()
+	ref:SetColor(r,g,b,1)
+	ref:SetType(RT_SPRITE)
+	ref:SetShader(flare)
+	ref:SetRotation(math.random(360))
+	ref:SetPos((VectorRandom() * 10) + pos)
+
+	local le = LocalEntity()
+	le:SetPos(pos)
+	le:SetRefEntity(ref)
+	le:SetStartTime(LevelTime())
+	le:SetType(LE_FRAGMENT)
+	le:SetEndColor(0,0,0,0)
+	le:Emitter(LevelTime(), LevelTime()+10, 1, 
+	function(le2,frac)
+		local dir = Vector(indir.x,indir.y,indir.z)
+		dir.x = dir.x + (math.random(-10,10)/40)
+		dir.y = dir.y + (math.random(-10,10)/40)
+		dir.z = dir.z + (math.random(-10,10)/40)
+				
+		dir = dir * (math.random(200,300))
+		le2:SetVelocity(dir)
+		le2:SetRadius(math.random(2,20))
+		le2:SetEndTime(LevelTime() + math.random(200,400) * math.random(1,4))
+		
+		local r,g,b = hsv(hue,(math.random(10,100)/100),1)
+		--if(math.random(0,1) == 1) then
+			le2:SetStartColor(r,g,b,1)
+		--else
+			--le2:SetStartColor(1,1,1,1)
+		--end
+	end)]]
+	
+	local le = spriteEmitter1
+	le:SetPos(pos)
+	
+	for i=1,20 do
+		local le2 = le:Emit()
+		if(le2 != nil) then
+			local dir = Vector(indir.x,indir.y,indir.z)
+			dir.x = dir.x + (math.random(-10,10)/10)
+			dir.y = dir.y + (math.random(-10,10)/10)
+			dir.z = dir.z + (math.random(-10,10)/10)
+					
+			dir = dir * (math.random(40,80))
+			le2:SetVelocity(dir)
+			le2:SetRadius(math.random(40,100))
+			le2:SetEndRadius(0)
+			le2:SetStartTime(LevelTime() - math.random(10,1000))
+			le2:SetEndTime(LevelTime() + math.random(200,600))
+			le2:SetTrType(TR_LINEAR)
+			
+			local r,g,b = hsv(hue,(math.random(40,100)/100),1)
+			--if(math.random(0,1) == 1) then
+				le2:SetStartColor(r,g,b,1)
+			--else
+				--le2:SetStartColor(1,1,1,1)
+			--end
+		end
+	end
+end
+
 
 local function qbeam(v1,v2,r,g,b,size,np,delay,stdelay)
 	local ref = getBeamRef(v1,v2,r,g,b,size)
@@ -156,17 +250,20 @@ local function DoBeam(s,e,hue,tr)
 	qbeam(s,e,1,1,1,5,false,600)
 	
 	if(!tr.normal) then return end
-	util.CreateMark(mark,e,tr.normal,math.random(360),0,0,0,.5,math.random(25,35),true)
+	local rot = math.random(360)
+	util.CreateMark(fmark,e,tr.normal,rot,r,g,b,.5,math.random(65,75),false,-8500)
+	
+	r,g,b = hsv(hue,.5,1)
+	util.CreateMark(fmark,e,tr.normal,rot,r,g,b,.5,math.random(45,55),false,-8200)
+	util.CreateMark(fmark,e,tr.normal,rot,1,1,1,.5,math.random(45,55),false,-8500)
+	util.CreateMark(mark,e,tr.normal,rot,1,1,1,.5,math.random(45,55),false)
+	
+	spriteEmitter1 = createEmitter()
+	hitFX(e,tr.normal,hue)
 end
 
-local function BeamBounce()
-	local s = message.ReadVector()
-	local e = message.ReadVector()
-	local hue = message.ReadShort()
-	local bounces = message.ReadShort()
-	local pl = message.ReadShort()
-	local muzzle = GetMuzzleLocation()
-	
+local function BeamBounce(s,e,hue,bounces,pl)
+	local muzzle = GetAltMuzzleLocation()
 	local tr = TraceLine(s,e+VectorNormalize(e-s)*100,nil,tr_flags)
 	local pos = s
 	e = tr.endpos
@@ -191,15 +288,24 @@ end
 
 local function HandleMessage(msgid)
 	if(msgid == "igrailfire") then
+		print("GOTS RAIL FIRE\n")
 		fading = false
-		if(railStart != 0 and railEnd != 0) then
-			PlaySound(clicksound)
-		end
 		railStart = LevelTime()
 		local rtime = message.ReadShort()
-		print(rtime .. "\n")
-		railEnd = railStart + rtime
-		BeamBounce()
+		local s = message.ReadVector()
+		local e = message.ReadVector()
+		local hue = message.ReadShort()
+		local bounces = message.ReadShort()
+		local pl = message.ReadShort()
+		
+		if(pl == LocalPlayer():EntIndex()) then
+			print(rtime .. "\n")
+			if(railStart != 0 and railEnd != 0) then
+				PlaySound(clicksound)
+			end
+			railEnd = railStart + rtime
+		end
+		BeamBounce(s,e,hue,bounces,pl)
 	end
 	if(msgid == "igdeath") then
 		local id = message.ReadShort()
@@ -216,7 +322,8 @@ local function HandleMessage(msgid)
 		stats[message.ReadShort()][1] = message.ReadShort()
 	end
 	if(msgid == "igbeam") then
-		BeamBounce()
+		print("GOTS BEAM\n")
+		--BeamBounce()
 	end
 end
 hook.add("HandleMessage","cl_instagib",HandleMessage)
