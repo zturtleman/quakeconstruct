@@ -142,6 +142,16 @@ for n,e in pairs(enum) do
 	val = 0
 end
 
+function GetEnumSet(set)
+	if not(set == nil) then
+		if(type(set) == "table") then
+			local out = table.Copy(set)
+			out.IsEnumeration = nil
+			return out
+		end
+	end
+end
+
 function EnumToString(set,val)
 	if not(set == nil) then
 		if(type(set) == "table") then
