@@ -7,29 +7,93 @@ local tabBar = nil
 local currTab = "Main"
 local layout = nil
 
-local function slider(par)
-	local panel = UI_Create("valuebar",par)
-	panel:SetMax(100)
-	panel:SetMin(40)
-	panel.FormatValue = function(self,v) return "" .. v end
-	panel.DoLayout = function()
+local sliderTemplate = UI_Create("valuebar")
+sliderTemplate:SetSize(18,18)
+sliderTemplate:Remove()
+
+local seperatorTemplate = UI_Create("label")
+seperatorTemplate:SetSize(22,22)
+seperatorTemplate:Remove()
+
+local function sliderMoved(tab,v)
+	print("Value For: " .. tab[3] .. " [" .. v .. "]\n")
+	SendString("cnfvar " .. tab[3] .. " " .. v .. "")
+end
+
+local sliders = {
+	["Weapons"] = {
+		{"slider","Delay%","wp_delay",10,1000,100,"int",10},
+		{"slider","Damage%","wp_damage",10,1000,100,"int",10}
+	}
+}
+
+local function slider(list,tab)
+	--[[panel.DoLayout = function()
 		panel:SetSize(par:GetWidth(),18)
+	end]]
+	
+	local panel = list:AddPanel(sliderTemplate,true)
+	
+	local step = tab[8]
+	
+	panel:SetTitle(tab[2])
+	panel:SetMax(tab[5])
+	panel:SetMin(tab[4])
+	panel.FormatValue = function(self,v)
+		if(step) then
+			v = v / step
+			v = math.floor(v)*step
+		end
+		if(tab[7] == "int") then
+			return math.floor(v)
+		elseif(tab[7] == "lowerfloat") then
+			if(v > 1) then return math.floor(v) end
+			v = v * 10
+			v = math.floor(v)/10
+			return v
+		else
+			return v
+		end
 	end
+	panel.OnValue = function(s,v)
+		sliderMoved(tab,v)
+	end
+	panel:CatchMouse(true)
+	panel:SetValue(tab[6])
+	
+	list:DoLayout()
 	
 	return panel
 end
 
-local function addPanel()
-	local panel = UI_Create("panel",main)
-	panel:CatchMouse(true)
-	panel:SetVisible(true)
+local function seperator(list,label)
+	local panel = list:AddPanel(seperatorTemplate,true)
+	
+	panel:SetText(label)
+	
+	list:DoLayout()
+end
+
+local function addPanel(class)
+	local panel = UI_Create(class or "panel",main)
+	--panel:CatchMouse(true)
+	--panel:SetVisible(true)
 	table.insert(ptemp,panel)
 	return panel
 end
 
 local function populate(panel)
-	local s = slider(panel)
-	s:SetSize(panel:GetWidth(),20)
+	--local list = UI_Create("listpane",panel)
+	--list:CatchMouse(true)
+	--list:DoLayout()
+	local group = sliders[currTab]
+	
+	if(group != nil) then
+		for k,v in pairs(group) do
+			if(v[1] == "slider") then slider(panel,v) end
+			if(v[1] == "group") then seperator(panel,v[2]) end
+		end
+	end
 end
 
 local function addTab(name)
@@ -61,27 +125,37 @@ layout = function(panel)
 	addTab("Main")
 	addTab("Weapons")
 	
-	local contents = addPanel()
+	local contents = addPanel()--addPanel()
 	contents:SetPos(0,32)
-	contents:SetSize(main:GetWidth(),main:GetHeight() - 32)
 	contents.DoLayout = function(self)
-		self:SetSize(main:GetWidth(),main:GetHeight() - 32)
+		self:SetSize(main:GetWidth()-4,main:GetHeight() - 62)
 	end
+	contents:DoLayout()
 	
-	populate(contents)
+	local list = UI_Create("listpane",contents)
+	--list:CatchMouse(true)
+	--list:SetVisible(true)
+	
+	populate(list)
 end
 
 function configurator.open()
-	local panel = UI_Create("frame")
-	if(panel != nil) then
-		local w,h = 640,480
-		local pw,ph = w/2,h/2
-		panel:SetPos((w/2) - pw/2,(h/2) - ph/2)
-		panel:SetSize(pw,ph)
-		panel:SetTitle("Configurator")
-		panel:CatchMouse(true)
-		panel:SetVisible(true)
-		layout(panel)
+	if(configurator_panel == nil) then
+		configurator_panel = UI_Create("frame")
+		local panel = configurator_panel
+		if(panel != nil) then
+			local w,h = 640,480
+			local pw,ph = w/2,h/2
+			panel:SetPos((w/2) - pw/2,(h/2) - ph/2)
+			panel:SetSize(pw,ph)
+			panel:SetTitle("Configurator")
+			panel:CatchMouse(true)
+			panel:SetVisible(true)
+			panel:RemoveOnClose(false)
+			layout(panel)
+		end
+	else
+		configurator_panel:SetVisible(true)
 	end
 end
 addToAltMenu("Configurator",configurator.open)
