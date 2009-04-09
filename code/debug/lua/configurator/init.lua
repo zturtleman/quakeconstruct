@@ -1,6 +1,6 @@
 downloader.add("lua/configurator/cl_init.lua")
 
-vars = vars or {
+local vars = {
 	{"wp_delay",100},
 	{"wp_damage",100},
 }
