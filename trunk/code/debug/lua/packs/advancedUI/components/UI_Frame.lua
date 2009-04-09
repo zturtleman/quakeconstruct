@@ -1,4 +1,5 @@
 local Panel = {}
+Panel.removeOnClose = true
 --Panel.bgcolor = {0.3,0.3,0.3,.8}
 
 function Panel:Initialize()
@@ -15,7 +16,11 @@ function Panel:Initialize()
 	self.close:SetText("X")
 	self.close.DoClick = function()
 		--self:Remove()
-		self:Close()
+		if(self.removeOnClose) then
+			self:Close()
+		else
+			self:SetVisible(false)
+		end
 	end
 	
 	self.dragbar2 = UI_Create("dragbutton",self,true)
@@ -37,6 +42,10 @@ function Panel:Initialize()
 	
 	self:PositionBar()
 	self:AlignContentPane()
+end
+
+function Panel:RemoveOnClose(b)
+	self.removeOnClose = b
 end
 
 function Panel:EnableCloseButton(b)

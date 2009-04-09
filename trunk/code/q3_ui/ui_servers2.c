@@ -484,8 +484,8 @@ static void ArenaServers_UpdateMenu( void ) {
 			continue;
 		}
 
-		if( strcmp(servernodeptr->gamename, "qconstruct") ) {
-			continue;
+		if( strcmp(servernodeptr->gamename, "qconstruct") && strcmp(servernodeptr->gamename, "qconstru") ) {
+			//continue;
 		}
 
 		switch( g_gametype ) {

@@ -1,6 +1,7 @@
 local Panel = {}
 Panel.drag = false
-Panel.value = .5
+Panel.lastvalue = nil
+Panel.value = .1
 Panel.title = "slider"
 Panel.min = 0
 Panel.max = 1
@@ -31,15 +32,20 @@ function Panel:SetTitle(t)
 	if(t != nil and type(t) == "string") then
 		self.title = t
 	end
-	self:SetText(self.title .. ": " .. tostring(self:FormatValue(self.value)))
+	self:SetText(self.title .. ": " .. tostring(self:GetValue()))
 end
 
 function Panel:SetValue(v)
+	v = self:FormatValue(v)
 	if(v > self.max) then v = self.max end
 	if(v < self.min) then v = self.min end
 	self.value = v
-	self:SetText(self.title .. ": " .. tostring(self:FormatValue(self.value)))
-	self:OnValue(v)
+	self:SetText(self.title .. ": " .. tostring(v))
+	
+	if(self.lastvalue != self.value) then
+		self.lastvalue = v
+		self:OnValue(v)
+	end
 end
 
 function Panel:OnValue(v) end
@@ -53,7 +59,7 @@ function Panel:GetValue()
 end
 
 function Panel:FormatValue(v)
-	return "" .. v
+	return v
 end
 
 function Panel:Think()
