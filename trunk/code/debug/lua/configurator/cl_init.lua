@@ -150,7 +150,7 @@ function configurator.open()
 			panel:SetSize(pw,ph)
 			panel:SetTitle("Configurator")
 			panel:CatchMouse(true)
-			panel:SetVisible(true)
+			panel:SetVisible(false)
 			panel:RemoveOnClose(false)
 			layout(panel)
 		end
@@ -158,7 +158,10 @@ function configurator.open()
 		configurator_panel:SetVisible(true)
 	end
 end
-addToAltMenu("Configurator",configurator.open)
+if(addToAltMenu) then
+	addToAltMenu("Configurator",configurator.open)
+end
+concommand.add("openconfig",configurator.open)
 
 configurator.open()
 print("BLAH\n")

@@ -168,8 +168,8 @@ function DrawHead(x,y,ICON_SIZE,hp)
 	local hp2x = math.min(math.max(hp/100,0),1)
 	local na2 = math.min((hp2x/3) + .6,1)
 	
-	calpha = calpha + (nalpha - calpha)*.01
-	calpha2 = calpha2 + (na2 - calpha2)*.01
+	calpha = nalpha --calpha + (nalpha - calpha)*.01
+	calpha2 = na2 --calpha2 + (na2 - calpha2)*.01
 	if(calpha < 0.5) then calpha = 0.5 end
 	
 	ref:Render()
