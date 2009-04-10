@@ -15,6 +15,7 @@ HOOKS.SV = {
 	"FlagStatus",
 	"FiredWeapon",
 	"ItemPickup",
+	"ItemPickupQuantity",
 	"MessageReceived",
 	"PlayerDamaged",
 	"PlayerDisconnected",

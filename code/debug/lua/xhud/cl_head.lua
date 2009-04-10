@@ -30,6 +30,8 @@ local headStartYaw = 0
 local headEndYaw = 0
 local headStartPitch = 0
 local headEndPitch = 0
+local headStartRoll = 0
+local headEndRoll = 0
 local headStartTime = 0
 local headEndTime = 0
 local deadFrac = 0
@@ -40,6 +42,7 @@ local mvz = 0
 local nalpha = 0
 local calpha = 0
 local calpha2 = 0
+local ddir = 0
 function DrawHead(x,y,ICON_SIZE,hp)
 	local inf = LocalPlayer():GetInfo()
 	local nhead = inf.headModel
@@ -74,16 +77,29 @@ function DrawHead(x,y,ICON_SIZE,hp)
 		
 		headStartYaw = 180 + damageX * 45;
 		
+		if(damageY > 0) then
+			headStartPitch = -30*(1-frac)
+		else
+			headStartPitch = 30*(1-frac)
+		end
+		
 		headEndYaw = 180 + 20 * math.cos( math.random()*math.pi );
-		headEndPitch = 5 * math.cos( math.random()*math.pi );
+		headEndPitch = -10 * math.cos( math.random()*math.pi );
+		
+		print(ddir .. "\n")
+		headStartRoll = ddir*(1-frac)
+		headEndRoll = 0
 
 		headStartTime = ltime;
 		headEndTime = ltime + 100 + math.random() * 2000;
 	else
+		ddir = ((math.random(1,2)*2) - 3) * (math.random(6,10))
 		if ( ltime >= headEndTime ) then
 			headStartYaw = headEndYaw;
 			headStartPitch = headEndPitch;
 			headStartTime = headEndTime;
+			headStartRoll = headEndRoll
+			
 			headEndTime = ltime + 100 + math.random() * 2000;
 
 			local hpx = (math.min(math.max(hp/100,.1),1))
@@ -115,6 +131,7 @@ function DrawHead(x,y,ICON_SIZE,hp)
 	frac = frac * frac * ( 3 - 2 * frac );
 	angles.y = headStartYaw + ( headEndYaw - headStartYaw ) * frac;
 	angles.x = headStartPitch + ( headEndPitch - headStartPitch ) * frac;
+	angles.z = headStartRoll + ( headEndRoll - headStartRoll ) * frac;
 
 	render.CreateScene()
 	

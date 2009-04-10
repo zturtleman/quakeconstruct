@@ -35,17 +35,17 @@ function Panel:SetTitle(t)
 	self:SetText(self.title .. ": " .. tostring(self:GetValue()))
 end
 
-function Panel:SetValue(v)
+function Panel:SetValue(v,silent)
 	v = self:FormatValue(v)
 	if(v > self.max) then v = self.max end
 	if(v < self.min) then v = self.min end
 	self.value = v
 	self:SetText(self.title .. ": " .. tostring(v))
 	
-	if(self.lastvalue != self.value) then
-		self.lastvalue = v
+	if((self.lastvalue != self.value) && !silent) then
 		self:OnValue(v)
 	end
+	self.lastvalue = v
 end
 
 function Panel:OnValue(v) end
