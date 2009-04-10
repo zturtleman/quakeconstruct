@@ -50,6 +50,7 @@ int Pickup_Powerup( gentity_t *ent, gentity_t *other ) {
 	int			quantity;
 	int			i;
 	gclient_t	*client;
+	lua_State	*L = GetServerLuaState();
 
 	if ( !other->client->ps.powerups[ent->item->giTag] ) {
 		// round timing to seconds to make multiple powerup timers
@@ -62,6 +63,19 @@ int Pickup_Powerup( gentity_t *ent, gentity_t *other ) {
 		quantity = ent->count;
 	} else {
 		quantity = ent->item->quantity;
+	}
+
+	if(L != NULL) {
+		qlua_gethook(L, "ItemPickupQuantity");
+		lua_pushentity(L, ent);
+		lua_pushentity(L, other);
+		lua_pushinteger(L, quantity);
+		lua_pushinteger(L, ent->item->giType);
+		lua_pushinteger(L, ent->item->giTag);
+		qlua_pcall(L,5,1,qtrue);
+		if(lua_type(L,-1) == LUA_TNUMBER) {
+			quantity = lua_tointeger(L,-1);
+		}
 	}
 
 	other->client->ps.powerups[ent->item->giTag] += quantity * 1000;
@@ -217,11 +231,25 @@ void Add_Ammo (gentity_t *ent, int weapon, int count)
 int Pickup_Ammo (gentity_t *ent, gentity_t *other)
 {
 	int		quantity;
-
+	lua_State *L = GetServerLuaState();
+		
 	if ( ent->count ) {
 		quantity = ent->count;
 	} else {
 		quantity = ent->item->quantity;
+	}
+
+	if(L != NULL) {
+		qlua_gethook(L, "ItemPickupQuantity");
+		lua_pushentity(L, ent);
+		lua_pushentity(L, other);
+		lua_pushinteger(L, quantity);
+		lua_pushinteger(L, ent->item->giType);
+		lua_pushinteger(L, ent->item->giTag);
+		qlua_pcall(L,5,1,qtrue);
+		if(lua_type(L,-1) == LUA_TNUMBER) {
+			quantity = lua_tointeger(L,-1);
+		}
 	}
 
 	Add_Ammo (other, ent->item->giTag, quantity);
@@ -234,6 +262,7 @@ int Pickup_Ammo (gentity_t *ent, gentity_t *other)
 
 int Pickup_Weapon (gentity_t *ent, gentity_t *other) {
 	int		quantity;
+	lua_State	*L = GetServerLuaState();
 
 	if ( ent->count < 0 ) {
 		quantity = 0; // None for you, sir!
@@ -253,6 +282,19 @@ int Pickup_Weapon (gentity_t *ent, gentity_t *other) {
 			} else {
 				quantity = 1;		// only add a single shot
 			}
+		}
+	}
+
+	if(L != NULL) {
+		qlua_gethook(L, "ItemPickupQuantity");
+		lua_pushentity(L, ent);
+		lua_pushentity(L, other);
+		lua_pushinteger(L, quantity);
+		lua_pushinteger(L, ent->item->giType);
+		lua_pushinteger(L, ent->item->giTag);
+		qlua_pcall(L,5,1,qtrue);
+		if(lua_type(L,-1) == LUA_TNUMBER) {
+			quantity = lua_tointeger(L,-1);
 		}
 	}
 
@@ -278,6 +320,7 @@ int Pickup_Weapon (gentity_t *ent, gentity_t *other) {
 int Pickup_Health (gentity_t *ent, gentity_t *other) {
 	int			max;
 	int			quantity;
+	lua_State	*L = GetServerLuaState();
 
 	// small and mega healths will go over the max
 #ifdef MISSIONPACK
@@ -296,6 +339,19 @@ int Pickup_Health (gentity_t *ent, gentity_t *other) {
 		quantity = ent->count;
 	} else {
 		quantity = ent->item->quantity;
+	}
+
+	if(L != NULL) {
+		qlua_gethook(L, "ItemPickupQuantity");
+		lua_pushentity(L, ent);
+		lua_pushentity(L, other);
+		lua_pushinteger(L, quantity);
+		lua_pushinteger(L, ent->item->giType);
+		lua_pushinteger(L, ent->item->giTag);
+		qlua_pcall(L,5,1,qtrue);
+		if(lua_type(L,-1) == LUA_TNUMBER) {
+			quantity = lua_tointeger(L,-1);
+		}
 	}
 
 	other->health += quantity;
@@ -332,7 +388,25 @@ int Pickup_Armor( gentity_t *ent, gentity_t *other ) {
 		other->client->ps.stats[STAT_ARMOR] = upperBound;
 	}
 #else
-	other->client->ps.stats[STAT_ARMOR] += ent->item->quantity;
+	int		quantity;
+	lua_State	*L = GetServerLuaState();
+
+	quantity = ent->item->quantity;
+
+	if(L != NULL) {
+		qlua_gethook(L, "ItemPickupQuantity");
+		lua_pushentity(L, ent);
+		lua_pushentity(L, other);
+		lua_pushinteger(L, quantity);
+		lua_pushinteger(L, ent->item->giType);
+		lua_pushinteger(L, ent->item->giTag);
+		qlua_pcall(L,5,1,qtrue);
+		if(lua_type(L,-1) == LUA_TNUMBER) {
+			quantity = lua_tointeger(L,-1);
+		}
+	}
+
+	other->client->ps.stats[STAT_ARMOR] += quantity;
 	if ( other->client->ps.stats[STAT_ARMOR] > other->client->ps.stats[STAT_MAX_HEALTH] * 2 ) {
 		other->client->ps.stats[STAT_ARMOR] = other->client->ps.stats[STAT_MAX_HEALTH] * 2;
 	}

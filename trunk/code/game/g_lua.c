@@ -276,6 +276,35 @@ int qlua_md5 (lua_State *L) {
   return 1;
 }
 
+int qlua_getcvar(lua_State *L) {
+	const char *name = "";
+	char output[MAX_STRING_CHARS];
+
+	luaL_checkstring(L,1);
+	name = lua_tostring(L,1);
+
+	trap_Cvar_VariableStringBuffer(name,output,sizeof(output));
+	
+	lua_pushstring(L,output);
+	lua_pushinteger(L,trap_Cvar_VariableIntegerValue( name ));
+
+	return 2;
+}
+
+int qlua_setcvar(lua_State *L) {
+	const char *name = "";
+	const char *value = "";
+
+	luaL_checkstring(L,1);
+	name = lua_tostring(L,1);
+
+	luaL_checkstring(L,2);
+	value = lua_tostring(L,2);
+
+	trap_Cvar_Set( name, value );
+	return 0;
+}
+
 int SendTest(lua_State *L) {
 	msg_t msg;
 
@@ -337,6 +366,8 @@ void InitServerLua( void ) {
 	lua_register(L,"runString",qlua_runstr);
 	lua_register(L,"MD5",qlua_md5);
 	lua_register(L,"SendTest",SendTest);
+	lua_register(L,"GetCvar",qlua_getcvar);
+	lua_register(L,"SetCvar",qlua_setcvar);
 	lua_register(L,"_qlimit",qlimit);
 
 	/*G_Printf("CONTENTS_AREAPORTAL = %i\n",CONTENTS_AREAPORTAL);

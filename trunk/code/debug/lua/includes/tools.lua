@@ -129,6 +129,26 @@ function PlayerTrace(...)
 	return TraceLine(startpos,endpos,pl,mask)
 end
 
+function MethodOfDeathToWeapon(dtype)
+	local mods = {
+		[MOD_SHOTGUN] = WP_SHOTGUN,
+		[MOD_GAUNTLET] = WP_GAUNTLET,
+		[MOD_MACHINEGUN] = WP_MACHINEGUN,
+		[MOD_GRENADE] = WP_GRENADE_LAUNCHER,
+		[MOD_GRENADE_SPLASH] = WP_GRENADE_LAUNCHER,
+		[MOD_ROCKET] = WP_ROCKET_LAUNCHER,
+		[MOD_ROCKET_SPLASH] = WP_ROCKET_LAUNCHER,
+		[MOD_PLASMA] = WP_PLASMAGUN,
+		[MOD_PLASMA_SPLASH] = WP_PLASMAGUN,
+		[MOD_RAILGUN] = WP_RAILGUN,
+		[MOD_LIGHTNING] = WP_LIGHTNING,
+		[MOD_BFG] = WP_BFG,
+		[MOD_BFG_SPLASH] = WP_BFG,
+		[MOD_GRAPPLE] = WP_GRAPPLING_HOOK,
+	}
+	return mods[dtype] or WP_NONE
+end
+
 if(CLIENT) then
 	function drawNSBox(x,y,w,h,v,shader,nocenter)
 		local d = 1/3
