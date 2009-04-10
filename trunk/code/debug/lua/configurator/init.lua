@@ -8,12 +8,6 @@ local function getValue(var,def)
 	return vars[var]
 end
 
-local weapons = GetEnumSet(weapon_t,val)
-
-for k,v in pairs(weapons) do
-	print(v.name .. "\n")
-end
-
 local function message(str,pl)
 	local args = string.Explode(" ",str)
 	if(args[1] == "cnfvar") then
