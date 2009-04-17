@@ -1704,6 +1704,32 @@ int qlua_espawn(lua_State *L) {
 	return 0;
 }
 
+int qlua_use(lua_State *L) {
+	gentity_t	*luaentity, *other, *activator;
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaentity = lua_toentity(L,1);
+
+	if(lua_type(L,2) == LUA_TUSERDATA) other = lua_toentity(L,2);
+	if(lua_type(L,3) == LUA_TUSERDATA) activator = lua_toentity(L,3);
+
+	if(other == NULL) other = activator;
+	if(other == NULL) other = luaentity;
+	if(activator == NULL) activator = other;
+
+	if(luaentity != NULL) {
+		if(luaentity->use != NULL) {
+			luaentity->use(luaentity,other,activator);
+		}
+		if(qlua_getstored(L,luaentity->lua_use)) {
+			lua_pushentity(L,luaentity);
+			lua_pushentity(L,other);
+			lua_pushentity(L,activator);
+			qlua_pcall(L, 3, 0, qfalse);
+		}
+	}
+	return 0;
+}
+
 static const luaL_reg Entity_methods[] = {
   {"GetInfo",		qlua_getclientinfo},
   {"SetInfo",		qlua_setclientinfo},
@@ -1782,6 +1808,7 @@ static const luaL_reg Entity_methods[] = {
   {"SetOwner",		qlua_setowner},
   {"SetDeathMethod", qlua_setmod},
   {"Spawn",			qlua_espawn},
+  {"Fire",			qlua_use},
   {0,0}
 };
 
