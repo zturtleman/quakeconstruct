@@ -54,6 +54,26 @@ function GetOwner()
 	return nil
 end
 
+function FindEntities(func,value,...)
+	if(type(func) != "string") then return end
+	func = Entity[func]
+	if(func == nil) then return end
+	
+	local tab = {}
+	for k,v in pairs(GetAllEntities()) do
+		local b,e = pcall(func,v,unpack(arg))
+		if(!b) then
+			print("^1FIND ERROR: " .. e .. "\n")
+			return tab
+		else
+			if(e == value) then
+				table.insert(tab,v)
+			end
+		end
+	end
+	return tab
+end
+
 local function UnlinkEntity(ent)
 	if(ent == nil) then return end
 	if(string.find(ent:Classname(),"func_")) then return end
@@ -94,8 +114,8 @@ end
 
 local function LinkEntity(ent)
 	if(ent == nil) then return end
-	if(string.find(ent:Classname(),"target_")) then return end
-	if(string.find(ent:Classname(),"func_")) then return end
+	--if(string.find(ent:Classname(),"target_")) then return end
+	--if(string.find(ent:Classname(),"func_")) then return end
 	if(string.find(ent:Classname(),"mover")) then return end
 	local index = ent:EntIndex()
 	if(!addEnt(ent)) then return end

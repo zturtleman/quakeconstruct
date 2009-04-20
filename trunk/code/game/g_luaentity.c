@@ -870,15 +870,59 @@ int qlua_getotherentity2(lua_State *L) {
 	return 0;
 }
 
-int qlua_gettarget(lua_State *L) {
+int qlua_settargetname(lua_State *L) {
 	gentity_t	*luaentity;
-	gentity_t	*target;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TSTRING);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		strcpy(luaentity->targetname,lua_tostring(L,2));
+	}
+	return 0;
+}
+
+int qlua_gettargetname(lua_State *L) {
+	gentity_t	*luaentity;
 
 	luaL_checktype(L,1,LUA_TUSERDATA);
 
 	luaentity = lua_toentity(L,1);
 	if(luaentity != NULL) {
-		if(luaentity->target_ent) {
+		if(luaentity->target != NULL) {
+			lua_pushstring(L,luaentity->targetname);
+			return 1;
+		}
+	}
+	return 0;
+}
+
+int qlua_settarget(lua_State *L) {
+	gentity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TSTRING);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		strcpy(luaentity->target,lua_tostring(L,2));
+	}
+	return 0;
+}
+
+int qlua_gettarget(lua_State *L) {
+	gentity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		if(luaentity->target != NULL) {
+			lua_pushstring(L,luaentity->target);
+			return 1;
+		}
+		/*if(luaentity->target_ent) {
 			lua_pushentity(L,luaentity->target_ent);
 			return 1;
 		} else if (luaentity->target) {
@@ -887,7 +931,7 @@ int qlua_gettarget(lua_State *L) {
 				lua_pushentity(L,target);
 				return 1;
 			}
-		}
+		}*/
 	}
 	return 0;
 }
@@ -1750,6 +1794,9 @@ static const luaL_reg Entity_methods[] = {
   {"GetOtherEntity",	qlua_getotherentity},
   {"GetOtherEntity2",	qlua_getotherentity},
   {"GetTarget",			qlua_gettarget},
+  {"SetTarget",			qlua_settarget},
+  {"GetTargetName",		qlua_gettargetname},
+  {"SetTargetName",		qlua_settargetname},
   {"SetWeapon",		qlua_setweapon},
   {"GiveWeapon",	qlua_giveweapon},
   {"HasWeapon",		qlua_hasweapon},
