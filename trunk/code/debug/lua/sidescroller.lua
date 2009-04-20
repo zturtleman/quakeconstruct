@@ -121,7 +121,20 @@ local function CheckDoubleJump(pm,mask)
 end
 
 function PlayerMove(pm,walk,forward,right)
+	local strt = pm:GetPos()
 	pm:SetMask(contents)
+	
+	
+	local angles = pm:GetAngles()
+	if(angles.y > 0 and angles.y < 180) then
+		angles.y = 90
+	else
+		angles.y = -90
+	end
+
+	pm:SetAngles(angles)
+	--print(tostring(pm:GetAngles()) .. "\n")
+	
 	if(pm:GetType() == PM_DEAD) then
 		PM_Drop()
 		PM_AirMove()
@@ -141,8 +154,14 @@ function PlayerMove(pm,walk,forward,right)
 	end
 	
 	local v = pm:GetVelocity()
+	v.y = v.y - v.x
+	v.x = 0
 	pm:SetVelocity(v)
 
+	local p = pm:GetPos()
+	p.x = strt.x
+	pm:SetPos(p)
+	
 	CheckDoubleJump(pm,contents)
 	
 	return true
