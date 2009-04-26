@@ -1,6 +1,6 @@
 local function PlayerDamaged(self,inflictor,attacker,damage,meansOfDeath,dir,pos)
 	if(self:GetHealth() <= 0 and self:GetHealth() > -50) then
-		--CreateExplosion(self:GetPos() + Vector(0,0,5),100,4,200,self)
+		CreateExplosion(self:GetPos() + Vector(0,0,5),200,6,200,self)
 		return self:GetHealth() - 100
 	end
 end

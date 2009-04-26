@@ -75,6 +75,8 @@ typedef struct {
 		float s1, float t1, float s2, float t2, qhandle_t hShader );	// 0 = white
 	void	(*DrawTransformPic) ( float x, float y, float w, float h, 
 		float s1, float t1, float s2, float t2, float r, qhandle_t hShader );	// 0 = white
+	void	(*DrawQuadPic) ( float x0, float y0, float x1, float y1, float x2, float y2, float x3, float y3, 
+		float s1, float t1, float s2, float t2, qhandle_t hShader );	// 0 = white
 
 	// Draw images for cinematic rendering, pass as 32 bit rgba
 	void	(*DrawStretchRaw) (int x, int y, int w, int h, int cols, int rows, const byte *data, int client, qboolean dirty);

@@ -32,43 +32,28 @@ local plaincolor = CreateShader("f",data)
 
 local chrome_data = 
 [[{
-	//cull none
-	//deformVertexes wave 1000 sin 2 0 0 0
+	cull none
+	//deformVertexes autosprite
+	//deformVertexes wave 30 sin 22 1 0 1
 	//deformVertexes bulge 12 12 1
 	//deformVertexes normal 12 .2
-//	{
-//		map textures/base_wall/chrome_env2.tga
-//		rgbGen entity
-//		alphaGen entity
-//		tcGen environment
-//		tcmod scale .25 .25
-//	}
 	{
-		map models/misc/thingie_texmap.tga
-		rgbGen entity
-		alphaGen entity
-	}
-//	{
-//		map textures/base_wall/bluemetal1b_shiny.tga
-//		blendFunc GL_ONE_MINUS_SRC_ALPHA GL_SRC_ALPHA
-//		rgbGen entity
-//		alphaGen entity
-//	}
-	{
-		map $lightmap
+		map textures/base_wall/chrome_env2.tga
 		rgbGen vertex
-		blendfunc gl_dst_color gl_zero
+		alphaGen vertex
+		//tcGen environment
+		tcmod scale .25 .25
 	}
 }]]
-local outline = CreateShader("f",chrome_data)
+local outline = CreateShader("f2",chrome_data)
 local flare = LoadShader("flareShader")
 
-local mdl = LoadModel("models/misc/spinnything.md3")
+local mdl = LoadModel("models/misc/trailtest.md3")
 local t = 0
-local anim = Animation(50,20,30)
+local anim = Animation(0,100,15)
 local vec = PlayerTrace().endpos
 
-anim:SetType(ANIM_ACT_PINGPONG)
+anim:SetType(ANIM_ACT_LOOP_LERP)
 anim:Play()
 
 local function used(s)
@@ -103,6 +88,24 @@ local function newParticle(pos,indir)
 	le:SetEndRadius(0)
 end
 
+local poly = Poly(outline)
+
+poly:AddVertex(Vector(0,0,0),0,0,{1,1,1,1})
+poly:AddVertex(Vector(1,0,0),1,0,{1,1,1,1})
+poly:AddVertex(Vector(1,1,0),1,1,{1,1,1,1})
+poly:AddVertex(Vector(0,1,0),0,1,{1,1,1,1})
+
+poly:Split()
+
+poly:AddVertex(Vector(1,0,0),0,0,{1,1,1,1})
+poly:AddVertex(Vector(2,0,0),1,0,{1,1,1,1})
+poly:AddVertex(Vector(2,1,0),1,1,{1,1,1,1})
+poly:AddVertex(Vector(1,1,0),0,1,{1,1,1,1})
+
+poly:Fuse()
+
+local reftest = poly:ToRef(false)
+
 function d3d()
 	
 	local svec = vec.x .. " " .. vec.y .. " " .. vec.z
@@ -115,18 +118,31 @@ function d3d()
 	ref:SetModel(mdl)
 	ref:SetPos(vec + Vector(0,0,10))
 	ref:SetColor(1,1,1,1)
-	ref:SetShader(outline)
+	ref:Scale(Vector(1,1,1))
+	--ref:SetShader(outline)
 	--ref:SetAngles(Vector(0,LevelTime()/5,0))
 	
-	anim:SetRef(ref)
-	anim:Animate()
+	//anim:SetRef(ref)
+	//anim:Animate()
 	
-	ref:Render()
+	reftest:AlwaysRender(true)
+	reftest:SetPos(vec + Vector(0,0,10))
+	reftest:SetColor(1,1,1,1)
+	reftest:SetAngles(Vector(0,0,0))
+	reftest:Scale(Vector(20,20,1))
+	reftest:SetShader(outline)
+	reftest:Render()
 	
-	local pos,_,_,f = GetTag(ref,"tag_left")
-	newParticle(pos,f*10)
+	//poly:SetOffset(vec + Vector(0,0,10))
+	//poly:Render()
 	
-	local pos2,_,_,f2 = GetTag(ref,"tag_right")
-	newParticle(pos2,f2*30)
+	
+	--ref:Render()
+	
+	--local pos,_,_,f = GetTag(ref,"tag_left")
+	--newParticle(pos,f*10)
+	
+	--local pos2,_,_,f2 = GetTag(ref,"tag_right")
+	--newParticle(pos2,f2*30)
 end
 hook.add("Draw3D","cl_modeltrace",d3d)

@@ -412,6 +412,11 @@ void	trap_R_DrawTransformPic( float x, float y, float w, float h,
 	syscall( CG_R_DRAWTRANSFORMPIC, PASSFLOAT(x), PASSFLOAT(y), PASSFLOAT(w), PASSFLOAT(h), PASSFLOAT(s1), PASSFLOAT(t1), PASSFLOAT(s2), PASSFLOAT(t2), PASSFLOAT(r), hShader );
 }
 
+void	trap_R_DrawQuadPic( float x0, float y0, float x1, float y1, float x2, float y2, float x3, float y3, 
+						   float s1, float t1, float s2, float t2, qhandle_t hShader ) {
+	syscall( CG_R_DRAWQUADPIC, PASSFLOAT(x0), PASSFLOAT(y0), PASSFLOAT(x1), PASSFLOAT(y1), PASSFLOAT(x2), PASSFLOAT(y2), PASSFLOAT(x3), PASSFLOAT(y3), PASSFLOAT(s1), PASSFLOAT(t1), PASSFLOAT(s2), PASSFLOAT(t2), hShader );
+}
+
 void	trap_R_ModelBounds( clipHandle_t model, vec3_t mins, vec3_t maxs ) {
 	syscall( CG_R_MODELBOUNDS, model, mins, maxs );
 }

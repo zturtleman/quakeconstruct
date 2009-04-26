@@ -68,5 +68,5 @@ function LoadFont(ini)
 		return x
 	end
 	
-	return draw,title,shader,sprite,spacings
+	return draw,title,sprite,spacings
 end

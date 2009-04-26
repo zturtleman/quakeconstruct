@@ -67,6 +67,7 @@ typedef enum {
 	RT_RAIL_RINGS,
 	RT_LIGHTNING,
 	RT_PORTALSURFACE,		// doesn't draw anything, just info for portals
+	RT_TRAIL,
 
 	RT_MAX_REF_ENTITY_TYPE
 } refEntityType_t;
@@ -111,6 +112,8 @@ typedef struct {
 	polyVert_t	verts[1024];		//Hxrmn's poly code
 	vec3_t		lua_scale;
 
+
+	vec3_t		trailVerts[32];
 } refEntity_t;
 
 

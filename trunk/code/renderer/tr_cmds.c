@@ -378,6 +378,33 @@ void RE_TransformPic ( float x, float y, float w, float h,
 	cmd->r = r;
 }
 
+void RE_QuadPic ( float x0, float y0, float x1, float y1, float x2, float y2, float x3, float y3,
+					  float s1, float t1, float s2, float t2, qhandle_t hShader ) {
+	quadPicCommand_t	*cmd;
+
+  if (!tr.registered) {
+    return;
+  }
+	cmd = R_GetCommandBuffer( sizeof( *cmd ) );
+	if ( !cmd ) {
+		return;
+	}
+	cmd->commandId = RC_QUAD_PIC;
+	cmd->shader = R_GetShaderByHandle( hShader );
+	cmd->x0 = x0;
+	cmd->y0 = y0;
+	cmd->x1 = x1;
+	cmd->y1 = y1;
+	cmd->x2 = x2;
+	cmd->y2 = y2;
+	cmd->x3 = x3;
+	cmd->y3 = y3;
+	cmd->s1 = s1;
+	cmd->t1 = t1;
+	cmd->s2 = s2;
+	cmd->t2 = t2;
+}
+
 
 void RE_BeginRTBuffer() {
 //GL_DRAW_BUFFER

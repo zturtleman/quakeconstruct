@@ -163,6 +163,49 @@ int qlua_rect(lua_State *L) {
 	return 0;
 }
 
+void adjustVector(vec3_t v) {
+	v[0] *= cgs.screenXScale;
+	v[1] *= cgs.screenYScale;
+}
+
+int qlua_quad(lua_State *L) {
+	float s,t,s2,t2;
+	vec3_t v1,v2,v3,v4;
+
+	qhandle_t shader = cgs.media.whiteShader;
+
+	luaL_checktype(L,1,LUA_TVECTOR);
+	luaL_checktype(L,2,LUA_TVECTOR);
+	luaL_checktype(L,3,LUA_TVECTOR);
+	luaL_checktype(L,4,LUA_TVECTOR);
+
+	lua_tovector(L,1,v1);
+	lua_tovector(L,2,v2);
+	lua_tovector(L,3,v3);
+	lua_tovector(L,4,v4);
+
+	adjustVector(v1);
+	adjustVector(v2);
+	adjustVector(v3);
+	adjustVector(v4);
+
+	if(lua_type(L,5) == LUA_TNUMBER) {
+		shader = lua_tointeger(L,5);
+	}
+	
+	s = quickfloat(L,6,0);
+	t = quickfloat(L,7,0);
+	s2 = quickfloat(L,8,1);
+	t2 = quickfloat(L,9,1);
+
+	trap_R_DrawQuadPic( v1[0], v1[1], 
+						v4[0], v4[1],
+						v3[0], v3[1],
+						v2[0], v2[1], s, t, s2, t2, shader );
+
+	return 0;
+}
+
 int qlua_line(lua_State *L) {
 	float x1,y1,x2,y2,w,s,t,s2,t2;
 	float dx,dy,cx,cy,rot;
@@ -297,6 +340,7 @@ static const luaL_reg Draw_methods[] = {
   {"SetColor",		qlua_setcolor},
   {"Rect",			qlua_rect},
   {"Line",			qlua_line},
+  {"Quad",			qlua_quad},
   {"RectRotated",	qlua_rectrotated},
   {"BeveledRect",	qlua_beveledRect},
   {"Text",			qlua_text},

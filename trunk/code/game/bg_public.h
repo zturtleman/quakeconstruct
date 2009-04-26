@@ -661,6 +661,15 @@ typedef struct gitem_s {
 	int			id;
 } gitem_t;
 
+typedef struct coordwarp_s {
+	vec3_t		src[4];
+	vec3_t		dst[4];
+    float		srcMat[16];
+    float		dstMat[16];
+    float		warpMat[16];
+	qboolean	dirty;
+} coordwarp_t;
+
 #define LUA_TVECTOR LUA_TUSERDATA
 
 // included in both the game dll and the client
@@ -740,6 +749,7 @@ void BG_InitLuaTrajectory(lua_State *L);
 void BG_InitLuaPMove(lua_State *L);
 void BG_InitLuaMisc(lua_State *L);
 void BG_InitLuaUtil(lua_State *L);
+void BG_InitLuaMath(lua_State *L);
 
 void lua_pushvector(lua_State *L, vec3_t vec);
 void lua_tovector(lua_State *L, int i, vec3_t in);

@@ -1207,6 +1207,7 @@ refexport_t *GetRefAPI ( int apiVersion, refimport_t *rimp ) {
 	re.SetColor = RE_SetColor;
 	re.DrawStretchPic = RE_StretchPic;
 	re.DrawTransformPic = RE_TransformPic;
+	re.DrawQuadPic = RE_QuadPic;
 	re.DrawStretchRaw = RE_StretchRaw;
 	re.UploadCinematic = RE_UploadCinematic;
 
