@@ -515,6 +515,48 @@ void RB_SurfaceRailCore( void ) {
 	}
 }
 
+void RB_SurfaceTrail( void ) {
+	refEntity_t *e;
+	int			len,i;
+	int			size;
+	vec3_t		right;
+	vec3_t		vec;
+	vec3_t		start, end;
+	vec3_t		v1, v2;
+	//vec3_t		temp[2048];
+
+	e = &backEnd.currentEntity->e;
+
+	size = sizeof(e->trailVerts) / sizeof(e->trailVerts[0]);
+
+	for(i=0; i<size-1; i++) {
+		VectorCopy( e->trailVerts[i], start );
+		VectorCopy( e->trailVerts[i+1], end );
+
+		if(end[0] == 0 && end[1] == 0 && end[2] == 0) {
+			break;
+		}
+
+		VectorSubtract( end, start, vec );
+		len = VectorNormalize( vec );
+
+		// compute side vector
+		VectorSubtract( start, backEnd.viewParms.or.origin, v1 );
+		VectorNormalize( v1 );
+		VectorSubtract( end, backEnd.viewParms.or.origin, v2 );
+		VectorNormalize( v2 );
+		CrossProduct( v1, v2, right );
+		VectorNormalize( right );
+
+		if(e->radius > 0) {
+			DoRailCore( start, end, right, len, e->radius );
+		} else {
+			DoRailCore( start, end, right, len, r_railCoreWidth->integer );
+		}
+
+	}
+}
+
 //Hxrmn's Poly Code
 void RB_EntitySurfacePolys( void ) {
 	refEntity_t *e;
@@ -1173,6 +1215,9 @@ void RB_SurfaceEntity( surfaceType_t *surfType ) {
 		break;
 	case RT_POLY:
 		RB_EntitySurfacePolys();
+		break;
+	case RT_TRAIL:
+		RB_SurfaceTrail();
 		break;
 	default:
 		RB_SurfaceAxis();

@@ -72,6 +72,18 @@ function SpriteT:DrawAnim()
 	draw.RectRotated(self.x,self.y,self.w*2,self.h*2,self.shd,self.rot,rx,cx,rx1,cx1)
 end
 
+function SpriteT:GetCoords()
+	local rf = self.frame % self.rows
+	local cf = math.floor(self.frame / self.rows)
+	
+	local rx = (1/self.rows)*rf
+	local cx = (1/self.cols)*cf
+	local rx1 = rx + (1/self.rows)
+	local cx1 = cx + (1/self.cols)
+	
+	return rx,cx,rx1,cx1
+end
+
 function SpriteT:Animate()
 	local lt = LevelTime()
 	if(self.nxt < lt) then

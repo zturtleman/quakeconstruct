@@ -72,6 +72,8 @@ int qlua_rgetpos(lua_State *L) {
 int qlua_rsetpos(lua_State *L) {
 	refEntity_t	*luaentity;
 	vec3_t		origin;
+	vec3_t		temp[32];
+	int			size,i;
 
 	luaL_checktype(L,1,LUA_TUSERDATA);
 	luaL_checktype(L,2,LUA_TVECTOR);
@@ -81,6 +83,21 @@ int qlua_rsetpos(lua_State *L) {
 		lua_tovector(L,2,origin);
 		VectorCopy( origin, luaentity->lightingOrigin );
 		VectorCopy( origin, luaentity->origin );
+
+		if(luaentity->reType == RT_TRAIL) {
+			size = sizeof(luaentity->trailVerts) / sizeof(luaentity->trailVerts[0]);
+
+			Com_Printf("Shifted: %i verts\n",size);
+
+			for(i=0; i<size; i++) {
+				VectorCopy(luaentity->trailVerts[i],temp[i]);
+			}
+
+			for(i=1; i<size; i++) {
+				VectorCopy(temp[i-1],luaentity->trailVerts[i]);
+			}
+			VectorCopy(luaentity->origin,luaentity->trailVerts[0]);
+		}
 	}
 	return 0;
 }

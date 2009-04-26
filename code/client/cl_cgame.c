@@ -606,6 +606,9 @@ int CL_CgameSystemCalls( int *args ) {
 	case CG_R_DRAWTRANSFORMPIC:
 		re.DrawTransformPic( VMF(1), VMF(2), VMF(3), VMF(4), VMF(5), VMF(6), VMF(7), VMF(8), VMF(9), args[10] );
 		return 0;
+	case CG_R_DRAWQUADPIC:
+		re.DrawQuadPic( VMF(1), VMF(2), VMF(3), VMF(4), VMF(5), VMF(6), VMF(7), VMF(8), VMF(9), VMF(10), VMF(11), VMF(12), args[13] );
+		return 0;
 	case CG_R_MODELBOUNDS:
 		re.ModelBounds( args[1], VMA(2), VMA(3) );
 		return 0;

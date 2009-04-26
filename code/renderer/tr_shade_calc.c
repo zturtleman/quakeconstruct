@@ -758,7 +758,7 @@ void RB_CalcModulateColorsByFog( unsigned char *colors ) {
 	// calculate texcoords so we can derive density
 	// this is not wasted, because it would only have
 	// been previously called if the surface was opaque
-	RB_CalcFogTexCoords( texCoords[0] );
+	// RB_CalcFogTexCoords( texCoords[0] ); //-tempfix by HXRMN
 
 	for ( i = 0; i < tess.numVertexes; i++, colors += 4 ) {
 		float f = 1.0 - R_FogFactor( texCoords[i][0], texCoords[i][1] );
@@ -834,6 +834,11 @@ void RB_CalcFogTexCoords( float *st ) {
 	fog_t		*fog;
 	vec3_t		local;
 	vec4_t		fogDistanceVector, fogDepthVector;
+
+	fogDepthVector[0] = 0;
+	fogDepthVector[1] = 0;
+	fogDepthVector[2] = 0;
+	fogDepthVector[3] = 0;
 
 	fog = tr.world->fogs + tess.fogNum;
 

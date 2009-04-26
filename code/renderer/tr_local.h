@@ -1557,6 +1557,17 @@ typedef struct {
 
 typedef struct {
 	int		commandId;
+	shader_t	*shader;
+	float	x0, y0;
+	float	x1, y1;
+	float	x2, y2;
+	float	x3, y3;
+	float	s1, t1;
+	float	s2, t2;
+} quadPicCommand_t;
+
+typedef struct {
+	int		commandId;
 	float	x, y;
 	float	w, h;
 } maskRectCommand_t;
@@ -1588,6 +1599,7 @@ typedef enum {
 	RC_SET_COLOR,
 	RC_STRETCH_PIC,
 	RC_TRANSFORM_PIC,
+	RC_QUAD_PIC,
 	RC_DRAW_SURFS,
 	RC_DRAW_BUFFER,
 	RC_SWAP_BUFFERS,
@@ -1650,6 +1662,8 @@ void RE_StretchPic ( float x, float y, float w, float h,
 					  float s1, float t1, float s2, float t2, qhandle_t hShader );
 void RE_TransformPic ( float x, float y, float w, float h, 
 					  float s1, float t1, float s2, float t2, float r, qhandle_t hShader );
+void RE_QuadPic ( float x0, float y0, float x1, float y1, float x2, float y2, float x3, float y3, 
+					float s1, float t1, float s2, float t2, qhandle_t hShader );
 void RE_BeginFrame( stereoFrame_t stereoFrame );
 void RE_EndFrame( int *frontEndMsec, int *backEndMsec );
 void SaveJPG(char * filename, int quality, int image_width, int image_height, unsigned char *image_buffer);

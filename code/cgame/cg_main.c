@@ -2169,6 +2169,7 @@ void CG_InitLua() {
 	BG_InitLuaTrajectory(L);
 	BG_InitLuaPMove(L);
 	BG_InitLuaUtil(L);
+	BG_InitLuaMath(L);
 	CG_InitLuaVector(L);
 	CG_InitLuaEnts(L);
 	CG_InitLuaREnts(L);
