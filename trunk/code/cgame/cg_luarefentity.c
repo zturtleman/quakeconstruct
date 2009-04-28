@@ -74,6 +74,7 @@ int qlua_rsetpos(lua_State *L) {
 	vec3_t		origin;
 	vec3_t		temp[256];
 	int			size,i,size2;
+	qboolean	isNew = qfalse;
 
 	luaL_checktype(L,1,LUA_TUSERDATA);
 	luaL_checktype(L,2,LUA_TVECTOR);
@@ -81,6 +82,13 @@ int qlua_rsetpos(lua_State *L) {
 	luaentity = lua_torefentity(L,1);
 	if(luaentity != NULL) {
 		lua_tovector(L,2,origin);
+
+		if( origin[0] != luaentity->origin[0] ||
+			origin[1] != luaentity->origin[1] ||
+			origin[2] != luaentity->origin[2]) {
+			isNew = qtrue;
+		}
+
 		VectorCopy( origin, luaentity->lightingOrigin );
 		VectorCopy( origin, luaentity->origin );
 
@@ -563,6 +571,40 @@ int qlua_rgettraillength(lua_State *L) {
 	return 0;
 }
 
+int qlua_rsettrailfade(lua_State *L) {
+	refEntity_t	*luaentity;
+	int count = 0;
+	int size2 = 0;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TNUMBER);
+
+	luaentity = lua_torefentity(L,1);
+	if(luaentity != NULL) {
+		count = lua_tointeger(L,2);
+		if(count >= FT_MAX_TRAILFADE_TYPE) {
+			count = FT_MAX_TRAILFADE_TYPE-1;
+		} else if (count < FT_RADIUS) {
+			count = FT_RADIUS;
+		}
+		luaentity->tfade = count;
+	}
+	return 0;
+}
+
+int qlua_rgettrailfade(lua_State *L) {
+	refEntity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	luaentity = lua_torefentity(L,1);
+	if(luaentity != NULL) {
+		lua_pushinteger(L,luaentity->tfade);
+		return 1;
+	}
+	return 0;
+}
+
 static int Entity_tostring (lua_State *L)
 {
   lua_pushfstring(L, "RefEntity: %p", lua_touserdata(L, 1));
@@ -616,6 +658,8 @@ static const luaL_reg REntity_methods[] = {
   {"PositionOnTag",	qlua_rpositionontag},
   {"SetTrailLength",qlua_rsettraillength},
   {"GetTrailLength",qlua_rgettraillength},
+  {"SetTrailFade",	qlua_rsettrailfade},
+  {"GetTrailFade",	qlua_rgettrailfade},
   {0,0}
 };
 
