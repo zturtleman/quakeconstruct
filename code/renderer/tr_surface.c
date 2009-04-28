@@ -515,6 +515,54 @@ void RB_SurfaceRailCore( void ) {
 	}
 }
 
+void RB_Quad(vec3_t v1, vec3_t v2, vec3_t v3, vec3_t v4, float len) {
+	int			vbase;
+	float		t = len / 256.0f;
+
+	vbase = tess.numVertexes;
+
+	// FIXME: use quad stamp?
+	VectorCopy( v1, tess.xyz[tess.numVertexes] );
+	tess.texCoords[tess.numVertexes][0][0] = 0;
+	tess.texCoords[tess.numVertexes][0][1] = 0;
+	tess.vertexColors[tess.numVertexes][0] = backEnd.currentEntity->e.shaderRGBA[0];
+	tess.vertexColors[tess.numVertexes][1] = backEnd.currentEntity->e.shaderRGBA[1];
+	tess.vertexColors[tess.numVertexes][2] = backEnd.currentEntity->e.shaderRGBA[2];
+	tess.numVertexes++;
+
+	VectorCopy( v2, tess.xyz[tess.numVertexes] );
+	tess.texCoords[tess.numVertexes][0][0] = 0;
+	tess.texCoords[tess.numVertexes][0][1] = 1;
+	tess.vertexColors[tess.numVertexes][0] = backEnd.currentEntity->e.shaderRGBA[0];
+	tess.vertexColors[tess.numVertexes][1] = backEnd.currentEntity->e.shaderRGBA[1];
+	tess.vertexColors[tess.numVertexes][2] = backEnd.currentEntity->e.shaderRGBA[2];
+	tess.numVertexes++;
+
+	VectorCopy( v3, tess.xyz[tess.numVertexes] );
+	tess.texCoords[tess.numVertexes][0][0] = t;
+	tess.texCoords[tess.numVertexes][0][1] = 0;
+	tess.vertexColors[tess.numVertexes][0] = backEnd.currentEntity->e.shaderRGBA[0];
+	tess.vertexColors[tess.numVertexes][1] = backEnd.currentEntity->e.shaderRGBA[1];
+	tess.vertexColors[tess.numVertexes][2] = backEnd.currentEntity->e.shaderRGBA[2];
+	tess.numVertexes++;
+
+	VectorCopy( v4, tess.xyz[tess.numVertexes] );
+	tess.texCoords[tess.numVertexes][0][0] = t;
+	tess.texCoords[tess.numVertexes][0][1] = 1;
+	tess.vertexColors[tess.numVertexes][0] = backEnd.currentEntity->e.shaderRGBA[0];
+	tess.vertexColors[tess.numVertexes][1] = backEnd.currentEntity->e.shaderRGBA[1];
+	tess.vertexColors[tess.numVertexes][2] = backEnd.currentEntity->e.shaderRGBA[2];
+	tess.numVertexes++;
+
+	tess.indexes[tess.numIndexes++] = vbase;
+	tess.indexes[tess.numIndexes++] = vbase + 1;
+	tess.indexes[tess.numIndexes++] = vbase + 2;
+
+	tess.indexes[tess.numIndexes++] = vbase + 2;
+	tess.indexes[tess.numIndexes++] = vbase + 1;
+	tess.indexes[tess.numIndexes++] = vbase + 3;
+}
+
 void RB_SurfaceTrail( void ) {
 	refEntity_t *e;
 	int			len,i;
@@ -523,11 +571,20 @@ void RB_SurfaceTrail( void ) {
 	vec3_t		vec;
 	vec3_t		start, end;
 	vec3_t		v1, v2;
+	vec3_t		vns1, vns2;
+	vec3_t		vos1, vos2;
 	//vec3_t		temp[2048];
+	float rad = 0, ix, sx;
+
+	right[0] = 0;
+	right[1] = 0;
+	right[2] = 0;
 
 	e = &backEnd.currentEntity->e;
 
 	size = sizeof(e->trailVerts) / sizeof(e->trailVerts[0]);
+
+	//RB_Quad(v1,v2,v3,v4);
 
 	for(i=0; i<size-1; i++) {
 		VectorCopy( e->trailVerts[i], start );
@@ -540,6 +597,19 @@ void RB_SurfaceTrail( void ) {
 		VectorSubtract( end, start, vec );
 		len = VectorNormalize( vec );
 
+		VectorMA( start, rad, right, vos1 );
+		VectorMA( start, -rad, right, vos2 );
+
+		sx = (float)size;
+		ix = (float)i;
+
+		if(e->radius > 0) {
+			rad = e->radius * (1 - (ix / sx));
+		} else {
+			rad = r_railCoreWidth->integer * (1 - (ix / sx));
+			//DoRailCore( start, end, right, len, r );
+		}
+
 		// compute side vector
 		VectorSubtract( start, backEnd.viewParms.or.origin, v1 );
 		VectorNormalize( v1 );
@@ -548,12 +618,10 @@ void RB_SurfaceTrail( void ) {
 		CrossProduct( v1, v2, right );
 		VectorNormalize( right );
 
-		if(e->radius > 0) {
-			DoRailCore( start, end, right, len, e->radius );
-		} else {
-			DoRailCore( start, end, right, len, r_railCoreWidth->integer );
-		}
+		VectorMA( end, rad, right, vns1 );
+		VectorMA( end, -rad, right, vns2 );
 
+		RB_Quad(vos1,vos2,vns1,vns2,len);
 	}
 }
 
