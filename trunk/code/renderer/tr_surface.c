@@ -515,9 +515,19 @@ void RB_SurfaceRailCore( void ) {
 	}
 }
 
-void RB_Quad(vec3_t v1, vec3_t v2, vec3_t v3, vec3_t v4, float len) {
+void RB_Quad(vec3_t v1, vec3_t v2, vec3_t v3, vec3_t v4, float len, float cf1, float cf2, float af1, float af2) {
 	int			vbase;
 	float		t = len / 256.0f;
+
+	if(cf1 > 1) cf1 = 1;
+	if(cf2 > 1) cf2 = 1;
+	if(af1 > 1) af1 = 1;
+	if(af2 > 1) af2 = 1;
+
+	if(cf1 < 0) cf1 = 0;
+	if(cf2 < 0) cf2 = 0;
+	if(af1 < 0) af1 = 0;
+	if(af2 < 0) af2 = 0;
 
 	vbase = tess.numVertexes;
 
@@ -525,33 +535,37 @@ void RB_Quad(vec3_t v1, vec3_t v2, vec3_t v3, vec3_t v4, float len) {
 	VectorCopy( v1, tess.xyz[tess.numVertexes] );
 	tess.texCoords[tess.numVertexes][0][0] = 0;
 	tess.texCoords[tess.numVertexes][0][1] = 0;
-	tess.vertexColors[tess.numVertexes][0] = backEnd.currentEntity->e.shaderRGBA[0];
-	tess.vertexColors[tess.numVertexes][1] = backEnd.currentEntity->e.shaderRGBA[1];
-	tess.vertexColors[tess.numVertexes][2] = backEnd.currentEntity->e.shaderRGBA[2];
+	tess.vertexColors[tess.numVertexes][0] = backEnd.currentEntity->e.shaderRGBA[0] * cf1;
+	tess.vertexColors[tess.numVertexes][1] = backEnd.currentEntity->e.shaderRGBA[1] * cf1;
+	tess.vertexColors[tess.numVertexes][2] = backEnd.currentEntity->e.shaderRGBA[2] * cf1;
+	tess.vertexColors[tess.numVertexes][3] = backEnd.currentEntity->e.shaderRGBA[3] * af1;
 	tess.numVertexes++;
 
 	VectorCopy( v2, tess.xyz[tess.numVertexes] );
 	tess.texCoords[tess.numVertexes][0][0] = 0;
 	tess.texCoords[tess.numVertexes][0][1] = 1;
-	tess.vertexColors[tess.numVertexes][0] = backEnd.currentEntity->e.shaderRGBA[0];
-	tess.vertexColors[tess.numVertexes][1] = backEnd.currentEntity->e.shaderRGBA[1];
-	tess.vertexColors[tess.numVertexes][2] = backEnd.currentEntity->e.shaderRGBA[2];
+	tess.vertexColors[tess.numVertexes][0] = backEnd.currentEntity->e.shaderRGBA[0] * cf1;
+	tess.vertexColors[tess.numVertexes][1] = backEnd.currentEntity->e.shaderRGBA[1] * cf1;
+	tess.vertexColors[tess.numVertexes][2] = backEnd.currentEntity->e.shaderRGBA[2] * cf1;
+	tess.vertexColors[tess.numVertexes][3] = backEnd.currentEntity->e.shaderRGBA[3] * af1;
 	tess.numVertexes++;
 
 	VectorCopy( v3, tess.xyz[tess.numVertexes] );
 	tess.texCoords[tess.numVertexes][0][0] = t;
 	tess.texCoords[tess.numVertexes][0][1] = 0;
-	tess.vertexColors[tess.numVertexes][0] = backEnd.currentEntity->e.shaderRGBA[0];
-	tess.vertexColors[tess.numVertexes][1] = backEnd.currentEntity->e.shaderRGBA[1];
-	tess.vertexColors[tess.numVertexes][2] = backEnd.currentEntity->e.shaderRGBA[2];
+	tess.vertexColors[tess.numVertexes][0] = backEnd.currentEntity->e.shaderRGBA[0] * cf2;
+	tess.vertexColors[tess.numVertexes][1] = backEnd.currentEntity->e.shaderRGBA[1] * cf2;
+	tess.vertexColors[tess.numVertexes][2] = backEnd.currentEntity->e.shaderRGBA[2] * cf2;
+	tess.vertexColors[tess.numVertexes][3] = backEnd.currentEntity->e.shaderRGBA[3] * af2;
 	tess.numVertexes++;
 
 	VectorCopy( v4, tess.xyz[tess.numVertexes] );
 	tess.texCoords[tess.numVertexes][0][0] = t;
 	tess.texCoords[tess.numVertexes][0][1] = 1;
-	tess.vertexColors[tess.numVertexes][0] = backEnd.currentEntity->e.shaderRGBA[0];
-	tess.vertexColors[tess.numVertexes][1] = backEnd.currentEntity->e.shaderRGBA[1];
-	tess.vertexColors[tess.numVertexes][2] = backEnd.currentEntity->e.shaderRGBA[2];
+	tess.vertexColors[tess.numVertexes][0] = backEnd.currentEntity->e.shaderRGBA[0] * cf2;
+	tess.vertexColors[tess.numVertexes][1] = backEnd.currentEntity->e.shaderRGBA[1] * cf2;
+	tess.vertexColors[tess.numVertexes][2] = backEnd.currentEntity->e.shaderRGBA[2] * cf2;
+	tess.vertexColors[tess.numVertexes][3] = backEnd.currentEntity->e.shaderRGBA[3] * af2;
 	tess.numVertexes++;
 
 	tess.indexes[tess.numIndexes++] = vbase;
@@ -573,7 +587,11 @@ void RB_SurfaceTrail( void ) {
 	vec3_t		v1, v2;
 	vec3_t		vns1, vns2;
 	vec3_t		vos1, vos2;
-	float rad = 0, ix, sx;
+	float rad = 0, ix, ix2, sx;
+	float sc = 1;
+	float ec = 1;
+	float sa = 1;
+	float ea = 1;
 
 	right[0] = 0;
 	right[1] = 0;
@@ -586,8 +604,6 @@ void RB_SurfaceTrail( void ) {
 	if(size > size2) size = size2;
 	if(size <= 1) size = 2;
 
-	//RB_Quad(v1,v2,v3,v4);
-
 	for(i=0; i<size-1; i++) {
 		VectorCopy( e->trailVerts[i], start );
 		VectorCopy( e->trailVerts[i+1], end );
@@ -599,17 +615,47 @@ void RB_SurfaceTrail( void ) {
 		VectorSubtract( end, start, vec );
 		len = VectorNormalize( vec );
 
-		VectorMA( start, rad, right, vos1 );
-		VectorMA( start, -rad, right, vos2 );
+		if(i == 0) {
+			VectorSubtract( start, backEnd.viewParms.or.origin, v1 );
+			VectorNormalize( v1 );
+			VectorSubtract( end, backEnd.viewParms.or.origin, v2 );
+			VectorNormalize( v2 );
+			CrossProduct( v1, v2, right );
+			VectorNormalize( right );
 
-		sx = (float)size;
+			if(e->radius > 0) {
+				rad = e->radius;
+			} else {
+				rad = r_railCoreWidth->integer;
+				//DoRailCore( start, end, right, len, r );
+			}
+
+			if(right[0] == 0 && right[1] == 0 && right[2] == 0) Com_Printf("Bad Right Vector [1]\n");
+
+			VectorMA( start, rad, right, vos1 );
+			VectorMA( start, -rad, right, vos2 );
+		}
+
+		//VectorMA( start, rad, right, vos1 );
+		//VectorMA( start, -rad, right, vos2 );
+
+		sx = (float)size-2;
 		ix = (float)i;
+		ix2 = ix+1;
 
 		if(e->radius > 0) {
-			rad = e->radius * (1 - (ix / sx));
+			rad = e->radius;
 		} else {
-			rad = r_railCoreWidth->integer * (1 - (ix / sx));
+			rad = r_railCoreWidth->integer;
 			//DoRailCore( start, end, right, len, r );
+		}
+
+		if(e->tfade == FT_RADIUS) {
+			rad *= (1 - (ix / sx));
+		}
+
+		if(rad <= 0) {
+			Com_Printf("Bad Radius %f\n",rad);
 		}
 
 		// compute side vector
@@ -620,10 +666,25 @@ void RB_SurfaceTrail( void ) {
 		CrossProduct( v1, v2, right );
 		VectorNormalize( right );
 
+		if(right[0] == 0 && right[1] == 0 && right[2] == 0) Com_Printf("Bad Right Vector [2]\n");
+
 		VectorMA( end, rad, right, vns1 );
 		VectorMA( end, -rad, right, vns2 );
 
-		RB_Quad(vos1,vos2,vns1,vns2,len);
+		if(e->tfade == FT_COLOR) {
+			sc = (1 - (ix / sx));
+			ec = (1 - (ix2 / sx));
+		}
+
+		if(e->tfade == FT_ALPHA) {
+			sa = (1 - (ix / sx));
+			ea = (1 - (ix2 / sx));
+		}
+
+		RB_Quad(vos1,vos2,vns1,vns2,len, sc, ec, sa, ea);
+
+		VectorCopy(vns1,vos1);
+		VectorCopy(vns2,vos2);
 	}
 }
 
