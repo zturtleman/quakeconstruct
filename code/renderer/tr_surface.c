@@ -566,14 +566,13 @@ void RB_Quad(vec3_t v1, vec3_t v2, vec3_t v3, vec3_t v4, float len) {
 void RB_SurfaceTrail( void ) {
 	refEntity_t *e;
 	int			len,i;
-	int			size;
+	int			size, size2;
 	vec3_t		right;
 	vec3_t		vec;
 	vec3_t		start, end;
 	vec3_t		v1, v2;
 	vec3_t		vns1, vns2;
 	vec3_t		vos1, vos2;
-	//vec3_t		temp[2048];
 	float rad = 0, ix, sx;
 
 	right[0] = 0;
@@ -582,7 +581,10 @@ void RB_SurfaceTrail( void ) {
 
 	e = &backEnd.currentEntity->e;
 
-	size = sizeof(e->trailVerts) / sizeof(e->trailVerts[0]);
+	size = e->numVerts2; //sizeof(e->trailVerts) / sizeof(e->trailVerts[0]);
+	size2 = sizeof(e->trailVerts) / sizeof(e->trailVerts[0]);
+	if(size > size2) size = size2;
+	if(size <= 1) size = 2;
 
 	//RB_Quad(v1,v2,v3,v4);
 

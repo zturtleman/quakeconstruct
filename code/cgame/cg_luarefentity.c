@@ -72,8 +72,8 @@ int qlua_rgetpos(lua_State *L) {
 int qlua_rsetpos(lua_State *L) {
 	refEntity_t	*luaentity;
 	vec3_t		origin;
-	vec3_t		temp[128];
-	int			size,i;
+	vec3_t		temp[256];
+	int			size,i,size2;
 
 	luaL_checktype(L,1,LUA_TUSERDATA);
 	luaL_checktype(L,2,LUA_TVECTOR);
@@ -85,7 +85,10 @@ int qlua_rsetpos(lua_State *L) {
 		VectorCopy( origin, luaentity->origin );
 
 		if(luaentity->reType == RT_TRAIL) {
-			size = sizeof(luaentity->trailVerts) / sizeof(luaentity->trailVerts[0]);
+			size2 = sizeof(luaentity->trailVerts) / sizeof(luaentity->trailVerts[0]);
+			if(luaentity->numVerts2 > size2) luaentity->numVerts2 = size2;
+			if(luaentity->numVerts2 <= 1) luaentity->numVerts2 = 2;
+			size = luaentity->numVerts2; //sizeof(luaentity->trailVerts) / sizeof(luaentity->trailVerts[0]);
 
 			//Com_Printf("Shifted: %i verts\n",size);
 
@@ -525,6 +528,41 @@ int qlua_rsettime(lua_State *L) {
 	return 0;
 }
 
+int qlua_rsettraillength(lua_State *L) {
+	refEntity_t	*luaentity;
+	int count = 0;
+	int size2 = 0;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TNUMBER);
+
+	luaentity = lua_torefentity(L,1);
+	if(luaentity != NULL) {
+		count = lua_tointeger(L,2);
+		size2 = sizeof(luaentity->trailVerts) / sizeof(luaentity->trailVerts[0]);
+		if(count > size2) {
+			count = size2;
+		} else if (count <= 1) {
+			count = 2;
+		}
+		luaentity->numVerts2 = count;
+	}
+	return 0;
+}
+
+int qlua_rgettraillength(lua_State *L) {
+	refEntity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	luaentity = lua_torefentity(L,1);
+	if(luaentity != NULL) {
+		lua_pushinteger(L,luaentity->numVerts2);
+		return 1;
+	}
+	return 0;
+}
+
 static int Entity_tostring (lua_State *L)
 {
   lua_pushfstring(L, "RefEntity: %p", lua_touserdata(L, 1));
@@ -576,6 +614,8 @@ static const luaL_reg REntity_methods[] = {
   {"Render",		qlua_rrender},
   {"AlwaysRender",	qlua_rsetalways},
   {"PositionOnTag",	qlua_rpositionontag},
+  {"SetTrailLength",qlua_rsettraillength},
+  {"GetTrailLength",qlua_rgettraillength},
   {0,0}
 };
 
