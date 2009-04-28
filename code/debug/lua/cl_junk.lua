@@ -20,6 +20,18 @@ local extimer = LevelTime()
 local exduration = 7000
 local intervals = {2,-1.6,2,3}
 
+local data = 
+[[{
+	{
+		blendfunc add
+		map $whiteimage
+		alphaGen vertex
+		rgbGen vertex
+		//tcGen environment
+	}
+}]]
+local trailfx1 = CreateShader("f",data)
+
 local function lerpVec(v1,v2,t)
 	return v1 + (v2 - v1) * t
 end
@@ -133,6 +145,13 @@ local function doSplines(ref)
 	ref:SetPos(ref:GetPos() + pos)
 end
 
+local trail = RefEntity()
+trail:SetType(RT_TRAIL)
+trail:SetShader(trailfx1)
+trail:SetColor(.5,.5,.5,1)
+trail:SetRadius(3)
+trail:SetTrailLength(10)
+
 local function d3d()
 	local hand = util.Hand()
 	local pl = LocalPlayer()
@@ -208,6 +227,9 @@ local function d3d()
 		local flash = RefEntity()
 		flash:SetModel(inf.flashModel)
 		flash:PositionOnTag(ref,"tag_flash")
+		
+		trail:SetPos(flash:GetPos())
+		trail:Render()
 		
 		if(wpstate == WEAPON_FIRING) then
 			local fv = (lastflpos - flash:GetPos())

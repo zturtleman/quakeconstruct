@@ -70,6 +70,7 @@ local function makeTrail(i,cr,cg,cb,ca)
 	trail:SetRadius(4)
 	trail:SetShader(trailfx1)
 	trail:SetTrailLength(256)
+	trail:SetTrailFade(FT_COLOR)
 	trailCache[i] = trail
 end
 
@@ -120,6 +121,7 @@ local function d3d()
 				trail:SetTrailLength(128)
 				trail:SetRadius(trail:GetRadius() * 2)
 				trail:SetShader(trailfx2)
+				trail:SetTrailFade(FT_RADIUS)
 				trail:SetColor(r/4,g/4,b/4,a/4)
 				passTrail(trail)
 				trailCache[i] = nil

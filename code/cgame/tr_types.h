@@ -72,8 +72,17 @@ typedef enum {
 	RT_MAX_REF_ENTITY_TYPE
 } refEntityType_t;
 
+typedef enum {
+	FT_RADIUS,
+	FT_COLOR,
+	FT_ALPHA,
+
+	FT_MAX_TRAILFADE_TYPE
+} trailFadeType_t;
+
 typedef struct {
 	refEntityType_t	reType;
+	trailFadeType_t tfade;
 	int			renderfx;
 
 	qhandle_t	hModel;				// opaque type outside refresh
