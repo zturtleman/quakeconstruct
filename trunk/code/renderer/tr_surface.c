@@ -630,7 +630,9 @@ void RB_SurfaceTrail( void ) {
 				//DoRailCore( start, end, right, len, r );
 			}
 
-			if(right[0] == 0 && right[1] == 0 && right[2] == 0) Com_Printf("Bad Right Vector [1]\n");
+			if(right[0] == 0 && right[1] == 0 && right[2] == 0) {
+				//Com_Printf("Bad Right Vector [1]\n");
+			}
 
 			VectorMA( start, rad, right, vos1 );
 			VectorMA( start, -rad, right, vos2 );
@@ -666,7 +668,10 @@ void RB_SurfaceTrail( void ) {
 		CrossProduct( v1, v2, right );
 		VectorNormalize( right );
 
-		if(right[0] == 0 && right[1] == 0 && right[2] == 0) Com_Printf("Bad Right Vector [2]\n");
+		if(right[0] == 0 && right[1] == 0 && right[2] == 0) {
+			continue;
+			//Com_Printf("Bad Right Vector [2]\n");
+		}
 
 		VectorMA( end, rad, right, vns1 );
 		VectorMA( end, -rad, right, vns2 );
