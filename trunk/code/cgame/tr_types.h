@@ -113,7 +113,7 @@ typedef struct {
 	vec3_t		lua_scale;
 
 
-	vec3_t		trailVerts[32];
+	vec3_t		trailVerts[128];
 } refEntity_t;
 
 

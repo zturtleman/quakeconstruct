@@ -72,7 +72,7 @@ int qlua_rgetpos(lua_State *L) {
 int qlua_rsetpos(lua_State *L) {
 	refEntity_t	*luaentity;
 	vec3_t		origin;
-	vec3_t		temp[32];
+	vec3_t		temp[128];
 	int			size,i;
 
 	luaL_checktype(L,1,LUA_TUSERDATA);
@@ -87,7 +87,7 @@ int qlua_rsetpos(lua_State *L) {
 		if(luaentity->reType == RT_TRAIL) {
 			size = sizeof(luaentity->trailVerts) / sizeof(luaentity->trailVerts[0]);
 
-			Com_Printf("Shifted: %i verts\n",size);
+			//Com_Printf("Shifted: %i verts\n",size);
 
 			for(i=0; i<size; i++) {
 				VectorCopy(luaentity->trailVerts[i],temp[i]);
@@ -451,6 +451,23 @@ int qlua_rsetcolor(lua_State *L) {
 	return 0;
 }
 
+int qlua_rgetcolor(lua_State *L) {
+	refEntity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaentity = lua_torefentity(L,1);
+
+	if(luaentity != NULL) {
+		lua_pushinteger(L,(int)luaentity->shaderRGBA[0]);
+		lua_pushinteger(L,(int)luaentity->shaderRGBA[1]);
+		lua_pushinteger(L,(int)luaentity->shaderRGBA[2]);
+		lua_pushinteger(L,(int)luaentity->shaderRGBA[3]);
+		return 4;
+	}
+
+	return 0;
+}
+
 int qlua_rrender(lua_State *L) {
 	refEntity_t	*e;
 
@@ -552,6 +569,7 @@ static const luaL_reg REntity_methods[] = {
   {"SetLerp",		qlua_rsetlerp},
   {"GetLerp",		qlua_rgetlerp},
   {"SetColor",		qlua_rsetcolor},
+  {"GetColor",		qlua_rgetcolor},
   {"SetRotation",	qlua_rsetrotation},
   {"SetTime",		qlua_rsettime},
   {"Scale",			qlua_rsetscale},
