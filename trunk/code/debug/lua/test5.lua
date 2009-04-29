@@ -1,8 +1,12 @@
+util.ClearImage("gfx/trailbanner.tga")
+util.ClearImage("gfx/trailstreaks.tga")
+
 local data = 
 [[{
 	{
 		blendfunc add
-		map $whiteimage
+		map gfx/trailstreaks.tga //$whiteimage
+		//tcMod scroll 0  0.7
 		alphaGen vertex
 		rgbGen vertex
 		//tcGen environment
@@ -13,7 +17,8 @@ local trailfx1 = CreateShader("f",data)
 local data = 
 [[{
 	{
-		map $whiteimage
+		blendfunc blend
+		map gfx/trailstreaks.tga //$whiteimage
 		alphaGen vertex
 		rgbGen vertex
 		//tcGen environment
@@ -32,6 +37,18 @@ local data =
 	}
 }]]
 local trailfx3 = CreateShader("f",data)
+
+
+local data =
+[[{
+	{
+        map gfx/damage/blood8x.tga
+		blendFunc blend
+		rgbGen		vertex
+		alphaGen	vertex
+	}
+}]]
+local blood = CreateShader("f",data)
 
 local trailCache = {}
 local posCache = {}
@@ -67,10 +84,10 @@ local function makeTrail(i,cr,cg,cb,ca)
 	local trail = RefEntity()
 	trail:SetType(RT_TRAIL)
 	trail:SetColor(cr or r,cg or g,cb or b,ca or 1)
-	trail:SetRadius(4)
+	trail:SetRadius(6)
 	trail:SetShader(trailfx1)
 	trail:SetTrailLength(256)
-	trail:SetTrailFade(FT_COLOR)
+	trail:SetTrailFade(FT_NONE)
 	trailCache[i] = trail
 end
 
@@ -80,7 +97,16 @@ local function d3d()
 	for k,v in pairs(players) do
 		local i = v:EntIndex()
 		local trail = trailCache[i]
-		local plpos = v:GetPos() - Vector(0,0,10)
+		
+		local forward = VectorForward(v:GetLerpAngles())
+		local pos = v:GetPos() + Vector(0,0,25)
+		local ep = pos + forward * 3000
+		local tr = TraceLine(pos,ep,v,1)
+		
+		
+		--posCache[i] = posCache[i] or Vector()
+		--posCache[i] = posCache[i] + ((tr.endpos + Vector(0,0,15)) - posCache[i])*.5
+		local plpos = (v:GetPos() - Vector(0,0,10))
 		local health = v:GetInfo().health
 		if(health > 0) then
 			if(trail == nil) then
@@ -121,7 +147,7 @@ local function d3d()
 				trail:SetTrailLength(128)
 				trail:SetRadius(trail:GetRadius() * 2)
 				trail:SetShader(trailfx2)
-				trail:SetTrailFade(FT_RADIUS)
+				trail:SetTrailFade(FT_ALPHA)
 				trail:SetColor(r/4,g/4,b/4,a/4)
 				passTrail(trail)
 				trailCache[i] = nil
@@ -131,3 +157,72 @@ local function d3d()
 	end
 end
 hook.add("Draw3D","test5",d3d)
+//__DL_BLOCK
+
+local function createEmitter()
+	local ref = RefEntity()
+	ref:SetColor(1,0,0,1)
+	ref:SetType(RT_TRAIL)
+	ref:SetShader(blood)
+	ref:SetRadius(2)
+	ref:SetTrailLength(10)
+	ref:SetTrailFade(FT_ALPHA)
+	
+	local le = LocalEntity()
+	le:SetRefEntity(ref)
+	le:SetStartTime(LevelTime())
+	le:SetEndTime(LevelTime() + 100)
+	le:SetType(LE_FRAGMENT)
+	le:SetEndColor(0,0,0,0)
+	le:Emitter(LevelTime(), LevelTime()+100, 1000)
+	return le
+end
+
+local emitter = createEmitter()
+
+local function pldamage(self2,attacker,pos,dmg,death,self,suicide,hp,id,pos,dir)
+	if(self2 != nil and self2:IsPlayer()) then
+		local le = createEmitter()
+		le:SetPos(pos)
+	
+		for i=1,8 do
+			local le2 = le:Emit()
+			if(le2 != nil) then
+				dir = Vector(0,0,0)
+				dir.x = dir.x + (math.random(-10,10)/10)
+				dir.y = dir.y + (math.random(-10,10)/10)
+				dir.z = dir.z + (math.random(-10,10)/10)
+						
+				dir = dir * math.random(60,300)
+				le2:SetVelocity(dir + self2:GetTrajectory():GetDelta()/2)
+				le2:SetRadius(math.random(1,5))
+				le2:SetEndRadius(1)
+				le2:SetStartTime(LevelTime())
+				le2:SetEndTime(LevelTime() + math.random(800,2000))
+				
+				le2:SetCallback(LOCALENTITY_CALLBACK_THINK,function(le)
+					local r = le:GetRefEntity()
+					r:SetPos(r:GetPos())
+					le:SetRefEntity(r)
+					le:SetNextThink(LevelTime() + 20)
+				end)
+				
+				
+				--if(math.random(0,1) == 1) then
+					le2:SetStartColor(.4,0,0,1)
+				--else
+					--le2:SetStartColor(1,1,1,1)
+				--end
+			end
+		end
+	end
+end
+hook.add("PlayerDamaged","test5",pldamage)
+
+local function event(entity,event,pos,dir)
+	if(event == EV_BULLET_HIT_FLESH) then
+
+	end
+end
+hook.add("EventReceived","vecdefine",event)
+//__DL_UNBLOCK

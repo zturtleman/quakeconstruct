@@ -13,6 +13,7 @@ typedef enum {
 } refEntityType_t;
 
 typedef enum {
+	FT_NONE,
 	FT_RADIUS,
 	FT_COLOR,
 	FT_ALPHA,

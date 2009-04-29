@@ -151,6 +151,7 @@ trail:SetShader(trailfx1)
 trail:SetColor(.5,.5,.5,1)
 trail:SetRadius(3)
 trail:SetTrailLength(10)
+trail:SetTrailFade(FT_COLOR)
 
 local function d3d()
 	local hand = util.Hand()
