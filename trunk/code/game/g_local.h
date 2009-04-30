@@ -377,6 +377,7 @@ typedef struct {
 
 	int			startTime;				// level.time the map was started
 
+	qboolean	customScores;
 	int			teamScores[TEAM_NUM_TEAMS];
 	int			lastTeamLocationTime;		// last time of client team location update
 

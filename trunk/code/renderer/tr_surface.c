@@ -515,9 +515,8 @@ void RB_SurfaceRailCore( void ) {
 	}
 }
 
-void RB_Quad(vec3_t v1, vec3_t v2, vec3_t v3, vec3_t v4, float len, float cf1, float cf2, float af1, float af2) {
+void RB_Quad(vec3_t v1, vec3_t v2, vec3_t v3, vec3_t v4, float cf1, float cf2, float af1, float af2, float start, float end) {
 	int			vbase;
-	float		t = len / 256.0f;
 
 	if(cf1 > 1) cf1 = 1;
 	if(cf2 > 1) cf2 = 1;
@@ -533,7 +532,7 @@ void RB_Quad(vec3_t v1, vec3_t v2, vec3_t v3, vec3_t v4, float len, float cf1, f
 
 	// FIXME: use quad stamp?
 	VectorCopy( v1, tess.xyz[tess.numVertexes] );
-	tess.texCoords[tess.numVertexes][0][0] = 0;
+	tess.texCoords[tess.numVertexes][0][0] = 1 - start;
 	tess.texCoords[tess.numVertexes][0][1] = 0;
 	tess.vertexColors[tess.numVertexes][0] = backEnd.currentEntity->e.shaderRGBA[0] * cf1;
 	tess.vertexColors[tess.numVertexes][1] = backEnd.currentEntity->e.shaderRGBA[1] * cf1;
@@ -542,7 +541,7 @@ void RB_Quad(vec3_t v1, vec3_t v2, vec3_t v3, vec3_t v4, float len, float cf1, f
 	tess.numVertexes++;
 
 	VectorCopy( v2, tess.xyz[tess.numVertexes] );
-	tess.texCoords[tess.numVertexes][0][0] = 0;
+	tess.texCoords[tess.numVertexes][0][0] = 1 - start;
 	tess.texCoords[tess.numVertexes][0][1] = 1;
 	tess.vertexColors[tess.numVertexes][0] = backEnd.currentEntity->e.shaderRGBA[0] * cf1;
 	tess.vertexColors[tess.numVertexes][1] = backEnd.currentEntity->e.shaderRGBA[1] * cf1;
@@ -551,7 +550,7 @@ void RB_Quad(vec3_t v1, vec3_t v2, vec3_t v3, vec3_t v4, float len, float cf1, f
 	tess.numVertexes++;
 
 	VectorCopy( v3, tess.xyz[tess.numVertexes] );
-	tess.texCoords[tess.numVertexes][0][0] = t;
+	tess.texCoords[tess.numVertexes][0][0] = 1 - end;
 	tess.texCoords[tess.numVertexes][0][1] = 0;
 	tess.vertexColors[tess.numVertexes][0] = backEnd.currentEntity->e.shaderRGBA[0] * cf2;
 	tess.vertexColors[tess.numVertexes][1] = backEnd.currentEntity->e.shaderRGBA[1] * cf2;
@@ -560,7 +559,7 @@ void RB_Quad(vec3_t v1, vec3_t v2, vec3_t v3, vec3_t v4, float len, float cf1, f
 	tess.numVertexes++;
 
 	VectorCopy( v4, tess.xyz[tess.numVertexes] );
-	tess.texCoords[tess.numVertexes][0][0] = t;
+	tess.texCoords[tess.numVertexes][0][0] = 1 - end;
 	tess.texCoords[tess.numVertexes][0][1] = 1;
 	tess.vertexColors[tess.numVertexes][0] = backEnd.currentEntity->e.shaderRGBA[0] * cf2;
 	tess.vertexColors[tess.numVertexes][1] = backEnd.currentEntity->e.shaderRGBA[1] * cf2;
@@ -592,6 +591,8 @@ void RB_SurfaceTrail( void ) {
 	float ec = 1;
 	float sa = 1;
 	float ea = 1;
+	float u_start = 0;
+	float u_end = 1;
 
 	right[0] = 0;
 	right[1] = 0;
@@ -656,9 +657,9 @@ void RB_SurfaceTrail( void ) {
 			rad *= (1 - (ix / sx));
 		}
 
-		if(rad <= 0) {
+		/*if(rad <= 0) {
 			Com_Printf("Bad Radius %f\n",rad);
-		}
+		}*/
 
 		// compute side vector
 		VectorSubtract( start, backEnd.viewParms.or.origin, v1 );
@@ -686,7 +687,21 @@ void RB_SurfaceTrail( void ) {
 			ea = (1 - (ix2 / sx));
 		}
 
-		RB_Quad(vos1,vos2,vns1,vns2,len, sc, ec, sa, ea);
+		u_start = (ix / sx);
+		u_end = (ix2 / sx);
+
+		if(u_start < 0) u_start = 0;
+		if(u_start > 1) u_start = 1;
+
+		if(u_end < 0) u_end = 0;
+		if(u_end > 1) u_end = 1;
+
+		if(i >= size-4) {
+			u_end = .99f;
+			u_start = .99f;
+		}
+
+		RB_Quad(vos1,vos2,vns1,vns2, sc, ec, sa, ea, u_start, u_end);
 
 		VectorCopy(vns1,vos1);
 		VectorCopy(vns2,vos2);

@@ -127,50 +127,57 @@ AddTeamScore
  for gametype GT_TEAM the level.teamScores is updated in AddScore in g_combat.c
 ==============
 */
-void AddTeamScore(vec3_t origin, int team, int score) {
+void AddTeamScore(vec3_t origin, int team, int score, qboolean sound) {
 	gentity_t	*te;
 	lua_State	*L = GetServerLuaState();
-
-	te = G_TempEntity(origin, EV_GLOBAL_TEAM_SOUND );
-	te->r.svFlags |= SVF_BROADCAST;
-
-	if ( team == TEAM_RED ) {
-		if ( level.teamScores[ TEAM_RED ] + score == level.teamScores[ TEAM_BLUE ] ) {
-			//teams are tied sound
-			te->s.eventParm = GTS_TEAMS_ARE_TIED;
-		}
-		else if ( level.teamScores[ TEAM_RED ] <= level.teamScores[ TEAM_BLUE ] &&
-					level.teamScores[ TEAM_RED ] + score > level.teamScores[ TEAM_BLUE ]) {
-			// red took the lead sound
-			te->s.eventParm = GTS_REDTEAM_TOOK_LEAD;
-		}
-		else {
-			// red scored sound
-			te->s.eventParm = GTS_REDTEAM_SCORED;
-		}
-	}
-	else {
-		if ( level.teamScores[ TEAM_BLUE ] + score == level.teamScores[ TEAM_RED ] ) {
-			//teams are tied sound
-			te->s.eventParm = GTS_TEAMS_ARE_TIED;
-		}
-		else if ( level.teamScores[ TEAM_BLUE ] <= level.teamScores[ TEAM_RED ] &&
-					level.teamScores[ TEAM_BLUE ] + score > level.teamScores[ TEAM_RED ]) {
-			// blue took the lead sound
-			te->s.eventParm = GTS_BLUETEAM_TOOK_LEAD;
+	
+	if(sound) {
+		te = G_TempEntity(origin, EV_GLOBAL_TEAM_SOUND );
+		te->r.svFlags |= SVF_BROADCAST;
+		if ( team == TEAM_RED ) {
+			if ( level.teamScores[ TEAM_RED ] + score == level.teamScores[ TEAM_BLUE ] ) {
+				//teams are tied sound
+				te->s.eventParm = GTS_TEAMS_ARE_TIED;
+			}
+			else if ( level.teamScores[ TEAM_RED ] <= level.teamScores[ TEAM_BLUE ] &&
+						level.teamScores[ TEAM_RED ] + score > level.teamScores[ TEAM_BLUE ]) {
+				// red took the lead sound
+				te->s.eventParm = GTS_REDTEAM_TOOK_LEAD;
+			}
+			else {
+				// red scored sound
+				te->s.eventParm = GTS_REDTEAM_SCORED;
+			}
 		}
 		else {
-			// blue scored sound
-			te->s.eventParm = GTS_BLUETEAM_SCORED;
+			if ( level.teamScores[ TEAM_BLUE ] + score == level.teamScores[ TEAM_RED ] ) {
+				//teams are tied sound
+				te->s.eventParm = GTS_TEAMS_ARE_TIED;
+			}
+			else if ( level.teamScores[ TEAM_BLUE ] <= level.teamScores[ TEAM_RED ] &&
+						level.teamScores[ TEAM_BLUE ] + score > level.teamScores[ TEAM_RED ]) {
+				// blue took the lead sound
+				te->s.eventParm = GTS_BLUETEAM_TOOK_LEAD;
+			}
+			else {
+				// blue scored sound
+				te->s.eventParm = GTS_BLUETEAM_SCORED;
+			}
 		}
 	}
-	level.teamScores[ team ] += score;
+	if(!level.customScores) {
+		level.teamScores[ team ] += score;
+	}
 	if(L != NULL) {
 		qlua_gethook(L, "TeamScored");
 		lua_pushinteger(L,team);
 		lua_pushinteger(L,score);
-		lua_pushinteger(L,te->s.eventParm);
 		lua_pushvector(L,origin);
+		if(sound) {
+			lua_pushinteger(L,te->s.eventParm);
+		} else {
+			lua_pushinteger(L,0);
+		}
 		qlua_pcall(L,4,0,qtrue);
 	}
 }
@@ -786,7 +793,7 @@ int Team_TouchOurFlag( gentity_t *ent, gentity_t *other, int team ) {
 	teamgame.last_capture_team = team;
 
 	// Increase the team's score
-	AddTeamScore(ent->s.pos.trBase, other->client->sess.sessionTeam, 1);
+	AddTeamScore(ent->s.pos.trBase, other->client->sess.sessionTeam, 1, qtrue);
 	Team_ForceGesture(other->client->sess.sessionTeam);
 
 	other->client->pers.teamState.captures++;
@@ -1263,7 +1270,7 @@ static void ObeliskDie( gentity_t *self, gentity_t *inflictor, gentity_t *attack
 	int			otherTeam;
 
 	otherTeam = OtherTeam( self->spawnflags );
-	AddTeamScore(self->s.pos.trBase, otherTeam, 1);
+	AddTeamScore(self->s.pos.trBase, otherTeam, 1, qtrue);
 	Team_ForceGesture(otherTeam);
 
 	CalculateRanks();
@@ -1309,7 +1316,7 @@ static void ObeliskTouch( gentity_t *self, gentity_t *other, trace_t *trace ) {
 	PrintMsg(NULL, "%s" S_COLOR_WHITE " brought in %i skull%s.\n",
 					other->client->pers.netname, tokens, tokens ? "s" : "" );
 
-	AddTeamScore(self->s.pos.trBase, other->client->sess.sessionTeam, tokens);
+	AddTeamScore(self->s.pos.trBase, other->client->sess.sessionTeam, tokens, qtrue);
 	Team_ForceGesture(other->client->sess.sessionTeam);
 
 	AddScore(other, self->r.currentOrigin, CTF_CAPTURE_BONUS*tokens);

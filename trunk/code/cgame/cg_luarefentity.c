@@ -584,8 +584,8 @@ int qlua_rsettrailfade(lua_State *L) {
 		count = lua_tointeger(L,2);
 		if(count >= FT_MAX_TRAILFADE_TYPE) {
 			count = FT_MAX_TRAILFADE_TYPE-1;
-		} else if (count < FT_RADIUS) {
-			count = FT_RADIUS;
+		} else if (count < 0) {
+			count = 0;
 		}
 		luaentity->tfade = count;
 	}
