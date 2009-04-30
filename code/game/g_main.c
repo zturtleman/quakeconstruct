@@ -1444,16 +1444,18 @@ void CheckExitRules( void ) {
 	}
 
 	if ( g_gametype.integer < GT_CTF && g_fraglimit.integer ) {
-		if ( level.teamScores[TEAM_RED] >= g_fraglimit.integer ) {
-			trap_SendServerCommand( -1, "print \"Red hit the fraglimit.\n\"" );
-			LogExit( "Fraglimit hit." );
-			return;
-		}
+		if ( !level.customScores ) {
+			if ( level.teamScores[TEAM_RED] >= g_fraglimit.integer ) {
+				trap_SendServerCommand( -1, "print \"Red hit the fraglimit.\n\"" );
+				LogExit( "Fraglimit hit." );
+				return;
+			}
 
-		if ( level.teamScores[TEAM_BLUE] >= g_fraglimit.integer ) {
-			trap_SendServerCommand( -1, "print \"Blue hit the fraglimit.\n\"" );
-			LogExit( "Fraglimit hit." );
-			return;
+			if ( level.teamScores[TEAM_BLUE] >= g_fraglimit.integer ) {
+				trap_SendServerCommand( -1, "print \"Blue hit the fraglimit.\n\"" );
+				LogExit( "Fraglimit hit." );
+				return;
+			}
 		}
 
 		for ( i=0 ; i< g_maxclients.integer ; i++ ) {
@@ -1475,17 +1477,18 @@ void CheckExitRules( void ) {
 	}
 
 	if ( g_gametype.integer >= GT_CTF && g_capturelimit.integer ) {
+		if ( !level.customScores ) {
+			if ( level.teamScores[TEAM_RED] >= g_capturelimit.integer ) {
+				trap_SendServerCommand( -1, "print \"Red hit the capturelimit.\n\"" );
+				LogExit( "Capturelimit hit." );
+				return;
+			}
 
-		if ( level.teamScores[TEAM_RED] >= g_capturelimit.integer ) {
-			trap_SendServerCommand( -1, "print \"Red hit the capturelimit.\n\"" );
-			LogExit( "Capturelimit hit." );
-			return;
-		}
-
-		if ( level.teamScores[TEAM_BLUE] >= g_capturelimit.integer ) {
-			trap_SendServerCommand( -1, "print \"Blue hit the capturelimit.\n\"" );
-			LogExit( "Capturelimit hit." );
-			return;
+			if ( level.teamScores[TEAM_BLUE] >= g_capturelimit.integer ) {
+				trap_SendServerCommand( -1, "print \"Blue hit the capturelimit.\n\"" );
+				LogExit( "Capturelimit hit." );
+				return;
+			}
 		}
 	}
 }
