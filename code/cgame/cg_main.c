@@ -2176,6 +2176,7 @@ void CG_InitLua() {
 	CG_InitLuaLEnts(L);
 	CG_InitLua2D(L);
 	CG_InitLua3D(L);
+	CG_InitLuaGui(L);
 	CG_InitLuaUtil(L);
 	CG_InitLuaMessages(L);
 
