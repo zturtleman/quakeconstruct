@@ -1262,7 +1262,10 @@ void lua_pushsfx(lua_State *L, sfxHandle_t *sfx);
 sfxHandle_t *lua_tosfx(lua_State *L, int i);
 
 void lua_pushtrace(lua_State *L, trace_t results);
+
 void qlua_toColor(lua_State *L, int idx, vec4_t color, qboolean strict);
+void qlua_pushColor(lua_State *L, vec4_t color);
+
 void checkColor(vec4_t color, qboolean strict);
 void adjustColor(vec4_t color, float amt);
 
@@ -1277,6 +1280,8 @@ void CG_InitLuaGui(lua_State *L);
 void CG_InitLuaUtil(lua_State *L);
 
 void CG_RunGui(lua_State *L);
+qboolean CG_MouseGui(lua_State *L, int x, int y);
+qboolean CG_KeyGui(lua_State *L, int key, qboolean down);
 
 void setTableRefDef(lua_State *L, char *str, refdef_t refdef);
 

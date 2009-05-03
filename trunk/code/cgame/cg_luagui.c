@@ -10,7 +10,7 @@ void create_base() {
 	base_panel->y = 0;
 	base_panel->w = 640;//cgs.glconfig.vidWidth;
 	base_panel->h = 480;//cgs.glconfig.vidHeight;
-	base_panel->classname = "base";
+	strcpy(base_panel->classname,"base");
 	base_panel->enabled = qtrue;
 	base_panel->visible = qtrue;
 }
@@ -23,7 +23,8 @@ int gui_panel_create(lua_State *L) {
 	const char	*classname = lua_tostring(L,1);
 	panel_t	*parent = NULL;
 	panel_t	*panel = malloc(sizeof(panel_t));
-	
+	int chsize = 0;
+
 	if(lua_type(L,2) == LUA_TUSERDATA) {
 		parent = lua_topanel(L,2);
 	}
@@ -41,9 +42,11 @@ int gui_panel_create(lua_State *L) {
 	if(parent == NULL) parent = base_panel;
 
 	memset(panel,0,sizeof(panel_t));
-	//realloc(active_panels, (num_panels+1) * sizeof(panel_t));
 
+	//chsize = (sizeof(parent->children) / sizeof(panel_t));
 	if(parent->num_panels+1 > PANEL_ARRAY_SIZE) {
+		//realloc(parent->children,sizeof(panel_t) * (chsize*2));
+		//CG_Printf("ReAlloc'd: %i -> %i\n",chsize,chsize*2);
 		return 0;
 	}
 	parent->num_panels++;
@@ -53,8 +56,26 @@ int gui_panel_create(lua_State *L) {
 	panel->persistantID = ++nextPanelID;
 	panel->visible = qtrue;
 	panel->enabled = qtrue;
-	panel->classname = classname;
+	//panel->classname = (char*) classname;
+	strcpy(panel->classname, (char*)classname);
+
 	panel->parent = parent;
+	panel->fgcolor[0] = 1;
+	panel->fgcolor[1] = 1;
+	panel->fgcolor[2] = 1;
+	panel->fgcolor[3] = 1;
+
+	panel->bgcolor[0] = 0;
+	panel->bgcolor[1] = 0;
+	panel->bgcolor[2] = 0;
+	panel->bgcolor[3] = .5f;
+
+	lua_newtable(L);
+	panel->lua_table = qlua_storefunc(L,lua_gettop(L),0);
+
+	qlua_gethook(L,"PanelCreated");
+	lua_pushpanel(L,panel);
+	qlua_pcall(L,1,0,qtrue);
 
 	lua_pushpanel(L,panel);
 
@@ -68,12 +89,16 @@ void UI_RemovePanel(panel_t *panel) {
 	int i;
 
 	if(panel == NULL) return;
+
+	//free(panel->children);
+
 	if(parent == NULL) {
 		CG_Printf("^1Unable to remove panel %s[%i], bad parent\n", panel->classname, panel->persistantID);
 		return;
 	}
 	panel->removed = qtrue;
 
+	parent->children[pi] = NULL;
 	for(i=pi; i<parent->num_panels-1; i++) {
 		temp[i] = parent->children[i+1];
 	}
@@ -125,6 +150,14 @@ void recursive_panel(lua_State *L, panel_t *panel) {
 			}
 		}
 	}
+}
+
+qboolean CG_MouseGui(lua_State *L, int x, int y) {
+	return qfalse;
+}
+
+qboolean CG_KeyGui(lua_State *L, int key, qboolean down) {
+	return qfalse;
 }
 
 void CG_RunGui(lua_State *L) {
