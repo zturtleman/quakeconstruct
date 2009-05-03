@@ -2730,6 +2730,8 @@ void CG_DrawActive( stereoFrame_t stereoView ) {
 		CG_Draw2D();
 	}
 
+	CG_RunGui(L);
+
 	if(L != NULL) {
 		qlua_gethook(L,"Draw2D");
 		qlua_pcall(L,0,0,qtrue);

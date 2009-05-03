@@ -36,6 +36,7 @@ local cy = 0
 local cy2 = 0
 local lasthp = 0
 local dm = 0
+local brt = 1
 
 local function getHP()
 	local hp = _CG.stats[STAT_HEALTH]
@@ -76,6 +77,7 @@ local function d2d()
 	local f = ((cx - minx) / (maxx*2)) % (.7 - (.4*(1-hp)))
 	if(f > .28 and f < .34) then
 		ty = -20
+		brt = .4
 	elseif(f > .4 and f < .46) then
 		ty = 30
 	elseif(f > .5 and f < .55) then
@@ -88,8 +90,9 @@ local function d2d()
 	
 	cy2 = cy2 + (cy - cy2)*.7
 	dm = dm + (0 - dm)*.2
+	brt = brt + (0 - brt)*.1
 	
-	draw.SetColor(0,0,0,.6)
+	draw.SetColor(cr*brt,cg*brt,cb*brt,.6)
 	draw.Rect(10,10,200,100)
 
 	render.CreateScene()

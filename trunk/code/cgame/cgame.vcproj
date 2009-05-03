@@ -726,6 +726,12 @@
 				RelativePath=".\cg_luaentity.c">
 			</File>
 			<File
+				RelativePath=".\cg_luagui.c">
+			</File>
+			<File
+				RelativePath=".\cg_luagui_meta.c">
+			</File>
+			<File
 				RelativePath=".\cg_luahandles.c">
 			</File>
 			<File
@@ -1249,6 +1255,9 @@
 			Filter="h">
 			<File
 				RelativePath="..\game\bg_public.h">
+			</File>
+			<File
+				RelativePath=".\cg_gui.h">
 			</File>
 			<File
 				RelativePath="cg_local.h">

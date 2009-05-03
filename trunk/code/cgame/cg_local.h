@@ -1273,7 +1273,10 @@ void CG_InitLuaLEnts(lua_State *L);
 void CG_InitHandles(lua_State *L);
 void CG_InitLua2D(lua_State *L);
 void CG_InitLua3D(lua_State *L);
+void CG_InitLuaGui(lua_State *L);
 void CG_InitLuaUtil(lua_State *L);
+
+void CG_RunGui(lua_State *L);
 
 void setTableRefDef(lua_State *L, char *str, refdef_t refdef);
 
