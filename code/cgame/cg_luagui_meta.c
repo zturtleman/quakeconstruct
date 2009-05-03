@@ -21,19 +21,19 @@ panel_t *lua_topanel(lua_State *L, int i) {
 	}
 }
 
-panel_t *lua_topanel_fake(lua_State *L, int i) {
+/*panel_t *lua_topanel(lua_State *L, int i) {
 	panel_t	*luapanel;
 	luaL_checktype(L,i,LUA_TUSERDATA);
 	luapanel = (panel_t *)luaL_checkudata(L, i, "Panel");;
 	if (luapanel == NULL) luaL_typerror(L, i, "Panel");
 	return luapanel;
-}
+}*/
 
 static int Panel_remove(lua_State *L) {
-	panel_t *panel = lua_topanel_fake(L,1);
+	panel_t *panel = lua_topanel(L,1);
 
 	if(panel != NULL && strcmp(panel->classname,"base") && !panel->noGC) {
-		UI_RemovePanel(panel);
+		//UI_RemovePanel(panel);
 		CG_Printf("Remove Panel: %s[%i]\n", panel->classname, panel->persistantID);
 	}
 
@@ -48,8 +48,8 @@ static int Panel_tostring (lua_State *L)
 
 static int Panel_equal (lua_State *L)
 {
-	panel_t *p1 = lua_topanel_fake(L,1);
-	panel_t *p2 = lua_topanel_fake(L,2);
+	panel_t *p1 = lua_topanel(L,1);
+	panel_t *p2 = lua_topanel(L,2);
 	if(p1 != NULL && p2 != NULL) {
 		lua_pushboolean(L, (p1->persistantID == p2->persistantID));
 	} else {
@@ -59,7 +59,7 @@ static int Panel_equal (lua_State *L)
 }
 
 int	pget_localpos(lua_State *L) {
-	panel_t *panel = lua_topanel_fake(L,1);
+	panel_t *panel = lua_topanel(L,1);
 
 	if(panel->parent == NULL) {
 		lua_pushnumber(L,panel->x);
@@ -75,7 +75,7 @@ int	pget_localpos(lua_State *L) {
 }
 
 int	pget_pos(lua_State *L) {
-	panel_t *panel = lua_topanel_fake(L,1);
+	panel_t *panel = lua_topanel(L,1);
 
 	lua_pushnumber(L,panel->x);
 	lua_pushnumber(L,panel->y);
@@ -96,7 +96,7 @@ int	pset_pos(lua_State *L) {
 }
 
 int	pget_size(lua_State *L) {
-	panel_t *panel = lua_topanel_fake(L,1);
+	panel_t *panel = lua_topanel(L,1);
 
 	lua_pushnumber(L,panel->w);
 	lua_pushnumber(L,panel->h);
@@ -113,11 +113,37 @@ int	pset_size(lua_State *L) {
 	panel->w = lua_tonumber(L,2);
 	panel->h = lua_tonumber(L,3);
 
+	//CG_Printf("Set Size To: %f, %f\n",panel->w,panel->h);
+
+	return 0;
+}
+
+int pget_fgcolor(lua_State *L) {
+	panel_t *panel = lua_topanel(L,1);
+	qlua_pushColor(L,panel->fgcolor);
+	return 4;
+}
+
+int pset_fgcolor(lua_State *L) {
+	panel_t *panel = lua_topanel(L,1);
+	qlua_toColor(L,2,panel->fgcolor,qfalse);
+	return 0;
+}
+
+int pget_bgcolor(lua_State *L) {
+	panel_t *panel = lua_topanel(L,1);
+	qlua_pushColor(L,panel->bgcolor);
+	return 4;
+}
+
+int pset_bgcolor(lua_State *L) {
+	panel_t *panel = lua_topanel(L,1);
+	qlua_toColor(L,2,panel->bgcolor,qfalse);
 	return 0;
 }
 
 int pget_parent(lua_State *L) {
-	panel_t *panel = lua_topanel_fake(L,1);
+	panel_t *panel = lua_topanel(L,1);
 
 	if(panel->parent != NULL) {
 		lua_pushpanel(L,panel->parent);
@@ -128,7 +154,7 @@ int pget_parent(lua_State *L) {
 }
 
 int pget_classname(lua_State *L) {
-	panel_t *panel = lua_topanel_fake(L,1);
+	panel_t *panel = lua_topanel(L,1);
 
 	if(panel->classname != NULL) {
 		lua_pushstring(L,panel->classname);
@@ -138,21 +164,82 @@ int pget_classname(lua_State *L) {
 	return 0;
 }
 
+int pcmd_remove(lua_State *L) {
+	panel_t *panel = lua_topanel(L,1);
+	
+	UI_RemovePanel(panel);
+	
+	return 0;
+}
+
 static const luaL_reg Panel_methods[] = {
   {"GetLocalPos",	pget_localpos},
   {"GetPos",		pget_pos},
   {"SetPos",		pset_pos},
   {"GetSize",		pget_size},
   {"SetSize",		pset_size},
+  {"GetFGColor",	pget_fgcolor},
+  {"SetFGColor",	pset_fgcolor},
+  {"GetBGColor",	pget_bgcolor},
+  {"SetBGColor",	pset_bgcolor},
   {"GetParent",		pget_parent},
   {"Classname",		pget_classname},
+  {"Remove",		pcmd_remove},
   {0,0}
 };
+
+int Panel_index(lua_State *L) {
+	panel_t	*panel = lua_topanel(L,1);
+	const char *str = luaL_checkstring(L,2);
+	int size = sizeof(Panel_methods) / sizeof(luaL_reg);
+	int i;
+
+	for(i=0; i<size; i++) {
+		if(Panel_methods[i].name != NULL && Panel_methods[i].func != NULL) {
+			if(!strcmp(Panel_methods[i].name,str)) {
+				lua_pushcclosure(L,Panel_methods[i].func,1);
+				return 1;
+			}
+		}
+	}
+
+	qlua_getstored(L,panel->lua_table);
+	lua_pushstring(L,str);
+	lua_gettable(L,-2);
+
+	return 1;
+}
+
+int Panel_newindex(lua_State *L) {
+	panel_t	*panel = lua_topanel(L,1);
+	const char *str = luaL_checkstring(L,2);
+	int size = sizeof(Panel_methods) / sizeof(luaL_reg);
+	int i;
+
+	for(i=0; i<size; i++) {
+		if(Panel_methods[i].name != NULL && Panel_methods[i].func != NULL) {
+			if(!strcmp(Panel_methods[i].name,str)) {
+				lua_pushfstring(L,"^1Panel:%s Is Write-Protected!", str);
+				lua_error(L);
+				return 1;
+			}
+		}
+	}
+
+	qlua_getstored(L,panel->lua_table);
+	lua_pushstring(L, str);
+	lua_pushvalue(L,3);
+	lua_rawset(L, -3);
+
+	return 0;
+}
 
 static const luaL_reg Panel_meta[] = {
   {"__tostring", Panel_tostring},
   {"__eq", Panel_equal},
-  {"__gc", Panel_remove},
+  {"__index", Panel_index},
+  {"__newindex", Panel_newindex},
+  //{"__gc", Panel_remove}, -doesn't work right :(
   {0, 0}
 };
 
@@ -162,12 +249,12 @@ int Panel_register (lua_State *L) {
 	luaL_newmetatable(L, "Panel");
 
 	luaL_openlib(L, 0, Panel_meta, 0);
-	lua_pushliteral(L, "__index");
+	/*lua_pushliteral(L, "__index");
 	lua_pushvalue(L, -3);
 	lua_rawset(L, -3);
 	lua_pushliteral(L, "__metatable");
 	lua_pushvalue(L, -3);
-	lua_rawset(L, -3);
+	lua_rawset(L, -3);*/
 
 	lua_pop(L, 1);
 	return 1;

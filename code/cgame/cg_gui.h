@@ -1,6 +1,6 @@
 #include "cg_local.h"
 
-#define	PANEL_ARRAY_SIZE 256
+#define	PANEL_ARRAY_SIZE 128
 
 typedef struct panel_s {
 	struct panel_s		*parent;
@@ -10,7 +10,11 @@ typedef struct panel_s {
 	float		x,y,w,h;
 	int			depth;
 	int			persistantID;
-	const char	*classname;
+	char		classname[128];
+
+	int			lua_table;
+
+	vec4_t		bgcolor, fgcolor;
 
 	/*int			lua_draw;
 	int			lua_think;*/

@@ -19,6 +19,13 @@ void qlua_toColor(lua_State *L, int idx, vec4_t color, qboolean strict) {
 	checkColor(color,strict);
 }
 
+void qlua_pushColor(lua_State *L, vec4_t color) {
+	lua_pushnumber(L,color[0]);
+	lua_pushnumber(L,color[1]);
+	lua_pushnumber(L,color[2]);
+	lua_pushnumber(L,color[3]);
+}
+
 void adjustColor(vec4_t color, float amt) {
 	color[0] = (color[0] + amt);
 	color[1] = (color[1] + amt);
