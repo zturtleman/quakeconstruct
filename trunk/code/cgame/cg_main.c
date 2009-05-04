@@ -2353,7 +2353,7 @@ void CG_DemoStarted() {
 qboolean CG_KeyEvent(int key, qboolean down) {
 	lua_State *L = GetClientLuaState();
 	if(L != NULL) {
-		CG_KeyGui(L,key,down);
+		if(CG_KeyGui(L,key,down)) return qtrue;
 		qlua_gethook(L,"KeyEvent");
 		lua_pushinteger(L,key);
 		lua_pushboolean(L,down);
@@ -2367,7 +2367,10 @@ qboolean CG_KeyEvent(int key, qboolean down) {
 void CG_MouseEvent(int x, int y) {
 	lua_State *L = GetClientLuaState();
 	if(L != NULL) {
-		CG_MouseGui(L,x,y);
+		if(CG_MouseGui(L,x,y)) {
+			
+			return;
+		}
 		qlua_gethook(L,"MouseEvent");
 		lua_pushinteger(L,x);
 		lua_pushinteger(L,y);

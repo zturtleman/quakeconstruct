@@ -60,16 +60,12 @@ static int Panel_equal (lua_State *L)
 
 int	pget_localpos(lua_State *L) {
 	panel_t *panel = lua_topanel(L,1);
+	vec3_t pos;
 
-	if(panel->parent == NULL) {
-		lua_pushnumber(L,panel->x);
-		lua_pushnumber(L,panel->y);
+	UI_GetLocalPosition(panel,pos);
 
-		return 2;
-	}
-
-	lua_pushnumber(L,panel->x + panel->parent->x);
-	lua_pushnumber(L,panel->y + panel->parent->y);
+	lua_pushnumber(L,pos[0]);
+	lua_pushnumber(L,pos[1]);
 
 	return 2;
 }
@@ -172,6 +168,22 @@ int pcmd_remove(lua_State *L) {
 	return 0;
 }
 
+int pmousedown(lua_State *L) {
+	panel_t *panel = lua_topanel(L,1);
+
+	lua_pushboolean(L,panel->mousedown);
+
+	return 1;
+}
+
+int pmouseover(lua_State *L) {
+	panel_t *panel = lua_topanel(L,1);
+
+	lua_pushboolean(L,panel->mouseover);
+
+	return 1;
+}
+
 static const luaL_reg Panel_methods[] = {
   {"GetLocalPos",	pget_localpos},
   {"GetPos",		pget_pos},
@@ -185,6 +197,8 @@ static const luaL_reg Panel_methods[] = {
   {"GetParent",		pget_parent},
   {"Classname",		pget_classname},
   {"Remove",		pcmd_remove},
+  {"MouseDown",		pmousedown},
+  {"MouseOver",		pmouseover},
   {0,0}
 };
 

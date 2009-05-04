@@ -23,10 +23,20 @@ typedef struct panel_s {
 	qboolean	enabled;
 	qboolean	removed;
 	qboolean	noGC;
+	qboolean	mouseover;
+	qboolean	mousedown;
 } panel_t;
+
+typedef enum {
+	UIM_PRESS,
+	UIM_RELEASE,
+	UIM_MOVE,
+} ui_mouseevent_t;
 
 panel_t *get_base();
 void lua_pushpanel(lua_State *L, panel_t *panel);
 panel_t *lua_topanel(lua_State *L, int i);
 int Panel_register (lua_State *L);
 void UI_RemovePanel(panel_t *panel);
+void UI_GetLocalPosition(panel_t *panel, vec3_t vec);
+qboolean UI_InsidePanel(panel_t *panel, float x, float y);
