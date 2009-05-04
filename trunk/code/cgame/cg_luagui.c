@@ -5,6 +5,7 @@ int ymouse = 0;
 qboolean mouseon = qfalse;
 qboolean mouse_right = qfalse;
 qboolean mouse_left = qfalse;
+qboolean mouse_caught = qfalse;
 
 int nextPanelID = 0;
 panel_t	*base_panel;
@@ -101,7 +102,7 @@ int gui_panel_create(lua_State *L) {
 
 void UI_GetLocalPosition(panel_t *panel, vec3_t vec) {
 	vec3_t parentPos;
-	if(panel->parent) {
+	if(panel != NULL && panel->parent != NULL) {
 		UI_GetLocalPosition(panel->parent, parentPos);
 		vec[0] = panel->x + parentPos[0];
 		vec[1] = panel->y + parentPos[1];
@@ -128,12 +129,14 @@ qboolean UI_InsidePanel(panel_t *panel, float x, float y) {
 }
 
 void UI_RemovePanel(panel_t *panel) {
-	panel_t *parent = panel->parent;
+	panel_t *parent;
 	panel_t *temp[PANEL_ARRAY_SIZE];
-	int pi = panel->depth;
+	int pi = 0;
 	int i;
 
 	if(panel == NULL) return;
+	parent = panel->parent;
+	pi = panel->depth;
 
 	//free(panel->children);
 
@@ -173,7 +176,7 @@ int gui_mouse_enabled(lua_State *L) {
 int gui_mouse_getpos(lua_State *L) {
 	lua_pushinteger(L,xmouse);
 	lua_pushinteger(L,ymouse);
-	return 1;
+	return 2;
 }
 
 static const luaL_reg Gui_methods[] = {
@@ -276,33 +279,47 @@ qboolean gui_mouse_event_recursive(lua_State *L, panel_t *panel, int ev, int x, 
 				}
 				switch(ev) {
 					case UIM_PRESS:
-						if(UI_InsidePanel(current,x,y)) {
-							current->mousedown = qtrue;
+						if(UI_InsidePanel(current,x,y) && pass == 1) {
+							if(!current->mousedown) {
+								gui_mouse_quickcall(L,current,"MousePressed",NULL,x,y,param);
+								current->mousedown = qtrue;
+							}
+							return qtrue;
 						}
-						if(gui_mouse_quickcall(L,current,"MousePressed",NULL,x,y,param) && pass == 1) return qtrue;
-						if(gui_mouse_quickcall(L,current,NULL,"MousePressedOutside",x,y,param) && pass == 2);
+						if(pass == 2) {
+							gui_mouse_quickcall(L,current,NULL,"MousePressedOutside",x,y,param);
+						}
 					break;
 					case UIM_RELEASE:
-						current->mousedown = qfalse;
-						if(gui_mouse_quickcall(L,current,"MouseReleased",NULL,x,y,param) && pass == 1) return qtrue;
-						if(gui_mouse_quickcall(L,current,NULL,"MouseReleasedOutside",x,y,param) && pass == 2);
+						if(pass == 1) {
+							if(current->mousedown) {
+								gui_mouse_quickcall(L,current,"MouseReleased",NULL,x,y,param);
+								gui_mouse_quickcall(L,current,NULL,"MouseReleasedOutside",x,y,param);
+								current->mousedown = qfalse;
+							}
+						}
 					break;
 					case UIM_MOVE:
-						if(UI_InsidePanel(current,x,y)) {
-							if(!current->mouseover && pass == 1) {
-								current->mouseover = qtrue;
-								CG_Printf("Mouse Enter Panel!\n");
-								if(gui_mouse_quickcall(L,current,"MouseEnter",NULL,x,y,param)) {
-									CG_Printf("^3Break!\n");
-									return qtrue;
+						if(UI_InsidePanel(current,x,y) && !mouse_caught) {
+							if(pass == 1) {
+								if(!current->mouseover) {
+									current->mouseover = qtrue;
+									gui_mouse_quickcall(L,current,"MouseEnter",NULL,x,y,param);
 								}
+								return qtrue;
+							} else if(pass == 2) {
+								mouse_caught = qtrue;
 							}
 						} else {
-							if(current->mouseover && pass == 2) {
-								current->mouseover = qfalse;
-								CG_Printf("Mouse Exit Panel!\n");
-								gui_mouse_quickcall(L,current,NULL,"MouseExit",x,y,param);
+							if(pass == 2) {
+								if(current->mouseover) {
+									current->mouseover = qfalse;
+									gui_mouse_quickcall(L,current,NULL,"MouseExit",x,y,param);
+								}
 							}
+						}
+						if(pass == 2) {
+							gui_mouse_quickcall(L,current,"MouseMove","MouseMove",x,y,param);
 						}
 					break;
 				}
@@ -314,8 +331,12 @@ qboolean gui_mouse_event_recursive(lua_State *L, panel_t *panel, int ev, int x, 
 
 qboolean gui_mouse_event(lua_State *L, panel_t *panel, int ev, int x, int y, int param, qboolean bleh) {
 	qboolean ret = qfalse;
+	mouse_caught = qfalse;
 
 	if(gui_mouse_event_recursive(L,panel,ev,x,y,param,1)) ret = qtrue;
+	
+	if(ev == UIM_RELEASE) return ret;
+	
 	if(gui_mouse_event_recursive(L,panel,ev,x,y,param,2)) ret = qtrue;
 	return ret;
 } 
@@ -325,7 +346,7 @@ qboolean CG_MouseGui(lua_State *L, int x, int y) {
 		xmouse += x;
 		ymouse += y;
 
-		gui_mouse_event(L,base_panel,UIM_MOVE,xmouse,ymouse,0,qtrue);
+		gui_mouse_event(L,base_panel,UIM_MOVE,x,y,0,qtrue);
 
 		if(xmouse < 0) xmouse = 0;
 		if(ymouse < 0) ymouse = 0;
