@@ -62,21 +62,27 @@ int	pget_localpos(lua_State *L) {
 	panel_t *panel = lua_topanel(L,1);
 	vec3_t pos;
 
-	UI_GetLocalPosition(panel,pos);
+	if(panel != NULL) {
+		UI_GetLocalPosition(panel,pos);
 
-	lua_pushnumber(L,pos[0]);
-	lua_pushnumber(L,pos[1]);
+		lua_pushnumber(L,pos[0]);
+		lua_pushnumber(L,pos[1]);
 
-	return 2;
+		return 2;
+	}
+	return 0;
 }
 
 int	pget_pos(lua_State *L) {
 	panel_t *panel = lua_topanel(L,1);
 
-	lua_pushnumber(L,panel->x);
-	lua_pushnumber(L,panel->y);
+	if(panel != NULL) {
+		lua_pushnumber(L,panel->x);
+		lua_pushnumber(L,panel->y);
 
-	return 2;
+		return 2;
+	}
+	return 0;
 }
 
 int	pset_pos(lua_State *L) {
@@ -85,8 +91,10 @@ int	pset_pos(lua_State *L) {
 	luaL_checktype(L,2,LUA_TNUMBER);
 	luaL_checktype(L,3,LUA_TNUMBER);
 
-	panel->x = lua_tonumber(L,2);
-	panel->y = lua_tonumber(L,3);
+	if(panel != NULL) {
+		panel->x = lua_tonumber(L,2);
+		panel->y = lua_tonumber(L,3);
+	}
 
 	return 0;
 }
@@ -94,10 +102,12 @@ int	pset_pos(lua_State *L) {
 int	pget_size(lua_State *L) {
 	panel_t *panel = lua_topanel(L,1);
 
-	lua_pushnumber(L,panel->w);
-	lua_pushnumber(L,panel->h);
-
-	return 2;
+	if(panel != NULL) {
+		lua_pushnumber(L,panel->w);
+		lua_pushnumber(L,panel->h);
+		return 2;
+	}
+	return 0;
 }
 
 int	pset_size(lua_State *L) {
@@ -106,8 +116,10 @@ int	pset_size(lua_State *L) {
 	luaL_checktype(L,2,LUA_TNUMBER);
 	luaL_checktype(L,3,LUA_TNUMBER);
 
-	panel->w = lua_tonumber(L,2);
-	panel->h = lua_tonumber(L,3);
+	if(panel != NULL) {
+		panel->w = lua_tonumber(L,2);
+		panel->h = lua_tonumber(L,3);
+	}
 
 	//CG_Printf("Set Size To: %f, %f\n",panel->w,panel->h);
 
@@ -116,32 +128,38 @@ int	pset_size(lua_State *L) {
 
 int pget_fgcolor(lua_State *L) {
 	panel_t *panel = lua_topanel(L,1);
-	qlua_pushColor(L,panel->fgcolor);
-	return 4;
+	if(panel != NULL) {
+		qlua_pushColor(L,panel->fgcolor);
+		return 4;
+	}
+	return 0;
 }
 
 int pset_fgcolor(lua_State *L) {
 	panel_t *panel = lua_topanel(L,1);
-	qlua_toColor(L,2,panel->fgcolor,qfalse);
+	if(panel != NULL) qlua_toColor(L,2,panel->fgcolor,qfalse);
 	return 0;
 }
 
 int pget_bgcolor(lua_State *L) {
 	panel_t *panel = lua_topanel(L,1);
-	qlua_pushColor(L,panel->bgcolor);
-	return 4;
+	if(panel != NULL) {
+		qlua_pushColor(L,panel->bgcolor);
+		return 4;
+	}
+	return 0;
 }
 
 int pset_bgcolor(lua_State *L) {
 	panel_t *panel = lua_topanel(L,1);
-	qlua_toColor(L,2,panel->bgcolor,qfalse);
+	if(panel != NULL) qlua_toColor(L,2,panel->bgcolor,qfalse);
 	return 0;
 }
 
 int pget_parent(lua_State *L) {
 	panel_t *panel = lua_topanel(L,1);
 
-	if(panel->parent != NULL) {
+	if(panel != NULL && panel->parent != NULL) {
 		lua_pushpanel(L,panel->parent);
 		return 1;
 	}
@@ -152,7 +170,7 @@ int pget_parent(lua_State *L) {
 int pget_classname(lua_State *L) {
 	panel_t *panel = lua_topanel(L,1);
 
-	if(panel->classname != NULL) {
+	if(panel != NULL && panel->classname != NULL) {
 		lua_pushstring(L,panel->classname);
 		return 1;
 	}
@@ -163,7 +181,7 @@ int pget_classname(lua_State *L) {
 int pcmd_remove(lua_State *L) {
 	panel_t *panel = lua_topanel(L,1);
 	
-	UI_RemovePanel(panel);
+	if(panel != NULL) UI_RemovePanel(panel);
 	
 	return 0;
 }
@@ -171,17 +189,21 @@ int pcmd_remove(lua_State *L) {
 int pmousedown(lua_State *L) {
 	panel_t *panel = lua_topanel(L,1);
 
-	lua_pushboolean(L,panel->mousedown);
-
-	return 1;
+	if(panel != NULL) {
+		lua_pushboolean(L,panel->mousedown);
+		return 1;
+	}
+	return 0;
 }
 
 int pmouseover(lua_State *L) {
 	panel_t *panel = lua_topanel(L,1);
 
-	lua_pushboolean(L,panel->mouseover);
-
-	return 1;
+	if(panel != NULL) {
+		lua_pushboolean(L,panel->mouseover);
+		return 1;
+	}
+	return 0;
 }
 
 static const luaL_reg Panel_methods[] = {
