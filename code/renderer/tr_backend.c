@@ -539,6 +539,20 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs ) {
 	macEventTime = ri.Milliseconds() + MAC_EVENT_PUMP_MSEC;
 #endif
 
+	if(backEnd.viewParms.isRenderTarget) {
+		//GL_State( GLS_DEPTHTEST_DISABLE );
+		backEnd.viewParms.viewportX = 0;
+		backEnd.viewParms.viewportY = 0;
+		backEnd.viewParms.viewportWidth = 128;
+		backEnd.viewParms.viewportHeight = 128;
+
+		SetViewportAndScissor();
+
+		qglClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
+		qglClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT ); //
+		GL_State( GLS_DEFAULT );
+	}
+
 	// save original time for entity shader offsets
 	originalTime = backEnd.refdef.floatTime;
 
@@ -667,6 +681,14 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs ) {
 
 	// add light flares on lights that aren't obscured
 	RB_RenderFlares();
+
+	if(backEnd.viewParms.isRenderTarget) {
+		qglBindTexture(GL_TEXTURE_2D, rtTexture);
+		
+		qglCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 0, 0, 128, 128, 0);
+		qglClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
+		qglClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT ); // | GL_COLOR_BUFFER_BIT
+	}
 
 #ifdef __MACOS__
 	Sys_PumpEvents();		// crutch up the mac's limited buffer queue size

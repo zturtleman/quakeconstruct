@@ -11,10 +11,11 @@ void lua_pushpanel(lua_State *L, panel_t *panel) {
 panel_t *lua_topanel(lua_State *L, int i) {
 	panel_t	*luapanel;
 	luaL_checktype(L,i,LUA_TUSERDATA);
-	luapanel = (panel_t *)luaL_checkudata(L, i, "Panel");;
+	luapanel = (panel_t *)luaL_checkudata(L, i, "Panel");
 	if (luapanel == NULL) luaL_typerror(L, i, "Panel");
 
-	if (luapanel->parent != NULL) {
+	//if (luapanel->removed) luaL_typerror(L, i, "Panel");
+	if (luapanel->parent != NULL && luapanel->parent->children[luapanel->depth] != NULL) {
 		return luapanel->parent->children[luapanel->depth];
 	} else {
 		return get_base();
@@ -206,6 +207,17 @@ int pmouseover(lua_State *L) {
 	return 0;
 }
 
+int pisontop(lua_State *L) {
+	panel_t *panel = lua_topanel(L,1);
+
+	if(panel != NULL && panel->parent != NULL) {
+		lua_pushboolean(L,((panel->parent->num_panels-1) == panel->depth));
+		return 1;
+	}
+
+	return 0;
+}
+
 static const luaL_reg Panel_methods[] = {
   {"GetLocalPos",	pget_localpos},
   {"GetPos",		pget_pos},
@@ -221,6 +233,7 @@ static const luaL_reg Panel_methods[] = {
   {"Remove",		pcmd_remove},
   {"MouseDown",		pmousedown},
   {"MouseOver",		pmouseover},
+  {"IsOnTop",		pisontop},
   {0,0}
 };
 

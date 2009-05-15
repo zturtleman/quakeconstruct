@@ -771,6 +771,7 @@ void setTableTable(lua_State *L, char *str, int tab[], int size);
 
 float qlua_pullfloat(lua_State *L, char *str, qboolean req, float def);
 float qlua_pullfloat_i(lua_State *L, int i, qboolean req, float def, int m);
+int qlua_pullboolean(lua_State *L, char *str, qboolean req, qboolean def);
 int qlua_pullint(lua_State *L, char *str, qboolean req, int def);
 int qlua_pullint_i(lua_State *L, int i, qboolean req, int def, int m);
 void qlua_pullvector(lua_State *L, char *str, vec3_t vec, qboolean req);

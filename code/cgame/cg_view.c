@@ -766,6 +766,7 @@ Generates and draws a game scene and status information at the given time.
 */
 void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demoPlayback ) {
 	int		inwater;
+	lua_State	*L = GetClientLuaState();
 
 	cg.time = serverTime;
 	cg.demoPlayback = demoPlayback;
@@ -811,6 +812,12 @@ void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demo
 
 	// build cg.refdef
 	inwater = CG_CalcViewValues();
+
+	if(L != NULL) {
+		qlua_gethook(L,"DrawRT");
+		qlua_pcall(L,0,0,qtrue);
+	}
+	trap_R_ClearScene();
 
 	// first person blend blobs, done after AnglesToAxis
 	if ( !cg.renderingThirdPerson ) {

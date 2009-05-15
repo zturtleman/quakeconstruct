@@ -223,6 +223,11 @@ static void R_BindAnimatedImage( textureBundle_t *bundle ) {
 		return;
 	}
 
+	if ( bundle->isRenderTarget ) {
+		qglBindTexture (GL_TEXTURE_2D, bundle->renderTarget);
+		return;
+	}
+
 	if ( bundle->numImageAnimations <= 1 ) {
 		GL_Bind( bundle->image[0] );
 		return;
