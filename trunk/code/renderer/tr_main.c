@@ -1485,8 +1485,30 @@ void R_RenderView (viewParms_t *parms) {
 
 	R_SortDrawSurfs( tr.refdef.drawSurfs + firstDrawSurf, tr.refdef.numDrawSurfs - firstDrawSurf );
 
+
 	// draw main system development information (surface outlines, etc)
 	R_DebugGraphics();
+
+
+	//RENDER TARGET START
+/*	tr.viewParms.viewportX = 0;
+	tr.viewParms.viewportY = 0;
+	tr.viewParms.viewportWidth = 128;
+	tr.viewParms.viewportHeight = 128;
+
+	R_SortDrawSurfs( tr.refdef.drawSurfs + firstDrawSurf, tr.refdef.numDrawSurfs - firstDrawSurf );
+
+	qglBindTexture(GL_TEXTURE_2D, rtTexture);
+	
+	qglCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 0, 0, 128, 128, 0);
+	qglClearColor( 0.0f, 0.0f, 0.0f, 1.0f );
+	qglClear( GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT );
+
+	tr.viewParms.viewportX = parms->viewportX;
+	tr.viewParms.viewportY = parms->viewportY;
+	tr.viewParms.viewportWidth = parms->viewportWidth;
+	tr.viewParms.viewportHeight = parms->viewportHeight;*/
+	//RENDER TARGET END
 }
 
 

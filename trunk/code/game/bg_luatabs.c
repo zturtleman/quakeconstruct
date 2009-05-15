@@ -69,6 +69,17 @@ float qlua_pullfloat_i(lua_State *L, int i, qboolean req, float def, int m) {
 	return v;
 }
 
+int qlua_pullboolean(lua_State *L, char *str, qboolean req, qboolean def) {
+	qboolean v = def;
+	lua_pushstring(L,str);
+	lua_gettable(L,1);
+	if(req) luaL_checktype(L,lua_gettop(L),LUA_TBOOLEAN);
+	if(lua_type(L,lua_gettop(L)) == LUA_TBOOLEAN) {
+		v = lua_toboolean(L,lua_gettop(L));
+	}
+	return v;
+}
+
 int qlua_pullint(lua_State *L, char *str, qboolean req, int def) {
 	int v = def;
 	lua_pushstring(L,str);

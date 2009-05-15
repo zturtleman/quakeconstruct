@@ -104,9 +104,10 @@ local function draw2D()
 	refdef.origin = Vector()
 	refdef.angles = Vector()
 	refdef.flags = 1
+	refdef.renderTarget = true
 	render.RenderScene(refdef)
 end
-hook.add("Draw2D","cl_headtest",draw2D)
+hook.add("DrawRT","cl_headtest",draw2D)
 
 local function newClientInfo(newinfo)
 	skull = newinfo.headModel

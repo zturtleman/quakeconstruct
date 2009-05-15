@@ -55,7 +55,7 @@ long myftol( float f );
 #define MAX_STATE_NAME 32
 
 // can't be increased without changing bit packing for drawsurfs
-
+GLint	rtTexture;
 
 typedef struct dlight_s {
 	vec3_t	origin;
@@ -297,6 +297,8 @@ typedef struct {
 	qboolean		isLightmap;
 	qboolean		vertexLightmap;
 	qboolean		isVideoMap;
+	int				renderTarget;
+	qboolean		isRenderTarget;
 } textureBundle_t;
 
 #define NUM_TEXTURE_BUNDLES 2
@@ -429,6 +431,7 @@ typedef struct shaderState_s {
 // trRefdef_t holds everything that comes in refdef_t,
 // as well as the locally generated scene information
 typedef struct {
+	qboolean	renderTarget;
 	int			x, y, width, height;
 	float		fov_x, fov_y;
 	vec3_t		vieworg;
@@ -496,6 +499,7 @@ typedef struct {
 	vec3_t		pvsOrigin;			// may be different than or.origin for portals
 	qboolean	isPortal;			// true if this view is through a portal
 	qboolean	isMirror;			// the portal is a mirror, invert the face culling
+	qboolean	isRenderTarget;		// it's a render target!
 	int			frameSceneNum;		// copied from tr.frameSceneNum
 	int			frameCount;			// copied from tr.frameCount
 	cplane_t	portalPlane;		// clip anything behind this if mirroring
@@ -1581,6 +1585,7 @@ typedef struct {
 	trRefdef_t	refdef;
 	viewParms_t	viewParms;
 	drawSurf_t *drawSurfs;
+	qboolean	override;
 	int		numDrawSurfs;
 } drawSurfsCommand_t;
 

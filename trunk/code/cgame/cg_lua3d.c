@@ -19,6 +19,7 @@ int lua_torefdef(lua_State *L, int idx, refdef_t *refdef, qboolean a640) {
 	refdef->rdflags = qlua_pullint(L,"flags",qfalse,0);
 	refdef->zFar = qlua_pullfloat(L,"zFar",qfalse,0);
 	refdef->zNear = qlua_pullfloat(L,"zNear",qfalse,0);
+	refdef->renderTarget = qlua_pullboolean(L,"renderTarget",qfalse,qfalse);
 	
 	//if(angles[0] != 0 || angles[1] != 0 || angles[2] != 0) {
 		AnglesToAxis(angles,refdef->viewaxis);

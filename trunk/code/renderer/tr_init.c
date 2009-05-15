@@ -178,6 +178,23 @@ static void AssertCvarRange( cvar_t *cv, float minVal, float maxVal, qboolean sh
 	}
 }
 
+void initRT( void ) {
+	unsigned int* data;						// Stored Data
+
+	// Create Storage Space For Texture Data (128x128x4)
+	//data = (unsigned int*)new GLuint[((128 * 128)* 4 * sizeof(unsigned int))];
+	data = ri.Malloc(((128 * 128)* 4 * sizeof(unsigned int)));
+
+	qglGenTextures(1,&rtTexture);
+	qglBindTexture(GL_TEXTURE_2D, rtTexture);
+	qglTexImage2D(GL_TEXTURE_2D, 0, 4, 128, 128, 0,
+		GL_RGBA, GL_UNSIGNED_BYTE, data);			// Build Texture Using Information In data
+	qglTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+	qglTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+
+	Com_Memset(data,0,0);
+
+}
 
 /*
 ** InitOpenGL
@@ -231,6 +248,8 @@ static void InitOpenGL( void )
 
 	// set default state
 	GL_SetDefaultState();
+
+	initRT();
 }
 
 /*

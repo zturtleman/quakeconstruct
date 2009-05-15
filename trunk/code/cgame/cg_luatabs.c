@@ -6,6 +6,8 @@ void setTableRefDef(lua_State *L, char *str, refdef_t refdef) {
 	lua_createtable(L,8,0);
 	tabid = lua_gettop(L);
 	
+	setTableBoolean(L,"renderTarget",refdef.renderTarget);
+
 	setTableFloat(L,"x",refdef.x);
 	setTableFloat(L,"y",refdef.y);
 	setTableFloat(L,"width",refdef.width);

@@ -622,6 +622,13 @@ static qboolean ParseStage( shaderStage_t *stage, char **text )
 				stage->bundle[0].image[0] = tr.whiteImage;
 				continue;
 			}
+			else if ( !Q_stricmp( token, "$rendertarget" ) )
+			{
+				stage->bundle[0].image[0] = tr.whiteImage;
+				stage->bundle[0].isRenderTarget = qtrue;
+				stage->bundle[0].renderTarget = rtTexture;
+				continue;
+			}
 			else if ( !Q_stricmp( token, "$lightmap" ) )
 			{
 				stage->bundle[0].isLightmap = qtrue;
