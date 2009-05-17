@@ -1245,6 +1245,7 @@ refexport_t *GetRefAPI ( int apiVersion, refimport_t *rimp ) {
 
 	re.TakeScreenshot = R_TakeScreenshot;
 	re.ClearImage = R_ClearImageHash;
+	re.SetupRenderTarget = setupRT;
 
 	return &re;
 }

@@ -133,6 +133,7 @@ typedef struct {
 #define	MAX_RENDER_STRING_LENGTH	32
 
 typedef struct {
+	int			rt_index;
 	qboolean	renderTarget;
 	int			x, y, width, height;
 	float		zFar;

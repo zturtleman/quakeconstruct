@@ -442,6 +442,10 @@ local function drawx()
 	end
 end
 
+function DrawUI()
+	drawx()
+end
+
 local function profd()
 	local dtime = ProfileFunction(drawx)
 	if(QLUA_DEBUG) then 
