@@ -589,6 +589,7 @@ static qboolean ParseStage( shaderStage_t *stage, char **text )
 	char *token;
 	int depthMaskBits = GLS_DEPTHMASK_TRUE, blendSrcBits = 0, blendDstBits = 0, atestBits = 0, depthFuncBits = 0;
 	qboolean depthMaskExplicit = qfalse;
+	int	rt_index;
 
 	stage->active = qtrue;
 
@@ -624,9 +625,32 @@ static qboolean ParseStage( shaderStage_t *stage, char **text )
 			}
 			else if ( !Q_stricmp( token, "$rendertarget" ) )
 			{
+				token = COM_ParseExt( text, qfalse );
+				if ( !token[0] )
+				{
+					ri.Printf( PRINT_WARNING, "WARNING: missing parameter for 'map' keyword in shader '%s'\n", shader.name );
+					return qfalse;
+				}
+				if(renderTargets == NULL) {
+					ri.Printf( PRINT_WARNING, "WARNING: no render targets at this time.\n");
+					return qfalse;
+				}
+				
+				rt_index = atoi(token);
+				if(rt_index < 0 || rt_index > MAX_RENDER_TARGETS)
+				{
+					ri.Printf( PRINT_WARNING, "WARNING: invalid render target index in shader %s (%i)\n", shader.name, rt_index );
+					return qfalse;
+				}
+
+				if(renderTargets[rt_index].valid != qtrue) {
+					ri.Printf( PRINT_WARNING, "WARNING: render target not initialized (%i) in shader '%s'\n", rt_index, shader.name );
+					return qfalse;
+				}
+
 				stage->bundle[0].image[0] = tr.whiteImage;
 				stage->bundle[0].isRenderTarget = qtrue;
-				stage->bundle[0].renderTarget = rtTexture;
+				stage->bundle[0].renderTarget = renderTargets[rt_index].texture;
 				continue;
 			}
 			else if ( !Q_stricmp( token, "$lightmap" ) )

@@ -1,11 +1,13 @@
+render.SetupRenderTarget(1,512,512)
+
 local data = 
 [[{
-	sort nearest
-	cull disable
+	//sort nearest
+	//cull disable
 	{
-		blendfunc add
+		blendfunc blend
 		//alphaFunc LT128
-		map $rendertarget
+		map $rendertarget 1
 		alphaGen vertex
 		rgbGen vertex
 		tcMod transform 1 0 0 -1 0 0
@@ -13,25 +15,54 @@ local data =
 	}
 }]]
 local renderTarget = CreateShader("f",data)
+
+local data = 
+[[{
+	//sort nearest
+	//cull disable
+	{
+		blendfunc blend
+		//alphaFunc LT128
+		map $rendertarget 1
+		alphaGen vertex
+		rgbGen vertex
+		tcMod transform 1 0 0 -1 0 0
+		//tcGen environment
+	}
+}]]
+local renderTarget2 = CreateShader("f",data)
+
+local data = 
+[[{
+	{
+		blendfunc filter
+		map $whiteimage
+		alphaGen vertex
+		rgbGen vertex
+	}
+}]]
+local white = CreateShader("f",data)
+
 local blood = LoadShader("dissolve")
 
-local function riter(s)
-	draw.Rect(-s,0,640,480,renderTarget)
-	draw.Rect(s,0,640,480,renderTarget)
-	draw.Rect(0,-s,640,480,renderTarget)
-	draw.Rect(0,s,640,480,renderTarget)
-	draw.Rect(s,s,640,480,renderTarget)
-	draw.Rect(-s,-s,640,480,renderTarget)
-	draw.Rect(-s,s,640,480,renderTarget)
-	draw.Rect(s,-s,640,480,renderTarget)
+local function riter(s,t)
+	draw.Rect(-s,0,640,480,t)
+	draw.Rect(s,0,640,480,t)
+	draw.Rect(0,-s,640,480,t)
+	draw.Rect(0,s,640,480,t)
+	draw.Rect(s,s,640,480,t)
+	draw.Rect(-s,-s,640,480,t)
+	draw.Rect(-s,s,640,480,t)
+	draw.Rect(s,-s,640,480,t)
 end
 
 function d2d()
-	draw.SetColor(.1,.1,.1,.3)
+	draw.SetColor(1,1,1,.6)
+	draw.Rect(0,0,640,480,renderTarget2)
 	
-	riter(5)
-	riter(7)
-	riter(10)
+	--riter(5,renderTarget2)
+	--riter(7)
+	--riter(10)
 	
 	
 	draw.Rect(0,0,1,1)
@@ -56,17 +87,20 @@ local reftest = poly:ToRef(false)
 local function draw2D()
 	render.CreateScene()
 
-	local ref = RefEntity()
+	--[[local ref = RefEntity()
 	ref:AlwaysRender(true)
 	ref:SetModel(mdl)
 	ref:SetColor(1,1,1,1)
 	ref:Scale(Vector(1,1,1))
 	ref:Render()
-	ref:SetShader(0)
+	ref:SetShader(0)]]
 	
 	render.AddPacketEntities()
 	render.AddLocalEntities()
 	render.AddMarks()
+	
+	--local rh = util.Hand()
+	--util.PlayerWeapon(LocalPlayer(),rh)
 	
 	local ang = VectorToAngles(_CG.refdef.angles)
 	local ang2 = ang - Vector(90,0,0)
@@ -77,8 +111,11 @@ local function draw2D()
 	
 	reftest:SetAngles(ang2)
 	reftest:Scale(Vector(1.5,2,5))
-	reftest:SetColor(.15,.15,.15,1)
+	
+	reftest:SetColor(1,1,1,.92)
 	reftest:SetShader(renderTarget)
+	reftest:SetPos(org)
+	reftest:Render()
 	
 	--[[reftest:SetPos(org + u/2)
 	reftest:Render()
@@ -98,8 +135,9 @@ local function draw2D()
 	refdef.height = 480
 	refdef.origin = _CG.refdef.origin
 	refdef.angles = VectorToAngles(_CG.refdef.angles)
-	refdef.flags = 1
-	refdef.renderTarget = true
+	refdef.flags = 0
+	refdef.renderTarget = 1
+	refdef.isRenderTarget = true
 	render.RenderScene(refdef)
 end
 hook.add("DrawRT","test8",draw2D)

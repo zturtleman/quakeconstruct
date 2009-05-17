@@ -340,6 +340,30 @@ function BounceEntity(ent,trace,amt)
 	ent:SetPos(vAdd(ent:GetPos(),trace.normal))
 end
 
+local function MirrorPoint (vec, surface, camera)
+	local lv = Vector()
+	local transformed = Vector()
+
+	lv = vec - surface.origin
+
+	for i=1, 3 do
+		local d = DotProduct(lv, surface.axis[i]);
+		transformed = transformed + (camera.axis[i] * d)
+	end
+
+	return transformed + camera.origin
+end
+
+local function MirrorVector (vec, surface, camera)
+	local out = Vector()
+
+	for i=1, 3 do
+		local d = DotProduct(vec, surface.axis[i]);
+		out = out + (camera.axis[i] * d)
+	end
+	return out
+end
+
 function LerpReach(lr,id,v,t,thr,s,r)
 	if(lr == nil or type(lr) != "table") then error("No LerpReach for you :(\n") end
 	lr[id] = lr[id] or {}

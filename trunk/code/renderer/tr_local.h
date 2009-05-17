@@ -53,9 +53,19 @@ long myftol( float f );
 //#define MAX_SHADER_STATES 2048
 #define MAX_STATES_PER_SHADER 32
 #define MAX_STATE_NAME 32
+#define MAX_RENDER_TARGETS 32
 
 // can't be increased without changing bit packing for drawsurfs
 GLint	rtTexture;
+
+typedef struct rendertarget_s {
+	GLint		texture;
+	int			width;
+	int			height;
+	qboolean	valid;
+} rendertarget_t;
+
+rendertarget_t renderTargets[MAX_RENDER_TARGETS];
 
 typedef struct dlight_s {
 	vec3_t	origin;
@@ -431,7 +441,7 @@ typedef struct shaderState_s {
 // trRefdef_t holds everything that comes in refdef_t,
 // as well as the locally generated scene information
 typedef struct {
-	qboolean	renderTarget;
+	int			renderTarget;
 	int			x, y, width, height;
 	float		fov_x, fov_y;
 	vec3_t		vieworg;
@@ -500,6 +510,7 @@ typedef struct {
 	qboolean	isPortal;			// true if this view is through a portal
 	qboolean	isMirror;			// the portal is a mirror, invert the face culling
 	qboolean	isRenderTarget;		// it's a render target!
+	int			rt_index;
 	int			frameSceneNum;		// copied from tr.frameSceneNum
 	int			frameCount;			// copied from tr.frameCount
 	cplane_t	portalPlane;		// clip anything behind this if mirroring
@@ -1686,5 +1697,7 @@ void RE_EndMask( void );
 //Coordinate Functions
 void RE_Begin2D( void );
 void RE_End2D( void );
+
+void setupRT( int index, int width, int height );
 
 #endif //TR_LOCAL_H

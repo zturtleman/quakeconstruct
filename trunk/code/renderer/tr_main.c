@@ -1476,6 +1476,21 @@ void R_RenderView (viewParms_t *parms) {
 
 	tr.viewCount++;
 
+	if(tr.viewParms.isRenderTarget) {
+		if(renderTargets == NULL) {
+			ri.Printf( PRINT_WARNING, "WARNING: no render targets at this time.\n");
+			return;
+		}
+		if(tr.viewParms.rt_index < 0 || tr.viewParms.rt_index > MAX_RENDER_TARGETS) {
+			ri.Printf( PRINT_WARNING, "WARNING: bad render target index %i.\nMust be a value between 0-%i\n",tr.viewParms.rt_index,MAX_RENDER_TARGETS);
+			return;
+		}
+		if(renderTargets[tr.viewParms.rt_index].valid == qfalse) {
+			ri.Printf( PRINT_WARNING, "WARNING: render target[%i] not initialized.\n", tr.viewParms.rt_index );
+			return;
+		}
+	}
+
 	// set viewParms.world
 	R_RotateForViewer ();
 

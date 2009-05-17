@@ -2,6 +2,62 @@
 
 vec4_t	lastcolor;
 qboolean	maskOn = qfalse;
+qboolean	tdraw = qfalse;
+vec3_t		td_vo;
+vec3_t		td_vr;
+vec3_t		td_vd;
+
+void DrawRect(float x, float y, float w, float h, float s, float t, float s2, float t2, qhandle_t shader) {
+	vec3_t rd, dd, rn, dn;
+	vec3_t v1, v2, v3, v4, tmp;
+	float rd2, dd2;
+	if(!tdraw) {
+		CG_AdjustFrom640( &x, &y, &w, &h );
+		trap_R_DrawStretchPic( x, y, w, h, s, t, s2, t2, shader );
+	} else {
+		VectorSubtract(td_vr,td_vo,rd);
+		VectorSubtract(td_vd,td_vo,dd);
+
+		VectorNormalize2(rd,rn);
+		VectorNormalize2(dd,dn);
+
+		rd2 = VectorLength(rd);
+		dd2 = VectorLength(dd);
+
+		VectorMA(td_vo,((x) / 640) * rd2,rn,tmp);
+		VectorMA(tmp,((y) / 480) * dd2,dn,v1);
+
+		VectorMA(td_vo,((x + w) / 640) * rd2,rn,tmp);
+		VectorMA(tmp,((y) / 480) * dd2,dn,v2);
+
+		VectorMA(td_vo,((x + w) / 640) * rd2,rn,tmp);
+		VectorMA(tmp,((y + h) / 480) * dd2,dn,v3);
+
+		VectorMA(td_vo,((x) / 640) * rd2,rn,tmp);
+		VectorMA(tmp,((y + h) / 480) * dd2,dn,v4);
+
+		RenderQuad(shader,v1,v2,v3,v4,lastcolor,s,t,s2,t2);
+	}
+}
+
+int qlua_start3D(lua_State *L) {
+	luaL_checktype(L,1,LUA_TVECTOR);
+	luaL_checktype(L,2,LUA_TVECTOR);
+	luaL_checktype(L,3,LUA_TVECTOR);
+
+	lua_tovector(L,1,td_vo);
+	lua_tovector(L,2,td_vr);
+	lua_tovector(L,3,td_vd);
+
+	tdraw = qtrue;
+
+	return 0;
+}
+
+int qlua_end3D(lua_State *L) {
+	tdraw = qfalse;
+	return 0;
+}
 
 int qlua_setcolor(lua_State *L) {
 	vec4_t	color;
@@ -82,6 +138,9 @@ void adjustColor2(vec4_t color, float amt) {
 	
 	checkColor(color2,qtrue);
 	trap_R_SetColor(color2);
+
+	VectorCopy(color2,lastcolor);
+	lastcolor[3] = color2[3];
 }
 
 int qlua_beveledRect(lua_State *L) {
@@ -115,20 +174,19 @@ int qlua_beveledRect(lua_State *L) {
 		inset = lua_tonumber(L,10);
 	}
 
-	CG_AdjustFrom640( &x, &y, &w, &h );
-	trap_R_DrawStretchPic( x, y, w, h, 0, 0, 1, 1, shader );
+	DrawRect( x, y, w, h, 0, 0, 1, 1, shader );
 
 	adjustColor2(color,2*factor);
-	trap_R_DrawStretchPic( x, y, w, inset, 0, 0, 1, 1, shader );
+	DrawRect( x, y, w, inset, 0, 0, 1, 1, shader );
 
 	adjustColor2(color,1*factor);
-	trap_R_DrawStretchPic( x, y, inset, h, 0, 0, 1, 1, shader );
+	DrawRect( x, y, inset, h, 0, 0, 1, 1, shader );
 
 	adjustColor2(color,-1*factor);
-	trap_R_DrawStretchPic( x+(w-inset), y, inset, h, 0, 0, 1, 1, shader );
+	DrawRect( x+(w-inset), y, inset, h, 0, 0, 1, 1, shader );
 
 	adjustColor2(color,-2*factor);
-	trap_R_DrawStretchPic( x, y+(h-inset), w, inset, 0, 0, 1, 1, shader );
+	DrawRect( x, y+(h-inset), w, inset, 0, 0, 1, 1, shader );
 	return 0;
 }
 
@@ -157,8 +215,7 @@ int qlua_rect(lua_State *L) {
 	s2 = quickfloat(L,8,1);
 	t2 = quickfloat(L,9,1);
 
-	CG_AdjustFrom640( &x, &y, &w, &h );
-	trap_R_DrawStretchPic( x, y, w, h, s, t, s2, t2, shader );
+	DrawRect( x, y, w, h, s, t, s2, t2, shader );
 
 	return 0;
 }
@@ -348,6 +405,8 @@ static const luaL_reg Draw_methods[] = {
   {"Text2Width",	qlua_text2width},
   {"EndMask",		qlua_endmask},
   {"MaskRect",		qlua_maskrect},
+  {"Start3D",		qlua_start3D},
+  {"End3D",			qlua_end3D},
   {0,0}
 };
 

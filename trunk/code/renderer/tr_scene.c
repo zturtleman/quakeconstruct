@@ -377,14 +377,17 @@ void RE_RenderScene( const refdef_t *fd ) {
 
 	Com_Memcpy( tr.refdef.text, fd->text, sizeof( tr.refdef.text ) );
 
-	tr.refdef.renderTarget = qfalse;
+	if(fd->renderTarget) {
+		tr.refdef.renderTarget = fd->rt_index;
+	} else {
+		tr.refdef.renderTarget = -1;
+	}
 	tr.refdef.x = fd->x;
 	tr.refdef.y = fd->y;
 	tr.refdef.width = fd->width;
 	tr.refdef.height = fd->height;
 	tr.refdef.fov_x = fd->fov_x;
 	tr.refdef.fov_y = fd->fov_y;
-	tr.refdef.renderTarget = fd->renderTarget;
 
 	VectorCopy( fd->vieworg, tr.refdef.vieworg );
 	VectorCopy( fd->viewaxis[0], tr.refdef.viewaxis[0] );
@@ -470,7 +473,8 @@ void RE_RenderScene( const refdef_t *fd ) {
 
 	parms.fovX = tr.refdef.fov_x;
 	parms.fovY = tr.refdef.fov_y;
-	parms.isRenderTarget = tr.refdef.renderTarget;
+	parms.isRenderTarget = fd->renderTarget;
+	parms.rt_index = tr.refdef.renderTarget;
 
 	VectorCopy( fd->vieworg, parms.or.origin );
 	VectorCopy( fd->viewaxis[0], parms.or.axis[0] );

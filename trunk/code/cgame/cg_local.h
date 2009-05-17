@@ -1268,6 +1268,7 @@ void qlua_pushColor(lua_State *L, vec4_t color);
 
 void checkColor(vec4_t color, qboolean strict);
 void adjustColor(vec4_t color, float amt);
+void RenderQuad(qhandle_t shader, vec3_t v1, vec3_t v2, vec3_t v3, vec3_t v4, vec4_t color, float s1, float t1, float s2, float t2);
 
 void CG_InitLuaVector(lua_State *L);
 void CG_InitLuaEnts(lua_State *L);
@@ -1678,7 +1679,7 @@ void	trap_S_StopBackgroundTrack( void );
 
 
 void		trap_R_LoadWorldMap( const char *mapname );
-
+void		trap_R_SetupRenderTarget( int index, int width, int height );
 // all media should be registered during level startup to prevent
 // hitches during gameplay
 qhandle_t	trap_R_RegisterModel( const char *name );			// returns rgb axis if not found

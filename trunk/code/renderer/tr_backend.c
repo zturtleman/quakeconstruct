@@ -62,6 +62,34 @@ void GL_Bind( image_t *image ) {
 	}
 }
 
+void setupRT( int index, int width, int height ) {
+	unsigned int* data;						// Stored Data
+
+	if(index < 0 || index > MAX_RENDER_TARGETS) {
+		ri.Printf( PRINT_WARNING, "WARNING: bad render target index %i.\nMust be a value between 0-%i\n",index,MAX_RENDER_TARGETS);
+		return;
+	}
+
+	// Create Storage Space For Texture Data (128x128x4)
+	//data = (unsigned int*)new GLuint[((128 * 128)* 4 * sizeof(unsigned int))];
+	data = malloc(((width * height)* 4 * sizeof(unsigned int)));
+
+	qglGenTextures(1,&renderTargets[index].texture);
+	qglBindTexture(GL_TEXTURE_2D, renderTargets[index].texture);
+	qglTexImage2D(GL_TEXTURE_2D, 0, 4, width, height, 0,
+		GL_RGBA, GL_UNSIGNED_BYTE, data);			// Build Texture Using Information In data
+	qglTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+	qglTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+
+	//Com_Memset(data,0,0);
+
+	renderTargets[index].width = width;
+	renderTargets[index].height = height;
+	renderTargets[index].valid = qtrue;
+	
+	free(data);
+}
+
 /*
 ** GL_SelectTexture
 */
@@ -521,6 +549,7 @@ RB_RenderDrawSurfList
 */
 void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs ) {
 	shader_t		*shader, *oldShader;
+	rendertarget_t	rt;
 	int				fogNum, oldFogNum;
 	int				entityNum, oldEntityNum;
 	int				dlighted, oldDlighted;
@@ -539,18 +568,23 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs ) {
 	macEventTime = ri.Milliseconds() + MAC_EVENT_PUMP_MSEC;
 #endif
 
+	rt.valid = qfalse;
+
 	if(backEnd.viewParms.isRenderTarget) {
-		//GL_State( GLS_DEPTHTEST_DISABLE );
-		backEnd.viewParms.viewportX = 0;
-		backEnd.viewParms.viewportY = 0;
-		backEnd.viewParms.viewportWidth = 128;
-		backEnd.viewParms.viewportHeight = 128;
+		rt = renderTargets[backEnd.viewParms.rt_index];
+		if(rt.valid) {
+			//GL_State( GLS_DEPTHTEST_DISABLE );
+			backEnd.viewParms.viewportX = 0;
+			backEnd.viewParms.viewportY = 0;
+			backEnd.viewParms.viewportWidth = rt.width;
+			backEnd.viewParms.viewportHeight = rt.height;
 
-		SetViewportAndScissor();
+			SetViewportAndScissor();
 
-		qglClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
-		qglClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT ); //
-		GL_State( GLS_DEFAULT );
+			qglClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
+			qglClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT ); //
+			GL_State( GLS_DEFAULT );
+		}
 	}
 
 	// save original time for entity shader offsets
@@ -682,10 +716,10 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs ) {
 	// add light flares on lights that aren't obscured
 	RB_RenderFlares();
 
-	if(backEnd.viewParms.isRenderTarget) {
-		qglBindTexture(GL_TEXTURE_2D, rtTexture);
+	if(rt.valid) {
+		qglBindTexture(GL_TEXTURE_2D, rt.texture);
 		
-		qglCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 0, 0, 128, 128, 0);
+		qglCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 0, 0, rt.width, rt.height, 0);
 		qglClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
 		qglClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT ); // | GL_COLOR_BUFFER_BIT
 	}

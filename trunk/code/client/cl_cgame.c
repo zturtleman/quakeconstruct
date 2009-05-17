@@ -626,6 +626,9 @@ int CL_CgameSystemCalls( int *args ) {
 	case CG_R_END2D:
 		re.End2D();
 		return 0;
+	case CG_R_SETUPRT:
+		re.SetupRenderTarget( args[1], args[2], args[3] );
+		return 0;
 	case CG_GETGLCONFIG:
 		CL_GetGlconfig( VMA(1) );
 		return 0;

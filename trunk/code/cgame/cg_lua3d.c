@@ -19,7 +19,8 @@ int lua_torefdef(lua_State *L, int idx, refdef_t *refdef, qboolean a640) {
 	refdef->rdflags = qlua_pullint(L,"flags",qfalse,0);
 	refdef->zFar = qlua_pullfloat(L,"zFar",qfalse,0);
 	refdef->zNear = qlua_pullfloat(L,"zNear",qfalse,0);
-	refdef->renderTarget = qlua_pullboolean(L,"renderTarget",qfalse,qfalse);
+	refdef->rt_index = qlua_pullint(L,"renderTarget",qfalse,0);
+	refdef->renderTarget = qlua_pullboolean(L,"isRenderTarget",qfalse,qfalse);
 	
 	//if(angles[0] != 0 || angles[1] != 0 || angles[2] != 0) {
 		AnglesToAxis(angles,refdef->viewaxis);
@@ -240,6 +241,87 @@ int qlua_modelbounds(lua_State *L) {
 	return 2;
 }
 
+int qlua_setuprt(lua_State *L) {
+	int index,width,height;
+	index = luaL_checkint(L,1);
+	width = luaL_checkint(L,2);
+	height = luaL_checkint(L,3);
+
+	trap_R_SetupRenderTarget(index,width,height);
+
+	return 0;
+}
+
+void RenderQuad(qhandle_t shader, vec3_t v1, vec3_t v2, vec3_t v3, vec3_t v4, vec4_t color, float s1, float t1, float s2, float t2) {
+	polyVert_t	verts[4];
+	verts[0].st[0] = s1;
+	verts[0].st[1] = t1;
+	verts[0].modulate[0] = (byte) (color[0] * 255);
+	verts[0].modulate[1] = (byte) (color[1] * 255);
+	verts[0].modulate[2] = (byte) (color[2] * 255);
+	verts[0].modulate[3] = (byte) (color[3] * 255);
+	VectorCopy(v1,verts[0].xyz);
+
+	verts[1].st[0] = s2;
+	verts[1].st[1] = t1;
+	verts[1].modulate[0] = (byte) (color[0] * 255);
+	verts[1].modulate[1] = (byte) (color[1] * 255);
+	verts[1].modulate[2] = (byte) (color[2] * 255);
+	verts[1].modulate[3] = (byte) (color[3] * 255);
+	VectorCopy(v2,verts[1].xyz);
+
+	verts[2].st[0] = s2;
+	verts[2].st[1] = t2;
+	verts[2].modulate[0] = (byte) (color[0] * 255);
+	verts[2].modulate[1] = (byte) (color[1] * 255);
+	verts[2].modulate[2] = (byte) (color[2] * 255);
+	verts[2].modulate[3] = (byte) (color[3] * 255);
+	VectorCopy(v3,verts[2].xyz);
+
+	verts[3].st[0] = s1;
+	verts[3].st[1] = t2;
+	verts[3].modulate[0] = (byte) (color[0] * 255);
+	verts[3].modulate[1] = (byte) (color[1] * 255);
+	verts[3].modulate[2] = (byte) (color[2] * 255);
+	verts[3].modulate[3] = (byte) (color[3] * 255);
+	VectorCopy(v4,verts[3].xyz);
+
+	trap_R_AddPolyToScene( shader, 4, verts );
+}
+
+int qlua_3Dquad(lua_State *L) {
+	//float s,t,s2,t2;
+	vec3_t v1,v2,v3,v4;
+	vec4_t color;
+
+	qhandle_t shader = cgs.media.whiteShader;
+
+	luaL_checktype(L,1,LUA_TVECTOR);
+	luaL_checktype(L,2,LUA_TVECTOR);
+	luaL_checktype(L,3,LUA_TVECTOR);
+	luaL_checktype(L,4,LUA_TVECTOR);
+
+	lua_tovector(L,1,v1);
+	lua_tovector(L,2,v2);
+	lua_tovector(L,3,v3);
+	lua_tovector(L,4,v4);
+
+	if(lua_type(L,5) == LUA_TNUMBER) {
+		shader = lua_tointeger(L,5);
+	}
+
+	qlua_toColor(L,6,color,qfalse);
+	
+	//s = quickfloat(L,6,0);
+	//t = quickfloat(L,7,0);
+	//s2 = quickfloat(L,8,1);
+	//t2 = quickfloat(L,9,1);
+
+	RenderQuad(shader,v1,v2,v3,v4,color,0,0,1,1);
+
+	return 0;
+}
+
 static const luaL_reg Render_methods[] = {
   {"CreateScene",		qlua_createscene},
   {"DLight",			qlua_dlight},
@@ -251,6 +333,8 @@ static const luaL_reg Render_methods[] = {
   {"AddPacketEntities",	qlua_addPacketEnts},
   {"AddMarks",			qlua_addMarks},
   {"AddLocalEntities",	qlua_addLocalEnts},
+  {"SetupRenderTarget",	qlua_setuprt},
+  {"Quad",				qlua_3Dquad},
   {0,0}
 };
 
