@@ -40,6 +40,7 @@ refimport_t	ri;
 // entities that will have procedurally generated surfaces will just
 // point at this for their sorting surface
 surfaceType_t	entitySurface = SF_ENTITY;
+//drawSurf_s		tempSurfs[MAX_DRAWSURFS];
 
 /*
 =================
@@ -601,6 +602,7 @@ void R_PlaneForSurface (surfaceType_t *surfType, cplane_t *plane) {
 		plane->dist = plane4[3];
 		return;
 	case SF_POLY:
+	case SF_MD4:
 		poly = (srfPoly_t *)surfType;
 		PlaneFromPoints( plane4, poly->verts[0].xyz, poly->verts[1].xyz, poly->verts[2].xyz );
 		VectorCopy( plane4, plane->normal ); 
@@ -1130,7 +1132,8 @@ recurse:
                A[loguy] > A[lo], A[higuy] < A[lo],
                loguy < hi, highy > lo */
 
-            SWAP_DRAW_SURF(loguy, higuy);
+			SWAP_DRAW_SURF(loguy, higuy);
+			
 
             /* A[loguy] < A[lo], A[higuy] > A[lo]; so condition at top
                of loop is re-established */
@@ -1144,7 +1147,7 @@ recurse:
                A[i] <= A[lo] for lo <= i <= higuy,
                A[i] = A[lo] for higuy < i < loguy */
 
-        SWAP_DRAW_SURF(lo, higuy);     /* put partition element in place */
+			SWAP_DRAW_SURF(lo, higuy);     /* put partition element in place */
 
         /* OK, now we have the following:
               A[i] >= A[higuy] for loguy <= i <= hi,
@@ -1212,10 +1215,21 @@ void R_AddDrawSurf( surfaceType_t *surface, shader_t *shader,
 	index = tr.refdef.numDrawSurfs & DRAWSURF_MASK;
 	// the sort data is packed into a single 32 bit value so it can be
 	// compared quickly during the qsorting process
-	tr.refdef.drawSurfs[index].sort = (shader->sortedIndex << QSORT_SHADERNUM_SHIFT) 
+
+	if(*surface != SF_MD4) {
+		tr.refdef.drawSurfs[index].sort = (shader->sortedIndex << QSORT_SHADERNUM_SHIFT) 
 		| tr.shiftedEntityNum | ( fogIndex << QSORT_FOGNUM_SHIFT ) | (int)dlightMap;
-	tr.refdef.drawSurfs[index].surface = surface;
-	tr.refdef.numDrawSurfs++;
+
+		tr.refdef.drawSurfs[index].surface = surface;
+		tr.refdef.numDrawSurfs++;
+	} else {
+		index = tr.refdef.numTempSurfs; // & DRAWSURF_MASK;
+		tr.refdef.tempSurfs[index].sort = (shader->sortedIndex << QSORT_SHADERNUM_SHIFT) 
+		| tr.shiftedEntityNum | ( fogIndex << QSORT_FOGNUM_SHIFT ) | (int)dlightMap;
+
+		tr.refdef.tempSurfs[index].surface = surface;
+		tr.refdef.numTempSurfs++;
+	}
 }
 
 /*
@@ -1246,7 +1260,7 @@ void R_SortDrawSurfs( drawSurf_t *drawSurfs, int numDrawSurfs ) {
 	// it is possible for some views to not have any surfaces
 	if ( numDrawSurfs < 1 ) {
 		// we still need to add it for hyperspace cases
-		R_AddDrawSurfCmd( drawSurfs, numDrawSurfs );
+		R_AddDrawSurfCmd( drawSurfs, numDrawSurfs, qfalse );
 		return;
 	}
 
@@ -1259,6 +1273,7 @@ void R_SortDrawSurfs( drawSurf_t *drawSurfs, int numDrawSurfs ) {
 
 	// sort the drawsurfs by sort type, then orientation, then shader
 	qsortFast (drawSurfs, numDrawSurfs, sizeof(drawSurf_t) );
+	//BAD TEMPORARY FIX, FIND A BETTER ONE -hxrmn
 
 	// check for any pass through drawing, which
 	// may cause another view to be rendered first
@@ -1284,7 +1299,9 @@ void R_SortDrawSurfs( drawSurf_t *drawSurfs, int numDrawSurfs ) {
 		}
 	}
 
-	R_AddDrawSurfCmd( drawSurfs, numDrawSurfs );
+	R_AddDrawSurfCmd( drawSurfs, numDrawSurfs, qfalse );
+	R_AddDrawSurfCmd( tr.refdef.tempSurfs, tr.refdef.numTempSurfs, qtrue );
+	//tr.refdef.numTempSurfs = 0;
 }
 
 /*

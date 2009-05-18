@@ -447,6 +447,9 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\cg_2d3d.c">
+			</File>
+			<File
 				RelativePath="cg_consolecmds.c">
 				<FileConfiguration
 					Name="Release TA|Win32">
@@ -1255,6 +1258,9 @@
 			Filter="h">
 			<File
 				RelativePath="..\game\bg_public.h">
+			</File>
+			<File
+				RelativePath=".\cg_2d3d.h">
 			</File>
 			<File
 				RelativePath=".\cg_gui.h">

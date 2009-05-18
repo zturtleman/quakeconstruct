@@ -1,61 +1,28 @@
 #include "cg_local.h"
+#include "cg_2d3d.h"
 
-vec4_t	lastcolor;
-qboolean	maskOn = qfalse;
-qboolean	tdraw = qfalse;
-vec3_t		td_vo;
-vec3_t		td_vr;
-vec3_t		td_vd;
-
-void DrawRect(float x, float y, float w, float h, float s, float t, float s2, float t2, qhandle_t shader) {
-	vec3_t rd, dd, rn, dn;
-	vec3_t v1, v2, v3, v4, tmp;
-	float rd2, dd2;
-	if(!tdraw) {
-		CG_AdjustFrom640( &x, &y, &w, &h );
-		trap_R_DrawStretchPic( x, y, w, h, s, t, s2, t2, shader );
-	} else {
-		VectorSubtract(td_vr,td_vo,rd);
-		VectorSubtract(td_vd,td_vo,dd);
-
-		VectorNormalize2(rd,rn);
-		VectorNormalize2(dd,dn);
-
-		rd2 = VectorLength(rd);
-		dd2 = VectorLength(dd);
-
-		VectorMA(td_vo,((x) / 640) * rd2,rn,tmp);
-		VectorMA(tmp,((y) / 480) * dd2,dn,v1);
-
-		VectorMA(td_vo,((x + w) / 640) * rd2,rn,tmp);
-		VectorMA(tmp,((y) / 480) * dd2,dn,v2);
-
-		VectorMA(td_vo,((x + w) / 640) * rd2,rn,tmp);
-		VectorMA(tmp,((y + h) / 480) * dd2,dn,v3);
-
-		VectorMA(td_vo,((x) / 640) * rd2,rn,tmp);
-		VectorMA(tmp,((y + h) / 480) * dd2,dn,v4);
-
-		RenderQuad(shader,v1,v2,v3,v4,lastcolor,s,t,s2,t2);
-	}
-}
+qboolean		maskOn = qfalse;
 
 int qlua_start3D(lua_State *L) {
+	vec3_t origin,right,down,forward;
+
 	luaL_checktype(L,1,LUA_TVECTOR);
 	luaL_checktype(L,2,LUA_TVECTOR);
 	luaL_checktype(L,3,LUA_TVECTOR);
+	luaL_checktype(L,4,LUA_TVECTOR);
 
-	lua_tovector(L,1,td_vo);
-	lua_tovector(L,2,td_vr);
-	lua_tovector(L,3,td_vd);
+	lua_tovector(L,1,origin);
+	lua_tovector(L,2,right);
+	lua_tovector(L,3,down);
+	lua_tovector(L,4,forward);
 
-	tdraw = qtrue;
+	Start2D3D(origin,right,down,forward);
 
 	return 0;
 }
 
 int qlua_end3D(lua_State *L) {
-	tdraw = qfalse;
+	End2D3D();
 	return 0;
 }
 
@@ -65,9 +32,6 @@ int qlua_setcolor(lua_State *L) {
 	VectorClear(color);
 
 	qlua_toColor(L,1,color,qfalse);
-
-	VectorCopy(color,lastcolor);
-	lastcolor[3] = color[3];
 
 	trap_R_SetColor(color);
 
@@ -138,9 +102,6 @@ void adjustColor2(vec4_t color, float amt) {
 	
 	checkColor(color2,qtrue);
 	trap_R_SetColor(color2);
-
-	VectorCopy(color2,lastcolor);
-	lastcolor[3] = color2[3];
 }
 
 int qlua_beveledRect(lua_State *L) {
@@ -289,7 +250,7 @@ int qlua_line(lua_State *L) {
 	s2 = quickfloat(L,9,1);
 	t2 = quickfloat(L,10,1);
 
-	CG_AdjustFrom640( &x1, &y1, &x2, &y2 );
+	//CG_AdjustFrom640( &x1, &y1, &x2, &y2 );
 
 	dx = x2 - x1;
 	dy = y2 - y1;
@@ -297,7 +258,7 @@ int qlua_line(lua_State *L) {
 	cy = y1 + dy/2;
 	rot = atan2(dy,dx)*57.3;
 
-	trap_R_DrawTransformPic( cx, cy, sqrt(dx*dx + dy*dy), w, s, t, s2, t2, rot, shader );
+	DrawRotatedRect( cx, cy, sqrt(dx*dx + dy*dy), w, s, t, s2, t2, rot, shader );
 
 	return 0;
 }
@@ -327,8 +288,8 @@ int qlua_rectrotated(lua_State *L) {
 	s2 = quickfloat(L,9,1);
 	t2 = quickfloat(L,10,1);
 
-	CG_AdjustFrom640( &x, &y, &w, &h );
-	trap_R_DrawTransformPic( x, y, w, h, s, t, s2, t2, r, shader );
+	//CG_AdjustFrom640( &x, &y, &w, &h );
+	DrawRotatedRect( x, y, w, h, s, t, s2, t2, r, shader );
 
 	return 0;
 }
@@ -338,6 +299,7 @@ int qlua_text(lua_State *L) {
 	int w=CHAR_WIDTH,h=CHAR_HEIGHT;
 	float size = 0;
 	const char *text = "text";
+	vec4_t	lastcolor;
 
 	luaL_checktype(L,1,LUA_TNUMBER);
 	luaL_checktype(L,2,LUA_TNUMBER);
@@ -349,6 +311,7 @@ int qlua_text(lua_State *L) {
 	if(lua_type(L,4) == LUA_TNUMBER) {w = lua_tointeger(L,4);}
 	if(lua_type(L,5) == LUA_TNUMBER) {h = lua_tointeger(L,5);}
 
+	trap_R_GetColor(lastcolor);
 	CG_DrawStringExt(x, y, text, lastcolor, qfalse, qfalse, w, h, 0 );
 
 	return 0;
@@ -371,6 +334,7 @@ int qlua_text2(lua_State *L) {
 	float size = 1;
 	const char *text = "text";
 	qboolean glow = qfalse;
+	vec4_t	lastcolor;
 
 	luaL_checktype(L,1,LUA_TNUMBER);
 	luaL_checktype(L,2,LUA_TNUMBER);
@@ -384,6 +348,7 @@ int qlua_text2(lua_State *L) {
 		glow = lua_toboolean(L,5);
 	}
 
+	trap_R_GetColor(lastcolor);
 	if(glow) {
 		UI_DrawProportionalString2(x, y, text, lastcolor, size, cgs.media.charsetPropGlow);
 	} else {

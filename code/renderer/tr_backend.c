@@ -547,7 +547,7 @@ void RB_BeginDrawingView (void) {
 RB_RenderDrawSurfList
 ==================
 */
-void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs ) {
+void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs, qboolean override ) {
 	shader_t		*shader, *oldShader;
 	rendertarget_t	rt;
 	int				fogNum, oldFogNum;
@@ -591,7 +591,7 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs ) {
 	originalTime = backEnd.refdef.floatTime;
 
 	// clear the z buffer, set the modelview, etc
-	RB_BeginDrawingView ();
+	if(!override) RB_BeginDrawingView ();
 
 	// draw everything
 	oldEntityNum = -1;
@@ -1156,7 +1156,7 @@ const void	*RB_DrawSurfs( const void *data ) {
 	backEnd.refdef = cmd->refdef;
 	backEnd.viewParms = cmd->viewParms;
 
-	RB_RenderDrawSurfList( cmd->drawSurfs, cmd->numDrawSurfs );
+	RB_RenderDrawSurfList( cmd->drawSurfs, cmd->numDrawSurfs, cmd->override );
 
 	return (const void *)(cmd + 1);
 }
@@ -1347,6 +1347,13 @@ const void *RB_EndMask( const void *data ) {
 	return (const void *)(cmd + 1);
 }
 
+const void *RB_Advance( const void *data ) {
+	const voidCommand_t *cmd;
+	cmd = (const voidCommand_t *)data;
+
+	return (const void *)(cmd + 1);
+}
+
 /*
 ====================
 RB_ExecuteRenderCommands
@@ -1399,15 +1406,18 @@ void RB_ExecuteRenderCommands( const void *data ) {
 			data = RB_EndMask(data);
 			break;
 		case RC_BEGIN2D:
-			if ( !backEnd.projection2D ) {
-				cmd2D = qtrue;
-				RB_SetGL2D();
-			}
+			//if ( !backEnd.projection2D ) {
+				//cmd2D = qtrue;
+				//RB_SetGL2D();
+				//GL_State( GLS_DEPTHFUNC_EQUAL );
+			//}
+			data = RB_Advance(data);
 			break;
 		case RC_END2D:
-			if ( cmd2D ) {
-				cmd2D = qfalse;
-			}
+			//if ( cmd2D ) {
+				//cmd2D = qfalse;
+			//}
+			data = RB_Advance(data);
 			break;
 		case RC_END_OF_LIST:
 		default:

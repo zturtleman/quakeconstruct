@@ -56,7 +56,7 @@ long myftol( float f );
 #define MAX_RENDER_TARGETS 32
 
 // can't be increased without changing bit packing for drawsurfs
-GLint	rtTexture;
+//GLint	rtTexture;
 
 typedef struct rendertarget_s {
 	GLint		texture;
@@ -66,6 +66,7 @@ typedef struct rendertarget_s {
 } rendertarget_t;
 
 rendertarget_t renderTargets[MAX_RENDER_TARGETS];
+qboolean FORCE_NEAREST;
 
 typedef struct dlight_s {
 	vec3_t	origin;
@@ -470,6 +471,9 @@ typedef struct {
 
 	int			numDrawSurfs;
 	struct drawSurf_s	*drawSurfs;
+
+	int			numTempSurfs;
+	struct drawSurf_s	*tempSurfs;
 
 
 } trRefdef_t;
@@ -1645,6 +1649,7 @@ typedef struct {
 // duplicated so the front and back end can run in parallel
 // on an SMP machine
 typedef struct {
+	drawSurf_t	tempSurfs[MAX_DRAWSURFS];
 	drawSurf_t	drawSurfs[MAX_DRAWSURFS];
 	dlight_t	dlights[MAX_DLIGHTS];
 	trRefEntity_t	entities[MAX_ENTITIES];
@@ -1671,7 +1676,7 @@ void R_ShutdownCommandBuffers( void );
 
 void R_SyncRenderThread( void );
 
-void R_AddDrawSurfCmd( drawSurf_t *drawSurfs, int numDrawSurfs );
+void R_AddDrawSurfCmd( drawSurf_t *drawSurfs, int numDrawSurfs, qboolean override );
 
 void RE_SetColor( const float *rgba );
 void RE_StretchPic ( float x, float y, float w, float h, 
