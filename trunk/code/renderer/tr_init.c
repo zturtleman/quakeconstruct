@@ -178,7 +178,7 @@ static void AssertCvarRange( cvar_t *cv, float minVal, float maxVal, qboolean sh
 	}
 }
 
-void initRT( void ) {
+/*void initRT( void ) {
 	unsigned int* data;						// Stored Data
 
 	// Create Storage Space For Texture Data (128x128x4)
@@ -194,7 +194,7 @@ void initRT( void ) {
 
 	Com_Memset(data,0,0);
 
-}
+}*/
 
 /*
 ** InitOpenGL
@@ -249,7 +249,7 @@ static void InitOpenGL( void )
 	// set default state
 	GL_SetDefaultState();
 
-	initRT();
+	//initRT();
 }
 
 /*

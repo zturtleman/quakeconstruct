@@ -217,7 +217,7 @@ R_AddDrawSurfCmd
 
 =============
 */
-void	R_AddDrawSurfCmd( drawSurf_t *drawSurfs, int numDrawSurfs ) {
+void	R_AddDrawSurfCmd( drawSurf_t *drawSurfs, int numDrawSurfs, qboolean override ) {
 	drawSurfsCommand_t	*cmd;
 
 	cmd = R_GetCommandBuffer( sizeof( *cmd ) );
@@ -231,6 +231,7 @@ void	R_AddDrawSurfCmd( drawSurf_t *drawSurfs, int numDrawSurfs ) {
 
 	cmd->refdef = tr.refdef;
 	cmd->viewParms = tr.viewParms;
+	cmd->override = override;
 }
 
 
@@ -302,6 +303,8 @@ void RE_EndMask( void ) {
 void RE_Begin2D( void ) {
 	voidCommand_t	*cmd;
 
+	FORCE_NEAREST = qtrue;
+
 	if ( !tr.registered ) {
 		return;
 	}
@@ -314,6 +317,8 @@ void RE_Begin2D( void ) {
 
 void RE_End2D( void ) {
 	voidCommand_t	*cmd;
+
+	FORCE_NEAREST = qfalse;
 
 	if ( !tr.registered ) {
 		return;

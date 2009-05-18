@@ -216,6 +216,12 @@ void RE_AddPolyToScene( qhandle_t hShader, int numVerts, const polyVert_t *verts
 
 		poly = &backEndData[tr.smpFrame]->polys[r_numpolys];
 		poly->surfaceType = SF_POLY;
+
+		if(FORCE_NEAREST) {
+			//Com_Printf("Forced Nearest: %i [%i]\n",r_numpolys+1,SF_MD4);
+			poly->surfaceType = SF_MD4;
+		}
+
 		poly->hShader = hShader;
 		poly->numVerts = numVerts;
 		poly->verts = &backEndData[tr.smpFrame]->polyVerts[r_numpolyverts];
@@ -433,6 +439,9 @@ void RE_RenderScene( const refdef_t *fd ) {
 
 	tr.refdef.numPolys = r_numpolys - r_firstScenePoly;
 	tr.refdef.polys = &backEndData[tr.smpFrame]->polys[r_firstScenePoly];
+
+	tr.refdef.numTempSurfs = 0;
+	tr.refdef.tempSurfs = backEndData[tr.smpFrame]->tempSurfs;
 
 	// turn off dynamic lighting globally by clearing all the
 	// dlights if it needs to be disabled or if vertex lighting is enabled

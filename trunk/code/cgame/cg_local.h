@@ -466,6 +466,14 @@ typedef struct {
 	qhandle_t		icon;
 } itemInfo_t;
 
+/*typedef struct {
+	vec3_t		origin;
+	vec3_t		right;
+	vec3_t		down;
+	vec3_t		rn, dn;
+	float		rd2, dd2;
+} coordRemap_t;*/
+
 
 typedef struct {
 	int				itemNum;
@@ -1700,6 +1708,7 @@ void		trap_R_AddPolysToScene( qhandle_t hShader , int numVerts, const polyVert_t
 void		trap_R_AddLightToScene( const vec3_t org, float intensity, float r, float g, float b );
 int			trap_R_LightForPoint( vec3_t point, vec3_t ambientLight, vec3_t directedLight, vec3_t lightDir );
 void		trap_R_RenderScene( const refdef_t *fd );
+void		trap_R_GetColor( vec4_t color );
 void		trap_R_SetColor( const float *rgba );	// NULL = 1,1,1,1
 void		trap_R_DrawStretchPic( float x, float y, float w, float h, 
 			float s1, float t1, float s2, float t2, qhandle_t hShader );

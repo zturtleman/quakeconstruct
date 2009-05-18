@@ -22,7 +22,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //
 // cg_drawtools.c -- helper functions called by cg_draw, cg_scoreboard, cg_info, etc
 #include "cg_local.h"
-
+#include "cg_2d3d.h"
 /*
 ================
 CG_AdjustFrom640
@@ -42,6 +42,19 @@ void CG_AdjustFrom640( float *x, float *y, float *w, float *h ) {
 	*y *= cgs.screenYScale;
 	*w *= cgs.screenXScale;
 	*h *= cgs.screenYScale;
+}
+
+void CG_AdjustTo640( float *x, float *y, float *w, float *h ) {
+	// scale for screen sizes
+	*x = *x / cgs.screenXScale;
+	*y = *y / cgs.screenYScale;
+	*w = *w / cgs.screenXScale;
+	*h = *h / cgs.screenYScale;
+}
+
+void DrawRect2(float x, float y, float w, float h, float s, float t, float s2, float t2, qhandle_t shader) {
+	CG_AdjustTo640(&x,&y,&w,&h);
+	DrawRect(x,y,w,h,s,t,s2,t2,shader);
 }
 
 /*
@@ -87,7 +100,7 @@ UI_DrawRect
 Coordinates are 640*480 virtual values
 =================
 */
-void CG_DrawRect( float x, float y, float width, float height, float size, const float *color ) {
+void CG_DrawRect2( float x, float y, float width, float height, float size, const float *color ) {
 	trap_R_SetColor( color );
 
   CG_DrawTopBottom(x, y, width, height, size);
@@ -144,7 +157,7 @@ void CG_DrawChar( int x, int y, int width, int height, int ch ) {
 	fcol = col*0.0625;
 	size = 0.0625;
 
-	trap_R_DrawStretchPic( ax, ay, aw, ah,
+	DrawRect2( ax, ay, aw, ah,
 					   fcol, frow, 
 					   fcol + size, frow + size, 
 					   cgs.media.charsetShader );
@@ -629,7 +642,7 @@ static void UI_DrawBannerString2( int x, int y, const char* str, vec4_t color )
 			fheight = (float)PROPB_HEIGHT / 256.0f;
 			aw = (float)propMapB[ch][2] * cgs.screenXScale;
 			ah = (float)PROPB_HEIGHT * cgs.screenXScale;
-			trap_R_DrawStretchPic( ax, ay, aw, ah, fcol, frow, fcol+fwidth, frow+fheight, cgs.media.charsetPropB );
+			DrawRect2( ax, ay, aw, ah, fcol, frow, fcol+fwidth, frow+fheight, cgs.media.charsetPropB );
 			ax += (aw + (float)PROPB_GAP_WIDTH * cgs.screenXScale);
 		}
 		s++;
@@ -737,7 +750,7 @@ void UI_DrawProportionalString2( int x, int y, const char* str, vec4_t color, fl
 			fheight = (float)PROP_HEIGHT / 256.0f;
 			aw = (float)propMap[ch][2] * cgs.screenXScale * sizeScale;
 			ah = (float)PROP_HEIGHT * cgs.screenXScale * sizeScale;
-			trap_R_DrawStretchPic( ax, ay, aw, ah, fcol, frow, fcol+fwidth, frow+fheight, charset );
+			DrawRect2( ax, ay, aw, ah, fcol, frow, fcol+fwidth, frow+fheight, charset );
 		} else {
 			aw = 0;
 		}

@@ -176,9 +176,9 @@ local function draw2D()
 	draw.Rect(0,recty,640,480-recty)
 	draw.SetColor(1,1,1,1)
 	
-	DrawAmmo(mx+95+shakex,my+430+shakey,50,50)
-	DrawArmor(mx+450+shakex,my+430+shakey,50,50,armor)
-	DrawHead(mx+285,my+375,105,hp)
+	--DrawAmmo(mx+95+shakex,my+430+shakey,50,50)
+	--DrawArmor(mx+450+shakex,my+430+shakey,50,50,armor)
+	--DrawHead(mx+285,my+375,105,hp)
 	
 	local col_hp = colors.health_norm
 	local col_ammo = colors.ammo_norm
@@ -204,6 +204,10 @@ local function draw2D()
 	if(armor > 0) then drawNumbers(mx+500,num_y,20,20,armor,8,unpack(col_armor)) end
 end
 hook.add("Draw2D","cl_xhud",draw2D)
+
+function DrawXHUD()
+	draw2D()
+end
 
 local function processDamage(attacker,pos,dmg,death,waslocal,wasme,health)
 	if(dmg > 50) then dmg = 50 end

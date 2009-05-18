@@ -27,9 +27,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #endif
 
 #include "cg_local.h"
+vec4_t	lastcolor;
 
 static int (QDECL *syscall)( int arg, ... ) = (int (QDECL *)( int, ...))-1;
-
 
 void dllEntry( int (QDECL  *syscallptr)( int arg,... ) ) {
 	syscall = syscallptr;
@@ -402,7 +402,29 @@ void	trap_R_RenderScene( const refdef_t *fd ) {
 	syscall( CG_R_RENDERSCENE, fd );
 }
 
+void	trap_R_GetColor( vec4_t color ) {
+	color[0] = lastcolor[0];
+	color[1] = lastcolor[1];
+	color[2] = lastcolor[2];
+	color[3] = lastcolor[3];
+}
+
 void	trap_R_SetColor( const float *rgba ) {
+	//int s, i;
+	if(rgba != NULL) {
+		/*s = sizeof(rgba) / sizeof(float);
+		if(s < 4) CG_Printf("Odd Size %i\n",s);
+		if(s > 4) s = 4;
+		for(i=0; i<s; i++) {
+			lastcolor[i] = rgba[i];
+		}*/
+		lastcolor[0] = rgba[0];
+		lastcolor[1] = rgba[1];
+		lastcolor[2] = rgba[2];
+		lastcolor[3] = rgba[3];
+	} else {
+		lastcolor[0] = lastcolor[1] = lastcolor[2] = lastcolor[3] = 1;
+	}
 	syscall( CG_R_SETCOLOR, rgba );
 }
 
