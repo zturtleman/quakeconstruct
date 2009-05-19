@@ -51,7 +51,7 @@ void RB_CheckOverflow( int verts, int indexes ) {
 		return;
 	}
 
-	RB_EndSurface();
+	RB_EndSurface(qfalse);
 
 	if ( verts >= SHADER_MAX_VERTEXES ) {
 		ri.Error(ERR_DROP, "RB_CheckOverflow: verts > MAX (%d > %d)", verts, SHADER_MAX_VERTEXES );
@@ -1216,7 +1216,7 @@ void RB_SurfaceGrid( srfGridMesh_t *cv ) {
 
 			// if we don't have enough space for at least one strip, flush the buffer
 			if ( vrows < 2 || irows < 1 ) {
-				RB_EndSurface();
+				RB_EndSurface(qfalse);
 				RB_BeginSurface(tess.shader, tess.fogNum );
 			} else {
 				break;

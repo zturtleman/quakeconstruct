@@ -455,6 +455,24 @@ int qlua_screenshot(lua_State *L) {
 	return 0;
 }
 
+int qlua_getscores(lua_State *L) {
+	trap_SendClientCommand( "score" );
+	return 0;
+}
+
+int qlua_getclientinfo2(lua_State *L) {
+	int client = luaL_checkint(L,1);
+	clientInfo_t *ci;
+	if(client >= 0 && client <= MAX_CLIENTS) {
+		ci = &cgs.clientinfo[ client ];
+		if(ci != NULL) {
+			CG_PushClientInfoTab(L,ci);
+			return 1;
+		}
+	}
+	return 0;
+}
+
 static const luaL_reg Util_methods[] = {
   {"GetNumItems",		qlua_numitems},
   {"GetItemIcon",		qlua_getitemicon},
@@ -478,6 +496,8 @@ static const luaL_reg Util_methods[] = {
   {"IsUI",				qlua_isUI},
   {"Screenshot",		qlua_screenshot},
   {"ClearImage",		qlua_clearimage},
+  {"GetScores",			qlua_getscores},
+  {"GetClientInfo",		qlua_getclientinfo2},
   {0,0}
 };
 

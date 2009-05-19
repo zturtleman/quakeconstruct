@@ -354,7 +354,7 @@ void RB_RenderFlare( flare_t *f ) {
 	tess.indexes[tess.numIndexes++] = 2;
 	tess.indexes[tess.numIndexes++] = 3;
 
-	RB_EndSurface();
+	RB_EndSurface(qfalse);
 }
 
 /*

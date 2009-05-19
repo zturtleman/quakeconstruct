@@ -777,7 +777,7 @@ void RB_DrawSun( void ) {
 		tess.indexes[tess.numIndexes++] = 2;
 		tess.indexes[tess.numIndexes++] = 3;
 
-	RB_EndSurface();
+	RB_EndSurface(qfalse);
 
 	// back to normal depth range
 	qglDepthRange( 0.0, 1.0 );

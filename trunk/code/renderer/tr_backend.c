@@ -630,8 +630,9 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs, qboolean ov
 					Sys_PumpEvents();
 				}
 #endif
-				RB_EndSurface();
+				RB_EndSurface(override);
 			}
+			//shader->stages[0]->stateBits &= ~GLS_DEPTHTEST_DISABLE;
 			RB_BeginSurface( shader, fogNum );
 			oldShader = shader;
 			oldFogNum = fogNum;
@@ -698,7 +699,7 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs, qboolean ov
 
 	// draw the contents of the last shader batch
 	if (oldShader != NULL) {
-		RB_EndSurface();
+		RB_EndSurface(override);
 	}
 
 	// go back to the world modelview matrix
@@ -907,7 +908,7 @@ const void *RB_QuadPic ( const void *data ) {
 	shader = cmd->shader;
 	if ( shader != tess.shader ) {
 		if ( tess.numIndexes ) {
-			RB_EndSurface();
+			RB_EndSurface(qfalse);
 		}
 		backEnd.currentEntity = &backEnd.entity2D;
 		RB_BeginSurface( shader, 0 );
@@ -984,7 +985,7 @@ const void *RB_TransformPic ( const void *data ) {
 	shader = cmd->shader;
 	if ( shader != tess.shader ) {
 		if ( tess.numIndexes ) {
-			RB_EndSurface();
+			RB_EndSurface(qfalse);
 		}
 		backEnd.currentEntity = &backEnd.entity2D;
 		RB_BeginSurface( shader, 0 );
@@ -1080,7 +1081,7 @@ const void *RB_StretchPic ( const void *data ) {
 	shader = cmd->shader;
 	if ( shader != tess.shader ) {
 		if ( tess.numIndexes ) {
-			RB_EndSurface();
+			RB_EndSurface(qfalse);
 		}
 		backEnd.currentEntity = &backEnd.entity2D;
 		RB_BeginSurface( shader, 0 );
@@ -1148,7 +1149,7 @@ const void	*RB_DrawSurfs( const void *data ) {
 
 	// finish any 2D drawing if needed
 	if ( tess.numIndexes ) {
-		RB_EndSurface();
+		RB_EndSurface(qfalse);
 	}
 
 	cmd = (const drawSurfsCommand_t *)data;
@@ -1288,7 +1289,7 @@ const void	*RB_SwapBuffers( const void *data ) {
 
 	// finish any 2D drawing if needed
 	if ( tess.numIndexes ) {
-		RB_EndSurface();
+		RB_EndSurface(qfalse);
 	}
 
 	//doMask();
@@ -1338,11 +1339,11 @@ const void *RB_EndMask( const void *data ) {
 	cmd = (const voidCommand_t *)data;
 
 	if ( tess.numIndexes ) {
-		RB_EndSurface();
+		RB_EndSurface(qfalse);
 	}
 	backEnd.currentEntity = &backEnd.entity2D;
 	RB_BeginSurface( tr.maskEndShader, 0 );
-	RB_EndSurface();
+	RB_EndSurface(qfalse);
 
 	return (const void *)(cmd + 1);
 }
