@@ -35,6 +35,59 @@ void CG_ApplyCGTab(lua_State *L) {
 	getTableVector(L,"viewOrigin",cg.refdef.vieworg);
 }
 
+void setTableScore(lua_State *L, score_t score) {
+	lua_newtable(L);
+	setTableInt(L,"accuracy",score.accuracy);
+	setTableInt(L,"assistCount",score.assistCount);
+	setTableInt(L,"captures",score.captures);
+	setTableInt(L,"client",score.client);
+	setTableInt(L,"defendCount",score.defendCount);
+	setTableInt(L,"excellentCount",score.excellentCount);
+	setTableInt(L,"guantletCount",score.guantletCount);
+	setTableInt(L,"impressiveCount",score.impressiveCount);
+	setTableInt(L,"perfect",score.perfect);
+	setTableInt(L,"ping",score.ping);
+	setTableInt(L,"powerUps",score.powerUps);
+	setTableInt(L,"score",score.score);
+	setTableInt(L,"scoreFlags",score.scoreFlags);
+	setTableInt(L,"team",score.team);
+	setTableInt(L,"time",score.time);
+}
+
+
+void setTableScores(lua_State *L) {
+	int i;
+	int tabid;
+	int size = cg.numScores;
+
+	lua_pushstring(L, "scores");
+	lua_createtable(L,size,0);
+	tabid = lua_gettop(L);
+
+	for(i=0;i<size;i++) {
+		lua_pushinteger(L,i+1);
+		
+		setTableScore(L,cg.scores[i]);
+
+		lua_settable(L, tabid);
+	}
+	lua_rawset(L, -3);
+
+	lua_pushstring(L, "teamScores");
+	lua_createtable(L,2,0);
+	tabid = lua_gettop(L);
+
+	lua_pushinteger(L,TEAM_BLUE);
+	lua_pushinteger(L,cg.teamScores[1]);
+	lua_settable(L, tabid);
+
+	lua_pushinteger(L,TEAM_RED);
+	lua_pushinteger(L,cg.teamScores[0]);
+	lua_settable(L, tabid);
+
+	lua_rawset(L, -3);
+}
+
 void CG_PushCGTab(lua_State *L) {
 	lua_newtable(L);
 
@@ -49,6 +102,7 @@ void CG_PushCGTab(lua_State *L) {
 	setTableInt(L,"itemPickup", cg.itemPickup);
 	setTableInt(L,"itemPickupTime", cg.itemPickupTime);
 	setTableRefDef(L,"refdef",cg.refdef);
+	setTableScores(L);
 
 	if(cg.snap != NULL) {
 		setTableInt(L,"weapon", cg.snap->ps.weapon);
@@ -58,6 +112,7 @@ void CG_PushCGTab(lua_State *L) {
 		setTableTable(L,"ammo", cg.snap->ps.ammo, WP_NUM_WEAPONS);
 	}
 	lua_setglobal(L,"_CG");
+
 }
 
 void CG_PushClientInfoTab(lua_State *L, clientInfo_t *ci) {

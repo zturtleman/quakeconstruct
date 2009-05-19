@@ -317,6 +317,7 @@ to overflow.
 ==============
 */
 void RB_BeginSurface( shader_t *shader, int fogNum ) {
+	int i=0;
 
 	shader_t *state = (shader->remappedShader) ? shader->remappedShader : shader;
 
@@ -1345,8 +1346,9 @@ void RB_MaskTessFinish( void ) {
 /*
 ** RB_EndSurface
 */
-void RB_EndSurface( void ) {
+void RB_EndSurface( qboolean forceDepth ) {
 	shaderCommands_t *input;
+	int i,size;
 
 	input = &tess;
 
@@ -1388,6 +1390,18 @@ void RB_EndSurface( void ) {
 	backEnd.pc.c_vertexes += tess.numVertexes;
 	backEnd.pc.c_indexes += tess.numIndexes;
 	backEnd.pc.c_totalIndexes += tess.numIndexes * tess.numPasses;
+	
+	if(forceDepth) {
+		//Force depth testing if we are rendering via draw.Start3D -Hxrmn
+		size = sizeof(tess.xstages) / sizeof(tess.xstages[0]);
+		for(i=0; i<size; i++) {
+			if(tess.xstages[i] != NULL) {
+				if(tess.xstages[i]->stateBits & GLS_DEPTHTEST_DISABLE) {
+					tess.xstages[i]->stateBits &= ~GLS_DEPTHTEST_DISABLE;
+				}
+			}
+		}
+	}
 
 	//
 	// call off to shader specific tess end function
