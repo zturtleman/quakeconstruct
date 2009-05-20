@@ -125,6 +125,7 @@ void CG_PushClientInfoTab(lua_State *L, clientInfo_t *ci) {
 		setTableInt(L,"ammo",ci->ammo);
 		setTableInt(L,"score",ci->score);
 		setTableBoolean(L,"connected",qtrue);
+		setTableBoolean(L,"deferred",ci->deferred);
 		setTableInt(L,"weapon",ci->curWeapon);
 		setTableInt(L,"buttons",0);
 		setTableString(L,"modelName",ci->modelName);
@@ -139,6 +140,13 @@ void CG_PushClientInfoTab(lua_State *L, clientInfo_t *ci) {
 		setTableInt(L,"headSkin",ci->headSkin);
 		setTableInt(L,"torsoSkin",ci->torsoSkin);
 		setTableInt(L,"team",ci->team);
+		setTableInt(L,"powerups",ci->powerups);
+		setTableString(L,"blueTeam",ci->blueTeam);
+		setTableString(L,"redTeam",ci->redTeam);
+		setTableInt(L,"botSkill",ci->botSkill);
+		setTableVector(L,"color1",ci->color1);
+		setTableVector(L,"color2",ci->color2);
+		setTableVector(L,"headOffset",ci->headOffset);
 	} else {
 		lua_pushstring(L,"<CLIENT WAS NIL>");
 		lua_error(L);
