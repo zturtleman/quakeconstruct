@@ -6,7 +6,6 @@ local data =
 	{
 		map "gfx/grad_1_alpha.tga"
 		blendfunc blend
-		//tcMod transform 1 0 0 -1 0 0
 		tcMod scale .95 1
 	}
 }]]
@@ -16,15 +15,7 @@ local playerIcons = {}
 
 local function cachedIcon(ico)
 	if(playerIcons[ico] == nil) then
-		local data = 
-		[[{
-			nopicmip
-			{
-				map "]] .. ico .. [["
-				blendfunc blend
-			}
-		}]]
-		playerIcons[ico] = CreateShader("playerIcon",data)	
+		playerIcons[ico] = LoadShader(ico)	
 	end
 	return playerIcons[ico]
 end
@@ -39,7 +30,7 @@ local teamColors = {
 local placeColors = {
 	{0,0,.7},
 	{.7,0,0},
-	{.6,.6,0},
+	{.5,.5,0},
 }
 
 local teamNames = {
@@ -79,6 +70,8 @@ end
 local function drawTeamScores(sm,team,scores,columns)
 	if(teamCount(team,scores) == 0) then return end
 
+	local me = LocalPlayer():EntIndex()
+	
 	local r,g,b = unpack(teamColors[team])
 	local tstr = teamNames[team]
 	
@@ -106,14 +99,20 @@ local function drawTeamScores(sm,team,scores,columns)
 		local info = util.GetClientInfo(v.client)
 		if(info != nil) then	
 			if(info.connected and info.team == team) then
+			
+				if(v.client == me) then
+					draw.SetColor(.5,.5,.5,1)
+					draw.Rect(sm.x,sm.y+4,sm.width/2,20,gradient)
+				end
+			
 				local place = k2
 				if(k != 1 and scores[k-1].score == v.score) then
 					place = place - 1
 				end
-				if(v.client == 0 and place <= #placeColors and place > 0) then
+				if(v.client == me and place <= #placeColors and place > 0) then
 					local r,g,b = unpack(placeColors[place])
-					draw.SetColor(r,g,b,.5)
-					draw.Rect(sm.x,sm.y+4,sm.width/2,20,gradient)
+					draw.SetColor(r,g,b,1)
+					draw.Rect(sm.x,sm.y+7,sm.width/1.5,14,gradient)
 				end
 				
 				draw.SetColor(1,1,1,1)

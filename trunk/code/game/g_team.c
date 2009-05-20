@@ -260,22 +260,26 @@ void Team_SetFlagStatus( int team, flagStatus_t status ) {
 
 void Team_CheckDroppedItem( gentity_t *dropped ) {
 	lua_State *L = GetServerLuaState();
+	int team = -1;
 
 	if( dropped->item->giTag == PW_REDFLAG ) {
 		Team_SetFlagStatus( TEAM_RED, FLAG_DROPPED );
+		team = TEAM_RED;
 	}
 	else if( dropped->item->giTag == PW_BLUEFLAG ) {
 		Team_SetFlagStatus( TEAM_BLUE, FLAG_DROPPED );
+		team = TEAM_BLUE;
 	}
 	else if( dropped->item->giTag == PW_NEUTRALFLAG ) {
 		Team_SetFlagStatus( TEAM_FREE, FLAG_DROPPED );
+		team = TEAM_FREE;
 	} else {
 		return;
 	}
 	if(L != NULL) {
 		qlua_gethook(L, "FlagDropped");
 		lua_pushentity(L, dropped);
-		lua_pushinteger(L, dropped->item->giTag);
+		lua_pushinteger(L, team);
 		qlua_pcall(L,2,0,qtrue);
 	}
 }
@@ -757,6 +761,16 @@ int Team_TouchOurFlag( gentity_t *ent, gentity_t *other, int team ) {
 		AddScore(other, ent->r.currentOrigin, CTF_RECOVERY_BONUS);
 		other->client->pers.teamState.flagrecovery++;
 		other->client->pers.teamState.lastreturnedflag = level.time;
+
+
+		if(L != NULL) {
+			qlua_gethook(L, "FlagReturned");
+			lua_pushentity(L, ent);
+			lua_pushentity(L, other);
+			lua_pushinteger(L, team);
+			qlua_pcall(L,3,0,qtrue);
+		}
+
 		//ResetFlag will remove this entity!  We must return zero
 		Team_ReturnFlagSound(Team_ResetFlag(team), team);
 		return 0;
@@ -782,9 +796,10 @@ int Team_TouchOurFlag( gentity_t *ent, gentity_t *other, int team ) {
 
 	if(L != NULL) {
 		qlua_gethook(L, "FlagCaptured");
+		lua_pushentity(L, ent);
 		lua_pushentity(L, other);
 		lua_pushinteger(L, OtherTeam(team));
-		qlua_pcall(L,2,0,qtrue);
+		qlua_pcall(L,3,0,qtrue);
 	}
 
 	cl->ps.powerups[enemy_flag] = 0;
@@ -853,6 +868,7 @@ int Team_TouchOurFlag( gentity_t *ent, gentity_t *other, int team ) {
 }
 
 int Team_TouchEnemyFlag( gentity_t *ent, gentity_t *other, int team ) {
+	lua_State *L = GetServerLuaState();
 	gclient_t *cl = other->client;
 
 #ifdef MISSIONPACK
@@ -879,6 +895,14 @@ int Team_TouchEnemyFlag( gentity_t *ent, gentity_t *other, int team ) {
 			cl->ps.powerups[PW_BLUEFLAG] = INT_MAX; // flags never expire
 
 		Team_SetFlagStatus( team, FLAG_TAKEN );
+
+		if(L != NULL) {
+			qlua_gethook(L, "FlagPickup");
+			lua_pushentity(L, ent);
+			lua_pushentity(L, other);
+			lua_pushinteger(L, team);
+			qlua_pcall(L,3,0,qtrue);
+		}
 #ifdef MISSIONPACK
 	}
 #endif
