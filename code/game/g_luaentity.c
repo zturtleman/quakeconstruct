@@ -936,6 +936,27 @@ int qlua_gettarget(lua_State *L) {
 	return 0;
 }
 
+int qlua_gettargetent(lua_State *L) {
+	gentity_t	*luaentity, *target;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		if(luaentity->target_ent) {
+			lua_pushentity(L,luaentity->target_ent);
+			return 1;
+		} else if (luaentity->target != NULL) {
+			target = G_PickTarget(luaentity->target);
+			if(target) {
+				lua_pushentity(L,target);
+				return 1;
+			}
+		}
+	}
+	return 0;
+}
+
 int qlua_getallentities(lua_State *L) {
 	int numEnts = sizeof(g_entities) / sizeof(g_entities[0]);
 	int i=0;
@@ -1748,6 +1769,19 @@ int qlua_espawn(lua_State *L) {
 	return 0;
 }
 
+int qlua_getspawnangle(lua_State *L) {
+	gentity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		lua_pushnumber(L,luaentity->angle);
+		return 1;
+	}
+	return 0;
+}
+
 int qlua_use(lua_State *L) {
 	gentity_t	*luaentity, *other, *activator;
 	luaL_checktype(L,1,LUA_TUSERDATA);
@@ -1781,6 +1815,7 @@ static const luaL_reg Entity_methods[] = {
   {"SetPos",		qlua_setpos},
   {"GetAngles",		qlua_getangles},
   {"SetAngles",		qlua_setangles},
+  {"GetSpawnAngle", qlua_getspawnangle},
   {"GetMuzzlePos",	qlua_getmuzzlepos},
   {"GetAimAngles",		qlua_getaimvec},
   {"SetAimAngles",		qlua_setaimvec},
@@ -1793,6 +1828,7 @@ static const luaL_reg Entity_methods[] = {
   {"SetVelocity",		qlua_setvel},
   {"GetOtherEntity",	qlua_getotherentity},
   {"GetOtherEntity2",	qlua_getotherentity},
+  {"GetTargetEnt",		qlua_gettargetent},
   {"GetTarget",			qlua_gettarget},
   {"SetTarget",			qlua_settarget},
   {"GetTargetName",		qlua_gettargetname},
@@ -1879,6 +1915,8 @@ int Entity_register (lua_State *L) {
 	lua_pushliteral(L, "__metatable");
 	lua_pushvalue(L, -3);
 	lua_rawset(L, -3);
+
+	lua_setglobal(L,"M_Entity");
 
 	lua_pop(L, 1);
 	return 1;

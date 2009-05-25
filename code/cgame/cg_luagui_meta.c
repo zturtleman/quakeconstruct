@@ -300,10 +300,12 @@ int Panel_register (lua_State *L) {
 	luaL_openlib(L, 0, Panel_meta, 0);
 	/*lua_pushliteral(L, "__index");
 	lua_pushvalue(L, -3);
-	lua_rawset(L, -3);
+	lua_rawset(L, -3);*/
 	lua_pushliteral(L, "__metatable");
 	lua_pushvalue(L, -3);
-	lua_rawset(L, -3);*/
+	lua_rawset(L, -3);
+
+	lua_setglobal(L,"M_Panel");
 
 	lua_pop(L, 1);
 	return 1;
