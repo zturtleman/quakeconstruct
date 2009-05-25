@@ -8,7 +8,7 @@ local function clThink(client)
 			local vel = VectorLength(client:GetVelocity())/100
 			vel = math.max(5-vel,1)
 			if(myHp < 100 and myHp > 0) then
-				client:SetInfo(PLAYERINFO_HEALTH,myHp + 5)
+				client:SetInfo(PLAYERINFO_HEALTH,myHp + 1)
 			end
 			tab.lastrecharge = (LevelTime() + 100/vel) + 40 --5 hp every 2 seconds when standing still
 		end

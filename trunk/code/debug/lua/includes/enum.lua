@@ -1,4 +1,5 @@
 local enum = {}
+local enumsets = {}
 enum_weaponentities = {
 	"weapon_gauntlet",
 	"weapon_machinegun",
@@ -138,8 +139,13 @@ for n,e in pairs(enum) do
 	end
 	e.IsEnumeration = true
 	_G[n] = e
+	table.insert(enumsets,n)
 	forced = 0
 	val = 0
+end
+
+function GetEnumSets()
+	return enumsets
 end
 
 function GetEnumSet(set)

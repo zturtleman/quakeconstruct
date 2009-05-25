@@ -4,6 +4,7 @@ local ENTS = {}
 function META:Think() end
 function META:Initialized() end
 function META:Removed() end
+function META:MessageReceived() end
 
 if(SERVER) then
 	function META:Touch(other,trace) end
@@ -14,6 +15,7 @@ if(SERVER) then
 	function META:Reached(other) end
 else
 	function META:Draw() end
+	function META:UserCommand() end
 end
 
 function ExecuteEntity(v)
@@ -56,14 +58,21 @@ local function LinkEntity(ent)
 	if(ent == nil) then return end
 	local name = ent:Classname()
 	local found = FindEntity(name)
+
 	if(found != nil) then
-		local cent = table.Copy(found)
+		local cent = {}--table.Copy(found)
+		setmetatable(cent,found)
+		found.__index = found
+		
 		local id = ent:EntIndex()
 		cent.entity = ent
 		cent.Entity = ent --Because I'm like that
 		if(SERVER) then cent:Initialized() end
 		active[id] = cent
 		SetCallbacks(ent,cent)
+		
+		cent.__index = function(self,str) return active[self.Entity:EntIndex()][str] end
+		cent.__newindex = function(self,str,val) active[self.Entity:EntIndex()][str] = val end
 	end
 	
 	--local str = "Entity Linked: " .. name .. "\n"
@@ -89,15 +98,40 @@ end
 hook.add("EntityUnlinked","checkcustom",UnlinkEntity)
 
 if(SERVER) then
-
+	local function messagetest(...)
+		for k,v in pairs(active) do
+			if(v != nil) then
+				pcall(active[k].MessageReceived,active[k],unpack(arg))
+			end
+		end
+	end
+	hook.add("MessageReceived","checkcustom",messagetest)
 else
 	local function DrawEntity(ent,name)
 		local index = ent:EntIndex()
 		if(active[index] != nil) then
-			active[index]:Draw()
+			pcall(active[index].Draw,active[index])
 		end
 	end
 	hook.add("DrawCustomEntity","checkcustom",DrawEntity)
+	
+	local function UserCommand(...)
+		for k,v in pairs(active) do
+			if(v != nil) then
+				pcall(active[k].UserCommand,active[k],unpack(arg))
+			end
+		end
+	end
+	hook.add("UserCommand","checkcustom",UserCommand)
+	
+	local function messagetest(...)
+		for k,v in pairs(active) do
+			if(v != nil) then
+				pcall(active[k].MessageReceived,active[k],unpack(arg))
+			end
+		end
+	end
+	hook.add("MessageReceived","checkcustom",messagetest)
 	
 	local function dlhook(file)
 		if(string.find(file,"/lua.entities.") and

@@ -224,6 +224,8 @@ int Warp_register (lua_State *L) {
 	lua_pushvalue(L, -3);
 	lua_rawset(L, -3);
 
+	lua_setglobal(L,"M_Warper");
+
 	lua_pop(L, 1);
 	return 1;
 }
