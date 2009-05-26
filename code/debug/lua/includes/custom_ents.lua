@@ -13,6 +13,7 @@ if(SERVER) then
 	function META:Use(other) end
 	function META:Blocked(other) end
 	function META:Reached(other) end
+	function META:ClientReady(ent) end
 else
 	function META:Draw() end
 	function META:UserCommand() end
@@ -106,6 +107,15 @@ if(SERVER) then
 		end
 	end
 	hook.add("MessageReceived","checkcustom",messagetest)
+	
+	local function ClientReady(...)
+		for k,v in pairs(active) do
+			if(v != nil) then
+				pcall(active[k].ClientReady,active[k],unpack(arg))
+			end
+		end
+	end
+	hook.add("ClientReady","checkcustom",ClientReady)
 else
 	local function DrawEntity(ent,name)
 		local index = ent:EntIndex()

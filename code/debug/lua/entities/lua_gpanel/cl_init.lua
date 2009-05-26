@@ -84,6 +84,8 @@ function GPanelDraw(self)
 	draw.Rect(0,20,640,5)
 	draw.Rect(0,480-20,640,5)
 	
+	local msg = self.message or "nil"
+	
 	local ins = 100
 	if((1-self.light) != 0) then
 		draw.SetColor(.1,1,.3,.7*(1-self.light))
@@ -92,7 +94,7 @@ function GPanelDraw(self)
 		,.1,10)
 		
 		draw.SetColor(0,0,0,.7*(1-self.light))
-		draw.Text(320 - string.len("Open Door")*25,240 - 25,"Open Door",50,50)
+		draw.Text(320 - string.len(msg)*15,240 - 25,msg,30,50)
 	end
 	
 	if(self.light != 0) then
@@ -113,7 +115,7 @@ function GPanelDraw(self)
 			,.1,10)
 			
 			draw.SetColor(1,1,1,.7)
-			draw.Text(320 - string.len("Open Door")*25,240 - 25,"Open Door",50,50)
+			draw.Text(320 - string.len(msg)*15,240 - 25,msg,30,50)
 			if(self.buttonPress == 1) then
 				draw.SetColor(0,0,0,0)
 				draw.BeveledRect(ins/2,ins/2,640-ins,480-ins,
@@ -145,6 +147,7 @@ function GPanelDraw(self)
 	draw.End3D()
 end
 
+
 function GPanelUserCommand(self,pl,angle,fm,rm,um,buttons,weapon)
 	if(self.block) then 
 		self.buttonPress = bitAnd(buttons,BUTTON_ATTACK)
@@ -155,6 +158,19 @@ end
 
 function ENT:UserCommand(...)
 	GPanelUserCommand(self,unpack(arg))
+end
+
+function ENT:MessageReceived(str)
+	local args = string.Explode(" ",str)
+	
+	if(args[1] != "panelinit") then return end
+	if(tonumber(args[2]) != self.Entity:EntIndex()) then return end
+	local func = tonumber(args[3])
+	local farg = args[4]
+	
+	if(func == 1 and farg != nil) then
+		self.message = string.Replace(farg,"_sp"," ")
+	end
 end
 
 function ENT:Draw()

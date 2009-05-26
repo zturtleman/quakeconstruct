@@ -487,6 +487,7 @@ qboolean Cmd_Check_Lua( gentity_t *ent, char cmd[] );
 void G_InitLuaVector(lua_State *L);
 void G_InitLuaEnts(lua_State *L);
 void G_InitLuaTeam(lua_State *L);
+void G_InitSpawnLua(lua_State *L);
 
 static qboolean qlua_lockdamage = qfalse;
 
