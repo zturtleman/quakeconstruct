@@ -489,6 +489,7 @@ void G_InitLua() {
 	BG_InitLuaMisc(L);
 	BG_InitLuaUtil(L);
 	BG_InitLuaMath(L);
+	G_InitSpawnLua(L);
 	G_InitLuaEnts(L);
 	G_InitLuaVector(L);
 	G_InitLuaMessages(L);

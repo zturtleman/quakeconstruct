@@ -13,13 +13,15 @@ function ENT:Initialized()
 	self.Entity:SetNextThink(LevelTime() + 1000)
 	self.hp = 100
 	self.nextheal = 0
+	self.message = G_SpawnString("message","Open Door")
 	
 	print("SPAWN ANGLE: " .. self.Entity:GetSpawnAngle() .. "\n")
 	print("SPAWN ANGLE2: " .. tostring(self.Entity:GetAngles()) .. "\n")
+	print("SPAWN MESSAGE: " .. self.message .. "\n")
 	
+	self.Entity:SetClip(CONTENTS_PLAYERCLIP)
 	self.Entity:SetMins(Vector(-5,-5,-5))
 	self.Entity:SetMaxs(Vector(5,5,5))
-	self.Entity:SetClip(1)
 	self.Entity:SetTakeDamage(true)
 	self.Entity:SetHealth(1000)
 	self.Entity:SetBounce(.7)
@@ -41,6 +43,10 @@ function GPanelMessage(self,str,client)
 			v:Fire()
 		end
 	end
+end
+
+function ENT:ClientReady(client)
+	client:SendString("panelinit " .. self.Entity:EntIndex() .. " 1 " .. string.Replace(self.message," ","_sp"))
 end
 
 function ENT:MessageReceived(str,client)

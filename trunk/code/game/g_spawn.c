@@ -23,6 +23,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "g_local.h"
 
+qboolean	qlua_allowSpawnString = qfalse;
+
 qboolean	G_SpawnString( const char *key, const char *defaultString, char **out ) {
 	int		i;
 
@@ -69,6 +71,30 @@ qboolean	G_SpawnVector( const char *key, const char *defaultString, float *out )
 	return present;
 }
 
+int L_SpawnString(lua_State *L) {
+	char *out;
+	qboolean present = qfalse;
+
+	luaL_checkstring(L,1);
+	luaL_checkstring(L,2);
+	
+	if(qlua_allowSpawnString) {
+		present = G_SpawnString(lua_tostring(L,1),lua_tostring(L,2),&out);
+		lua_pushstring(L,out);
+		lua_pushboolean(L,present);
+		return 2;
+	} else {
+		lua_pushstring(L,lua_tostring(L,2));
+		lua_pushboolean(L,qfalse);
+		return 2;
+	}
+	return 0;
+}
+
+void G_InitSpawnLua(lua_State *L) {
+	lua_pushcfunction(L,L_SpawnString);
+	lua_setglobal(L,"G_SpawnString");
+}
 
 
 //
@@ -323,8 +349,10 @@ qboolean G_CallSpawn( gentity_t *ent ) {
 		ent->clipmask = MASK_SHOT;
 		ent->target_ent = NULL;
 		strcpy(ent->s.luaname, ent->classname);
-		VectorCopy(ent->s.pos.trBase,ent->s.origin2); 
+		VectorCopy(ent->s.pos.trBase,ent->s.origin2);
+		qlua_allowSpawnString = qtrue;
 		qlua_LinkEntity(ent);
+		qlua_allowSpawnString = qfalse;
 		return qtrue;
 	}
 
@@ -497,6 +525,8 @@ void G_SpawnGEntityFromSpawnVars( void ) {
 			}
 		}
 	}
+
+	//TODO, add lua spawn functions. -Hxrmn
 
 	// move editor origin to pos
 	VectorCopy( ent->s.origin, ent->s.pos.trBase );
