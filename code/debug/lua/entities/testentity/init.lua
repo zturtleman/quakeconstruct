@@ -32,6 +32,7 @@ function ENT:Pain(other,b,take)
 	local pos = self.Entity:GetPos()
 	local dir = VectorNormalize(other:GetPos() - pos)
 	self.Entity:SetVelocity((dir*-700) + Vector(0,0,100))
+	self.net.hitTime = LevelTime()
 end
 
 function ENT:SendSparks(p1,p2)
