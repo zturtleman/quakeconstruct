@@ -151,7 +151,7 @@ if(SERVER) then
 		local add = 0
 		for k,v in pairs(_NetTables) do
 			if(v != nil) then
-				Timer(.05+add,v:SendVars(),pl)
+				Timer(.05+add,v.SendVars,v,pl)
 				add = add + .05
 			end
 		end
