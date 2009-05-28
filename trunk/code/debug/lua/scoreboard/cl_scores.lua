@@ -50,7 +50,7 @@ local function drawIcon(x,y,w,h,info)
 	if(info.team == TEAM_BLUE) then skin = "blue" end
 	local path = "models/players/" .. info.modelName .. "/icon_" .. skin .. ".tga"
 	local shd = cachedIcon(path)
-	draw.Rect(x,y,w,h,shd)
+	--draw.Rect(x,y,w,h,shd)
 end
 
 local function teamCount(team,scores)

@@ -5,6 +5,7 @@ function META:Think() end
 function META:Initialized() end
 function META:Removed() end
 function META:MessageReceived() end
+function META:VariableChanged() end
 
 if(SERVER) then
 	function META:Touch(other,trace) end
@@ -68,12 +69,19 @@ local function LinkEntity(ent)
 		local id = ent:EntIndex()
 		cent.entity = ent
 		cent.Entity = ent --Because I'm like that
+		cent.net = CreateNetworkedTable(ent:EntIndex() or -1)
+		cent.net:Reset()
+		function cent.net:VariableChanged(...)
+			--active[id].net = CreateNetworkedTable(ent:EntIndex() or -1)
+			pcall(cent.VariableChanged,cent,unpack(arg))
+		end
 		if(SERVER) then cent:Initialized() end
 		active[id] = cent
 		SetCallbacks(ent,cent)
 		
-		cent.__index = function(self,str) return active[self.Entity:EntIndex()][str] end
-		cent.__newindex = function(self,str,val) active[self.Entity:EntIndex()][str] = val end
+		
+		--cent.__index = function(self,str) return active[self.Entity:EntIndex()][str] end
+		--cent.__newindex = function(self,str,val) active[self.Entity:EntIndex()][str] = val end
 	end
 	
 	--local str = "Entity Linked: " .. name .. "\n"
