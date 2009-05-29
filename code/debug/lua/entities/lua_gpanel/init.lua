@@ -10,14 +10,21 @@ end
 
 function ENT:Initialized()
 	print("Ent Init\n")
+	local lock = G_SpawnString("locked","0")
+	
 	self.Entity:SetNextThink(LevelTime() + 1000)
 	self.hp = 100
 	self.nextheal = 0
-	self.message = G_SpawnString("message","Open Door")
+	self.net.message = G_SpawnString("message","Open Door")
+	if(lock == "1") then
+		self.net.locked = 1
+	else
+		self.net.locked = 0
+	end
 	
 	print("SPAWN ANGLE: " .. self.Entity:GetSpawnAngle() .. "\n")
 	print("SPAWN ANGLE2: " .. tostring(self.Entity:GetAngles()) .. "\n")
-	print("SPAWN MESSAGE: " .. self.message .. "\n")
+	print("SPAWN MESSAGE: " .. tostring(self.net.message) .. "\n")
 	
 	self.Entity:SetClip(CONTENTS_PLAYERCLIP)
 	self.Entity:SetMins(Vector(-5,-5,-5))
@@ -45,14 +52,19 @@ function GPanelMessage(self,str,client)
 	end
 end
 
-function ENT:ClientReady(client)
-	client:SendString("panelinit " .. self.Entity:EntIndex() .. " 1 " .. string.Replace(self.message," ","_sp"))
-end
-
 function ENT:MessageReceived(str,client)
 	
 	GPanelMessage(self,str,client)
 
+end
+
+function ENT:Use(other)
+	print("Panel Used!\n")
+	if(self.net.locked == 0) then
+		self.net.locked = 1
+	else
+		self.net.locked = 0
+	end
 end
 
 function ENT:Removed()
@@ -60,10 +72,6 @@ function ENT:Removed()
 end
 
 function ENT:Pain(other,b,take)
-
-end
-
-function ENT:SendSparks(p1,p2)
 
 end
 
