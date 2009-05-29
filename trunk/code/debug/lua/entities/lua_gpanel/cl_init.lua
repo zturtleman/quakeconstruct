@@ -51,6 +51,7 @@ function GPanelDraw(self)
 	ref:Render()
 	
 	self.light = self.light or 1
+	self.light2 = self.light2 or 1
 	
 	local f,r,u = AngleVectors(self.Entity:GetAngles() + Vector(0,0,-10))
 	local pos = GetTag(ref,"tag_origin")
@@ -77,14 +78,47 @@ function GPanelDraw(self)
 	
 	draw.Start3D(pos,right,down,Vector(0,0,0))
 	
-	draw.SetColor(0,.4,0,.3)
+	local cr = 1 - (self.light2*self.light2)
+	local cg = self.light2*self.light2
+	local alp = (1 - ((LevelTime()/800)%1)) * cr
+	
+	draw.SetColor((cr*.4) + alp*.5,(cg*.4) + alp*.1,0,.3 + alp*.3)
 	draw.Rect(0,0,640,480)
 	
-	draw.SetColor(0,1,0,.3)
-	draw.Rect(0,20,640,5)
-	draw.Rect(0,480-20,640,5)
+	draw.SetColor(cr,cg,0,.3)
+	draw.Rect(0,20,640,5+(cr*100))
+	draw.Rect(0,(480-20)-(cr*100),640,5+(cr*100))
 	
-	local msg = self.message or "nil"
+	if(self.light2 < 1) then
+		--draw.Rect(50*cr,140,10 + (60*cr),205)
+		
+		draw.Rect(640 - (600*cr),140,10 + (60*cr),205)
+		draw.Rect((530*cr),140,10 + (60*cr),205)
+	end
+	
+	draw.SetColor(1,1,1,cr)
+	draw.Text(30,30,"Panel Locked",20,(cr*50))
+	
+	draw.SetColor(1,1,1,cr)
+	draw.Text(30,370 + (100*cg),"Function:",20,30)
+	draw.SetColor(1,1,1,cr)
+	draw.Text(30,400 + (100*cg),self.net.message or "nil",20,50*cr)
+	
+	if(self.light != 0) then
+		draw.SetColor(self.light*cr,self.light*cg,.2,1)
+		draw.RectRotated(320,240,240-(cr*80),240-(cr*80),console,-LevelTime()/10)
+	end
+	
+	if(self.net.locked == 0) then
+		self.light2 = self.light2 + .1
+		if(self.light2 > 1) then self.light2 = 1 end
+	else
+		self.light2 = self.light2 - .1
+		if(self.light2 < 0) then self.light2 = 0 end
+		return
+	end
+	
+	local msg = self.net.message or "nil"
 	
 	local ins = 100
 	if((1-self.light) != 0) then
@@ -95,11 +129,6 @@ function GPanelDraw(self)
 		
 		draw.SetColor(0,0,0,.7*(1-self.light))
 		draw.Text(320 - string.len(msg)*15,240 - 25,msg,30,50)
-	end
-	
-	if(self.light != 0) then
-		draw.SetColor(self.light,self.light,self.light,1)
-		draw.RectRotated(320,240,240,240,console,-LevelTime()/10)
 	end
 	
 	--draw.SetColor(0,0,0,self.light)
@@ -158,19 +187,6 @@ end
 
 function ENT:UserCommand(...)
 	GPanelUserCommand(self,unpack(arg))
-end
-
-function ENT:MessageReceived(str)
-	local args = string.Explode(" ",str)
-	
-	if(args[1] != "panelinit") then return end
-	if(tonumber(args[2]) != self.Entity:EntIndex()) then return end
-	local func = tonumber(args[3])
-	local farg = args[4]
-	
-	if(func == 1 and farg != nil) then
-		self.message = string.Replace(farg,"_sp"," ")
-	end
 end
 
 function ENT:Draw()
