@@ -69,7 +69,7 @@ local function LinkEntity(ent)
 		local id = ent:EntIndex()
 		cent.entity = ent
 		cent.Entity = ent --Because I'm like that
-		cent.net = CreateNetworkedTable(ent:EntIndex() or -1)
+		cent.net = CreateEntityNetworkedTable(ent:EntIndex() or -1)
 		cent.net:Reset()
 		function cent.net:VariableChanged(...)
 			--active[id].net = CreateNetworkedTable(ent:EntIndex() or -1)
