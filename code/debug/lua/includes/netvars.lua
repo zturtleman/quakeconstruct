@@ -1,5 +1,4 @@
 _NetTables = _NetTables or {}
-_NetTables = {}
 local network_meta = {}
 
 local n_msgid = "_ntbvar"
@@ -237,7 +236,7 @@ else
 	end
 end
 
-function CreateNetworkedTable(index)
+local function Internal_CreateNetworkedTable(index)
 	local nt = _NetTables[index]
 	if(nt == nil) then
 		_NetTables[index] = {}
@@ -254,4 +253,24 @@ function CreateNetworkedTable(index)
 		end
 	end
 	return nt
+end
+
+function NetworkTableInUse(index)
+	return (_NetTables[index] != nil)
+end
+
+function CreateEntityNetworkedTable(index)
+	if(index > 0) then
+		return Internal_CreateNetworkedTable(index + 1024)
+	else
+		error("Bad networked table index: " .. index .. "\n")
+	end
+end
+
+function CreateNetworkedTable(index)
+	if(index <= 1024 and index > 0) then
+		return Internal_CreateNetworkedTable(index)
+	else
+		error("Bad networked table index: " .. index .. "\n")
+	end
 end
