@@ -131,11 +131,14 @@ if(SERVER) then
 	end
 	hook.add("PlayerMove","sh_pong",PlayerMove)
 	
-	for k,v in pairs(GetAllPlayers()) do
-		game:SendVars(v)
-		player1:SendVars(v)
-		player2:SendVars(v)
+	local function ready(str,v)
+		if(str == "ReadyForPong") then
+			game:SendVars(v)
+			player1:SendVars(v)
+			player2:SendVars(v)		
+		end
 	end
+	hook.add("MessageReceived","sh_pong",ready)
 else
 	local mx = 0
 	local my = 0
@@ -233,4 +236,5 @@ else
 		if(str == "HUD_DRAWGUN") then return false end
 	end
 	hook.add("ShouldDraw","sh_pong",noNuthin);
+	SendString("ReadyForPong")
 end
