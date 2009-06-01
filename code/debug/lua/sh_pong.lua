@@ -19,6 +19,33 @@ local function calcball(ball)
 	return x,y
 end
 
+function PlayerMove(pm,walk,forward,right)
+	//__DL_BLOCK
+	if(SERVER) then
+		local f,r,u = pm:GetMove()
+		local index = pm:EntIndex()
+		local entity = nil
+		
+		for k,v in pairs(GetAllPlayers()) do
+			if(v:EntIndex() == index) then entity = v end
+		end
+		if(entity == nil) then return end
+		
+		local ready = 0
+		if(u == 127) then ready = 1 end
+		if(index == 0) then
+			player1.paddle_y = f
+			if(ready != 0 and game.started == 0) then player1.ready = ready end
+		else
+			player2.paddle_y = f
+			if(ready != 0 and game.started == 0) then player2.ready = ready end
+		end
+	end
+	//__DL_UNBLOCK
+	return true
+end
+hook.add("PlayerMove","sh_pong",PlayerMove)
+
 if(SERVER) then
 //__DL_BLOCK
 	downloader.add("lua/sh_pong.lua")
@@ -64,6 +91,7 @@ if(SERVER) then
 		player2.ready = 0
 	end
 	
+	local lastx,lasty = 0,0
 	local function frame()
 		if(game.started == 0) then 
 			-- and player2.ready == 1
@@ -71,6 +99,8 @@ if(SERVER) then
 				game.btime = LevelTime()
 				game.started = 1
 			end
+			lastx = nil
+			lasty = nil
 			return 
 		end
 		local x,y = calcball(game)
@@ -79,6 +109,9 @@ if(SERVER) then
 		local p2y = player2.paddle_y / 127
 		local p1s = player1.paddle_size
 		local p2s = player2.paddle_size
+		
+		lastx = lastx or x
+		lasty = lasty or y
 		
 		if(y+s >= 1 or y-s <= -1) then
 			game.vy = game.vy * -1
@@ -89,8 +122,8 @@ if(SERVER) then
 			game.hit = 1
 		end
 		
-		if(x < -.85 and y < p1y + p1s and y > p1y - p1s) then
-			game.vx = game.vx * -1.05
+		if(x < -.85 and lastx > -.85 and y < p1y + p1s and y > p1y - p1s) then
+			game.vx = game.vx * -1.15
 			game.bx = x
 			game.by = y
 			game.btime = LevelTime()-20
@@ -99,8 +132,8 @@ if(SERVER) then
 			return
 		end
 		
-		if(x > .85) then --and y < p2y + p2s and y > p2y - p2s
-			game.vx = game.vx * -1.05
+		if(x > .85 and lastx < .85) then --and y < p2y + p2s and y > p2y - p2s
+			game.vx = game.vx * -1.15
 			game.bx = x
 			game.by = y
 			game.btime = LevelTime()-20
@@ -109,37 +142,17 @@ if(SERVER) then
 			return
 		end
 		
-		if(x-s <= -1) then
+		if(x-s <= -2) then
 			playerScored(player2)
 		end
 		
-		if(x+s >= 1) then
+		if(x+s >= 2) then
 			playerScored(player1)
 		end
+		lastx = x
+		lasty = y
 	end
 	hook.add("Think","sh_pong",frame)
-	
-	function PlayerMove(pm,walk,forward,right)
-		local f,r,u = pm:GetMove()
-		local index = pm:EntIndex()
-		local entity = nil
-		
-		for k,v in pairs(GetAllPlayers()) do
-			if(v:EntIndex() == index) then entity = v end
-		end
-		if(entity == nil) then return end
-		
-		local ready = 0
-		if(u == 127) then ready = 1 end
-		if(index == 0) then
-			player1.paddle_y = f
-			if(ready != 0 and game.started == 0) then player1.ready = ready end
-		else
-			player2.paddle_y = f
-			if(ready != 0 and game.started == 0) then player2.ready = ready end
-		end
-	end
-	hook.add("PlayerMove","sh_pong",PlayerMove)
 	
 	local function ready(str,v)
 		if(str == "ReadyForPong") then
@@ -178,11 +191,22 @@ else
 	local mx = 0
 	local my = 0
 	local active = true
+	local function paddleInfo(scale)
+		local p1y = def(player1.paddle_y,0) / 127
+		local p2y = def(player2.paddle_y,0) / 127
+		local p1size = def(player1.paddle_size,4)
+		local p2size = def(player2.paddle_size,4)
+		if(scale) then
+			p1size = p1size * 480
+			p2size = p2size * 480
+			p1y = (p1y * 240) + 240
+			p2y = (p2y * 240) + 240
+		end
+		return p1y,p2y,p1size,p2size
+	end
+	
 	local function drawPlayers()
-		local p1y = ((def(player1.paddle_y,0) / 127) * 240) + 240
-		local p2y = ((def(player2.paddle_y,0) / 127) * 240) + 240
-		local p1size = def(player1.paddle_size,4) * 480
-		local p2size = def(player2.paddle_size,4) * 480
+		local p1y,p2y,p1size,p2size = paddleInfo(true)
 		local cl1 = def(player1.client,-1)
 		local cl2 = def(player2.client,-1)
 		draw.SetColor(1,0,0,1)
@@ -217,6 +241,7 @@ else
 		end
 	end
 	
+	local lastx,lasty = 0,0
 	local function drawPong(border)
 		draw.SetColor(1,1,1,border)
 		draw.Rect(0,0,4,480)
@@ -224,11 +249,20 @@ else
 		draw.Rect(640-4,0,4,480)
 		draw.Rect(0,480-4,640,4)
 	
+		local p1y,p2y,p1s,p2s = paddleInfo(false)
 		local cx,cy = calcball(game)
+		if(cx < -.85 and lastx >= -.85 and cy < p1y + p1s and cy > p1y - p1s) then cx = -.85 end
+		if(cx > .85 and lastx <= .85 and cy < p2y + p2s and cy > p2y - p2s) then cx = .85 end
+		if(cy > (1 - game.bsize)) then cy = (1 - game.bsize) end
+		if(cy < (-1 + game.bsize)) then cy = (-1 + game.bsize) end
+		lastx = cx
+		lasty = cy
+		
 		local ball_x = (cx * 320) + 320
 		local ball_y = (cy * 240) + 240
 		local ball_sizex = def(game.bsize,.01)*640
 		local ball_sizey = def(game.bsize,.01)*480
+		
 		
 		if(game.hit == 1) then
 			PlaySound(fire[math.random(1,#fire)])
@@ -246,12 +280,35 @@ else
 	local dist = 0
 	local rrx = 0
 	local rry = 0
+	local trail = RefEntity()
+	
+	local data = 
+	[[{
+		{
+			blendfunc add
+			map $whiteimage
+			//tcMod scroll 0  0.7
+			alphaGen vertex
+			rgbGen vertex
+			//tcGen environment
+		}
+	}]]
+	local trailfx1 = CreateShader("f",data)
+	
+	trail:SetType(RT_TRAIL)
+	trail:SetTrailLength(10)
+	trail:SetRadius(.4)
+	trail:SetShader(trailfx1)
+	trail:SetColor(1,1,1,1)
+	trail:SetTrailFade(FT_COLOR)
+	
 	local function d3d()
 		if(active) then
 			util.LockMouse(true)
-			draw.SetColor(0,0,0,1)
+			draw.SetColor(0,0,0,.6)
 			draw.Rect(0,0,640,480)
 			
+			local ballVec = Vector()
 			--drawPong()
 			
 			if(KeyIsDown(K_ENTER)) then --enterquit
@@ -285,12 +342,25 @@ else
 			local v3 = (v2 + up*20)
 			local v4 = (v1 + up*20)
 			
-			render.Quad(v1,v2,v3,v4,nil,0,0,0,.3)
+			render.Quad(v1,v2,v3,v4,nil,0,0,0,0)
 			draw.Start3D(v3,v4,v2,forward)
 			
 			drawPong(dist/6)
 			
+			ballVec = draw.Get3DCoord((lastx * 320) + 320,(lasty * 240) + 240)
 			draw.End3D()
+			
+			local r,g,b = hsv(LevelTime()/2,1,1)
+			trail:SetColor(r,g,b,1)
+			trail:SetPos(ballVec)
+			if(math.abs(game.vx) > 4) then
+				trail:SetTrailLength(10)
+			else
+				trail:SetTrailLength(5)
+			end
+			if(math.abs(game.vx) > 2) then
+				trail:Render()
+			end
 		else
 			util.LockMouse(false)
 		end
@@ -299,7 +369,7 @@ else
 	hook.add("AllowGameSound","sh_pong",function(sound) return !active end)
 
 	function view(pos,ang,fovx,fovy)
-		ApplyView(pos,Vector(-rry*rlvl,rrx*rlvl,0),fovx,fovy)
+		ApplyView(pos,Vector(rry*rlvl,rrx*rlvl,0),fovx,fovy)
 	end
 	hook.add("CalcView","sh_pong",view)
 	
@@ -319,7 +389,7 @@ else
 		if(active) then
 			fm = ((my/480) * 254)-127
 			rm = LocalPlayer():EntIndex()
-			SetUserCommand(angle,fm,0,um,buttons,0)
+			SetUserCommand(Vector(0,0,0),fm,0,um,buttons,0)
 			--print(fm .. "\n")
 		end
 	end

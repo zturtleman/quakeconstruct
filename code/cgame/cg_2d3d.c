@@ -105,6 +105,10 @@ void DrawRect(float x, float y, float w, float h, float s, float t, float s2, fl
 	}
 }
 
+coordRemap_t *GetCoordRemap(void) {
+	return &remap;
+}
+
 void Start2D3D(vec3_t origin, vec3_t right, vec3_t down, vec3_t forward) {
 	VectorCopy(origin,remap.origin);
 	VectorCopy(right,remap.right);
