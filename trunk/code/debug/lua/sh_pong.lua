@@ -1,55 +1,53 @@
-local player1 = CreateNetworkedTable(201)
-local player2 = CreateNetworkedTable(202)
-local game = CreateNetworkedTable(203)
-
-local function initVar(tab,var,value)
-	tab[var] = value
-end
+local player1 = CreateNetworkedTable(111)
+local player2 = CreateNetworkedTable(112)
+local game = CreateNetworkedTable(113)
 
 local function def(var,value)
 	return var or value
 end
 
-local function calcball(b)
+local function calcball(ball)
 	local x = 0
 	local y = 0
-	if(b.started == 1) then
-		local t = b.btime
+	if(ball.started == 1) then
+		local t = ball.btime
 		if(t == nil) then return 0,0 end
 		
-		x = b.bx + (b.bvx/1000) * (LevelTime() - t)
-		y = b.by + (b.bvy/1000) * (LevelTime() - t)
+		x = ball.bx + (ball.vx/1000) * (LevelTime() - t)
+		y = ball.by + (ball.vy/1000) * (LevelTime() - t)
 	end
 	return x,y
 end
 
 if(SERVER) then
-	--downloader.add("lua/sh_pong.lua")
-
+//__DL_BLOCK
+	downloader.add("lua/sh_pong.lua")
+	
 	local ball_vx = 0.6
 	local ball_vy = 0.65
 	local function initGame()
-		initVar(game,"started",0)
-		initVar(game,"bx",0)
-		initVar(game,"by",0)
-		initVar(game,"bvx",ball_vx)
-		initVar(game,"bvy",ball_vy)
-		initVar(game,"btime",LevelTime())
-		initVar(game,"bsize",.04)
-		initVar(player1,"ready",0)
-		initVar(player2,"ready",0)
+		game.hit = 0
+		game.started = 0
+		game.bx = 0
+		game.by = 0
+		game.vx = 0.6
+		game.vy = 0.65
+		game.bsize = .04
+		game.btime = LevelTime()
 	end
 	
 	local function initPlayer(pl,client)
-		initVar(pl,"paddle_y",0)
-		initVar(pl,"paddle_size",.2)
-		initVar(pl,"score",0)
-		initVar(pl,"client",client)
+		pl.paddle_y = 0
+		pl.paddle_size = .2
+		pl.score = 0
+		pl.client = client
+		pl.ready = 0
 	end
 	
 	local function initAllPlayers()
 		initPlayer(player1,0)
 		initPlayer(player2,1)
+		--player2.paddle_size = .06
 	end
 	
 	initAllPlayers()
@@ -62,12 +60,15 @@ if(SERVER) then
 	local function playerScored(pl)
 		pl.score = pl.score + 1
 		initGame()
+		player1.ready = 0
+		player2.ready = 0
 	end
 	
 	local function frame()
 		if(game.started == 0) then 
-			if(player1.ready == 1 and player2.ready == 1) then
-				initGame()
+			-- and player2.ready == 1
+			if(player1.ready == 1) then
+				game.btime = LevelTime()
 				game.started = 1
 			end
 			return 
@@ -78,33 +79,42 @@ if(SERVER) then
 		local p2y = player2.paddle_y / 127
 		local p1s = player1.paddle_size
 		local p2s = player2.paddle_size
+		
+		if(y+s >= 1 or y-s <= -1) then
+			game.vy = game.vy * -1
+			game.bx = x
+			game.by = y
+			game.btime = LevelTime()-20
+			game.hit = 0
+			game.hit = 1
+		end
+		
+		if(x < -.85 and y < p1y + p1s and y > p1y - p1s) then
+			game.vx = game.vx * -1.05
+			game.bx = x
+			game.by = y
+			game.btime = LevelTime()-20
+			game.hit = 0
+			game.hit = 1
+			return
+		end
+		
+		if(x > .85) then --and y < p2y + p2s and y > p2y - p2s
+			game.vx = game.vx * -1.05
+			game.bx = x
+			game.by = y
+			game.btime = LevelTime()-20
+			game.hit = 0
+			game.hit = 1
+			return
+		end
+		
 		if(x-s <= -1) then
 			playerScored(player2)
 		end
 		
 		if(x+s >= 1) then
 			playerScored(player1)
-		end
-		
-		if(y+s >= 1 or y-s <= -1) then
-			game.bvy = game.bvy * -1
-			game.bx = x
-			game.by = y
-			game.btime = LevelTime()-20
-		end
-		
-		if(x < -.85 and y < p1y + p1s and y > p1y - p1s) then
-			game.bvx = game.bvx * -1
-			game.bx = x
-			game.by = y
-			game.btime = LevelTime()-20
-		end
-		
-		if(x > .85 and y < p2y + p2s and y > p2y - p2s) then
-			game.bvx = game.bvx * -1
-			game.bx = x
-			game.by = y
-			game.btime = LevelTime()-20
 		end
 	end
 	hook.add("Think","sh_pong",frame)
@@ -133,13 +143,38 @@ if(SERVER) then
 	
 	local function ready(str,v)
 		if(str == "ReadyForPong") then
-			game:SendVars(v)
-			player1:SendVars(v)
-			player2:SendVars(v)		
+			print("Ready\n")
+			Timer(.5,function()
+				print("VarSet1\n")
+				game:SendVars(v)
+			end)
+			Timer(1,function()
+				print("VarSet2\n")
+				player1:SendVars(v)
+			end)
+			Timer(1.5,function()
+				print("VarSet3\n")
+				player2:SendVars(v)
+			end)
 		end
 	end
 	hook.add("MessageReceived","sh_pong",ready)
+	
+	for k,v in pairs(GetAllPlayers()) do
+		--ready("ReadyForPong",v)
+		--game:SendVars(v)
+		--player1:SendVars(v)
+		--player2:SendVars(v)
+	end
+//__DL_UNBLOCK
 else
+	local fire = {
+		LoadSound("sound/weapons/machinegun/machgf1b.wav"),
+		LoadSound("sound/weapons/machinegun/machgf2b.wav"),
+		LoadSound("sound/weapons/machinegun/machgf3b.wav"),
+		LoadSound("sound/weapons/machinegun/machgf4b.wav"),
+	}
+
 	local mx = 0
 	local my = 0
 	local active = true
@@ -147,58 +182,115 @@ else
 		local p1y = ((def(player1.paddle_y,0) / 127) * 240) + 240
 		local p2y = ((def(player2.paddle_y,0) / 127) * 240) + 240
 		local p1size = def(player1.paddle_size,4) * 480
-		local p2size = def(player1.paddle_size,4) * 480
+		local p2size = def(player2.paddle_size,4) * 480
 		local cl1 = def(player1.client,-1)
 		local cl2 = def(player2.client,-1)
-		draw.SetColor(1,1,1,1)
+		draw.SetColor(1,0,0,1)
 		draw.Rect(20,p1y-p1size/2,20,p1size)
+		draw.SetColor(0,0,1,1)
 		draw.Rect(600,p2y-p2size/2,20,p2size)
 		
 		if(cl1 != -1) then
 			local ptxt = GetEntityByIndex(cl1):GetInfo().name .. ": " .. player1.score
-			draw.SetColor(1,1,1,1)
-			draw.Text(20,0,ptxt,20,20)
+			draw.SetColor(1,0,0,1)
+			draw.Text(20,10,ptxt,20,20)
 			if(player1.ready == 1) then
 				draw.SetColor(1,1,1,1)
-				draw.Text(20,30,"Ready",20,20)			
+				draw.Text(20,30,"Ready",20,20)
+			else
+				draw.SetColor(1,1,1,math.abs(math.sin(LevelTime()/500)))
+				draw.Text(20,30,"Press Space",20,20)
 			end
 		end
 
 		if(cl2 != -1) then
 			local ptxt = GetEntityByIndex(cl2):GetInfo().name .. ": " .. player2.score
-			draw.SetColor(1,1,1,1)
-			draw.Text(620-string.len(ptxt)*20,0,ptxt,20,20)
+			draw.SetColor(0,0,1,1)
+			draw.Text(620-string.len(ptxt)*20,10,ptxt,20,20)
 			if(player2.ready == 1) then
 				draw.SetColor(1,1,1,1)
 				draw.Text(620-string.len("Ready")*20,30,"Ready",20,20)
+			else
+				draw.SetColor(1,1,1,math.abs(math.sin(LevelTime()/500)))
+				draw.Text(620-string.len("Press Space")*20,30,"Press Space",20,20)
 			end
 		end
 	end
 	
-	local function drawPong()
+	local function drawPong(border)
+		draw.SetColor(1,1,1,border)
+		draw.Rect(0,0,4,480)
+		draw.Rect(0,0,640,4)
+		draw.Rect(640-4,0,4,480)
+		draw.Rect(0,480-4,640,4)
+	
 		local cx,cy = calcball(game)
 		local ball_x = (cx * 320) + 320
 		local ball_y = (cy * 240) + 240
 		local ball_sizex = def(game.bsize,.01)*640
 		local ball_sizey = def(game.bsize,.01)*480
 		
-		draw.SetColor(1,1,1,1)
+		if(game.hit == 1) then
+			PlaySound(fire[math.random(1,#fire)])
+			game.hit = 0
+		end
+		
+		local r,g,b = hsv(LevelTime()/2,1,1)
+		draw.SetColor(r,g,b,1)
 		draw.Rect(mx-1,my-1,2,2)
 		draw.Rect(ball_x-ball_sizex/2,ball_y-ball_sizey/2,ball_sizex,ball_sizey)
 		drawPlayers()
 	end
 
+	local rlvl = 10
+	local dist = 0
+	local rrx = 0
+	local rry = 0
 	local function d3d()
 		if(active) then
 			util.LockMouse(true)
 			draw.SetColor(0,0,0,1)
 			draw.Rect(0,0,640,480)
-		
+			
+			--drawPong()
+			
 			if(KeyIsDown(K_ENTER)) then --enterquit
 				active = false
 			end
+			local cx,cy = calcball(game)
+			local rx = cx--(mx/320) - 1
+			local ry = cy--(my/240) - 1
+			rrx = rrx + (rx - rrx) * .05
+			rry = rry + (ry - rry) * .05
 			
-			drawPong()
+			local ang = Vector(rry*rlvl,rrx*rlvl,.5)
+			
+			local forward,right,up = AngleVectors(ang)
+			right.y = right.y * -1
+			
+			forward = _CG.refdef.forward
+			
+			if(game.started == 1) then
+				dist = dist + (6-dist) * .04
+			else
+				dist = dist + (0-dist) * .04
+			end
+			
+			local pos = (_CG.refdef.origin + forward*(13.2 + dist)) - up*10
+			pos = pos + right * (rrx * rlvl/2)
+			pos = pos + up * (rry * rlvl/2)
+			
+			local v1 = (pos - right*13.4)
+			local v2 = (pos + right*13.4)
+			local v3 = (v2 + up*20)
+			local v4 = (v1 + up*20)
+			
+			render.Quad(v1,v2,v3,v4,nil,0,0,0,.3)
+			draw.Start3D(v3,v4,v2,forward)
+			
+			drawPong(dist/6)
+			
+			draw.End3D()
 		else
 			util.LockMouse(false)
 		end
@@ -206,6 +298,11 @@ else
 	hook.add("Draw3D","sh_pong",d3d)
 	hook.add("AllowGameSound","sh_pong",function(sound) return !active end)
 
+	function view(pos,ang,fovx,fovy)
+		ApplyView(pos,Vector(-rry*rlvl,rrx*rlvl,0),fovx,fovy)
+	end
+	hook.add("CalcView","sh_pong",view)
+	
 	local function moused(x,y)
 		mx = mx + x
 		my = my + y
