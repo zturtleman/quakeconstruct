@@ -7,6 +7,7 @@ typedef struct {
 	float		rd2, dd2, depth;
 } coordRemap_t;
 
+coordRemap_t *GetCoordRemap(void);
 void BuildCoordRemap(coordRemap_t *in);
 void RemapCoords(float x, float y, vec3_t v, coordRemap_t in);
 void RotatedCoords(float x, float y, float r, float ox, float oy, float ow, float oh, vec3_t v, coordRemap_t in);

@@ -6,15 +6,19 @@ qboolean		maskOn = qfalse;
 int qlua_start3D(lua_State *L) {
 	vec3_t origin,right,down,forward;
 
+	VectorClear(forward);
+
 	luaL_checktype(L,1,LUA_TVECTOR);
 	luaL_checktype(L,2,LUA_TVECTOR);
 	luaL_checktype(L,3,LUA_TVECTOR);
-	luaL_checktype(L,4,LUA_TVECTOR);
 
 	lua_tovector(L,1,origin);
 	lua_tovector(L,2,right);
 	lua_tovector(L,3,down);
-	lua_tovector(L,4,forward);
+	
+	if(lua_type(L,4) == LUA_TVECTOR) {
+		lua_tovector(L,4,forward);
+	}
 
 	Start2D3D(origin,right,down,forward);
 
@@ -24,6 +28,17 @@ int qlua_start3D(lua_State *L) {
 int qlua_end3D(lua_State *L) {
 	End2D3D();
 	return 0;
+}
+
+int qlua_get3DCoord(lua_State *L) {
+	vec3_t v;
+	luaL_checknumber(L,1);
+	luaL_checknumber(L,2);
+
+	RemapCoords(lua_tonumber(L,1),lua_tonumber(L,2),v,*GetCoordRemap());
+
+	lua_pushvector(L,v);
+	return 1;
 }
 
 int qlua_setcolor(lua_State *L) {
@@ -372,6 +387,7 @@ static const luaL_reg Draw_methods[] = {
   {"MaskRect",		qlua_maskrect},
   {"Start3D",		qlua_start3D},
   {"End3D",			qlua_end3D},
+  {"Get3DCoord",	qlua_get3DCoord},
   {0,0}
 };
 
