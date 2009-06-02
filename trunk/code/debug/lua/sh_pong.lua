@@ -91,11 +91,22 @@ if(SERVER) then
 		player2.ready = 0
 	end
 	
+	local function bump_paddle(x,y)
+		game.vx = game.vx * -1.15
+		game.vy = game.vy + (math.random(-10,10)*.03)
+		if(game.vy > 2) then game.vy = 2 end
+		if(game.vy < -2) then game.vy = -2 end
+		game.bx = x
+		game.by = y
+		game.btime = LevelTime()-20
+		game.hit = 0
+		game.hit = 1	
+	end
+	
 	local lastx,lasty = 0,0
 	local function frame()
 		if(game.started == 0) then 
-			-- and player2.ready == 1
-			if(player1.ready == 1) then
+			if(player1.ready == 1) then -- and player2.ready == 1
 				game.btime = LevelTime()
 				game.started = 1
 			end
@@ -123,22 +134,12 @@ if(SERVER) then
 		end
 		
 		if(x < -.85 and lastx > -.85 and y < p1y + p1s and y > p1y - p1s) then
-			game.vx = game.vx * -1.15
-			game.bx = x
-			game.by = y
-			game.btime = LevelTime()-20
-			game.hit = 0
-			game.hit = 1
+			bump_paddle(x,y)
 			return
 		end
 		
-		if(x > .85 and lastx < .85) then --and y < p2y + p2s and y > p2y - p2s
-			game.vx = game.vx * -1.15
-			game.bx = x
-			game.by = y
-			game.btime = LevelTime()-20
-			game.hit = 0
-			game.hit = 1
+		if(x > .85 and lastx < .85) then -- and y < p2y + p2s and y > p2y - p2s
+			bump_paddle(x,y)
 			return
 		end
 		
@@ -251,8 +252,8 @@ else
 	
 		local p1y,p2y,p1s,p2s = paddleInfo(false)
 		local cx,cy = calcball(game)
-		if(cx < -.85 and lastx >= -.85 and cy < p1y + p1s and cy > p1y - p1s) then cx = -.85 end
-		if(cx > .85 and lastx <= .85 and cy < p2y + p2s and cy > p2y - p2s) then cx = .85 end
+		if(cx < -.85 and lastx > -.85 and cy < p1y + p1s and cy > p1y - p1s) then cx = -.85 end
+		if(cx > .85 and lastx < .85 and cy < p2y + p2s and cy > p2y - p2s) then cx = .85 end
 		if(cy > (1 - game.bsize)) then cy = (1 - game.bsize) end
 		if(cy < (-1 + game.bsize)) then cy = (-1 + game.bsize) end
 		lastx = cx
@@ -284,6 +285,19 @@ else
 	
 	local data = 
 	[[{
+		cull back
+		deformVertexes wave 10000 sin 1 1 0 0
+		polygonoffset
+		{
+			map $whiteimage
+			rgbGen entity
+			alphaGen entity
+		}
+	}]]
+	local cullfx = CreateShader("f",data)
+	
+	local data = 
+	[[{
 		{
 			blendfunc add
 			map $whiteimage
@@ -302,13 +316,46 @@ else
 	trail:SetColor(1,1,1,1)
 	trail:SetTrailFade(FT_COLOR)
 	
+	local function renderOutline(ref)
+		ref:Render()
+		ref:SetColor(1,1,1,1)
+		ref:SetShader(cullfx)
+		ref:Render()	
+	end
+	
+	local function drawPlayer(cid,pos,s)
+		local pl = GetEntityByIndex(cid)
+		if(pl == nil) then return end
+		local legs,torso,head = LoadPlayerModels(pl)
+		legs:SetPos(pos)
+		
+		util.AnimatePlayer(pl,legs,torso)
+
+		if(cid == 0) then
+			legs:SetAngles(Vector(0,-90,0))
+		else
+			legs:SetAngles(Vector(0,90,0))
+		end
+		legs:Scale(Vector(s,s,s))
+		
+		torso:SetAngles(Vector(0,0,0))
+		torso:PositionOnTag(legs,"tag_torso")
+		head:PositionOnTag(torso,"tag_head")
+		
+		renderOutline(legs)
+		renderOutline(torso)
+		renderOutline(head)
+	end
+	
 	local function d3d()
 		if(active) then
 			util.LockMouse(true)
-			draw.SetColor(0,0,0,.6)
+			draw.SetColor(0,0,0,.5)
 			draw.Rect(0,0,640,480)
 			
 			local ballVec = Vector()
+			local p1p = Vector()
+			local p2p = Vector()
 			--drawPong()
 			
 			if(KeyIsDown(K_ENTER)) then --enterquit
@@ -347,7 +394,12 @@ else
 			
 			drawPong(dist/6)
 			
+			local p1y,p2y,p1s,p2s = paddleInfo(true)
+			local pld = (1.2) + .4 * (1 - (dist/6))
+			
 			ballVec = draw.Get3DCoord((lastx * 320) + 320,(lasty * 240) + 240)
+			p1p = draw.Get3DCoord(((-pld)*320) + 320,p1y)
+			p2p = draw.Get3DCoord(((pld)*320) + 320,p2y)
 			draw.End3D()
 			
 			local r,g,b = hsv(LevelTime()/2,1,1)
@@ -361,6 +413,9 @@ else
 			if(math.abs(game.vx) > 2) then
 				trail:Render()
 			end
+			
+			drawPlayer(0,p1p,.08)
+			drawPlayer(1,p2p,.08)
 		else
 			util.LockMouse(false)
 		end
