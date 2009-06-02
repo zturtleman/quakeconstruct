@@ -252,9 +252,11 @@ if(SERVER) then
 	
 	local function DemoSend(pl)
 		if(pl == nil) then return end
-		debugprint("ClientDemoHook:\n")
-		SendCache(pl,true)
-		print("^5Demo Recording Started, Sending Message ID's\n")
+		Timer(.7,function()
+			debugprint("ClientDemoHook:\n")
+			SendCache(pl,true)
+			print("^5Demo Recording Started, Sending Message ID's\n")
+		end)
 	end
 	hook.add("DemoStarted","messages",DemoSend,9999)
 end
