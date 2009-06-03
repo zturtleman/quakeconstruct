@@ -179,6 +179,12 @@ if(SERVER) then
 		end
 	end
 	
+	local function printPl(pl)
+		local name = pl:GetInfo().name or "Unknown"
+		local ping = pl:GetInfo().ping or "999"
+		return "[" .. pl:EntIndex() .. "]: " .. name .. " " .. ping .. "ms\n"
+	end
+	
 	function SendDataMessage(m,pl,msgid)
 		--print("Sending Data Message...\n")
 		if(check(m)) then
@@ -187,7 +193,8 @@ if(SERVER) then
 			msgid = msgid or m.msgid
 			if(pl:IsBot()) then return end
 			if(pl == nil) then error("^5MESSAGE ERROR[F-1]: Nil Player\n") end
-			if(pl:GetTable() == nil or pl:GetTable()._mconnected == false) then error("^5MESSAGE ERROR[F-2]: Nil Player Table\n") end
+			if(pl:GetTable() == nil) then error("^5MESSAGE ERROR[F-2]: Nil Player Table\n" .. printPl(pl)) end
+			if(pl:GetTable()._mconnected == false) then error("^5MESSAGE ERROR[F-3]: Nil Player Not Connected\n" .. printPl(pl)) end
 			if(msgid == nil) then error("^5MESSAGE ERROR[G]: Nil Message Id\n") end
 			msgid = string.lower(msgid)
 			local prev = msgid

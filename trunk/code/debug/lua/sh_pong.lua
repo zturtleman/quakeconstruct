@@ -57,8 +57,8 @@ if(SERVER) then
 		game.started = 0
 		game.bx = 0
 		game.by = 0
-		game.vx = 0.6
-		game.vy = 0.65
+		game.vx = math.cos(math.random(360)/57.3)*0.65
+		game.vy = math.sin(math.random(360)/57.3)*0.65
 		game.bsize = .04
 		game.btime = LevelTime()
 	end
@@ -106,7 +106,7 @@ if(SERVER) then
 	local lastx,lasty = 0,0
 	local function frame()
 		if(game.started == 0) then 
-			if(player1.ready == 1) then -- and player2.ready == 1
+			if(player1.ready == 1 and player2.ready == 1) then
 				game.btime = LevelTime()
 				game.started = 1
 			end
@@ -138,7 +138,7 @@ if(SERVER) then
 			return
 		end
 		
-		if(x > .85 and lastx < .85) then -- and y < p2y + p2s and y > p2y - p2s
+		if(x > .85 and lastx < .85 and y < p2y + p2s and y > p2y - p2s) then
 			bump_paddle(x,y)
 			return
 		end
@@ -454,7 +454,7 @@ else
 		if(!active) then return true end
 		if(str == "WORLD") then return false end
 		if(str == "ENTITIES") then return false end
-		if(str == "HUD") then return false end
+		--if(str == "HUD") then return false end
 		if(str == "HUD_DRAWGUN") then return false end
 	end
 	hook.add("ShouldDraw","sh_pong",noNuthin);
