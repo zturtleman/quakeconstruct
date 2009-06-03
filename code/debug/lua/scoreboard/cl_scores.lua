@@ -44,13 +44,15 @@ local teamNames = {
 	[TEAM_SPECTATOR] = "Spectators",
 }
 
+local defer = LoadShader("gfx/2d/defer.tga")
 local function drawIcon(x,y,w,h,info)
 	local skin = info.skinName
 	if(info.team == TEAM_RED) then skin = "red" end
 	if(info.team == TEAM_BLUE) then skin = "blue" end
 	local path = "models/players/" .. info.modelName .. "/icon_" .. skin .. ".tga"
 	local shd = cachedIcon(path)
-	--draw.Rect(x,y,w,h,shd)
+	if(shd == 0) then shd = defer end
+	draw.Rect(x,y,w,h,shd)
 end
 
 local function teamCount(team,scores)
