@@ -814,7 +814,8 @@ void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demo
 	inwater = CG_CalcViewValues();
 
 	if(L != NULL) {
-		qlua_gethook(L,"DrawRT");
+		lua_getglobal(L, "CallHook");
+		lua_pushstring(L, "DrawRT");
 		qlua_pcall(L,0,0,qtrue);
 	}
 	trap_R_ClearScene();

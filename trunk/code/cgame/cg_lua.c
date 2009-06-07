@@ -7,6 +7,7 @@ lua_State *L;
 
 int samey = 0;
 char *samey2 = "";
+qboolean ready = qfalse;
 
 qboolean limited = qfalse;
 
@@ -405,6 +406,7 @@ void CloseClientLua( void ) {
 }
 
 int qclose(lua_State *L) {
+	ready = qfalse;
 	CloseClientLua();
 	return 0;
 }
@@ -445,6 +447,7 @@ void InitClientLua( void ) {
 	lua_register(L,"_profFunc",qprof_functest);
 
 	CG_Printf("----------------Done-----------------\n");
+	ready = qtrue;
 }
 
 void DoLuaInit( void ) {
@@ -479,5 +482,6 @@ void DoLuaIncludes( void ) {
 }
 
 lua_State *GetClientLuaState( void ) {
+	if(ready == qfalse) return NULL;
 	return L;
 }

@@ -249,7 +249,8 @@ int qlua_setuprt(lua_State *L) {
 
 	trap_R_SetupRenderTarget(index,width,height);
 
-	return 0;
+	lua_pushinteger(L,index);
+	return 1;
 }
 
 void RenderQuad(qhandle_t shader, vec3_t v1, vec3_t v2, vec3_t v3, vec3_t v4, vec4_t color, float s1, float t1, float s2, float t2) {
