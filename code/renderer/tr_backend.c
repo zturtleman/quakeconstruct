@@ -570,7 +570,7 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs, qboolean ov
 
 	rt.valid = qfalse;
 
-	if(backEnd.viewParms.isRenderTarget) {
+	if(backEnd.viewParms.isRenderTarget && !override) {
 		rt = renderTargets[backEnd.viewParms.rt_index];
 		if(rt.valid) {
 			//GL_State( GLS_DEPTHTEST_DISABLE );
@@ -717,7 +717,7 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs, qboolean ov
 	// add light flares on lights that aren't obscured
 	RB_RenderFlares();
 
-	if(rt.valid) {
+	if(rt.valid && !override) {
 		qglBindTexture(GL_TEXTURE_2D, rt.texture);
 		
 		qglCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 0, 0, rt.width, rt.height, 0);
