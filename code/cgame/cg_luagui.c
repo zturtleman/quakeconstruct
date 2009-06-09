@@ -6,7 +6,6 @@ qboolean mouseon = qfalse;
 qboolean mouse_right = qfalse;
 qboolean mouse_left = qfalse;
 qboolean mouse_caught = qfalse;
-qboolean dirtygarbage = qfalse;
 
 int nextPanelID = 0;
 panel_t	*base_panel;
@@ -62,10 +61,7 @@ int gui_panel_create(lua_State *L) {
 
 	memset(panel,0,sizeof(panel_t));
 
-	//chsize = (sizeof(parent->children) / sizeof(panel_t));
 	if(parent->num_panels+1 > PANEL_ARRAY_SIZE) {
-		//realloc(parent->children,sizeof(panel_t) * (chsize*2));
-		//CG_Printf("ReAlloc'd: %i -> %i\n",chsize,chsize*2);
 		return 0;
 	}
 	parent->num_panels++;
@@ -75,7 +71,6 @@ int gui_panel_create(lua_State *L) {
 	panel->persistantID = ++nextPanelID;
 	panel->visible = qtrue;
 	panel->enabled = qtrue;
-	//panel->classname = (char*) classname;
 	strcpy(panel->classname, (char*)classname);
 
 	panel->parent = parent;
@@ -101,6 +96,31 @@ int gui_panel_create(lua_State *L) {
 	return 1;
 }
 
+panel_t *recursive_find(lua_State *L, panel_t *panel, int id) {
+	int i;
+	const int num = panel->num_panels;
+	panel_t *current;
+	if(num > 0) {
+		for(i=0; i<num; i++) {
+			current = panel->children[i];
+			if(current != NULL) {
+				if(current->persistantID == id) {
+					return current;
+				}
+				if(current->num_panels > 0) {
+					return recursive_find(L, current, id);
+				}
+			}
+		}
+	}
+	return panel;
+}
+
+panel_t *UI_GetPanelByID(int id) {
+	lua_State *L = GetClientLuaState();
+	return recursive_find(L,base_panel,id);
+}
+
 void UI_GetLocalPosition(panel_t *panel, vec3_t vec) {
 	vec3_t parentPos;
 	if(panel != NULL && !panel->removed) {
@@ -121,49 +141,62 @@ qboolean UI_InsidePanel(panel_t *panel, float x, float y) {
 	vec3_t pos;
 	UI_GetLocalPosition(panel,pos);
 
-	//CG_Printf("%f,%f\n",pos[0],pos[1]);
 
 	if(x < pos[0] || x > (pos[0] + w)) return qfalse;
 	if(y < pos[1] || y > (pos[1] + h)) return qfalse;
 
-	//CG_Printf("InsidePanelTest!\n");
 
 	return qtrue;
 }
 
-void RemovePanel_internal(panel_t *panel) {
-	panel_t *parent;
-	panel_t *temp[PANEL_ARRAY_SIZE];
-	int pi = 0;
+void cleanPanel(panel_t *panel) {
 	int i;
+	int x;
+	qboolean in_f = qfalse;
+	int sIndex = 0;
+	int fIndex = 0;
+	int dIndex = 0;
+	for(i=0; i<PANEL_ARRAY_SIZE; i++) {
+		if(panel->children[i] != NULL) {
+			if(in_f == qtrue) {
+				fIndex = i;
+				dIndex = fIndex - sIndex;
 
-	if(panel == NULL) return;
-	parent = panel->parent;
-	pi = panel->depth;
-
-	//free(panel->children);
-	//memset(panel->children,0,0);
-
-	if(parent == NULL) {
-		CG_Printf("^1Unable to remove panel %s[%i], bad parent\n", panel->classname, panel->persistantID);
-		return;
+				for(x=sIndex; x<PANEL_ARRAY_SIZE; x++) {
+					if(x+dIndex < PANEL_ARRAY_SIZE) {
+						panel->children[x] = panel->children[x+dIndex];
+						if(panel->children[x] != NULL) {
+							panel->children[x]->depth = x;
+						}
+					} else {
+						panel->children[x] = NULL;
+					}
+				}
+				cleanPanel(panel);
+				return;
+			}
+		} else {
+			if(in_f == qfalse) {
+				in_f = qtrue;
+				sIndex = i;
+			}
+		}
 	}
-	panel->removed = qtrue;
-
-	parent->children[pi] = NULL;
-	for(i=pi; i<parent->num_panels-1; i++) {
-		temp[i] = parent->children[i+1];
-	}
-
-	for(i=pi; i<parent->num_panels; i++) {
-		if(temp[i] != NULL) parent->children[i] = temp[i];
-	}
-	parent->num_panels--;
 }
 
 void UI_RemovePanel(panel_t *panel) {
-	panel->removed = qtrue;
-	dirtygarbage = qtrue;
+	int i;
+	if(panel->parent != NULL && panel->removed == qfalse) {
+		panel->removed = qtrue;
+		for(i=0;i<panel->num_panels;i++) {
+			if(panel->children[i] != NULL) {
+				panel->children[i]->removed = qtrue;
+			}
+		}
+
+		panel->parent->children[panel->depth] = NULL;
+		cleanPanel(panel->parent);
+	}
 }
 
 int gui_panel_remove(lua_State *L) {
@@ -204,7 +237,6 @@ void draw_panel(lua_State *L, panel_t *panel) {
 }
 
 void layout_panel(lua_State *L, panel_t *panel) {
-	//CG_Printf("LayoutPanel %s\n", panel->classname);
 	if(gui_getpanelfunc(L,panel,"Think")) {
 		qlua_pcall(L,0,0,qtrue);
 	}
@@ -217,7 +249,6 @@ void recursive_panel_reverse(lua_State *L, panel_t *panel) {
 	int i;
 	panel_t *current;
 	if(panel->num_panels > 0) {
-		//CG_Printf("[%s]Recurse %i panels\n",panel->classname,panel->num_panels);
 		for(i=panel->num_panels; i>0; i--) {
 			current = panel->children[i-1];
 			if(current != NULL && current->visible) {
@@ -230,27 +261,23 @@ void recursive_panel_reverse(lua_State *L, panel_t *panel) {
 	}
 }
 
-void recursive_panel(lua_State *L, panel_t *panel, qboolean removesweep) {
+void recursive_panel(lua_State *L, panel_t *panel) {
 	int i;
+	const int num = panel->num_panels;
 	panel_t *current;
-	if(panel->num_panels > 0) {
-		for(i=0; i<panel->num_panels; i++) {
+	qboolean didRemove = qfalse;
+	if(num > 0) {
+		for(i=0; i<num; i++) {
 			current = panel->children[i];
 			if(current != NULL && current->visible) {
-				if(!removesweep) {
-					draw_panel(L, current);
-				} else {
-					if(current->removed) {
-						RemovePanel_internal(current);
-						return;
-					}
-				}
+				draw_panel(L, current);
 				if(current->num_panels > 0) {
-					recursive_panel(L, current, removesweep);
+					recursive_panel(L, current);
 				}
 			}
 		}
 	}
+	if(didRemove) cleanPanel(panel);
 }
 
 qboolean gui_mouse_quickcall(lua_State *L, panel_t *panel, char *inside, char *outside, int x, int y, int param) {
@@ -409,14 +436,8 @@ qboolean CG_KeyGui(lua_State *L, int key, qboolean down) {
 
 void CG_RunGui(lua_State *L) {
 	if(base_panel != NULL) {
-		//CG_Printf("Layout Pass!\n");
 		recursive_panel_reverse(L, base_panel);
-		recursive_panel(L, base_panel, qfalse);
-		if(dirtygarbage) {
-			CG_Printf("Garbage Pass!\n");
-			recursive_panel(L, base_panel, qtrue);
-			dirtygarbage = qfalse;
-		}
+		recursive_panel(L, base_panel);
 	}
 	if(mouseon) {
 		qlua_gethook(L,"DrawCursor");
@@ -428,7 +449,6 @@ void CG_RunGui(lua_State *L) {
 
 void CG_InitLuaGui(lua_State *L) {
 	mouseon = qfalse;
-	dirtygarbage = qfalse;
 	luaL_openlib(L, "gui", Gui_methods, 0);
 	Panel_register(L);
 	create_base();
