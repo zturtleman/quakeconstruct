@@ -14,51 +14,16 @@ panel_t *lua_topanel(lua_State *L, int i) {
 	luapanel = (panel_t *)luaL_checkudata(L, i, "Panel");
 	if (luapanel == NULL) luaL_typerror(L, i, "Panel");
 
-	//if (luapanel->removed) luaL_typerror(L, i, "Panel");
-	if (luapanel->parent != NULL && luapanel->parent->children[luapanel->depth] != NULL &&
-		luapanel->parent->children[luapanel->depth]->removed != qtrue) {
-		return luapanel->parent->children[luapanel->depth];
+	if (luapanel->parent != NULL) {
+		luapanel = luapanel->parent->children[luapanel->depth];
+	}
+	if (luapanel != NULL && luapanel->removed != qtrue) {
+		return luapanel;
 	} else {
 		luaL_typerror(L, i, "Panel");
 		return NULL;
-		//return get_base();
 	}
-	/*luapanel = UI_GetPanelByID(luapanel->persistantID);
-	if(luapanel == NULL) {
-		return get_base();
-	}
-	return luapanel;*/
 }
-
-panel_t *lua_topanel_strict(lua_State *L, int i) { //potentially slower, but safer
-	panel_t	*luapanel;
-	luaL_checktype(L,i,LUA_TUSERDATA);
-	luapanel = (panel_t *)luaL_checkudata(L, i, "Panel");
-	if (luapanel == NULL) luaL_typerror(L, i, "Panel");
-
-	if (luapanel->parent != NULL && luapanel->parent->children[luapanel->depth] != NULL &&
-		luapanel->parent->children[luapanel->depth]->removed != qtrue) {
-		return luapanel->parent->children[luapanel->depth];
-	} else {
-		luaL_typerror(L, i, "Panel");
-		return NULL;
-		//return get_base();
-	}
-
-	/*luapanel = UI_GetPanelByID(luapanel->persistantID);
-	if(luapanel == NULL) {
-		return get_base();
-	}
-	return luapanel;*/
-}
-
-/*panel_t *lua_topanel(lua_State *L, int i) {
-	panel_t	*luapanel;
-	luaL_checktype(L,i,LUA_TUSERDATA);
-	luapanel = (panel_t *)luaL_checkudata(L, i, "Panel");;
-	if (luapanel == NULL) luaL_typerror(L, i, "Panel");
-	return luapanel;
-}*/
 
 static int Panel_remove(lua_State *L) {
 	panel_t *panel = lua_topanel(L,1);
@@ -209,6 +174,17 @@ int pget_index(lua_State *L) {
 	return 0;
 }
 
+int pget_depth(lua_State *L) {
+	panel_t *panel = lua_topanel(L,1);
+
+	if(panel != NULL) {
+		lua_pushinteger(L,panel->depth);
+		return 1;
+	}
+
+	return 0;
+}
+
 int pget_classname(lua_State *L) {
 	panel_t *panel = lua_topanel(L,1);
 
@@ -221,7 +197,7 @@ int pget_classname(lua_State *L) {
 }
 
 int pcmd_remove(lua_State *L) {
-	panel_t *panel = lua_topanel_strict(L,1);
+	panel_t *panel = lua_topanel(L,1);
 	
 	if(panel != NULL) UI_RemovePanel(panel);
 	
@@ -259,6 +235,16 @@ int pisontop(lua_State *L) {
 	return 0;
 }
 
+int pfocus(lua_State *L) {
+	panel_t *panel = lua_topanel(L,1);
+
+	if(panel != NULL && panel->parent != NULL) {
+		UI_FocusPanel(panel);
+	}
+
+	return 0;
+}
+
 static const luaL_reg Panel_methods[] = {
   {"GetLocalPos",	pget_localpos},
   {"GetPos",		pget_pos},
@@ -271,11 +257,13 @@ static const luaL_reg Panel_methods[] = {
   {"SetBGColor",	pset_bgcolor},
   {"GetParent",		pget_parent},
   {"Index",			pget_index},
+  {"Depth",			pget_depth},
   {"Classname",		pget_classname},
   {"Remove",		pcmd_remove},
   {"MouseDown",		pmousedown},
   {"MouseOver",		pmouseover},
   {"IsOnTop",		pisontop},
+  {"Focus",			pfocus},
   {0,0}
 };
 

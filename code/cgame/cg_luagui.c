@@ -71,6 +71,7 @@ int gui_panel_create(lua_State *L) {
 	panel->persistantID = ++nextPanelID;
 	panel->visible = qtrue;
 	panel->enabled = qtrue;
+	panel->nodraw = qfalse;
 	strcpy(panel->classname, (char*)classname);
 
 	panel->parent = parent;
@@ -119,6 +120,30 @@ panel_t *recursive_find(lua_State *L, panel_t *panel, int id) {
 panel_t *UI_GetPanelByID(int id) {
 	lua_State *L = GetClientLuaState();
 	return recursive_find(L,base_panel,id);
+}
+
+void UI_FocusPanel(panel_t *panel) {
+	int num;
+	int i;
+	int pd;
+
+	if(panel == NULL) return;
+	if(panel->parent == NULL) return;
+	if(panel->depth == panel->parent->num_panels-1) {
+		CG_Printf("Panel is already on top\n");
+		return;
+	}
+
+	pd = panel->depth;
+	num = panel->parent->num_panels;
+	for(i=pd;i<num-1;i++) {
+		panel->parent->children[i] = panel->parent->children[i+1];
+		if(panel->parent->children[i] != NULL) {
+			panel->parent->children[i]->depth = i;
+		}
+	}
+	panel->parent->children[num-1] = panel;
+	panel->depth = num-1;
 }
 
 void UI_GetLocalPosition(panel_t *panel, vec3_t vec) {
@@ -195,6 +220,7 @@ void UI_RemovePanel(panel_t *panel) {
 		}
 
 		panel->parent->children[panel->depth] = NULL;
+		panel->parent->num_panels--;
 		cleanPanel(panel->parent);
 	}
 }
@@ -231,7 +257,7 @@ static const luaL_reg Gui_methods[] = {
 };
 
 void draw_panel(lua_State *L, panel_t *panel) {
-	if(gui_getpanelfunc(L,panel,"Draw")) {
+	if(gui_getpanelfunc(L,panel,"Draw") && !panel->nodraw) {
 		qlua_pcall(L,0,0,qtrue);
 	}
 }

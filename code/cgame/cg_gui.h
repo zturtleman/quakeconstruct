@@ -25,6 +25,7 @@ typedef struct panel_s {
 	qboolean	noGC;
 	qboolean	mouseover;
 	qboolean	mousedown;
+	qboolean	nodraw;
 } panel_t;
 
 typedef enum {
@@ -37,6 +38,7 @@ panel_t *get_base();
 void lua_pushpanel(lua_State *L, panel_t *panel);
 panel_t *lua_topanel(lua_State *L, int i);
 int Panel_register (lua_State *L);
+void UI_FocusPanel(panel_t *panel);
 void UI_RemovePanel(panel_t *panel);
 void UI_GetLocalPosition(panel_t *panel, vec3_t vec);
 panel_t *UI_GetPanelByID(int id);
