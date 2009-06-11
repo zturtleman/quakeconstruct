@@ -7,6 +7,10 @@ function killGaps(line)
 	return line
 end
 
+function argPack(...)
+	return arg
+end
+
 function boolToInt(b)
 	if(b == true) then return 1 end
 	return 0

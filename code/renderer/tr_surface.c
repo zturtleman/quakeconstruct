@@ -586,6 +586,7 @@ void RB_SurfaceTrail( void ) {
 	vec3_t		v1, v2;
 	vec3_t		vns1, vns2;
 	vec3_t		vos1, vos2;
+	vec3_t		vlen;
 	float rad = 0, ix, ix2, sx;
 	float sc = 1;
 	float ec = 1;
@@ -593,6 +594,8 @@ void RB_SurfaceTrail( void ) {
 	float ea = 1;
 	float u_start = 0;
 	float u_end = 1;
+	float u_iter = 0;
+	float u_iter2 = 0;
 
 	right[0] = 0;
 	right[1] = 0;
@@ -605,6 +608,8 @@ void RB_SurfaceTrail( void ) {
 	if(size > size2) size = size2;
 	if(size <= 1) size = 2;
 
+	u_iter = e->trailCoordBump;
+	u_iter2 = 0;
 	for(i=0; i<size-1; i++) {
 		VectorCopy( e->trailVerts[i], start );
 		VectorCopy( e->trailVerts[i+1], end );
@@ -700,8 +705,15 @@ void RB_SurfaceTrail( void ) {
 			u_end = .99f;
 			u_start = .99f;
 		}
-
-		RB_Quad(vos1,vos2,vns1,vns2, sc, ec, sa, ea, u_start, u_end);
+		
+		if(e->staticMap) {
+			VectorSubtract(end,start,vlen);
+			u_iter = u_iter + VectorLength(vlen) / e->trailCoordLength;
+			RB_Quad(vos1,vos2,vns1,vns2, sc, ec, sa, ea, u_iter2, u_iter);
+			u_iter2 = u_iter;
+		} else {
+			RB_Quad(vos1,vos2,vns1,vns2, sc, ec, sa, ea, u_start, u_end);
+		}
 
 		VectorCopy(vns1,vos1);
 		VectorCopy(vns2,vos2);

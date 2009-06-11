@@ -395,6 +395,8 @@ int qprof_functest(lua_State *L) {
 
 void CloseClientLua( void ) {
 	if(L != NULL) {
+		CG_CloseLuaView();
+		ready = qfalse;
 		qlua_gethook(L,"Shutdown");
 		qlua_pcall(L,0,0,qtrue);
 		lua_close(L);
@@ -406,7 +408,6 @@ void CloseClientLua( void ) {
 }
 
 int qclose(lua_State *L) {
-	ready = qfalse;
 	CloseClientLua();
 	return 0;
 }

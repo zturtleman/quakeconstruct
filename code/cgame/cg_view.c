@@ -68,6 +68,7 @@ Creates an entity in front of the current position, which
 can then be moved around
 =================
 */
+qboolean doRT = qfalse;
 void CG_TestModel_f (void) {
 	vec3_t		angles;
 
@@ -813,10 +814,11 @@ void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demo
 	// build cg.refdef
 	inwater = CG_CalcViewValues();
 
-	if(L != NULL) {
-		lua_getglobal(L, "CallHook");
-		lua_pushstring(L, "DrawRT");
-		qlua_pcall(L,0,0,qtrue);
+	if(doRT) {
+		if(L != NULL) {
+			qlua_gethook(L,"DrawRT");
+			qlua_pcall(L,0,0,qtrue);
+		}
 	}
 	trap_R_ClearScene();
 
@@ -909,4 +911,12 @@ void CG_ProjectVector( refdef_t refdef, vec3_t in, vec3_t out ) {
 
 	//MatrixMultiply(
 
+}
+
+void CG_InitLuaView(lua_State *L) {
+	doRT = qtrue;
+}
+
+void CG_CloseLuaView() {
+	doRT = qfalse;
 }

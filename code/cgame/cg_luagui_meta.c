@@ -88,6 +88,7 @@ int	pset_pos(lua_State *L) {
 	luaL_checktype(L,3,LUA_TNUMBER);
 
 	if(panel != NULL) {
+		if(!strcmp(panel->classname,"base")) return 0;
 		panel->x = lua_tonumber(L,2);
 		panel->y = lua_tonumber(L,3);
 	}
@@ -113,6 +114,7 @@ int	pset_size(lua_State *L) {
 	luaL_checktype(L,3,LUA_TNUMBER);
 
 	if(panel != NULL) {
+		if(!strcmp(panel->classname,"base")) return 0;
 		panel->w = lua_tonumber(L,2);
 		panel->h = lua_tonumber(L,3);
 	}
@@ -133,7 +135,10 @@ int pget_fgcolor(lua_State *L) {
 
 int pset_fgcolor(lua_State *L) {
 	panel_t *panel = lua_topanel(L,1);
-	if(panel != NULL) qlua_toColor(L,2,panel->fgcolor,qfalse);
+	if(panel != NULL) {
+		if(!strcmp(panel->classname,"base")) return 0;
+		qlua_toColor(L,2,panel->fgcolor,qfalse);
+	}
 	return 0;
 }
 
@@ -148,7 +153,10 @@ int pget_bgcolor(lua_State *L) {
 
 int pset_bgcolor(lua_State *L) {
 	panel_t *panel = lua_topanel(L,1);
-	if(panel != NULL) qlua_toColor(L,2,panel->bgcolor,qfalse);
+	if(panel != NULL) {
+		if(!strcmp(panel->classname,"base")) return 0;
+		qlua_toColor(L,2,panel->bgcolor,qfalse);
+	}
 	return 0;
 }
 
@@ -162,6 +170,26 @@ int pget_parent(lua_State *L) {
 
 	return 0;
 }
+
+int pget_children(lua_State *L) {
+	panel_t *panel = lua_topanel(L,1);
+	int i;
+	int i2 = 0;
+
+	lua_newtable(L);
+	if(panel != NULL && panel->num_panels > 0) {
+		for(i=0;i<panel->num_panels;i++) {
+			if(panel->children[i] != NULL) {
+				lua_pushinteger(L,++i2);
+				lua_pushpanel(L,panel->children[i]);
+				lua_rawset(L,-3);
+			}
+		}
+	}
+
+	return 1;
+}
+
 
 int pget_index(lua_State *L) {
 	panel_t *panel = lua_topanel(L,1);
@@ -199,7 +227,10 @@ int pget_classname(lua_State *L) {
 int pcmd_remove(lua_State *L) {
 	panel_t *panel = lua_topanel(L,1);
 	
-	if(panel != NULL) UI_RemovePanel(panel);
+	if(panel != NULL) {
+		if(!strcmp(panel->classname,"base")) return 0;
+		UI_RemovePanel(panel);
+	}
 	
 	return 0;
 }
@@ -224,6 +255,16 @@ int pmouseover(lua_State *L) {
 	return 0;
 }
 
+int pset_visible(lua_State *L) {
+	panel_t *panel = lua_topanel(L,1);
+
+	if(panel != NULL && panel->parent != NULL) {
+		panel->visible = lua_toboolean(L,2);
+	}
+
+	return 0;
+}
+
 int pisontop(lua_State *L) {
 	panel_t *panel = lua_topanel(L,1);
 
@@ -235,10 +276,22 @@ int pisontop(lua_State *L) {
 	return 0;
 }
 
+int pisvisible(lua_State *L) {
+	panel_t *panel = lua_topanel(L,1);
+
+	if(panel != NULL) {
+		lua_pushboolean(L,panel->visible);
+		return 1;
+	}
+
+	return 0;
+}
+
 int pfocus(lua_State *L) {
 	panel_t *panel = lua_topanel(L,1);
 
 	if(panel != NULL && panel->parent != NULL) {
+		if(!strcmp(panel->classname,"base")) return 0;
 		UI_FocusPanel(panel);
 	}
 
@@ -246,7 +299,7 @@ int pfocus(lua_State *L) {
 }
 
 static const luaL_reg Panel_methods[] = {
-  {"GetLocalPos",	pget_localpos},
+  {"GetRasterPos",	pget_localpos},
   {"GetPos",		pget_pos},
   {"SetPos",		pset_pos},
   {"GetSize",		pget_size},
@@ -256,6 +309,8 @@ static const luaL_reg Panel_methods[] = {
   {"GetBGColor",	pget_bgcolor},
   {"SetBGColor",	pset_bgcolor},
   {"GetParent",		pget_parent},
+  {"GetChildren",	pget_children},
+  {"SetVisible",	pset_visible},
   {"Index",			pget_index},
   {"Depth",			pget_depth},
   {"Classname",		pget_classname},
@@ -263,6 +318,7 @@ static const luaL_reg Panel_methods[] = {
   {"MouseDown",		pmousedown},
   {"MouseOver",		pmouseover},
   {"IsOnTop",		pisontop},
+  {"IsVisible",		pisvisible},
   {"Focus",			pfocus},
   {0,0}
 };
@@ -298,9 +354,8 @@ int Panel_newindex(lua_State *L) {
 	for(i=0; i<size; i++) {
 		if(Panel_methods[i].name != NULL && Panel_methods[i].func != NULL) {
 			if(!strcmp(Panel_methods[i].name,str)) {
-				lua_pushfstring(L,"^1Panel:%s Is Write-Protected!", str);
-				lua_error(L);
-				return 1;
+				CG_Printf("^1%s:%s Is Write-Protected!\n", panel->classname, str);
+				return 0;
 			}
 		}
 	}

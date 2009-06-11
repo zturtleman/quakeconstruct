@@ -1339,7 +1339,8 @@ void CG_ZoomUp_f( void );
 void CG_AddBufferedSound( sfxHandle_t sfx);
 
 void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demoPlayback );
-
+void CG_InitLuaView(lua_State *L);
+void CG_CloseLuaView();
 
 //
 // cg_drawtools.c

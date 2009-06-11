@@ -123,7 +123,10 @@ typedef struct {
 
 	polyVert_t	verts[128];		//Hxrmn's poly code
 	vec3_t		lua_scale;
+	float		trailCoordBump;
+	float		trailCoordLength;
 
+	qboolean	staticMap;
 
 	vec3_t		trailVerts[256];
 } refEntity_t;

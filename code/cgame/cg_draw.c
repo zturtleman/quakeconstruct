@@ -2679,6 +2679,7 @@ void CG_DrawActive( stereoFrame_t stereoView ) {
 
 	if(L != NULL) {
 		CG_PushCGTab(L);
+		CG_InitLuaView(L);
 	}
 
 	switch ( stereoView ) {
