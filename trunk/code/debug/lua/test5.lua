@@ -38,6 +38,27 @@ local data =
 }]]
 local trailfx3 = CreateShader("f",data)
 
+local data = 
+[[{
+	{
+		map gfx/misc/dissolve2.tga
+		blendfunc add
+		alphaFunc LT128
+		alphaGen oneMinusVertex
+		rgbGen vertex
+		tcMod scroll .3 -.2
+	}
+	{
+		map gfx/misc/dissolve2.tga
+		blendfunc add
+		alphaFunc LT128
+		alphaGen oneMinusVertex
+		rgbGen vertex
+		tcMod scroll -.2 .1
+	}
+}]]
+local trailfx4 = CreateShader("f",data)
+
 
 local data =
 [[{
@@ -80,14 +101,16 @@ local function passTrail(trail)
 end
 
 local function makeTrail(i,cr,cg,cb,ca)
-	local r,g,b = hsv(math.random(360),1,1)
+	local r,g,b = hsv(math.random(360),1,.5)
 	local trail = RefEntity()
 	trail:SetType(RT_TRAIL)
-	trail:SetColor(cr or r,cg or g,cb or b,ca or 1)
+	trail:SetColor(cr or r,cg or g,cb or b,ca or .5)
 	trail:SetRadius(6)
-	trail:SetShader(trailfx1)
+	trail:SetShader(trailfx4)
 	trail:SetTrailLength(256)
-	trail:SetTrailFade(FT_NONE)
+	trail:SetTrailFade(FT_ALPHA)
+	trail:SetTrailStaticMap(true)
+	trail:SetTrailMapLength(300)
 	trailCache[i] = trail
 end
 
@@ -161,10 +184,10 @@ hook.add("Draw3D","test5",d3d)
 
 local function createEmitter()
 	local ref = RefEntity()
-	ref:SetColor(1,0,0,1)
+	ref:SetColor(1,1,0,1)
 	ref:SetType(RT_TRAIL)
 	ref:SetShader(blood)
-	ref:SetRadius(2)
+	ref:SetRadius(1)
 	ref:SetTrailLength(10)
 	ref:SetTrailFade(FT_ALPHA)
 	
@@ -196,7 +219,7 @@ local function pldamage(self2,attacker,pos,dmg,death,self,suicide,hp,id,pos,dir)
 				dir = dir * math.random(60,300)
 				le2:SetVelocity(dir + self2:GetTrajectory():GetDelta()/2)
 				le2:SetRadius(math.random(1,5))
-				le2:SetEndRadius(1)
+				le2:SetEndRadius(.5)
 				le2:SetStartTime(LevelTime())
 				le2:SetEndTime(LevelTime() + math.random(800,2000))
 				

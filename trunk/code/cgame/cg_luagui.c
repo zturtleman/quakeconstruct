@@ -22,10 +22,6 @@ void create_base() {
 	base_panel->visible = qtrue;
 }
 
-panel_t *get_base() {
-	return base_panel;
-}
-
 qboolean gui_getpanelfunc(lua_State *L, panel_t* panel, char* f) {
 	qlua_getstored(L,panel->lua_table);
 	lua_pushstring(L,f);
@@ -122,6 +118,15 @@ panel_t *UI_GetPanelByID(int id) {
 	return recursive_find(L,base_panel,id);
 }
 
+panel_t *UI_GetBasePanel() {
+	return base_panel;
+}
+
+int gui_panel_getbase(lua_State *L) {
+	lua_pushpanel(L,base_panel);
+	return 1;
+}
+
 void UI_FocusPanel(panel_t *panel) {
 	int num;
 	int i;
@@ -211,14 +216,21 @@ void cleanPanel(panel_t *panel) {
 
 void UI_RemovePanel(panel_t *panel) {
 	int i;
+	lua_State *L = GetClientLuaState();
+
 	if(panel->parent != NULL && panel->removed == qfalse) {
 		panel->removed = qtrue;
 		for(i=0;i<panel->num_panels;i++) {
 			if(panel->children[i] != NULL) {
-				panel->children[i]->removed = qtrue;
+				UI_RemovePanel(panel->children[i]);
 			}
 		}
 
+		if(L != NULL) {
+			if(gui_getpanelfunc(L,panel,"OnRemove")) {
+				qlua_pcall(L,0,0,qtrue);
+			}
+		}
 		panel->parent->children[panel->depth] = NULL;
 		panel->parent->num_panels--;
 		cleanPanel(panel->parent);
@@ -248,6 +260,7 @@ int gui_mouse_getpos(lua_State *L) {
 }
 
 static const luaL_reg Gui_methods[] = {
+  {"GetBasePanel",	gui_panel_getbase},
   {"CreatePanel",	gui_panel_create},
   {"RemovePanel",	gui_panel_remove},
   {"EnableMouse",	gui_mouse_enable},

@@ -178,7 +178,7 @@ local function draw2D()
 	
 	DrawAmmo(mx+95+shakex,my+430+shakey,50,50)
 	DrawArmor(mx+450+shakex,my+430+shakey,50,50,armor)
-	DrawHead(mx+285,my+375,105,hp)
+	DrawHead(mx+275,my+335,145,hp)
 	
 	local col_hp = colors.health_norm
 	local col_ammo = colors.ammo_norm

@@ -71,7 +71,7 @@ int qlua_rgetpos(lua_State *L) {
 
 int qlua_rsetpos(lua_State *L) {
 	refEntity_t	*luaentity;
-	vec3_t		origin;
+	vec3_t		origin,vlen;
 	vec3_t		temp[256];
 	int			size,i,size2;
 	qboolean	isNew = qfalse;
@@ -93,6 +93,9 @@ int qlua_rsetpos(lua_State *L) {
 		VectorCopy( origin, luaentity->origin );
 
 		if(luaentity->reType == RT_TRAIL) {
+			VectorSubtract(luaentity->trailVerts[0],luaentity->origin,vlen);
+			luaentity->trailCoordBump -= VectorLength(vlen) / luaentity->trailCoordLength;
+
 			size2 = sizeof(luaentity->trailVerts) / sizeof(luaentity->trailVerts[0]);
 			if(luaentity->numVerts2 > size2) luaentity->numVerts2 = size2;
 			if(luaentity->numVerts2 <= 1) luaentity->numVerts2 = 2;
@@ -605,6 +608,62 @@ int qlua_rgettrailfade(lua_State *L) {
 	return 0;
 }
 
+int qlua_rsettrailstaticmap(lua_State *L) {
+	refEntity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TBOOLEAN);
+
+	luaentity = lua_torefentity(L,1);
+	if(luaentity != NULL) {
+		luaentity->staticMap = lua_toboolean(L,2);
+	}
+	return 0;
+}
+
+int qlua_rsettrailmaplength(lua_State *L) {
+	refEntity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TNUMBER);
+
+	luaentity = lua_torefentity(L,1);
+	if(luaentity != NULL) {
+		luaentity->trailCoordLength = lua_tonumber(L,2);
+		if(luaentity->trailCoordLength <= 0) {
+			luaentity->trailCoordLength = .1f;
+		}
+		return 1;
+	}
+	return 0;
+}
+
+int qlua_rgettrailstaticmap(lua_State *L) {
+	refEntity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	luaentity = lua_torefentity(L,1);
+	if(luaentity != NULL) {
+		lua_pushboolean(L,luaentity->staticMap);
+		return 1;
+	}
+	return 0;
+}
+
+int qlua_rgettrailmaplength(lua_State *L) {
+	refEntity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	luaentity = lua_torefentity(L,1);
+	if(luaentity != NULL) {
+		lua_pushnumber(L,luaentity->trailCoordLength);
+		return 1;
+	}
+	return 0;
+}
+
 static int Entity_tostring (lua_State *L)
 {
   lua_pushfstring(L, "RefEntity: %p", lua_touserdata(L, 1));
@@ -624,42 +683,46 @@ static int Entity_equal (lua_State *L)
 }
 
 static const luaL_reg REntity_methods[] = {
-  {"AddRenderFx",	qlua_rrenderfx},
-  {"GetPos",		qlua_rgetpos},
-  {"SetPos",		qlua_rsetpos},
-  {"GetPos2",		qlua_rgetpos2},
-  {"SetPos2",		qlua_rsetpos2},
-  {"GetAxis",		qlua_rgetaxis},
-  {"GetAngles",		qlua_rgetangles},
-  {"SetAngles",		qlua_rsetangles},
-  {"SetShader",		qlua_rsetshader},
-  {"GetShader",		qlua_rgetshader},
-  {"SetModel",		qlua_rsetmodel},
-  {"GetModel",		qlua_rgetmodel},
-  {"SetSkin",		qlua_rsetskin},
-  {"GetSkin",		qlua_rgetskin},
-  {"SetType",		qlua_rsettype},
-  {"GetType",		qlua_rgettype},
-  {"SetRadius",		qlua_rsetradius},
-  {"GetRadius",		qlua_rgetradius},
-  {"SetFrame",		qlua_rsetframe},
-  {"GetFrame",		qlua_rgetframe},
-  {"SetOldFrame",	qlua_rsetoldframe},
-  {"GetOldFrame",	qlua_rgetoldframe},
-  {"SetLerp",		qlua_rsetlerp},
-  {"GetLerp",		qlua_rgetlerp},
-  {"SetColor",		qlua_rsetcolor},
-  {"GetColor",		qlua_rgetcolor},
-  {"SetRotation",	qlua_rsetrotation},
-  {"SetTime",		qlua_rsettime},
-  {"Scale",			qlua_rsetscale},
-  {"Render",		qlua_rrender},
-  {"AlwaysRender",	qlua_rsetalways},
-  {"PositionOnTag",	qlua_rpositionontag},
-  {"SetTrailLength",qlua_rsettraillength},
-  {"GetTrailLength",qlua_rgettraillength},
-  {"SetTrailFade",	qlua_rsettrailfade},
-  {"GetTrailFade",	qlua_rgettrailfade},
+  {"AddRenderFx",		qlua_rrenderfx},
+  {"GetPos",			qlua_rgetpos},
+  {"SetPos",			qlua_rsetpos},
+  {"GetPos2",			qlua_rgetpos2},
+  {"SetPos2",			qlua_rsetpos2},
+  {"GetAxis",			qlua_rgetaxis},
+  {"GetAngles",			qlua_rgetangles},
+  {"SetAngles",			qlua_rsetangles},
+  {"SetShader",			qlua_rsetshader},
+  {"GetShader",			qlua_rgetshader},
+  {"SetModel",			qlua_rsetmodel},
+  {"GetModel",			qlua_rgetmodel},
+  {"SetSkin",			qlua_rsetskin},
+  {"GetSkin",			qlua_rgetskin},
+  {"SetType",			qlua_rsettype},
+  {"GetType",			qlua_rgettype},
+  {"SetRadius",			qlua_rsetradius},
+  {"GetRadius",			qlua_rgetradius},
+  {"SetFrame",			qlua_rsetframe},
+  {"GetFrame",			qlua_rgetframe},
+  {"SetOldFrame",		qlua_rsetoldframe},
+  {"GetOldFrame",		qlua_rgetoldframe},
+  {"SetLerp",			qlua_rsetlerp},
+  {"GetLerp",			qlua_rgetlerp},
+  {"SetColor",			qlua_rsetcolor},
+  {"GetColor",			qlua_rgetcolor},
+  {"SetRotation",		qlua_rsetrotation},
+  {"SetTime",			qlua_rsettime},
+  {"Scale",				qlua_rsetscale},
+  {"Render",			qlua_rrender},
+  {"AlwaysRender",		qlua_rsetalways},
+  {"PositionOnTag",		qlua_rpositionontag},
+  {"SetTrailLength",	qlua_rsettraillength},
+  {"GetTrailLength",	qlua_rgettraillength},
+  {"SetTrailFade",		qlua_rsettrailfade},
+  {"GetTrailFade",		qlua_rgettrailfade},
+  {"SetTrailStaticMap", qlua_rsettrailstaticmap},
+  {"SetTrailMapLength",	qlua_rsettrailmaplength},
+  {"GetTrailStaticMap", qlua_rgettrailstaticmap},
+  {"GetTrailMapLength",	qlua_rgettrailmaplength},
   {0,0}
 };
 
@@ -707,6 +770,8 @@ int qlua_createrefentity (lua_State *L) {
 	ent.lua_scale[0] = 1;
 	ent.lua_scale[1] = 1;
 	ent.lua_scale[2] = 1;
+
+	ent.trailCoordLength = 1000;
 
 	lua_pushrefentity(L,&ent);
 	return 1;

@@ -14,6 +14,12 @@ P:include("painting/cl_skins.lua")
 P:include("painting/cl_skinutil.lua")
 P:include("painting/cl_softwaremask.lua")
 
+local function dc(x,y)
+	draw.SetColor(1,1,1,1)
+	draw.Rect(x-1,y-1,2,2)
+end
+hook.add("DrawCursor","UI2",dc)
+
 local letters = string.alphabet
 
 function UI_ERROR(txt,cmp)
