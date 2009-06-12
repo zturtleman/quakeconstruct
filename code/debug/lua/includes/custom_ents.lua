@@ -1,7 +1,7 @@
 local META = {}
 local ENTS = {}
 
-function META:Think() end
+--[[function META:Think() end
 function META:Initialized() end
 function META:Removed() end
 function META:MessageReceived() end
@@ -18,7 +18,7 @@ if(SERVER) then
 else
 	function META:Draw() end
 	function META:UserCommand() end
-end
+end]]
 
 function ExecuteEntity(v)
 	ENT = {}
@@ -34,24 +34,70 @@ function ExecuteEntity(v)
 	table.insert(_CUSTOM,{data=ENT,type="entity"})
 end
 
+local function InheritEntities()
+	local finished = false
+	local nl = true
+	local maxiter = 100
+	local i = 0
+	local lc = 0
+	while(nl == true and i < maxiter) do
+		nl = false
+		for k,v in pairs(ENTS) do
+			if(!v.__inherit) then
+				local base = v.Base
+				local name = v._classname
+				--if(base == nil) then base = "panel" end
+				if(type(base) == "string" and ENTS[base] and base != name) then
+					if(ENTS[base].__inherit == true) then
+						ENTS[name] = table.Inherit( ENTS[name], ENTS[base] )
+						print("^3Entity Inherited: " .. name .. " -> " .. base .. "\n")
+						lc = lc + 1
+						v.__inherit = true
+					else
+						nl = true
+					end
+				else
+					lc = lc + 1
+					v.__inherit = true
+				end
+			end
+		end
+		i = i + 1
+	end
+	print("Loaded " .. lc .. " entities with " .. i .. " iterations.\n")
+end
+
 local list = FindCustomFiles("lua/entities")
 for k,v in pairs(list) do
 	ExecuteEntity(v)
 end
+InheritEntities()
 
 local function FindEntity(name)
 	return ENTS[string.lower(name)]
 end
 
+local function metaCall(tab,func,...)
+	if(tab[func] != nil) then
+		local b,e = pcall(tab[func],tab,unpack(arg))
+		if(!b) then
+			print("^1Entity Error[" .. tab._classname .. "]: ^2" .. e .. "\n")
+		else
+			return true
+		end
+	end
+	return false
+end
+
 local function SetCallbacks(ent,tab)
 	if(SERVER) then
-		ent:SetCallback(ENTITY_CALLBACK_THINK,function(ent) tab:Think() end)
-		ent:SetCallback(ENTITY_CALLBACK_DIE,function(ent,a,b,take) tab:Die(a,b,take) end)
-		ent:SetCallback(ENTITY_CALLBACK_PAIN,function(ent,a,b,take) tab:Pain(a,b,take) end)
-		ent:SetCallback(ENTITY_CALLBACK_TOUCH,function(ent,other,trace) tab:Touch(other,trace) end)
-		ent:SetCallback(ENTITY_CALLBACK_USE,function(ent,other) tab:Use(other) end)
-		ent:SetCallback(ENTITY_CALLBACK_BLOCKED,function(ent,other) tab:Blocked(other) end)
-		ent:SetCallback(ENTITY_CALLBACK_REACHED,function(ent,other) tab:Reached(other) end)
+		ent:SetCallback(ENTITY_CALLBACK_THINK,function(ent) metaCall(tab,"Think") end)
+		ent:SetCallback(ENTITY_CALLBACK_DIE,function(ent,a,b,take) metaCall(tab,"Die",a,b,take) end)
+		ent:SetCallback(ENTITY_CALLBACK_PAIN,function(ent,a,b,take) metaCall(tab,"Pain",a,b,take) end)
+		ent:SetCallback(ENTITY_CALLBACK_TOUCH,function(ent,other,trace) metaCall(tab,"Touch",other,trace) end)
+		ent:SetCallback(ENTITY_CALLBACK_USE,function(ent,other) metaCall(tab,"Use",other) end)
+		ent:SetCallback(ENTITY_CALLBACK_BLOCKED,function(ent,other) metaCall(tab,"Blocked",other) end)
+		ent:SetCallback(ENTITY_CALLBACK_REACHED,function(ent,other) metaCall(tab,"Reached",other) end)
 	end
 end
 
@@ -73,9 +119,9 @@ local function LinkEntity(ent)
 		cent.net:Reset()
 		function cent.net:VariableChanged(...)
 			--active[id].net = CreateNetworkedTable(ent:EntIndex() or -1)
-			pcall(cent.VariableChanged,cent,unpack(arg))
+			metaCall(cent,"VariableChanged",unpack(arg))
 		end
-		if(SERVER) then cent:Initialized() end
+		if(SERVER) then metaCall(cent,"Initialized") end
 		active[id] = cent
 		SetCallbacks(ent,cent)
 		
@@ -94,9 +140,7 @@ local function UnlinkEntity(ent)
 	local id = ent:EntIndex()
 	local cent = active[id]
 	if(cent != nil) then
-		if(cent.Removed) then
-			cent:Removed()
-		end
+		metaCall(cent,"Removed")
 	end
 	active[id] = nil
 	
@@ -110,7 +154,7 @@ if(SERVER) then
 	local function messagetest(...)
 		for k,v in pairs(active) do
 			if(v != nil) then
-				pcall(active[k].MessageReceived,active[k],unpack(arg))
+				metaCall(active[k],"MessageReceived",unpack(arg))
 			end
 		end
 	end
@@ -119,7 +163,7 @@ if(SERVER) then
 	local function ClientReady(...)
 		for k,v in pairs(active) do
 			if(v != nil) then
-				pcall(active[k].ClientReady,active[k],unpack(arg))
+				metaCall(active[k],"ClientReady",unpack(arg))
 			end
 		end
 	end
@@ -128,15 +172,28 @@ else
 	local function DrawEntity(ent,name)
 		local index = ent:EntIndex()
 		if(active[index] != nil) then
-			pcall(active[index].Draw,active[index])
+			metaCall(active[index],"Draw")
 		end
 	end
 	hook.add("DrawCustomEntity","checkcustom",DrawEntity)
 	
+	local function DrawRT()
+		local rtc = 0
+		for k,v in pairs(active) do
+			if(v != nil) then
+				if(metaCall(active[k],"DrawRT")) then
+					rtc = rtc + 1
+				end
+			end
+		end
+		--print("RTCalls: " .. rtc .. "\n")
+	end
+	hook.add("DrawRT","checkcustom",DrawRT)
+	
 	local function UserCommand(...)
 		for k,v in pairs(active) do
 			if(v != nil) then
-				pcall(active[k].UserCommand,active[k],unpack(arg))
+				metaCall(active[k],"UserCommand",unpack(arg))
 			end
 		end
 	end
@@ -145,7 +202,7 @@ else
 	local function messagetest(...)
 		for k,v in pairs(active) do
 			if(v != nil) then
-				pcall(active[k].MessageReceived,active[k],unpack(arg))
+				metaCall(active[k],"MessageReceived",unpack(arg))
 			end
 		end
 	end
@@ -166,6 +223,10 @@ else
 			if(string.len(name) <= 0) then return false end
 			
 			ENT = {}
+			if(ENTS[string.lower(name)] != nil) then
+				print("^1" .. string.lower(name) .. " already loaded.\n")
+				return true
+			end
 			
 			setmetatable(ENT,META)
 			META.__index = META
@@ -176,7 +237,8 @@ else
 			
 			ENTS[ENT._classname] = ENT
 			table.insert(_CUSTOM,{data=ENT,type="entity"})
-			print("Downloaded Entity '" .. file .. "'\n")	
+			print("Downloaded Entity '" .. file .. "'\n")
+			InheritEntities()
 			
 			return true
 		end

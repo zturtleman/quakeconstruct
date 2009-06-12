@@ -1886,7 +1886,7 @@ static const luaL_reg Entity_methods[] = {
   {"SetType",		qlua_setetype},
   {"GetType",		qlua_getetype},
   {"SetFlags",		qlua_setflags},
-  {"SetSvFlags",	qlua_setsvflags},
+  {"SetSvFlag",		qlua_setsvflags},
   {"SetDamage",		qlua_setdamage},
   {"SetOwner",		qlua_setowner},
   {"SetDeathMethod", qlua_setmod},
@@ -1992,7 +1992,7 @@ int qlua_createEntity(lua_State *L) {
 		}
 
 		ent->s.eType = ET_LUA;
-		ent->r.svFlags = SVF_BROADCAST;
+		ent->r.svFlags = SVF_BROADCAST;//SVF_BROADCAST;
 		ent->s.weapon = WP_NONE;
 		ent->clipmask = MASK_SHOT;
 		ent->target_ent = NULL;

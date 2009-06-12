@@ -570,7 +570,7 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs, qboolean ov
 
 	rt.valid = qfalse;
 
-	if(backEnd.viewParms.isRenderTarget && !override) {
+	if(backEnd.viewParms.isRenderTarget) {
 		rt = renderTargets[backEnd.viewParms.rt_index];
 		if(rt.valid) {
 			//GL_State( GLS_DEPTHTEST_DISABLE );
@@ -581,9 +581,11 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs, qboolean ov
 
 			SetViewportAndScissor();
 
-			qglClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
-			qglClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT ); //
-			GL_State( GLS_DEFAULT );
+			/*if(!override) {
+				qglClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
+				qglClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT ); //
+				GL_State( GLS_DEFAULT );
+			}*/
 		}
 	}
 
@@ -717,12 +719,15 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs, qboolean ov
 	// add light flares on lights that aren't obscured
 	RB_RenderFlares();
 
-	if(rt.valid && !override) {
+	if(rt.valid) {
 		qglBindTexture(GL_TEXTURE_2D, rt.texture);
 		
 		qglCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 0, 0, rt.width, rt.height, 0);
-		qglClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
-		qglClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT ); // | GL_COLOR_BUFFER_BIT
+		
+		/*if(override) {
+			qglClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
+			qglClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT ); // | GL_COLOR_BUFFER_BIT
+		}*/
 	}
 
 #ifdef __MACOS__
