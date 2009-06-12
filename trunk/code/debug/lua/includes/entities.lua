@@ -54,6 +54,18 @@ function GetOwner()
 	return nil
 end
 
+function FindEntityTargets(ent)
+	local targets = {}
+	for k,v in pairs(GetAllEntities()) do
+		if(v:GetTargetName() == ent:GetTarget()) then
+			table.insert(targets,v)
+		elseif(v:EntIndex() == ent:GetTargetEnt():EntIndex()) then
+			table.insert(targets,v)
+		end
+	end
+	return targets
+end
+
 function FindEntities(func,value,...)
 	if(type(func) != "string") then return end
 	func = Entity[func]

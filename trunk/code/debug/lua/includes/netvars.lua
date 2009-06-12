@@ -157,13 +157,45 @@ if(SERVER) then
 	end
 	hook.add("ClientReady","netvars2",PlayerJoined)
 else
+	function network_meta:Reset()
+		self.__mt._vars = {}
+		self.__mt._ids = {}
+	end
+	
+	function network_meta:Init()
+		self:Reset()
+	end
+	
+	function network_meta.__index(self,var)
+		local mt = rawget(self,"__mt")
+		if(isBlackListed(var) == true) then
+			return rawget(mt,var)
+		end
+		return mt._vars[var]
+	end
+	
+	function network_meta.__newindex(self,var,val)
+		if(isBlackListed(var) == true) then
+			return
+		end
+		local mt = rawget(self,"__mt")
+		mt._vars[var] = val
+	end
+
 	local function NetVar(msgid)
 		if(msgid == n_msgid) then
 			local tindex = message.ReadShort()
 			local action = message.ReadShort()
 
 			if(_NetTables[tindex] == nil) then
-				error("NetworkedTable: [" .. tindex .. "] not initialized!\n")
+				_NetTables[tindex] = {}
+				setmetatable(_NetTables[tindex],network_meta)
+				rawset(_NetTables[tindex],"__mt",table.Copy(network_meta))
+				
+				_NetTables[tindex].tindex = tindex
+				_NetTables[tindex]:Init()
+				nt = _NetTables[tindex]
+				print("^3Server Forced Client Networked Table: " .. tindex .. "\n")
 			end
 			
 			local mtab = _NetTables[tindex].__mt
@@ -209,31 +241,6 @@ else
 		end
 	end
 	hook.add("HandleMessage","netvars2",NetVar)
-	
-	function network_meta:Reset()
-		self.__mt._vars = {}
-		self.__mt._ids = {}
-	end
-	
-	function network_meta:Init()
-		self:Reset()
-	end
-	
-	function network_meta.__index(self,var)
-		local mt = rawget(self,"__mt")
-		if(isBlackListed(var) == true) then
-			return rawget(mt,var)
-		end
-		return mt._vars[var]
-	end
-	
-	function network_meta.__newindex(self,var,val)
-		if(isBlackListed(var) == true) then
-			return
-		end
-		local mt = rawget(self,"__mt")
-		mt._vars[var] = val
-	end
 end
 
 local function Internal_CreateNetworkedTable(index)
