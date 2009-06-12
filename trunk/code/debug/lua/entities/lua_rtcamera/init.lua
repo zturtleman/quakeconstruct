@@ -7,8 +7,8 @@ function ENT:Initialized()
 	local exPitch = G_SpawnString("pitch","0")
 	exPitch = tonumber(exPitch)
 	
-	self.Entity:SetSvFlag(SVF_PORTAL)
-	self.Entity:SetPos(self.Entity:GetPos())
+	self.Entity:SetSvFlag(gOR(SVF_PORTAL,SVF_BROADCAST))
+	self.Entity:SetPos2(self.Entity:GetPos())
 	if(exPitch) then
 		self.Entity:SetAngles(self.Entity:GetAngles() + Vector(exPitch,0,0))
 	end
