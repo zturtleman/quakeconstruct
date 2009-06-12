@@ -30,6 +30,15 @@ function gOR(...)
 	return v
 end
 
+function gAND(...)
+	if(#arg < 2) then return arg[1] or 0 end
+	local v = arg[1]
+	for i=2, #arg do
+		v = bitAnd(v,arg[i])
+	end
+	return v
+end
+
 function lastChar(v)
 	return string.sub(v,string.len(v),string.len(v))
 end

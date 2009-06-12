@@ -622,6 +622,19 @@ int qlua_setpos(lua_State *L) {
 	return 0;
 }
 
+int qlua_setpos2(lua_State *L) {
+	gentity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TVECTOR);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		lua_tovector(L,2,luaentity->s.origin2);
+	}
+	return 0;
+}
+
 int qlua_getangles(lua_State *L) {
 	gentity_t	*luaentity;
 
@@ -1813,6 +1826,7 @@ static const luaL_reg Entity_methods[] = {
   {"SetInfo",		qlua_setclientinfo},
   {"GetPos",		qlua_getpos},
   {"SetPos",		qlua_setpos},
+  {"SetPos2",		qlua_setpos2},
   {"GetAngles",		qlua_getangles},
   {"SetAngles",		qlua_setangles},
   {"GetSpawnAngle", qlua_getspawnangle},
@@ -1991,6 +2005,8 @@ int qlua_createEntity(lua_State *L) {
 			return 1;
 		}
 
+		VectorClear( ent->r.mins );
+		VectorClear( ent->r.maxs );
 		ent->s.eType = ET_LUA;
 		ent->r.svFlags = SVF_BROADCAST;//SVF_BROADCAST;
 		ent->s.weapon = WP_NONE;
