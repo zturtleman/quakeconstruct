@@ -19,7 +19,7 @@ function ENT:DrawForeground()
 	if(cameraEnt == nil) then return end
 	
 	draw.SetColor(1,1,1,1)
-	draw.Text(30,30,"RTCam: " .. camera .. " | " .. cameraEnt:Classname(),30,30)
+	draw.Text(30,30,"RTCam: " .. camera,30,30)
 	--draw.Text(30,60,"Position: " .. tostring(cameraEnt:GetPos()),20,30)
 	
 	draw.SetColor(1,1,1,1)
@@ -32,7 +32,7 @@ function ENT:DrawRT()
 	local camera = self.net.camtarget or 0
 	local cameraEnt = GetEntityByIndex(camera)
 	if(cameraEnt == nil or camera == 0) then 
-		print("^1 NULL CAMERA!\n")
+		--print("^1 NULL CAMERA!\n")
 		return
 	end
 
