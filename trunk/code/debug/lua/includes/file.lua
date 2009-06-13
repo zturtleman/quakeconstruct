@@ -46,11 +46,10 @@ end
 
 function fileExists(n,base)
 	base = base or "."
-	local tab = findFileByType(string.GetExtensionFromFilename(n),base)
-	for k,v in pairs(tab) do
-		if(v == n) then
-			return true
-		end
+	file = io.open(base .. "/" .. n, "r")
+	if(file != nil) then
+		file:close()
+		return true
 	end
 	return false
 end
@@ -80,38 +79,29 @@ function countFileLines(n,condition)
 end
 
 function fileMD5(n,condition)
-	if(fileExists(n)) then
-		file = io.open(n, "r")
-		if(file != nil) then
-			local dat = ""
-			local lines = 0
-			for line in file:lines() do			
-				local c = true
-				if(condition) then
-					local b,e = pcall(condition,line,lines)
-					if(!b) then error(e) end
-					c = e
-				end
-				if(c) then	
-					lines = lines + 1
-					line = string.Replace(line,"\n","")
-					line = string.Replace(line,"\t","")
-					--line = string.Replace(line,"\"","'")
-					--line = string.Trim(line)
-					
-					if(line != "") then
-						dat = dat .. line
-						--[[if(fmd5cnt == 0) then
-							print("^2|" .. line .. "|\n")
-						else
-							print("^3|" .. line .. "|\n")
-						end]]
-					end
+	file = io.open(n, "r")
+	if(file != nil) then
+		local dat = ""
+		local lines = 0
+		for line in file:lines() do			
+			local c = true
+			if(condition) then
+				local b,e = pcall(condition,line,lines)
+				if(!b) then error(e) end
+				c = e
+			end
+			if(c) then	
+				lines = lines + 1
+				line = string.Replace(line,"\n","")
+				line = string.Replace(line,"\t","")
+				
+				if(line != "") then
+					dat = dat .. line
 				end
 			end
-			--fmd5cnt = fmd5cnt + 1
-			return MD5(dat)
 		end
+		file:close()
+		return MD5(dat)
 	end
 	return ""
 end

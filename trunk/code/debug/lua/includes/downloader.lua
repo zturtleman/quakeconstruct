@@ -388,7 +388,6 @@ elseif(CLIENT) then
 	end
 	
 	local function writeToFile()
-		if(cancelled) then cancelled = false return end
 		local rez = "lua/downloads/" .. localFile(FILENAME)
 		debugprint("Writing File: '" .. rez .. "'\n")
 		--CONTENTS = string.Replace(CONTENTS,"_NL_","\n")
@@ -426,10 +425,13 @@ elseif(CLIENT) then
 	end
 	
 	local function checkForFile(FILENAME,md5)
-		print("^2" .. FILENAME .. "\n")
+		--print("^2" .. FILENAME .. "\n")
 		if(checkMD5(FILENAME,md5)) then return true end
 	
 		local fn1 = string.Replace(FILENAME,"/",".")
+		--print("^2" .. "lua/downloads/" .. fn1 .. "\n")
+		if(checkMD5("lua/downloads/" .. fn1,md5)) then return true end
+		
 		print("^1finding: ^7" .. fn1 .. "\n")
 		for k in dirtree("lua/downloads") do
 			local len = string.len("lua/downloads")
@@ -471,11 +473,12 @@ elseif(CLIENT) then
 			FILENAME = name
 			LINECOUNT = lines
 			LINEITER = 0
-			--[[if(checkForFile(FILENAME,md5)) then
+			cancelled = false
+			if(checkForFile(FILENAME,md5)) then
 				cancelled = true
 				SendString("__canceldownload")
 				includeFile(FILENAME)
-			end]]
+			end
 		elseif(msgid == "__fileline") then
 			local str = base64.dec(message.ReadString() or "")
 			CONTENTS = CONTENTS .. str -- .. "\n"
