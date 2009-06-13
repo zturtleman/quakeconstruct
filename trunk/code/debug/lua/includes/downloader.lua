@@ -228,8 +228,8 @@ if(SERVER) then
 		ptab.downloading = false
 		downloader.notify()
 		
-		local msg = Message(pl,"__fileheader")
-		SendDataMessage(msg)
+		--local msg = Message(pl,"__fileheader")
+		--SendDataMessage(msg)
 	end
 	
 	function downloader.begindownload(pl,file)
@@ -444,6 +444,7 @@ elseif(CLIENT) then
 				print(file .. "\n")
 			end
 		end
+		return false
 	end
 	
 	local function HandleMessage(msgid,tab)
@@ -480,6 +481,7 @@ elseif(CLIENT) then
 				includeFile(FILENAME)
 			end
 		elseif(msgid == "__fileline") then
+			if(cancelled) then return end
 			local str = base64.dec(message.ReadString() or "")
 			CONTENTS = CONTENTS .. str -- .. "\n"
 			LINEITER = LINEITER + 1
