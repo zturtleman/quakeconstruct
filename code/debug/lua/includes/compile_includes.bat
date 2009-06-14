@@ -8,6 +8,7 @@ luac -o compiled\custom.luc custom.lua
 luac -o compiled\custom_ents.luc custom_ents.lua
 luac -o compiled\custom_games.luc custom_games.lua
 luac -o compiled\downloader.luc downloader.lua
+luac -o compiled\downloader2.luc downloader2.lua
 luac -o compiled\entities.luc entities.lua
 luac -o compiled\enum.luc enum.lua
 luac -o compiled\extensions\init.luc extensions\init.lua

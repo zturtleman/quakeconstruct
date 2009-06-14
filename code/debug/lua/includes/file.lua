@@ -78,11 +78,16 @@ function countFileLines(n,condition)
 	return 0
 end
 
-function fileMD5(n,condition)
-	file = io.open(n, "r")
+function fileMD5(file,condition)
+	local wasStr = false
+	if(type(file) == "string") then
+		file = io.open(file, "r")
+		wasStr = true
+	end
 	if(file != nil) then
 		local dat = ""
 		local lines = 0
+		local current = file:seek()
 		for line in file:lines() do			
 			local c = true
 			if(condition) then
@@ -100,7 +105,11 @@ function fileMD5(n,condition)
 				end
 			end
 		end
-		file:close()
+		if(!wasStr) then 
+			file:seek("set", current) 
+		else
+			file:close()
+		end
 		return MD5(dat)
 	end
 	return ""
