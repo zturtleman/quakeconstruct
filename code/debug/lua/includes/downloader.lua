@@ -83,6 +83,9 @@ if(SERVER) then
 
 	function downloader.add(filename,force)
 		if(filename != nil and type(filename) == "string") then
+			if(!fileExists(filename)) then filename = filename .. ".lua" end
+			if(!fileExists(filename)) then filename = "lua/" .. filename end
+			print(filename .. "\n")
 			if(fileExists(filename)) then
 				local md5sum = fileMD5(filename,function(l,n) return (fixLine(l) != nil) end)
 				local flines = {}--countFileLines(filename,function(l,n) return (fixLine(l) != nil) end)

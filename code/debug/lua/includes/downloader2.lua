@@ -206,6 +206,13 @@ if(SERVER) then
 		if(!table.HasValue(self.queue,file)) then
 			local exist = getFileByName(file,self.queue)
 			if(exist) then
+				if(exist.status != FILE_PENDING) then
+					local msg = self:Message("__queuefile")
+					message.WriteString(msg,base64.enc(file.name))
+					message.WriteShort(msg,#file.lines)
+					SendDataMessage(msg)
+				end
+			
 				exist.status = FILE_PENDING
 				exist.md5 = file.md5
 				exist.lines = file.lines
@@ -363,6 +370,9 @@ if(SERVER) then
 --MAIN
 --****
 	function downloader.add(filename)
+		if(!fileExists(filename)) then filename = filename .. ".lua" end
+		if(!fileExists(filename)) then filename = "lua/" .. filename end
+		print(filename .. "\n")
 		AddFileToQueue(filename)
 	end
 
@@ -542,6 +552,7 @@ if(CLIENT) then
 			else
 				if(frame == nil) then
 					makeFrame()
+					update()
 				end
 				--print("F_SENT_ACCEPT\n")
 				SendString("_downloadaction accept")

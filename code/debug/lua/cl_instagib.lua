@@ -290,7 +290,6 @@ local function HandleMessage(msgid)
 	if(msgid == "igrailfire") then
 		print("GOTS RAIL FIRE\n")
 		fading = false
-		railStart = LevelTime()
 		local rtime = message.ReadShort()
 		local s = message.ReadVector()
 		local e = message.ReadVector()
@@ -299,6 +298,7 @@ local function HandleMessage(msgid)
 		local pl = message.ReadShort()
 		
 		if(pl == LocalPlayer():EntIndex()) then
+			railStart = LevelTime()
 			print(rtime .. "\n")
 			if(railStart != 0 and railEnd != 0) then
 				PlaySound(clicksound)
@@ -313,17 +313,19 @@ local function HandleMessage(msgid)
 		if(pl != nil) then
 			nxtsnd[id] = nxtsnd[id] or 1
 			local snd = LoadCustomSound(pl,"*death" .. nxtsnd[id] .. ".wav")
+			local snd2 = LoadCustomSound(pl,"*gasp.wav")
+			local snd3 = LoadCustomSound(pl,"*pain25_1.wav")
+			local snd4 = LoadCustomSound(pl,"*drown.wav")
 			PlaySound(pl,snd)
+			PlaySound(pl,snd2)
+			PlaySound(pl,snd3)
+			PlaySound(pl,snd4)
 			nxtsnd[id] = nxtsnd[id] + 1
 			if(nxtsnd[id] > 3) then nxtsnd[id] = 1 end
 		end
 	end
 	if(msgid == "igstat") then
 		stats[message.ReadShort()][1] = message.ReadShort()
-	end
-	if(msgid == "igbeam") then
-		print("GOTS BEAM\n")
-		--BeamBounce()
 	end
 end
 hook.add("HandleMessage","cl_instagib",HandleMessage)

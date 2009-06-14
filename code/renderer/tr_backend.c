@@ -581,11 +581,11 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs, qboolean ov
 
 			SetViewportAndScissor();
 
-			/*if(!override) {
+			if(!override) {
 				qglClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
 				qglClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT ); //
-				GL_State( GLS_DEFAULT );
-			}*/
+				//GL_State( GLS_DEFAULT );
+			}
 		}
 	}
 
@@ -723,7 +723,7 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs, qboolean ov
 		qglBindTexture(GL_TEXTURE_2D, rt.texture);
 		
 		qglCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 0, 0, rt.width, rt.height, 0);
-		
+
 		/*if(override) {
 			qglClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
 			qglClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT ); // | GL_COLOR_BUFFER_BIT
