@@ -431,19 +431,6 @@ elseif(CLIENT) then
 		local fn1 = string.Replace(FILENAME,"/",".")
 		--print("^2" .. "lua/downloads/" .. fn1 .. "\n")
 		if(checkMD5("lua/downloads/" .. fn1,md5)) then return true end
-		
-		print("^1finding: ^7" .. fn1 .. "\n")
-		for k in dirtree("lua/downloads") do
-			local len = string.len("lua/downloads")
-			local file = string.sub(k,len+2,string.len(k))
-			if(file == fn1) then
-				print("^2" .. file .. " " .. FILENAME .. "\n")
-				if(checkMD5(k,md5)) then return true end
-				return false
-			else
-				print(file .. "\n")
-			end
-		end
 		return false
 	end
 	

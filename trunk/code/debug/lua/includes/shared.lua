@@ -53,7 +53,7 @@ includex("angles")
 includex("messages")
 includex("netvars")
 --includex("scriptmanager")
-includex("downloader")
+includex("downloader2")
 includex("commands")
 if(CLIENT) then includex("sound") end
 if(CLIENT) then includex("shader") end

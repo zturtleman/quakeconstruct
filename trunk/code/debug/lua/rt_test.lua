@@ -57,19 +57,28 @@ local function riter(s,t)
 end
 
 function d2d()
-	draw.SetColor(1,1,1,.6)
+	draw.SetColor(1,1,1,.3)
 	draw.Rect(0,0,640,480,renderTarget2)
+
+	draw.SetColor(1,1,1,.5)
+	riter(1,renderTarget2)
 	
-	--riter(5,renderTarget2)
+	draw.SetColor(1,1,1,.3)
+	riter(2,renderTarget2)
+	
+	draw.SetColor(1,1,1,.1)
+	riter(3,renderTarget2)
+	
 	--riter(7)
 	--riter(10)
 	
 	
-	draw.Rect(0,0,1,1)
+	--[[draw.Rect(0,0,1,1)
 	draw.Text(0,200,"YO",10,10)
-	draw.Text(0,210,"YO",10,10)
+	draw.Text(0,210,"YO",10,10)]]
 end
 hook.add("Draw2D","test8",d2d)
+
 
 local mdl = LoadModel("*0")
 
@@ -112,10 +121,10 @@ local function draw2D()
 	reftest:SetAngles(ang2)
 	reftest:Scale(Vector(1.5,2,5))
 	
-	reftest:SetColor(1,1,1,.92)
+	--[[reftest:SetColor(1,1,1,.92)
 	reftest:SetShader(renderTarget)
 	reftest:SetPos(org)
-	reftest:Render()
+	reftest:Render()]]
 	
 	--[[reftest:SetPos(org + u/2)
 	reftest:Render()
