@@ -1,6 +1,8 @@
 local inf = LocalPlayer():GetInfo()
 local flash = LoadShader("viewBloodBlend")
 
+render.SetupRenderTarget(1,800,600)
+
 --local skull = LoadModel("models/gibs/skull.md3")
 local skull = inf.headModel
 local skin = inf.headSkin
@@ -34,6 +36,31 @@ local headStartPitch = 0
 local headEndPitch = 0
 local headStartTime = 0
 local headEndTime = 0
+
+local data = 
+[[{
+	//sort nearest
+	//cull disable
+	{
+		blendfunc add
+		map $rendertarget 1
+		alphaGen vertex
+		rgbGen vertex
+		tcMod transform 1 0 0 -1 0 0
+		//tcGen environment
+		//depthFunc equal
+	}
+}]]
+local renderTarget = CreateShader("f",data)
+
+local data =
+[[{
+	{
+		map models/players/sorlag/armored.tga
+		rgbGen lightingDiffuse
+	}
+}]]
+local armored = CreateShader("f",data)
 
 local function draw2D()
 	local y = 0
@@ -93,6 +120,7 @@ local function draw2D()
 		ref2:Render()
 		ref2:Render()
 	end
+	ref:SetShader(armored)
 	ref:SetAngles(angles)
 	ref:Render()
 	
@@ -104,10 +132,17 @@ local function draw2D()
 	refdef.origin = Vector()
 	refdef.angles = Vector()
 	refdef.flags = 1
-	refdef.renderTarget = true
+	refdef.renderTarget = 1
+	refdef.isRenderTarget = true
 	render.RenderScene(refdef)
 end
 hook.add("DrawRT","cl_headtest",draw2D)
+
+local function d2d()
+	draw.SetColor(1,1,1,1)
+	draw.Rect(0,0,640,480,renderTarget)
+end
+hook.add("Draw2D","cl_headtest",d2d)
 
 local function newClientInfo(newinfo)
 	skull = newinfo.headModel

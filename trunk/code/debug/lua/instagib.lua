@@ -37,7 +37,9 @@ local function fullHealth(self)
 end
 
 local function removePickups()
+	print("Removing Entities\n")
 	for k,v in pairs(GetAllEntities()) do --Loop through all the entities
+		print(v:Classname() .. "\n")
 		if(string.find(v:Classname(),"weapon")) then
 			v:Remove() --If an entity's name contains 'weapon', remove it
 		end
@@ -55,6 +57,7 @@ local function removePickups()
 		end
 	end
 end
+removePickups()
 
 local function sendStat(pl,s)
 	local msg = Message()
@@ -233,7 +236,6 @@ hook.add("ShouldDropItem","instagib",function() return false end) --Don't drop i
 hook.add("PlayerKilled","instagib",function(p)  end)
 --Timer(1.5,spawnPlayer,p)
 --Remove pickups and outfit players
-removePickups()
 for k,v in pairs(GetAllPlayers()) do
 	if(!RELOAD) then
 		setupPlayer(v)

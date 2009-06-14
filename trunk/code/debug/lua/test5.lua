@@ -46,6 +46,7 @@ local data =
 		alphaFunc LT128
 		alphaGen oneMinusVertex
 		rgbGen vertex
+		tcMod scale 2 1
 		tcMod scroll .3 -.2
 	}
 	{
@@ -54,7 +55,20 @@ local data =
 		alphaFunc LT128
 		alphaGen oneMinusVertex
 		rgbGen vertex
+		tcMod scale 2 1
 		tcMod scroll -.2 .1
+	}
+}]]
+
+local data2 =
+[[{
+	sort portal
+	{
+		map gfx/misc/dissolve2.tga
+		blendfunc gl_zero gl_one
+		alphaFunc LT128
+		alphaGen oneMinusVertex
+		depthwrite
 	}
 }]]
 local trailfx4 = CreateShader("f",data)
@@ -105,7 +119,7 @@ local function makeTrail(i,cr,cg,cb,ca)
 	local trail = RefEntity()
 	trail:SetType(RT_TRAIL)
 	trail:SetColor(cr or r,cg or g,cb or b,ca or .5)
-	trail:SetRadius(22)
+	trail:SetRadius(4)
 	trail:SetShader(trailfx4)
 	trail:SetTrailLength(56)
 	trail:SetTrailFade(FT_ALPHA)

@@ -318,6 +318,9 @@ qboolean G_CallSpawn( gentity_t *ent ) {
 	for ( item=bg_itemlist+1 ; item->classname ; item++ ) {
 		if ( !strcmp(item->classname, ent->classname) ) {
 			G_SpawnItem( ent, item );
+			qlua_gethook(GetServerLuaState(),"EntityLinked");
+			lua_pushentity(GetServerLuaState(),ent);
+			qlua_pcall(GetServerLuaState(),1,0,qtrue);
 			return qtrue;
 		} else {
 			//G_Printf ("Srch: %s.\n",item->classname);
