@@ -330,6 +330,30 @@ void RE_End2D( void ) {
 	cmd->commandId = RC_END2D;
 }
 
+void RE_GetPixel( int x, int y, int *r, int *g, int *b ) {
+	getPixelCommand_t	*cmd;
+
+	if ( !tr.registered ) {
+		return;
+	}
+	cmd = R_GetCommandBuffer( sizeof( *cmd ) );
+	if ( !cmd ) {
+		return;
+	}
+	cmd->commandId = RC_GETPIXEL;
+	cmd->x = x;
+	cmd->y = y;
+	cmd->r = r;
+	cmd->g = g;
+	cmd->b = b;
+
+	R_IssueRenderCommands( qfalse );
+
+	*r = *cmd->r;
+	*g = *cmd->g;
+	*b = *cmd->b;
+}
+
 
 /*
 =============

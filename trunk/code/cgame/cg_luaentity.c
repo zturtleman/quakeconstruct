@@ -49,6 +49,7 @@ int lua_cggetentitytable(lua_State *L) {
 	luaentity = lua_toentity(L,1);
 	if(luaentity != NULL) {
 		//CG_Printf("ReCalled Table At %i\n",luaentity->luatablecent);
+		lua_cgentitytab(L,luaentity);
 		if(qlua_getstored(L,luaentity->luatablecent)) {
 			return 1;
 		}
@@ -122,6 +123,10 @@ int qlua_getpos(lua_State *L) {
 		return 1;
 	}
 	return 0;
+}
+
+int qlua_getlerppos(lua_State *L) {
+	return qlua_getpos(L);
 }
 
 int qlua_setpos(lua_State *L) {
@@ -521,6 +526,7 @@ static int Entity_equal (lua_State *L)
 
 static const luaL_reg Entity_methods[] = {
   {"GetPos",		qlua_getpos},
+  {"GetLerpPos",	qlua_getlerppos},
   {"SetPos",		qlua_setpos},
   {"GetTrajectory",	qlua_gettrx},
   {"SetTrajectory", qlua_settrx},

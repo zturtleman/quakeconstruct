@@ -101,6 +101,8 @@ void CG_PushCGTab(lua_State *L) {
 	setTableFloat(L,"fov_y",cg.refdef.fov_y);
 	setTableInt(L,"itemPickup", cg.itemPickup);
 	setTableInt(L,"itemPickupTime", cg.itemPickupTime);
+	setTableInt(L,"weaponSelect", cg.weaponSelect);
+	setTableInt(L,"weaponSelectTime", cg.weaponSelectTime);
 	setTableRefDef(L,"refdef",cg.refdef);
 	setTableScores(L);
 

@@ -112,6 +112,7 @@ typedef struct {
 	void (*TakeScreenshot)(int x, int y, int w, int h, char* file, qboolean jpeg);
 	void (*SetupRenderTarget)(int index, int width, int height);
 	void (*ClearImage)(const char* name);
+	void (*GetPixel)(int x, int y, int *r, int *g, int *b);
 } refexport_t;
 
 //

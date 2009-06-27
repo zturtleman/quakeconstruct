@@ -40,6 +40,39 @@ function vAbs(v)
 	return out
 end
 
+function RotateEntity(ent,ang)
+	local f,r,u = ent:GetAxis()
+	
+	r = RotatePointAroundVector(u,r,ang.y)
+	f = CrossProduct(r,u)
+	
+	u = RotatePointAroundVector(r,u,ang.p)
+	f = CrossProduct(r,u)
+	
+	local tu = u
+	r = RotatePointAroundVector(f,r,ang.z)
+	u = RotatePointAroundVector(f,tu,ang.z)
+	
+	ent:SetAxis(f,r,u)
+end
+
+function RotatePointAroundAxis(f,r,u,vec,ang)
+	r = RotatePointAroundVector(u,r,ang.y)
+	f = CrossProduct(r,u)
+	
+	u = RotatePointAroundVector(r,u,ang.p)
+	f = CrossProduct(r,u)
+	
+	local tu = u
+	r = RotatePointAroundVector(f,r,ang.z)
+	u = RotatePointAroundVector(f,tu,ang.z)
+	
+	vec = vec * f
+	vec = vec * r
+	vec = vec * u
+	return vec
+end
+
 if(CLIENT) then
 	local w,h = 320,240
 	function VectorToScreen(vec,pos,ang,in_fov)

@@ -39,6 +39,7 @@ function AnimationT:Animate()
 	--print("Animate\n")
 	if(self.playing != true) then return end
 	--print("Is Playing\n")
+	if(self.frameTime == nil) then return end
 	if(LevelTime() > self.frameTime) then
 		--print("New Frame\n")
 		self.oldFrameTime = self.frameTime
@@ -61,7 +62,7 @@ function AnimationT:Animate()
 			elseif(self.act == ANIM_ACT_STOP) then
 				self.frame = self.endf
 				self.oldframe = self.endf
-				self:Stop()
+				--self:Stop()
 			elseif(self.act == ANIM_ACT_PINGPONG) then
 				self.frame = self.endf
 				self.oldframe = self.endf
@@ -208,7 +209,7 @@ local function fixLegs(tab)
 	return animtab
 end
 
-local function parseAnims(txt)
+function parseAnims(txt)
 	local animtab = {}
 	local list = string.Explode("\n",txt)
 	for k,v in pairs(list) do

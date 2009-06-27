@@ -721,6 +721,33 @@ void R_ScreenShotJPEG_f (void) {
 	}
 } 
 
+void R_GetPixel(int x, int y, int *r, int *g, int *b) {
+	int		*buffer;
+		
+	if(x > glConfig.vidWidth) {
+		x = glConfig.vidWidth;
+	}
+	if(y > glConfig.vidHeight) {
+		y = glConfig.vidHeight;
+	}
+	y = glConfig.vidHeight - y;
+
+	buffer = ri.Hunk_AllocateTempMemory( sizeof(int) * 3 );
+
+	qglReadPixels( x, y, 1, 1, GL_RGB, GL_INT, buffer ); 
+
+	// gamma correct
+	if ( ( tr.overbrightBits > 0 ) && glConfig.deviceSupportsGamma ) {
+		//R_GammaCorrect( buffer, 3 );
+	}
+
+	*r = (buffer[0] >> 23);
+	*g = (buffer[1] >> 23);
+	*b = (buffer[2] >> 23);
+
+	ri.Hunk_FreeTempMemory( buffer );
+}
+
 //============================================================================
 
 /*
@@ -1246,6 +1273,7 @@ refexport_t *GetRefAPI ( int apiVersion, refimport_t *rimp ) {
 	re.TakeScreenshot = R_TakeScreenshot;
 	re.ClearImage = R_ClearImageHash;
 	re.SetupRenderTarget = setupRT;
+	re.GetPixel = RE_GetPixel;
 
 	return &re;
 }
