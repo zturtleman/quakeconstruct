@@ -786,6 +786,7 @@ int			R_LerpTag( orientation_t *tag, qhandle_t handle, int startFrame, int endFr
 void		R_ModelBounds( qhandle_t handle, vec3_t mins, vec3_t maxs );
 
 void		R_Modellist_f (void);
+void		R_GetPixel(int x, int y, int *r, int *g, int *b);
 
 //====================================================
 extern	refimport_t		ri;
@@ -1605,6 +1606,12 @@ typedef struct {
 } drawSurfsCommand_t;
 
 typedef struct {
+	int		commandId;
+	int		x, y;
+	int		*r, *g, *b;
+} getPixelCommand_t;
+
+typedef struct {
 	int commandId;
 	int x;
 	int y;
@@ -1627,6 +1634,7 @@ typedef enum {
 	RC_ENDMASK,
 	RC_BEGIN2D,
 	RC_END2D,
+	RC_GETPIXEL,
 } renderCommand_t;
 
 typedef struct {
@@ -1702,6 +1710,7 @@ void RE_EndMask( void );
 //Coordinate Functions
 void RE_Begin2D( void );
 void RE_End2D( void );
+void RE_GetPixel( int x, int y, int *r, int *g, int *b );
 
 void setupRT( int index, int width, int height );
 

@@ -287,6 +287,10 @@ void	trap_R_SetupRenderTarget( int index, int width, int height ) {
 	syscall( CG_R_SETUPRT, index, width, height );
 }
 
+void	trap_R_GetPixel( int x, int y, int *r, int *g, int *b ) {
+	syscall( CG_R_GETPIXEL, x, y, r, g, b );
+}
+
 qhandle_t trap_R_RegisterModel( const char *name ) {
 	int load = syscall( CG_R_REGISTERMODEL, name );
 	lua_State *L = GetClientLuaState();

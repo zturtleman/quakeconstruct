@@ -1353,6 +1353,16 @@ const void *RB_EndMask( const void *data ) {
 	return (const void *)(cmd + 1);
 }
 
+const void *RB_GetPixel( const void *data ) {
+	const getPixelCommand_t *cmd;
+
+	cmd = (const getPixelCommand_t *)data;
+
+	R_GetPixel(cmd->x, cmd->y, cmd->r, cmd->g, cmd->b);
+
+	return (const void *)(cmd + 1);
+}
+
 const void *RB_Advance( const void *data ) {
 	const voidCommand_t *cmd;
 	cmd = (const voidCommand_t *)data;
@@ -1424,6 +1434,9 @@ void RB_ExecuteRenderCommands( const void *data ) {
 				//cmd2D = qfalse;
 			//}
 			data = RB_Advance(data);
+			break;
+		case RC_GETPIXEL:
+			data = RB_GetPixel(data);
 			break;
 		case RC_END_OF_LIST:
 		default:

@@ -183,6 +183,64 @@ int qlua_rgetaxis(lua_State *L) {
 	return 0;
 }
 
+int qlua_rsetaxis(lua_State *L) {
+	refEntity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TUSERDATA);
+	luaL_checktype(L,3,LUA_TUSERDATA);
+	luaL_checktype(L,4,LUA_TUSERDATA);
+
+	if(IsVector(L,2) && IsVector(L,3) && IsVector(L,4)) {
+		luaentity = lua_torefentity(L,1);
+		if(luaentity != NULL) {
+			lua_tovector(L,2,luaentity->axis[0]);
+			lua_tovector(L,3,luaentity->axis[1]);
+			lua_tovector(L,4,luaentity->axis[2]);
+		}
+	}
+	return 0;
+}
+
+int qlua_rrotatearound(lua_State *L) {
+	refEntity_t	*luaentity;
+	vec3_t axis[3];
+	vec3_t ang;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	if(!lua_type(L,2) == LUA_TVECTOR) return 0;
+	if(!IsVector(L,2)) return 0;
+
+	luaentity = lua_torefentity(L,1);
+	if(luaentity != NULL) {
+		lua_tovector(L,2,ang);
+		VectorCopy(luaentity->axis[2],axis[0]);
+		VectorCopy(luaentity->axis[0],axis[1]);
+		VectorCopy(luaentity->axis[1],axis[2]);
+		RotateAroundDirection(axis,ang[0]);
+		VectorCopy(axis[0],luaentity->axis[2]);
+		VectorCopy(axis[1],luaentity->axis[0]);
+		VectorCopy(axis[2],luaentity->axis[1]);
+
+		/*VectorCopy(luaentity->axis[0],axis[0]);
+		VectorCopy(luaentity->axis[1],axis[1]);
+		VectorCopy(luaentity->axis[2],axis[2]);
+		RotateAroundDirection(axis,ang[2]);
+		VectorCopy(axis[0],luaentity->axis[0]);
+		VectorCopy(axis[1],luaentity->axis[1]);
+		VectorCopy(axis[2],luaentity->axis[2]);
+
+		VectorCopy(luaentity->axis[1],axis[0]);
+		VectorCopy(luaentity->axis[2],axis[1]);
+		VectorCopy(luaentity->axis[0],axis[2]);
+		RotateAroundDirection(axis,ang[1]);
+		VectorCopy(axis[0],luaentity->axis[1]);
+		VectorCopy(axis[1],luaentity->axis[2]);
+		VectorCopy(axis[2],luaentity->axis[0]);*/
+	}
+	return 0;
+}
+
 int qlua_rsetangles(lua_State *L) {
 	refEntity_t	*luaentity;
 	vec3_t angles;
@@ -689,6 +747,8 @@ static const luaL_reg REntity_methods[] = {
   {"GetPos2",			qlua_rgetpos2},
   {"SetPos2",			qlua_rsetpos2},
   {"GetAxis",			qlua_rgetaxis},
+  {"SetAxis",			qlua_rsetaxis},
+  {"RotateAroundAxis",	qlua_rrotatearound},
   {"GetAngles",			qlua_rgetangles},
   {"SetAngles",			qlua_rsetangles},
   {"SetShader",			qlua_rsetshader},

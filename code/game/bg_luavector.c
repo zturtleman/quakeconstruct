@@ -392,6 +392,15 @@ int qlua_DotProduct(lua_State *L) {
 	return 1;
 }
 
+int qlua_CrossProduct(lua_State *L) {
+	vec3_t a,b,c;
+	lua_tovector(L,1,a);
+	lua_tovector(L,2,b);
+	CrossProduct(a,b,c);
+	lua_pushvector(L,c);
+	return 1;
+}
+
 int qlua_ByteToDir(lua_State *L) {
 	vec3_t dir;
 	luaL_checkint(L,1);
@@ -472,6 +481,19 @@ int qlua_vspline(lua_State *L) {
 	return 1;
 }
 
+int qlua_vrotate(lua_State *L) {
+	vec3_t dst,dir,point;
+	float deg = 0;
+	lua_tovector(L,1,dir);
+	lua_tovector(L,2,point);
+	deg = lua_tonumber(L,3);
+
+	RotatePointAroundVector(dst,dir,point,deg);
+
+	lua_pushvector(L,dst);
+	return 1;
+}
+
 void BG_InitLuaVector(lua_State *L) {
 	lua_register(L,"VectorToAngles",qlua_VectorToAngles);
 	lua_register(L,"VectorNormalize",qlua_VectorNormalize);
@@ -481,9 +503,11 @@ void BG_InitLuaVector(lua_State *L) {
 	lua_register(L,"VectorUp",qlua_VectorUp);
 	lua_register(L,"AngleVectors",qlua_AngleVectors);
 	lua_register(L,"DotProduct",qlua_DotProduct);
+	lua_register(L,"CrossProduct",qlua_CrossProduct);
 	lua_register(L,"ByteToDir",qlua_ByteToDir);
 	lua_register(L,"DirToByte",qlua_DirToByte);
 	lua_register(L,"VectorSpline",qlua_vspline);
+	lua_register(L,"RotatePointAroundVector",qlua_vrotate);
 
 	Vector_register(L);
 }

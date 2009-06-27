@@ -373,6 +373,25 @@ int qlua_text2(lua_State *L) {
 	return 0;
 }
 
+int qlua_getpixel(lua_State *L) {
+	int x,y,r,g,b;
+
+	luaL_checkinteger(L,1);
+	luaL_checkinteger(L,2);
+
+	x = lua_tointeger(L,1);
+	y = lua_tointeger(L,2);
+
+	x *= cgs.screenXScale;
+	y *= cgs.screenYScale;
+
+	trap_R_GetPixel( x, y, &r, &g, &b );
+	lua_pushinteger(L,r);
+	lua_pushinteger(L,g);
+	lua_pushinteger(L,b);
+	return 3;
+}
+
 static const luaL_reg Draw_methods[] = {
   {"SetColor",		qlua_setcolor},
   {"Rect",			qlua_rect},
@@ -388,6 +407,7 @@ static const luaL_reg Draw_methods[] = {
   {"Start3D",		qlua_start3D},
   {"End3D",			qlua_end3D},
   {"Get3DCoord",	qlua_get3DCoord},
+  {"GetPixel",		qlua_getpixel},
   {0,0}
 };
 

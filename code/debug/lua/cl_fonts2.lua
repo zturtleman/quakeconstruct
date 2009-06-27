@@ -1,4 +1,4 @@
-local corporate = LoadFont("gfx/fonts/elbaris.ini")
+local corporate = LoadFont("gfx/fonts/corporate.ini")
 
 local tx = 0
 
