@@ -679,6 +679,8 @@ extern	int		bg_numItems;
 void BG_InitItems(void);
 void BG_AddItem(gitem_t *item);
 gitem_t	*BG_FindItem( const char *pickupName );
+gitem_t *BG_FindItemByClass( const char *pickupName );
+int BG_FindItemIndexByClass( const char *pickupName );
 gitem_t	*BG_FindItemForWeapon( weapon_t weapon );
 gitem_t	*BG_FindItemForPowerup( powerup_t pw );
 gitem_t	*BG_FindItemForHoldable( holdable_t pw );

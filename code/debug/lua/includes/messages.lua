@@ -305,6 +305,10 @@ if(CLIENT) then
 		return 0
 	end
 	
+	function message.StackSize()
+		return #stack
+	end
+	
 	function message.ReadShort()
 		return readData(D_SHORT)
 	end

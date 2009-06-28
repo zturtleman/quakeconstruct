@@ -30,6 +30,17 @@ int additem(lua_State *L) {
 	return 0;
 }
 
+int qlua_finditem(lua_State *L) {
+	const char *str = "";
+	luaL_checkstring(L,1);
+
+	str = lua_tostring(L,1);
+
+	lua_pushinteger(L,BG_FindItemIndexByClass(str));
+	return 1;
+}
+
 void BG_InitLuaMisc(lua_State *L) {
 	//lua_register(L,"AddItem",additem);
+	lua_register(L,"FindItemByClassname",qlua_finditem);
 }

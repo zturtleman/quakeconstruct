@@ -1,5 +1,7 @@
 local META = {}
 local ENTS = {}
+local active = {}
+local FCF = FindCustomFiles
 
 --[[function META:Think() end
 function META:Initialized() end
@@ -34,6 +36,25 @@ function ExecuteEntity(v)
 	table.insert(_CUSTOM,{data=ENT,type="entity"})
 end
 
+function ExecuteEntitySub(v)
+	local class = string.lower(v[2])
+	local current = ENTS[class]
+	if(current != nil) then
+		ENT = {}
+		Execute(v[1])
+		
+		ENTS[class] = table.Inherit( ENT, ENTS[class] )
+		
+		for k,v in pairs(active) do
+			if(active[k]._classname == class) then
+				active[k] = table.Inherit(ENTS[class], active[k])
+			end
+		end
+	else
+		ExecuteEntity(v)
+	end
+end
+
 local function InheritEntities()
 	local finished = false
 	local nl = true
@@ -50,7 +71,7 @@ local function InheritEntities()
 				if(type(base) == "string" and ENTS[base] and base != name) then
 					if(ENTS[base].__inherit == true) then
 						ENTS[name] = table.Inherit( ENTS[name], ENTS[base] )
-						print("^3Entity Inherited: " .. name .. " -> " .. base .. "\n")
+						--print("^3Entity Inherited: " .. name .. " -> " .. base .. "\n")
 						lc = lc + 1
 						v.__inherit = true
 					else
@@ -91,7 +112,7 @@ end
 
 local function SetCallbacks(ent,tab)
 	if(SERVER) then
-		--ent:SetCallback(ENTITY_CALLBACK_THINK,function(ent) metaCall(tab,"Think") end)
+		ent:SetCallback(ENTITY_CALLBACK_THINK,function(ent) metaCall(tab,"Think") end)
 		ent:SetCallback(ENTITY_CALLBACK_DIE,function(ent,a,b,take) metaCall(tab,"Die",a,b,take) end)
 		ent:SetCallback(ENTITY_CALLBACK_PAIN,function(ent,a,b,take) metaCall(tab,"Pain",a,b,take) end)
 		ent:SetCallback(ENTITY_CALLBACK_TOUCH,function(ent,other,trace) metaCall(tab,"Touch",other,trace) end)
@@ -101,7 +122,6 @@ local function SetCallbacks(ent,tab)
 	end
 end
 
-local active = {}
 local function LinkEntity(ent)
 	if(ent == nil) then return end
 	local name = ent:Classname()
@@ -116,12 +136,13 @@ local function LinkEntity(ent)
 		cent.entity = ent
 		cent.Entity = ent --Because I'm like that
 		cent.net = CreateEntityNetworkedTable(ent:EntIndex() or -1)
-		cent.net:Reset()
 		function cent.net:VariableChanged(...)
 			--active[id].net = CreateNetworkedTable(ent:EntIndex() or -1)
 			metaCall(cent,"VariableChanged",unpack(arg))
 		end
-		if(SERVER) then metaCall(cent,"Initialized") end
+		metaCall(cent,"Initialized")
+		metaCall(cent,"Initialize")
+		metaCall(cent,"Init")
 		active[id] = cent
 		SetCallbacks(ent,cent)
 		
@@ -142,6 +163,7 @@ local function UnlinkEntity(ent)
 	if(cent != nil) then
 		metaCall(cent,"Removed")
 	end
+	ClearEntityNetworkedTable(id)
 	active[id] = nil
 	
 	--local str = "Entity Unlinked: " .. ent:Classname() .. "\n"
@@ -149,6 +171,20 @@ local function UnlinkEntity(ent)
 	--print(str)
 end
 hook.add("EntityUnlinked","checkcustom",UnlinkEntity)
+
+local function reloadEnts()
+	--ENTS
+	local list = FCF("lua/entities")
+	for k,v in pairs(list) do
+		ExecuteEntitySub(v)
+	end
+	InheritEntities()
+end
+if(SERVER) then
+	concommand.add("reloadEnts",reloadEnts)
+else
+	concommand.add("reloadEnts_cl",reloadEnts)
+end
 
 if(SERVER) then
 	local function messagetest(...)
@@ -216,29 +252,41 @@ else
 			local name = string.sub(file,strt+1,string.len(file))
 			local ed = string.find(name,".",0,true)
 			
-			print(name .. " " .. ed .. "\n")
+			--print(name .. " " .. ed .. "\n")
 			if(!ed) then return false end
 			name = string.sub(name,0,ed-1)
-			print(name .. "\n")
+			--print(name .. "\n")
 			if(string.len(name) <= 0) then return false end
 			
-			ENT = {}
-			if(ENTS[string.lower(name)] != nil) then
-				print("^1" .. string.lower(name) .. " already loaded.\n")
-				return true
+			local class = string.lower(name)
+			local current = ENTS[class]
+			if(current != nil) then
+				ENT = {}
+				pcall(include,file)
+				
+				ENTS[class] = table.Inherit( ENT, ENTS[class] )
+				
+				for k,v in pairs(active) do
+					if(active[k]._classname == class) then
+						active[k] = table.Inherit(ENTS[class], active[k])
+					end
+				end
+				--print("REPLACED CURRENT: " .. class .. "\n")
+			else
+				ENT = {}
+				
+				setmetatable(ENT,META)
+				META.__index = META
+			
+				pcall(include,file)
+				
+				ENT._classname = string.lower(name)
+				
+				ENTS[ENT._classname] = ENT
+				table.insert(_CUSTOM,{data=ENT,type="entity"})
+				InheritEntities()
 			end
-			
-			setmetatable(ENT,META)
-			META.__index = META
-		
-			pcall(include,file)
-			
-			ENT._classname = string.lower(name)
-			
-			ENTS[ENT._classname] = ENT
-			table.insert(_CUSTOM,{data=ENT,type="entity"})
-			print("Downloaded Entity '" .. file .. "'\n")
-			InheritEntities()
+			--print("Downloaded Entity '" .. file .. "'\n")
 			
 			return true
 		end
