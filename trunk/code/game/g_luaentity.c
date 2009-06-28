@@ -1519,6 +1519,20 @@ int lua_setclip(lua_State *L) {
 	if(luaentity != NULL) {
 		mask = lua_tointeger(L,2);
 		luaentity->clipmask = mask;
+	}
+	return 0;
+}
+
+int lua_setcontents(lua_State *L) {
+	gentity_t	*luaentity;
+	int			mask = 0;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TNUMBER);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		mask = lua_tointeger(L,2);
 		luaentity->r.contents = mask;
 	}
 	return 0;
@@ -1888,6 +1902,7 @@ static const luaL_reg Entity_methods[] = {
   {"SetMaxs",		lua_setmaxs},
   {"SetTakeDamage",	lua_settakedamage},
   {"SetClip",		lua_setclip},
+  {"SetContents",	lua_setcontents},
   {"SetHealth",		lua_sethp},
   {"GetHealth",		lua_gethp},
   {"SetArmor",		lua_setarmor},
@@ -2075,6 +2090,31 @@ int qlua_firemissile(lua_State *L) {
 	return 0;
 }
 
+int qlua_devent(lua_State *L) {
+	gentity_t *ent;
+	int ev = EV_NONE;
+	int param = 0;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TNUMBER);
+
+	ent = lua_toentity(L,1);
+	ev = lua_tointeger(L,2);
+
+	if(ev < EV_NONE || ev > EV_TAUNT_PATROL) {
+		lua_pushstring(L,"Bad event number in AddEvent\n");
+		lua_error(L);
+		return 0;
+	}
+
+	if(lua_type(L,3) == LUA_TNUMBER) {
+		param = lua_tointeger(L,3);
+	}
+
+	G_AddEvent( ent, ev, param);
+	return 0;
+}
+
 void G_InitLuaEnts(lua_State *L) {
 	Entity_register(L);
 	lua_register(L,"CreateTempEntity",qlua_createtentity);
@@ -2084,6 +2124,7 @@ void G_InitLuaEnts(lua_State *L) {
 	lua_register(L,"LinkEntity",qlua_link);
 	lua_register(L,"CreateEntity",qlua_createEntity);
 	lua_register(L,"CreateMissile",qlua_firemissile);
+	lua_register(L,"AddEvent",qlua_devent);
 }
 
 qboolean IsEntity(lua_State *L, int i) {

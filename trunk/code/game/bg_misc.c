@@ -1101,6 +1101,32 @@ gitem_t	*BG_FindItem( const char *pickupName ) {
 	return NULL;
 }
 
+gitem_t	*BG_FindItemByClass( const char *pickupName ) {
+	gitem_t	*it;
+	
+	for ( it = bg_itemlist + 1 ; it->classname ; it++ ) {
+		if ( !Q_stricmp( it->classname, pickupName ) )
+			return it;
+	}
+
+	return NULL;
+}
+
+int	BG_FindItemIndexByClass( const char *pickupName ) {
+	gitem_t	*it;
+	
+	int i=1;
+	for ( it = bg_itemlist + 1 ; it->classname ; it++ ) {
+		if ( !Q_stricmp( it->classname, pickupName ) ) {
+			return i;
+		} else {
+			i++;
+		}
+	}
+
+	return 1;
+}
+
 /*
 ============
 BG_PlayerTouchesItem

@@ -7,6 +7,9 @@ types["number"] = 1
 types["string"] = 1
 types["nil"] = 1
 
+local sendQueue = 0
+local senddelay = 0.02 --Prevent too many messages being sent at once
+
 local blacklist = {
 	"_previous",
 	"_protected",
@@ -41,14 +44,10 @@ if(SERVER) then
 		
 		if(val == nil) then
 			if(new == true) then msg = nil return end
-			message.WriteShort(msg,3)
 			message.WriteShort(msg,self._ids[var] or -1)
 		else
 			if(new) then
-				message.WriteShort(msg,1)
 				message.WriteString(msg,tostring(var))
-			else
-				message.WriteShort(msg,2)
 			end
 			
 			message.WriteShort(msg,self._ids[var] or -1)
@@ -67,13 +66,18 @@ if(SERVER) then
 				message.WriteString(msg,val)
 			end
 		end
-		if(pl == nil) then
-			for k,v in pairs(GetAllPlayers()) do
-				SendDataMessage(msg,v)
+		Timer((senddelay * sendQueue), function()
+			if(pl == nil) then
+				for k,v in pairs(GetAllPlayers()) do
+					SendDataMessage(msg,v)
+				end
+			else
+				SendDataMessage(msg,pl)
 			end
-		else
-			SendDataMessage(msg,pl)
-		end
+			print("SENDVAR\n")
+			sendQueue = sendQueue - 1
+		end)
+		sendQueue = sendQueue + 1
 	end
 	
 	local function variableChanged(self,last,var,val)
@@ -185,7 +189,7 @@ else
 	local function NetVar(msgid)
 		if(msgid == n_msgid) then
 			local tindex = message.ReadShort()
-			local action = message.ReadShort()
+			local first = message.ReadRaw()
 
 			if(_NetTables[tindex] == nil) then
 				_NetTables[tindex] = {}
@@ -199,9 +203,9 @@ else
 			end
 			
 			local mtab = _NetTables[tindex].__mt
-			if(action == 1) then
+			if(type(first) == "string") then
 				debugprint("Got New Variable\n")
-				local var = message.ReadString()
+				local var = first
 				local id = message.ReadShort()
 				local value = message.ReadRaw()
 				var = tonumber(var) or var
@@ -213,9 +217,9 @@ else
 				if(self.VariableChanged != nil) then
 					pcall(self.VariableChanged,self,var,value,nil)
 				end
-			elseif(action == 2) then
+			elseif(type(first) == "number" and message.StackSize() >= 1) then
 				debugprint("Variable Changed\n")
-				local id = message.ReadShort()
+				local id = first
 				local var = tostring(mtab._ids[id])
 				var = tonumber(var) or var
 				local value = message.ReadRaw()
@@ -226,7 +230,7 @@ else
 					pcall(self.VariableChanged,self,var,value,mtab._vars[var])
 				end
 				mtab._vars[var] = value
-			elseif(action == 3) then
+			elseif(type(first) == "number" and message.StackSize() == 0) then
 				debugprint("Variable Cleared\n")
 				local id = message.ReadShort()
 				local var = tostring(mtab._ids[id])				
@@ -274,9 +278,25 @@ function CreateEntityNetworkedTable(index)
 	end
 end
 
+function ClearEntityNetworkedTable(index)
+	if(index > 0) then
+		_NetTables[index + 1024] = nil
+	else
+		error("Bad networked table index: " .. index .. "\n")
+	end
+end
+
 function CreateNetworkedTable(index)
 	if(index <= 1024 and index > 0) then
 		return Internal_CreateNetworkedTable(index)
+	else
+		error("Bad networked table index: " .. index .. "\n")
+	end
+end
+
+function ClearNetworkedTable(index)
+	if(index > 0) then
+		_NetTables[index] = nil
 	else
 		error("Bad networked table index: " .. index .. "\n")
 	end

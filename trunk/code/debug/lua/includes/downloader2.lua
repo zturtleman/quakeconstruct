@@ -464,8 +464,8 @@ if(CLIENT) then
 		return string.Replace(f,"/",".")
 	end
 	
-	local function includeFile()
-		local rez = "lua/downloads/" .. localFile(FILENAME)
+	local function includeFile(name)
+		local rez = "lua/downloads/" .. localFile(name)
 		if(!CallHook("FileDownloaded",rez)) then
 			debugprint("Execute: " .. rez .. "\n")
 			local b,e = pcall(include,rez)
@@ -477,13 +477,13 @@ if(CLIENT) then
 	
 	local function writeToFile()
 		local rez = "lua/downloads/" .. localFile(FILENAME)
-		debugprint("Writing File: '" .. rez .. "'\n")
+		--print("Writing File: '" .. rez .. "'\n")
 		--CONTENTS = string.Replace(CONTENTS,"_NL_","\n")
 		local file = io.open(rez,"w")
 		if(file != nil) then
 			file:write(CONTENTS)
 			file:close()
-			includeFile()
+			includeFile(FILENAME)
 		else
 			debugprint("^1Script Downloader Error (Script Copy): Unable to write file: " .. rez .. "\n")
 		end
@@ -496,6 +496,7 @@ if(CLIENT) then
 			frame = nil
 			flist = nil
 		end
+		--print("FINISHED!\n");
 		if(CONTENTS != "") then writeToFile() end
 		LINECOUNT = 0
 		LINEITER = 0
@@ -568,9 +569,9 @@ if(CLIENT) then
 			end
 		elseif(msgid == "__runfile") then
 			local name = base64.dec(message.ReadString() or "")
-			FILENAME = name
-			print("F_EXECUTE: " .. name .. "\n")
-			includeFile()
+			--FILENAME = name
+			--print("F_EXECUTE: " .. name .. "\n")
+			includeFile(name)
 		end
 	end
 	hook.add("HandleMessage","__downloader.lua",HandleMessage)
