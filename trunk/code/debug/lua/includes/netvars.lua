@@ -277,7 +277,7 @@ function CreateEntityNetworkedTable(index)
 		error("Bad networked table index: " .. index .. "\n")
 	end
 end
-for i=1,100 do
+for i=1,1024 do
 	CreateEntityNetworkedTable(i)
 end
 
