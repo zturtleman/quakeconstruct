@@ -99,7 +99,16 @@ gentity_t *lua_toentity(lua_State *L, int i) {
 	gentity_t	*luaentity;
 	luaL_checktype(L,i,LUA_TUSERDATA);
 	
-	if(luaL_checkudata(L,i,"Entity") == NULL) luaL_typerror(L,i,"Entity");
+	if(lua_type(L,i) == LUA_TTABLE ) {
+		G_Printf("^1Got Table Instead Of Entity, we'll roll with that\n");
+		lua_pushstring(L,"Entity");
+		lua_gettable(L,i);
+		i = lua_gettop(L);
+	}
+
+	if(luaL_checkudata(L,i,"Entity") == NULL) {
+		luaL_typerror(L,i,"Entity");
+	}
 
 	luaentity = (gentity_t *)lua_touserdata(L, i);
 	luaentity = qlua_getrealentity(luaentity);

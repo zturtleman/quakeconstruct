@@ -11,12 +11,7 @@ function ENT:Initialized()
 	self.Entity:SetClip(CONTENTS_SOLID)
 	self.Entity:SetBounce(.7)
 	self.Entity:SetSvFlag(SVF_USE_CURRENT_ORIGIN)
-	
-	Timer(.03,function()
-		self.Entity:SetPos(self.Entity:GetPos() + Vector(0,0,0))
-		self.Entity:SetVelocity(VectorNormalize(VectorRandom())*200)
-		self.Entity:SetTrType(TR_GRAVITY)
-	end)
+	self.Entity:SetTrType(TR_GRAVITY)
 	
 	self.net.fadetime = 1000
 	self:SetType("item_armor_shard")
@@ -49,6 +44,10 @@ end
 
 function ENT:Affect(other)
 	other:SetArmor(other:GetArmor() + 2)
+end
+
+function ENT:SetColor(r,g,b)
+	self.net.color = ColorToLong(r,g,b)
 end
 
 function ENT:Touch(other,trace)

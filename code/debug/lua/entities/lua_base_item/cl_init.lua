@@ -22,6 +22,16 @@ local trailfx1 = CreateShader("f",data)
 
 print("YO!!\n")
 
+function ENT:GetColor(a)
+	a = a or 1
+	local col = self.net.color
+	local r,g,b = 0,.2,.8
+	if(col) then
+		r,g,b = LongToColor(col)
+	end
+	return r,g,b,a
+end
+
 function ENT:PassTrail(trail) 
 	--Pass the trail over to a local entity so the engine can render it out.
 	local trail = self.trail
@@ -63,7 +73,7 @@ function ENT:GetScale()
 		scale = (LevelTime() - self.start) / (fade/2)
 		if(scale > 1) then scale = 1 end
 	else
-		scale = 0
+		scale = 1
 	end
 	
 	if(rem != nil and rem > LevelTime() and fade != nil) then
@@ -82,11 +92,13 @@ function ENT:DrawFadeSprite(pos)
 	flare:SetPos(pos)
 	flare:SetShader(flaretex)
 	
+	local r,g,b,a = self:GetColor()
+	
 	if(scale < 1) then
 		flare:SetRadius(200 * scale*(1-scale))
 		flare:SetColor(scale,scale*.8,scale*.1,1)
 		if(scalet == 0) then
-			flare:SetColor(0,(1-scale)*.2,(1-scale)*.8,1)
+			flare:SetColor((1-scale)*r,(1-scale)*g,(1-scale)*b,1)
 			flare:SetRadius(100 * (scale*(scale)))
 		end
 		flare:Render()
@@ -107,25 +119,43 @@ function ENT:DrawFadeSprite(pos)
 	a = (a * 2) - 1
 	if(a < 0) then a = 0 end
 	
-	flare:SetColor(a,a,a,1)
-	flare:SetRadius(30 * scale)
+	local r,g,b = self:GetColor()
 	
-	flare:Render()	
+	flare:SetColor(r*a,g*a,b*a,1)
+	flare:SetRadius(30 * scale)
+	flare:Render()
+	
+	flare:SetRadius(40 * scale)
+	flare:Render()
 end
 
 function ENT:DrawTrail(pos)
 	if(self.trail == nil) then
+		local r,g,b = self:GetColor()
 		local trail = RefEntity()
 		trail:SetType(RT_TRAIL)
-		trail:SetColor(0,.2,.8,1)
-		trail:SetRadius(4)
+		trail:SetColor(r,g,b,1)
+		trail:SetRadius(2)
 		trail:SetShader(trailfx1)
-		trail:SetTrailLength(56)
+		trail:SetTrailLength(36)
 		trail:SetTrailFade(FT_COLOR)
 		self.trail = trail
 	end
 	self.trail:SetPos(pos)
 	self.trail:Render()
+end
+
+function ENT:DLight(pos)
+	local scale,scalet = self:GetScale()
+	local r,g,b,a = self:GetColor()
+	--r = r + .2
+	--g = g + .2
+	--b = b + .2
+	if(r > 1) then r = 1 end
+	if(g > 1) then g = 1 end
+	if(b > 1) then b = 1 end
+	render.DLight(pos,r,g,b,(50 + math.cos(LevelTime()/200)*10)*scale)
+	render.DLight(pos,1,1,1,(30 + math.cos(LevelTime()/200)*2)*scale)
 end
 
 function ENT:DrawModel()
@@ -153,6 +183,7 @@ function ENT:DrawModel()
 	maxs.z = maxs.z / 2
 	pos = pos + (maxs + mins) * scale
 	
+	self:DLight(pos)
 	self:DrawFadeSprite(pos)
 	self:DrawTrail(pos)
 end
