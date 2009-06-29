@@ -22,6 +22,25 @@ else
 	function META:UserCommand() end
 end]]
 
+local function WriteEntityFunctions(cent) --Write internal entity functions into the meta table, these can be overwritten.
+	for k,v in pairs(_G["Entity"]) do
+		if(type(v) == "function") then
+			if(cent[k] == nil) then
+				cent[k] = function(self,...)
+					local entity = self["Entity"]
+					local b,e = pcall(entity[k],entity,unpack(arg))
+					if(!b) then
+						print("^1Error: [Entity:" .. k .. "] ^2" .. e .. "\n")
+						return nil
+					else
+						return e
+					end
+				end
+			end
+		end
+	end
+end
+
 function ExecuteEntity(v)
 	ENT = {}
 	
@@ -31,6 +50,9 @@ function ExecuteEntity(v)
 	Execute(v[1])
 	
 	ENT._classname = string.lower(v[2])
+	if(!ENT.Base) then
+		WriteEntityFunctions(ENT)
+	end
 	
 	ENTS[ENT._classname] = ENT
 	table.insert(_CUSTOM,{data=ENT,type="entity"})
@@ -128,11 +150,12 @@ local function LinkEntity(ent)
 	local found = FindEntity(name)
 
 	if(found != nil) then
+		local id = ent:EntIndex()
+		if(active[id] != nil) then return active[id] end
 		local cent = {}--table.Copy(found)
 		setmetatable(cent,found)
 		found.__index = found
 		
-		local id = ent:EntIndex()
 		cent.entity = ent
 		cent.Entity = ent --Because I'm like that
 		cent.net = CreateEntityNetworkedTable(ent:EntIndex() or -1)
@@ -146,7 +169,7 @@ local function LinkEntity(ent)
 		active[id] = cent
 		SetCallbacks(ent,cent)
 		
-		
+		return cent
 		--cent.__index = function(self,str) return active[self.Entity:EntIndex()][str] end
 		--cent.__newindex = function(self,str,val) active[self.Entity:EntIndex()][str] = val end
 	end
@@ -204,6 +227,12 @@ if(SERVER) then
 		end
 	end
 	hook.add("ClientReady","checkcustom",ClientReady)
+	
+	function CreateLuaEntity(class)
+		if(ENTS[string.lower(class)] != nil) then
+			return LinkEntity(CreateEntity(string.lower(class)))
+		end
+	end
 else
 	local function DrawEntity(ent,name)
 		local index = ent:EntIndex()
@@ -281,6 +310,9 @@ else
 				pcall(include,file)
 				
 				ENT._classname = string.lower(name)
+				if(!ENT.Base) then
+					WriteEntityFunctions(ENT)
+				end
 				
 				ENTS[ENT._classname] = ENT
 				table.insert(_CUSTOM,{data=ENT,type="entity"})

@@ -21,6 +21,39 @@ function intToBool(i)
 	return true
 end
 
+function ColorToLong(r,g,b,a)
+	if (a == nil) then a = 0 end
+	
+	r = r * 255
+	g = g * 255
+	b = b * 255
+	a = a * 255
+	
+	if(r > 255) then r = 255 end
+	if(g > 255) then g = 255 end
+	if(b > 255) then b = 255 end
+	if(a > 255) then a = 255 end
+	
+	if(r < 0) then r = 0 end
+	if(g < 0) then g = 0 end
+	if(b < 0) then b = 0 end
+	if(a < 0) then a = 0 end
+	
+	local out = 0
+	g = bitShift(g,-8)
+	b = bitShift(b,-16)
+	a = bitShift(a,-24)
+	return gOR(out,r,g,b,a)
+end
+
+function LongToColor(long)
+	local r = gAND(long,255)/255
+	local g = gAND(bitShift(long,8),255)/255
+	local b = gAND(bitShift(long,16),255)/255
+	local a = gAND(bitShift(long,24),255)/255
+	return r,g,b,a
+end
+
 function gOR(...)
 	if(#arg < 2) then return arg[1] or 0 end
 	local v = arg[1]

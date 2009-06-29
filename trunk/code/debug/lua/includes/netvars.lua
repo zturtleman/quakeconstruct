@@ -66,7 +66,7 @@ if(SERVER) then
 				message.WriteString(msg,val)
 			end
 		end
-		Timer((senddelay * sendQueue), function()
+		--Timer((senddelay * sendQueue), function()
 			if(pl == nil) then
 				for k,v in pairs(GetAllPlayers()) do
 					SendDataMessage(msg,v)
@@ -74,10 +74,10 @@ if(SERVER) then
 			else
 				SendDataMessage(msg,pl)
 			end
-			print("SENDVAR\n")
-			sendQueue = sendQueue - 1
-		end)
-		sendQueue = sendQueue + 1
+			--print("SENDVAR\n")
+			--sendQueue = sendQueue - 1
+		--end)
+		--sendQueue = sendQueue + 1
 	end
 	
 	local function variableChanged(self,last,var,val)
@@ -277,10 +277,15 @@ function CreateEntityNetworkedTable(index)
 		error("Bad networked table index: " .. index .. "\n")
 	end
 end
+for i=1,100 do
+	CreateEntityNetworkedTable(i)
+end
 
 function ClearEntityNetworkedTable(index)
 	if(index > 0) then
-		_NetTables[index + 1024] = nil
+		if(_NetTables[index + 1024] != nil) then
+			_NetTables[index + 1024]:Reset()
+		end
 	else
 		error("Bad networked table index: " .. index .. "\n")
 	end
