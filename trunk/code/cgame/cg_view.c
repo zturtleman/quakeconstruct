@@ -611,6 +611,7 @@ Sets cg.refdef view values
 static int CG_CalcViewValues( void ) {
 	playerState_t	*ps;
 	lua_State *L = GetClientLuaState();
+	int out;
 
 	memset( &cg.refdef, 0, sizeof( cg.refdef ) );
 
@@ -681,6 +682,8 @@ static int CG_CalcViewValues( void ) {
 		CG_OffsetFirstPersonView();
 	}
 
+	out = CG_CalcFov();
+
 	// position eye reletive to origin
 	AnglesToAxis( cg.refdefViewAngles, cg.refdef.viewaxis );
 	if(L != NULL) {
@@ -697,7 +700,7 @@ static int CG_CalcViewValues( void ) {
 	}
 
 	// field of view
-	return CG_CalcFov();
+	return out;
 }
 
 

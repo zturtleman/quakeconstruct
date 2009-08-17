@@ -1092,8 +1092,8 @@ void CL_KeyEvent (int key, qboolean down, unsigned time) {
 	if ( down && ( key < 128 || key == K_MOUSE1 ) && ( clc.demoplaying || cls.state == CA_CINEMATIC ) && !cls.keyCatchers) {
 
 		if (Cvar_VariableValue ("com_cameraMode") == 0) {
-			Cvar_Set ("nextdemo","");
-			key = K_ESCAPE;
+			//Cvar_Set ("nextdemo","");
+			//key = K_ESCAPE;
 		}
 	}
 
@@ -1118,9 +1118,10 @@ void CL_KeyEvent (int key, qboolean down, unsigned time) {
 				VM_Call( uivm, UI_SET_ACTIVE_MENU, UIMENU_INGAME );
 			}
 			else {
-				CL_Disconnect_f();
-				S_StopAllSounds();
-				VM_Call( uivm, UI_SET_ACTIVE_MENU, UIMENU_MAIN );
+				VM_Call( uivm, UI_SET_ACTIVE_MENU, UIMENU_INGAME );
+				//CL_Disconnect_f();
+				//S_StopAllSounds();
+				//VM_Call( uivm, UI_SET_ACTIVE_MENU, UIMENU_MAIN );
 			}
 			return;
 		}

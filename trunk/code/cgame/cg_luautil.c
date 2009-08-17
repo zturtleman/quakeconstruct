@@ -473,6 +473,24 @@ int qlua_getclientinfo2(lua_State *L) {
 	return 0;
 }
 
+int qlua_pointcontents(lua_State *L) {
+	vec3_t point;
+	int pass = -1;
+	int contents;
+
+	luaL_checkudata(L,1,"Vector");
+
+	lua_tovector(L,1,point);
+
+	if(lua_type(L,2) == LUA_TNUMBER) {
+		pass = lua_tonumber(L,2);
+	}
+	contents = CG_PointContents(point,pass);
+
+	lua_pushinteger(L,contents);
+	return 1;
+}
+
 static const luaL_reg Util_methods[] = {
   {"GetNumItems",		qlua_numitems},
   {"GetItemIcon",		qlua_getitemicon},
@@ -498,6 +516,7 @@ static const luaL_reg Util_methods[] = {
   {"ClearImage",		qlua_clearimage},
   {"GetScores",			qlua_getscores},
   {"GetClientInfo",		qlua_getclientinfo2},
+  {"GetPointContents",	qlua_pointcontents},
   {0,0}
 };
 

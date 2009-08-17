@@ -474,7 +474,7 @@ vm_t *VM_Create( const char *module, int (*systemCalls)(int *),
 	// never allow dll loading with a demo
 	if ( interpret == VMI_NATIVE ) {
 		if ( Cvar_VariableValue( "fs_restrict" ) ) {
-			interpret = VMI_COMPILED;
+			//interpret = VMI_COMPILED;
 		}
 	}
 
