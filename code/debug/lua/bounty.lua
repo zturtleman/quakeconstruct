@@ -12,7 +12,7 @@ local function makeHP(target,pos,amt)
 		end
 		health:SetColor(.2,1,.2)
 		health:SetType("item_health_small")
-		health:SetVelocity(VectorNormalize(VectorRandom())*100)
+		health:SetVelocity(Vector(0,0,300) + VectorNormalize(VectorRandom())*100)
 		LinkEntity(health.Entity)
 end
 
@@ -30,7 +30,7 @@ local function makeArmor(target,pos,amt)
 		end
 		armor:SetColor(1,.8,.1)
 		armor:SetType("item_armor_shard")
-		armor:SetVelocity(VectorNormalize(VectorRandom())*100)
+		armor:SetVelocity(Vector(0,0,300) + VectorNormalize(VectorRandom())*100)
 		LinkEntity(armor.Entity)
 end
 

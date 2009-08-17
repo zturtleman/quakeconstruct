@@ -196,11 +196,15 @@ or configs will never get loaded from disk!
 
 */
 
-#define	DEMOGAME			"demota"
+#define	DEMOGAME			"demoq3"
 
 // every time a new demo pk3 file is built, this checksum must be updated.
 // the easiest way to get it is to just run the game and see what it spits out
-#define	DEMO_PAK_CHECKSUM	437558517u
+#define	DEMO_PAK_CHECKSUM	2985612116 //437558517u
+#define QC_CONTENT_PAK_CHECKSUM		1732214438
+#define QC_GIBS_PAK_CHECKSUM		3376319979
+#define QC_PRESENTS_PAK_CHECKSUM	222703110
+#define QC_GEOM_PAK_CHECKSUM		148146879
 
 // if this is defined, the executable positively won't work with any paks other
 // than the demo pak, even if productid is present.  This is only used for our
@@ -2882,8 +2886,34 @@ static void FS_SetRestrictions( void ) {
 	for ( path = fs_searchpaths ; path ; path = path->next ) {
 		if ( path->pack ) {
 			// a tiny attempt to keep the checksum from being scannable from the exe
-			if ( (path->pack->checksum ^ 0x02261994u) != (DEMO_PAK_CHECKSUM ^ 0x02261994u) ) {
-				Com_Error( ERR_FATAL, "Corrupted pak0.pk3: %u", path->pack->checksum );
+			//QC_CONTENT_PAK_CHECKSUM
+			if (!strcmp(path->pack->pakBasename, "pak0")) {
+				if ( (path->pack->checksum ^ 0x02261994u) != (DEMO_PAK_CHECKSUM ^ 0x02261994u) ) {
+					Com_Error( ERR_FATAL, "Corrupted pak0.pk3: %u", path->pack->checksum );
+				}
+			}
+			else if (!strcmp(path->pack->pakBasename, "qcContent")) {
+				if ( (path->pack->checksum ^ 0x02261994u) != (QC_CONTENT_PAK_CHECKSUM ^ 0x02261994u) ) {
+					Com_Error( ERR_FATAL, "Corrupted qcContent.pk3: %u", path->pack->checksum );
+				}
+			}
+			else if (!strcmp(path->pack->pakBasename, "qcGibPack")) {
+				if ( (path->pack->checksum ^ 0x02261994u) != (QC_GIBS_PAK_CHECKSUM ^ 0x02261994u) ) {
+					Com_Error( ERR_FATAL, "Corrupted qcGibPack.pk3: %u", path->pack->checksum );
+				}
+			}
+			else if (!strcmp(path->pack->pakBasename, "qcPresents")) {
+				if ( (path->pack->checksum ^ 0x02261994u) != (QC_PRESENTS_PAK_CHECKSUM ^ 0x02261994u) ) {
+					Com_Error( ERR_FATAL, "Corrupted qcPresents.pk3: %u", path->pack->checksum );
+				}
+			}
+			else if (!strcmp(path->pack->pakBasename, "qcGeom")) {
+				if ( (path->pack->checksum ^ 0x02261994u) != (QC_GEOM_PAK_CHECKSUM ^ 0x02261994u) ) {
+					Com_Error( ERR_FATAL, "Corrupted qcGeom.pk3: %u", path->pack->checksum );
+				}
+			} 
+			else {
+				Com_Error( ERR_FATAL, "Add-on paks are NOT allowed in the demo version of Quake3." );
 			}
 		}
 	}
