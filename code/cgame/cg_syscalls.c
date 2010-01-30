@@ -456,6 +456,16 @@ int		trap_R_LerpTag( orientation_t *tag, clipHandle_t mod, int startFrame, int e
 	return syscall( CG_R_LERPTAG, tag, mod, startFrame, endFrame, PASSFLOAT(frac), tagName );
 }
 
+int		trap_R_LerpTriangle( clipHandle_t handle, int surfID, int id, refTri_t *tris, int startFrame, int endFrame, float frac ) {
+	return syscall( CG_R_LERPTRIANGLE, handle, surfID, id, tris, startFrame, endFrame, PASSFLOAT(frac) );
+}
+
+void	trap_R_ModelInfo( clipHandle_t mod, md3Info_t *info ) {
+	syscall( CG_R_MODELINFO, mod, info );
+}
+
+
+
 void	trap_R_RemapShader( const char *oldShader, const char *newShader, const char *timeOffset ) {
 	syscall( CG_R_REMAP_SHADER, oldShader, newShader, timeOffset );
 }

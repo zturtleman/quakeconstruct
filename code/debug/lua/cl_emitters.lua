@@ -64,18 +64,18 @@ local function newParticle1(pos,indir,freeze,parent,len,model)
 	scale = scale or 1
 
 	local mins,maxs = render.ModelBounds(model)
-	local radius = VectorLength(maxs-mins)
+	local radius = 15 --VectorLength(maxs-mins)
 	
 	local pmodel = parent:GetRefEntity():GetModel()
 	local le = LocalEntity()
 	le:SetPos(pos)
 	le:SetRefEntity(ref)
-	le:SetRadius(radius/2)
+	le:SetRadius(radius)
 	le:SetStartTime(LevelTime())
-	le:SetEndTime(LevelTime() + (800))
+	le:SetEndTime(LevelTime() + (400))
 	le:SetType(LE_FRAGMENT)
 	le:SetColor(math.random(160,255)/255,1,1,.8)
-	le:SetEndColor(1,0,0,.5)
+	le:SetEndColor(1,0,0,1)
 	le:SetEndRadius(radius/2)
 	--le:SetTrType(TR_LINEAR)
 	
@@ -83,11 +83,18 @@ local function newParticle1(pos,indir,freeze,parent,len,model)
 		le:SetParent(parent,attach)
 	end
 	
-	le:Emitter(LevelTime(), LevelTime() + len, 45, function(em)
+	le:Emitter(LevelTime(), LevelTime() + len, 10, function(em,t)
 		ref:SetRotation(math.random(360))
 		em:SetRefEntity(ref)
 		if(parent) then
-			em:SetVelocity(parent:GetVelocity()*(math.random(1,100)/100))
+			local pa = parent:GetRefEntity():GetAngles()
+			pa = VectorForward(pa)*-1
+			local pv = pa * math.random(200,400)
+			pv = pv + (VectorRandom()*20)
+			em:SetVelocity(pv*(1-(t*t)))
+			em:SetRadius(radius * (1-(t*t)))
+			em:SetEndRadius(0)
+			--em:SetVelocity(parent:GetVelocity()*(math.random(1,100)/100))
 		end
 		em:SetCallback(LOCALENTITY_CALLBACK_TOUCH,function(le2,tr)
 			--em:Remove()
@@ -111,7 +118,7 @@ local function newParticle(pos,indir,modelList,scale,skins,head)
 	le:SetEndColor(1,0,0,0)
 	le:SetEndRadius(0)
 	--le:SetTrType(TR_LINEAR)
-	le:Emitter(LevelTime(),LevelTime()+1000,100,function(em)
+	le:Emitter(LevelTime(),LevelTime()+1000,0,function(em)
 		local rv = rvel(200)
 		local t = (5800) + math.random(300,1000)
 		if(head) then t = t + 16000 end
@@ -120,6 +127,7 @@ local function newParticle(pos,indir,modelList,scale,skins,head)
 		em:SetAngleVelocity(rvel(600))
 		em:SetEndTime(LevelTime() + t)
 		em:SetBounceFactor(.7)
+		em:SetPos(LocalPlayer():GetPos())
 		
 		local mdl = 0
 		local ref2 = RefEntity()
@@ -137,7 +145,7 @@ local function newParticle(pos,indir,modelList,scale,skins,head)
 		ref2:Scale(Vector(1,1,1)*scale)
 		em:SetRefEntity(ref2)
 		
-		local p3 = newParticle1(pos,Vector(),false,em,t,mdl)
+		local p3 = newParticle1(pos,Vector(),false,em,6000,mdl)
 		
 		em:SetCallback(LOCALENTITY_CALLBACK_TOUCH,function(le2,tr)
 			util.CreateMark(blood[math.random(1,#blood)],tr.endpos,tr.normal,math.random(360),math.random(150,255)/255,1,1,1,math.random(15,35),true,0)
@@ -146,24 +154,28 @@ local function newParticle(pos,indir,modelList,scale,skins,head)
 		end)
 		em:SetCallback(LOCALENTITY_CALLBACK_STOPPED,function(le2)
 			em:SetAngleVelocity(Vector())
-			if(p3 != nil) then 
-				p3:Remove()
-				p3 = nil
-			end
+			--if(p3 != nil) then 
+				--p3:Remove()
+				--p3 = nil
+			--end
 			em:GetTable().stopped = true
 		end)
 		em:SetCallback(LOCALENTITY_CALLBACK_DIE,function(le2)
-			if(p3 != nil) then 
-				p3:Remove()
-				p3 = nil
-			end		
+			--if(p3 != nil) then 
+				--p3:Remove()
+				--p3 = nil
+			--end		
 		end)
+		print("Emitted: " .. id .. "\n")
 		id = id + 1
 	end)
 	if(type(modelList) == "table") then
-		le:Emit(#modelList)
+		print("ModelList == table: #" .. #modelList .. "\n")
+		for i=0, #modelList/2 do
+			le:Emit()	
+		end
 	else
-		le:Emit(1)
+		le:Emit()
 	end
 	le:Remove()
 end
@@ -173,12 +185,14 @@ local function particleTest()
 	local pos = PlayerTrace().endpos
 	local list = getGibModels(entity)
 	local skins = getGibSkins(entity)
+	
 	newParticle(pos + Vector(0,0,30),Vector(0,0,1),list,1.5,skins)
 	
 	local mdl = entity:GetInfo().headModel
 	local skin = entity:GetInfo().headSkin
 		
 	newParticle(pos,Vector(0,0,.8),mdl,1.4,skin,true)
+	
 end
 concommand.add("ptest",particleTest)
 

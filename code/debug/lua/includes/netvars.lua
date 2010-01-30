@@ -277,9 +277,9 @@ function CreateEntityNetworkedTable(index)
 		error("Bad networked table index: " .. index .. "\n")
 	end
 end
-for i=1,1024 do
+--[[for i=1,1024 do
 	CreateEntityNetworkedTable(i)
-end
+end]]
 
 function ClearEntityNetworkedTable(index)
 	if(index > 0) then
@@ -291,8 +291,19 @@ function ClearEntityNetworkedTable(index)
 	end
 end
 
+local function GetNextNetTableIndex()
+	for i=1,1024 do
+		if(_NetTables[i] == nil) then
+			return i
+		end
+	end
+end
+
 function CreateNetworkedTable(index)
 	if(index <= 1024 and index > 0) then
+		if(_NetTables[index] != nil) then
+			error("Networked table is in use, use \"ClearNetworkedTable(id)\" to clear it.\n")
+		end
 		return Internal_CreateNetworkedTable(index)
 	else
 		error("Bad networked table index: " .. index .. "\n")
@@ -300,7 +311,7 @@ function CreateNetworkedTable(index)
 end
 
 function ClearNetworkedTable(index)
-	if(index > 0) then
+	if(index <= 1024 and index > 0) then
 		_NetTables[index] = nil
 	else
 		error("Bad networked table index: " .. index .. "\n")

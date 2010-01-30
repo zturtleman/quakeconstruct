@@ -264,6 +264,7 @@ static void DrawTris (shaderCommands_t *input) {
 
 	qglDisableClientState (GL_COLOR_ARRAY);
 	qglDisableClientState (GL_TEXTURE_COORD_ARRAY);
+	qglDisableClientState (GL_NORMAL_ARRAY);
 
 	qglVertexPointer (3, GL_FLOAT, 16, input->xyz);	// padded for SIMD
 
@@ -954,7 +955,48 @@ static void ComputeTexCoords( shaderStage_t *pStage ) {
 static void RB_IterateStagesGeneric( shaderCommands_t *input )
 {
 	int stage;
+	int loc;
+	GLenum prog;
+	char texname[MAX_QPATH];
+	shaderStage_t *pStage;
 
+	/*if ( input->shader->GLSL ) {
+		prog = getShaderProgram(input->shader->GLSLName);
+		if(prog == -1) return;
+
+		for ( stage = 0; stage < MAX_SHADER_STAGES; stage++ )
+		{
+			pStage = tess.xstages[stage];
+			if(pStage) {
+
+				ComputeColors( pStage );
+				ComputeTexCoords( pStage );
+
+				if ( !setArraysOnce )
+				{
+					qglTexCoordPointer( 2, GL_FLOAT, 0, input->svars.texcoords[0] );
+					qglColorPointer( 4, GL_UNSIGNED_BYTE, 0, input->svars.colors );
+				}
+
+				if(pStage->bundle[0].image) {
+					qglActiveTextureARB(GL_TEXTURE0_ARB + stage);
+					qglBindTexture (GL_TEXTURE_2D, pStage->bundle[0].image[0]->texnum);
+
+					Com_sprintf(texname,sizeof(texname),"texture_%i\n", stage);
+
+					loc = qglGetUniformLocationARB(prog, texname);
+					qglUniform1iARB(loc, stage);
+				}
+			}
+		}
+
+		pStage = tess.xstages[0];
+		GL_State( pStage->stateBits );
+		
+		R_DrawElements( input->numIndexes, input->indexes );
+		return;
+	}*/
+	
 	for ( stage = 0; stage < MAX_SHADER_STAGES; stage++ )
 	{
 		shaderStage_t *pStage = tess.xstages[stage];
@@ -978,6 +1020,7 @@ static void RB_IterateStagesGeneric( shaderCommands_t *input )
 		//
 		if ( pStage->bundle[1].image[0] != 0 )
 		{
+			//Lightmaps and such
 			DrawMultitextured( input, stage );
 		}
 		else
@@ -986,6 +1029,12 @@ static void RB_IterateStagesGeneric( shaderCommands_t *input )
 			{
 				qglTexCoordPointer( 2, GL_FLOAT, 0, input->svars.texcoords[0] );
 			}
+
+			//LOL WTF, I don't need to do this!
+			/*if(pStage->clamp) {
+				qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP );
+				qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );	
+			}*/
 
 			//
 			// set state
@@ -1055,6 +1104,7 @@ void RB_StageIteratorGeneric( void )
 	if ( tess.numPasses > 1 || input->shader->multitextureEnv )
 	{
 		setArraysOnce = qfalse;
+		qglEnableClientState  ( GL_NORMAL_ARRAY );
 		qglDisableClientState (GL_COLOR_ARRAY);
 		qglDisableClientState (GL_TEXTURE_COORD_ARRAY);
 	}
@@ -1067,6 +1117,9 @@ void RB_StageIteratorGeneric( void )
 
 		qglEnableClientState( GL_TEXTURE_COORD_ARRAY);
 		qglTexCoordPointer( 2, GL_FLOAT, 0, tess.svars.texcoords[0] );
+
+		qglEnableClientState( GL_NORMAL_ARRAY );
+		qglNormalPointer (GL_FLOAT, 16, tess.normal);
 	}
 
 	//
@@ -1086,6 +1139,7 @@ void RB_StageIteratorGeneric( void )
 	{
 		qglEnableClientState( GL_TEXTURE_COORD_ARRAY );
 		qglEnableClientState( GL_COLOR_ARRAY );
+		qglEnableClientState( GL_NORMAL_ARRAY );
 	}
 
 	//
@@ -1164,10 +1218,12 @@ void RB_StageIteratorVertexLitTexture( void )
 	//
 	qglEnableClientState( GL_COLOR_ARRAY);
 	qglEnableClientState( GL_TEXTURE_COORD_ARRAY);
+	qglEnableClientState( GL_NORMAL_ARRAY);
 
 	qglColorPointer( 4, GL_UNSIGNED_BYTE, 0, tess.svars.colors );
 	qglTexCoordPointer( 2, GL_FLOAT, 16, tess.texCoords[0][0] );
 	qglVertexPointer (3, GL_FLOAT, 16, input->xyz);
+	qglNormalPointer (GL_FLOAT, 16, input->normal);
 
 	if ( qglLockArraysEXT )
 	{
@@ -1232,6 +1288,7 @@ void RB_StageIteratorLightmappedMultitexture( void ) {
 	//
 	GL_State( GLS_DEFAULT );
 	qglVertexPointer( 3, GL_FLOAT, 16, input->xyz );
+	qglNormalPointer (GL_FLOAT, 16, input->normal);
 
 #ifdef REPLACE_MODE
 	qglDisableClientState( GL_COLOR_ARRAY );
@@ -1350,7 +1407,12 @@ void RB_MaskTessFinish( void ) {
 */
 void RB_EndSurface( qboolean forceDepth ) {
 	shaderCommands_t *input;
+	GLenum			 prog;
+	int				 loc;
 	int i,size;
+	shaderStage_t	stage;
+	image_t			image;
+	char			tex[MAX_QPATH];
 
 	input = &tess;
 
@@ -1408,7 +1470,59 @@ void RB_EndSurface( qboolean forceDepth ) {
 	//
 	// call off to shader specific tess end function
 	//
+
+	if(tess.shader->GLSL) {
+		prog = getShaderProgram(tess.shader->GLSLName);
+		if(prog != -1) {
+			qglUseProgramObjectARB(prog);
+
+			if(qglUniform1fARB) {
+				loc = qglGetUniformLocationARB(prog, "cgtime");
+				qglUniform1fARB(loc, backEnd.refdef.floatTime);
+			}
+
+			if(qglUniform3fvARB) {
+				loc = qglGetUniformLocationARB(prog, "viewPos");
+				qglUniform3fARB(loc, 
+					backEnd.refdef.vieworg[0],
+					backEnd.refdef.vieworg[1],
+					backEnd.refdef.vieworg[2]);
+			}
+
+			if(qglUniform3fvARB) {
+				loc = qglGetUniformLocationARB(prog, "viewNormal");
+				qglUniform3fARB(loc, 
+					backEnd.refdef.viewaxis[0][0],
+					backEnd.refdef.viewaxis[0][1],
+					backEnd.refdef.viewaxis[0][2]);
+			}
+
+			if(qglUniform2fARB) {
+				loc = qglGetUniformLocationARB(prog, "fov");
+				qglUniform2fARB(loc, 
+					backEnd.refdef.fov_x,
+					backEnd.refdef.fov_y);
+			}
+			/*
+			loc = qglGetUniformLocationARB(prog, "texture_0");
+			qglUniform1iARB(loc, 0);
+
+			loc = qglGetUniformLocationARB(prog, "texture_1");
+			qglUniform1iARB(loc, 1);*/
+		}
+	}
+
+	//tess.shader->stages[0]->bundle[0].image
+
 	tess.currentStageIteratorFunc();
+
+	if(tess.shader->GLSL) {
+		revertShaderProgram();
+		qglDisable(GL_TEXTURE0_ARB);
+		qglDisable(GL_TEXTURE1_ARB);
+		qglDisable(GL_TEXTURE2_ARB);
+		qglDisable(GL_TEXTURE3_ARB);
+	}
 
 	//
 	// draw debugging stuff

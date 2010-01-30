@@ -229,8 +229,8 @@ local function d3d()
 		flash:SetModel(inf.flashModel)
 		flash:PositionOnTag(ref,"tag_flash")
 		
-		trail:SetPos(flash:GetPos())
-		trail:Render()
+		--trail:SetPos(flash:GetPos())
+		--trail:Render()
 		
 		if(wpstate == WEAPON_FIRING) then
 			local fv = (lastflpos - flash:GetPos())

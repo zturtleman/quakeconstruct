@@ -181,6 +181,8 @@ int qlua_createmark(lua_State *L) {
 	alpha = lua_tonumber(L,8);
 	radius = lua_tonumber(L,9);
 
+	if(radius <= 0) radius = .01f;
+
 	if(lua_type(L,10) == LUA_TBOOLEAN) {
 		alphafade = lua_toboolean(L,10);
 	}
@@ -455,6 +457,14 @@ int qlua_screenshot(lua_State *L) {
 	return 0;
 }
 
+int qlua_cvar(lua_State *L) {
+	luaL_checktype(L,1,LUA_TSTRING);
+	luaL_checktype(L,2,LUA_TSTRING);
+
+	trap_Cvar_Set(lua_tostring(L,1), lua_tostring(L,2));
+	return 0;
+}
+
 int qlua_getscores(lua_State *L) {
 	trap_SendClientCommand( "score" );
 	return 0;
@@ -517,6 +527,7 @@ static const luaL_reg Util_methods[] = {
   {"GetScores",			qlua_getscores},
   {"GetClientInfo",		qlua_getclientinfo2},
   {"GetPointContents",	qlua_pointcontents},
+  {"SetCvar",			qlua_cvar},
   {0,0}
 };
 

@@ -90,6 +90,14 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define GL_TEXTURE2_ARB                     0x84C2
 #define GL_TEXTURE3_ARB                     0x84C3
 
+#define GL_FRAGMENT_SHADER_ARB				0x8B30
+#define GL_VERTEX_SHADER_ARB				0x8B31
+#define GL_PROGRAM_OBJECT_ARB				0x8B40
+#define GL_SHADER_OBJECT_ARB				0x8B48
+#define GL_OBJECT_TYPE_ARB					0x8B4E
+
+#define GL_INFO_LOG_LENGTH					0x8B84
+
 // NOTE: some Linux platforms would need those prototypes
 #if defined(MACOS_X)
 typedef void (APIENTRY * PFNGLMULTITEXCOORD1DARBPROC) (GLenum target, GLdouble s);
@@ -133,6 +141,31 @@ typedef void (APIENTRY * PFNGLCLIENTACTIVETEXTUREARBPROC) (GLenum target);
 typedef void (APIENTRY * PFNGLMULTITEXCOORD2FARBPROC) (GLenum target, GLfloat s, GLfloat t);
 typedef void (APIENTRY * PFNGLACTIVETEXTUREARBPROC) (GLenum target);
 typedef void (APIENTRY * PFNGLCLIENTACTIVETEXTUREARBPROC) (GLenum target);
+
+typedef GLenum (APIENTRY * PFNGLCREATEPROGRAMOBJECTARBPROC) (void);
+typedef GLenum (APIENTRY * PFNGLCREATESHADEROBJECTARBPROC) (GLenum shader);
+typedef GLenum (APIENTRY * PFNGLCOMPILESHADEROBJECTARBPROC) (GLenum shader);
+typedef void (APIENTRY * PFNGLLINKPROGRAMARBPROC) (GLenum shader);
+typedef void (APIENTRY * PFNGLSHADERSOURCEARBPROC) (GLint shader, int numOfStrings, const char **strings, int *lenOfStrings);
+typedef void (APIENTRY * PFNGLATTACHOBJECTARBPROC) (GLenum obj, GLenum prog);
+typedef void (APIENTRY * PFNGLUSEPROGRAMOBJECTARBPROC) (GLenum prog);
+typedef void ( APIENTRY * PFNGLGETINFOLOGARBPROC)(GLenum obj, GLsizei maxLength, GLsizei *length, char *infoLog);
+typedef GLint ( APIENTRY * PFNGLGETUNIFORMLOCATIONARBPROC )(GLint programObject, const char *name);
+
+typedef  void ( APIENTRY * PFNGLGETSHADERIVPROC )(GLenum prog, GLenum attrib, GLint *v);
+
+typedef void ( APIENTRY * PFNGLUNIFORM1FVARBPROC )(GLint location, GLsizei count, GLfloat *value);
+typedef void ( APIENTRY * PFNGLUNIFORM2FVARBPROC )(GLint location, GLsizei count, GLfloat *value);
+typedef void ( APIENTRY * PFNGLUNIFORM3FVARBPROC )(GLint location, GLsizei count, GLfloat *value);
+typedef void ( APIENTRY * PFNGLUNIFORM4FVARBPROC )(GLint location, GLsizei count, GLfloat *value);
+typedef void ( APIENTRY * PFNGLUNIFORM1FARBPROC )(GLint location, GLfloat v0);
+typedef void ( APIENTRY * PFNGLUNIFORM2FARBPROC )(GLint location, GLfloat v0, GLfloat v1);
+typedef void ( APIENTRY * PFNGLUNIFORM3FARBPROC )(GLint location, GLfloat v0, GLfloat v1, GLfloat v2);
+typedef void ( APIENTRY * PFNGLUNIFORM4FARBPROC )(GLint location, GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3);
+typedef void ( APIENTRY * PFNGLUNIFORM1IARBPROC )(GLint location, GLint v0);
+typedef void ( APIENTRY * PFNGLUNIFORM2IARBPROC )(GLint location, GLint v0, GLint v1);
+typedef void ( APIENTRY * PFNGLUNIFORM3IARBPROC )(GLint location, GLint v0, GLint v1, GLint v2);
+typedef void ( APIENTRY * PFNGLUNIFORM4IARBPROC )(GLint location, GLint v0, GLint v1, GLint v2, GLint v3);
 #endif
 
 /*
@@ -146,6 +179,32 @@ typedef void (APIENTRY * PFNGLCLIENTACTIVETEXTUREARBPROC) (GLenum target);
 
 
 // extensions will be function pointers on all platforms
+
+extern  GLenum ( APIENTRY * qglCreateShaderObjectARB )(GLenum arb);
+extern  GLenum ( APIENTRY * qglCompileShaderARB )(GLenum arb);
+extern  GLenum ( APIENTRY * qglCreateProgramObjectARB )(void);
+extern  void ( APIENTRY * qglLinkProgramARB )(GLenum arb);
+extern  void ( APIENTRY * qglShaderSourceARB )(GLint shader, int numOfStrings, const char **strings, int *lenOfStrings);
+extern  void ( APIENTRY * qglAttachObjectARB )(GLenum obj, GLenum prog);
+extern  void ( APIENTRY * qglUseProgramObjectARB )(GLenum prog);
+extern  void ( APIENTRY * qglGetInfoLogARB)(GLenum obj, GLsizei maxLength, GLsizei *length, char *infoLog);
+extern  GLint ( APIENTRY * qglGetUniformLocationARB )(GLint programObject, const char *name);
+
+extern  void ( APIENTRY * qglGetShaderiv )(GLenum prog, GLenum attrib, GLint *v);
+
+extern  void ( APIENTRY *qglUniform1fvARB )(GLint location, GLsizei count, GLfloat *value);
+extern  void ( APIENTRY *qglUniform2fvARB )(GLint location, GLsizei count, GLfloat *value);
+extern  void ( APIENTRY *qglUniform3fvARB )(GLint location, GLsizei count, GLfloat *value);
+extern  void ( APIENTRY *qglUniform4fvARB )(GLint location, GLsizei count, GLfloat *value);
+extern  void ( APIENTRY *qglUniform1fARB )(GLint location, GLfloat v0);
+extern  void ( APIENTRY *qglUniform2fARB )(GLint location, GLfloat v0, GLfloat v1);
+extern  void ( APIENTRY *qglUniform3fARB )(GLint location, GLfloat v0, GLfloat v1, GLfloat v2);
+extern  void ( APIENTRY *qglUniform4fARB )(GLint location, GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3);
+extern  void ( APIENTRY *qglUniform1iARB )(GLint location, GLint v0);
+extern  void ( APIENTRY *qglUniform2iARB )(GLint location, GLint v0, GLint v1);
+extern  void ( APIENTRY *qglUniform3iARB )(GLint location, GLint v0, GLint v1, GLint v2);
+extern  void ( APIENTRY *qglUniform4iARB )(GLint location, GLint v0, GLint v1, GLint v2, GLint v3);
+
 
 extern	void ( APIENTRY * qglMultiTexCoord2fARB )( GLenum texture, GLfloat s, GLfloat t );
 extern	void ( APIENTRY * qglActiveTextureARB )( GLenum texture );

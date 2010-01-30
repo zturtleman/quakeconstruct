@@ -494,6 +494,20 @@ int qlua_vrotate(lua_State *L) {
 	return 1;
 }
 
+int qlua_vproject(lua_State *L) {
+	vec3_t dst,src,plane;
+
+	luaL_checktype(L,1,LUA_TVECTOR);
+	luaL_checktype(L,2,LUA_TVECTOR);
+	
+	lua_tovector(L,1,src);
+	lua_tovector(L,2,plane);
+
+	ProjectPointOnPlane(dst,src,plane);
+
+	lua_pushvector(L,dst);
+	return 1;
+}
 void BG_InitLuaVector(lua_State *L) {
 	lua_register(L,"VectorToAngles",qlua_VectorToAngles);
 	lua_register(L,"VectorNormalize",qlua_VectorNormalize);
@@ -508,6 +522,7 @@ void BG_InitLuaVector(lua_State *L) {
 	lua_register(L,"DirToByte",qlua_DirToByte);
 	lua_register(L,"VectorSpline",qlua_vspline);
 	lua_register(L,"RotatePointAroundVector",qlua_vrotate);
+	lua_register(L,"ProjectPointOnPlane",qlua_vproject);
 
 	Vector_register(L);
 }

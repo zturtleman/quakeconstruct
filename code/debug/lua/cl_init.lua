@@ -89,7 +89,7 @@ local function ParseDamage()
 	if(attacker != nil) then
 		atkname = attacker:GetInfo().name
 	end
-	CallHook("Damaged",atkname,pos,dmg,death,self,suicide,hp)
+	CallHook("Damaged",atkname,pos,dmg,death,self,suicide,hp,dir,self2:GetPos())
 	CallHook("PlayerDamaged",self2,atkname,pos,dmg,death,self,suicide,hp,id,pos,dir)
 	CallHook("PlayerDamaged2",self2,dmg,death,pos,dir,hp)
 	attacker = attacker or ""

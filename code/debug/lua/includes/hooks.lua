@@ -6,6 +6,8 @@ if(!hook) then
 	hook.reserved = {}
 end
 
+H = {}
+
 HOOKS = {}
 HOOKS.SV = {
 	"ClientShutdownLua",
@@ -35,6 +37,7 @@ HOOKS.SHARED = {
 	"EntityUnLinked",
 	"PlayerMove",
 	"Shutdown",
+	"ScriptLoaded",
 }
 
 HOOKS.CL = {
@@ -76,6 +79,16 @@ function hook.replacehook(tab,event)
 	end
 	hook.sort(event)
 	return false
+end
+
+function hook.removeAllByName(name)
+	for _,e in pairs(hook.events) do
+		for k,v in pairs(e) do
+			if(v.name == name) then 
+				table.remove(e,k)
+			end
+		end
+	end
 end
 
 function hook.remove(event,name)
@@ -180,5 +193,22 @@ function CallHook(event,...)
 	end
 	if(retVal != nil) then return retVal end
 end
+
+hook.add("ScriptLoaded","_scriptloadhooks",function(script)
+	script = string.sub(script,5)
+	script = string.sub(script,0,string.len(script)-4)
+
+	if(H.clear) then
+		hook.removeAllByName(script)
+	end
+	
+	for k,v in pairs(H) do
+		if(type(v) == "function") then
+			hook.add(k,script,v)
+		end
+	end
+	
+	H = {}
+end)
 
 debugprint("^3Hook code loaded.\n")

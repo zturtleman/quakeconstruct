@@ -17,8 +17,8 @@ localEntity_t *qlua_lgetrealentity( int id ) {
 
 		next = le->prev;
 
-		if(zc > 100) {
-			CG_Printf("Searched 100x\n");
+		if(zc > 10) {
+			CG_Printf("Searched 10x\n");
 			return NULL;
 		}
 

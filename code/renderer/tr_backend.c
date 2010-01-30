@@ -27,6 +27,248 @@ backEndState_t	backEnd;
 maskDef_t		maskState;
 qboolean		cmd2D = qfalse;
 
+GLenum			base_glsl_shader;
+
+int currentGLSLShader = 0;
+
+#define	MAX_GLSL_SHADERS	32
+
+GLenum glslShaders[MAX_GLSL_SHADERS];
+GLenum glslShaderFragment[MAX_GLSL_SHADERS];
+GLenum glslShaderVertex[MAX_GLSL_SHADERS];
+char* glslShaderFiles[MAX_GLSL_SHADERS];
+
+
+qboolean loadShaderSource(char *file, char **source) {
+	int		length;
+
+	length = ri.FS_ReadFile( file, (void **)source);
+	if (!*source) {
+		Com_Printf("^1Unable to find \"%s\".\n", file);
+		return qfalse;
+	}
+	//Com_Printf("^2Shader Component %s loaded.\n", file);
+	return qtrue;
+}
+
+void printInfoLog(GLenum obj)
+{
+	int infologLength = 0;
+	int charsWritten  = 0;
+	char *infoLog;
+	qglGetShaderiv(obj, GL_INFO_LOG_LENGTH,&infologLength);
+	if (infologLength > 1)
+	{
+	    infoLog = (char *)malloc(infologLength);
+	    qglGetInfoLogARB(obj, infologLength, &charsWritten, infoLog);
+		Com_Printf("\n^1%s\n",infoLog);
+	    free(infoLog);
+	}else{
+		Com_Printf("^2OK\n");
+	}
+}
+
+char *formatStr(const char *fmt, ...) {
+	char		msg[MAXPRINTMSG];
+	va_list		argptr;
+
+	va_start (argptr,fmt);
+	Q_vsnprintf (msg, sizeof(msg), fmt, argptr);
+	va_end (argptr);
+
+	return msg;
+}
+
+GLenum getShaderProgram(char *file) {
+	int i;
+	char* ffile;
+	for(i=0; i<sizeof(glslShaderFiles)/sizeof(char*); i++) {
+		ffile = glslShaderFiles[i];
+		if(ffile) {
+			if(!Q_stricmp(ffile,file)) {
+				return glslShaders[i];
+			}
+		}
+	}
+	return -1;
+}
+
+void useShaderProgram(char *file) {
+	GLenum sh = getShaderProgram(file);
+	if(sh != -1) {
+		qglUseProgramObjectARB(sh);
+	} else {
+		Com_Printf("^1Couldn't use: %i [%s]\n",sh,file);
+	}
+}
+
+void revertShaderProgram( void ) {
+	qglUseProgramObjectARB(base_glsl_shader);
+}
+
+qboolean getShaderForFile(char *file, GLenum *prog, GLenum *fragment, GLenum *vertex) {
+	int i;
+	char* ffile;
+	for(i=0; i<sizeof(glslShaderFiles)/sizeof(char*); i++) {
+		ffile = glslShaderFiles[i];
+		if(ffile) {
+			if(!Q_stricmp(ffile,file)) {
+				*prog = glslShaders[i];
+				*fragment = glslShaderFragment[i];
+				*vertex = glslShaderVertex[i];
+				return qtrue;
+			}
+		}
+	}
+	return qfalse;
+}
+
+void reloadShader(char *file, GLenum program, GLenum fragment, GLenum vertex) {
+	char *vertSource;
+	char *fragSource;
+
+	if(!loadShaderSource(formatStr("%s.%s",file,"frag"), &fragSource)) return;
+	if(!loadShaderSource(formatStr("%s.%s",file,"vert"), &vertSource)) return;
+
+	qglShaderSourceARB(vertex, 1, &vertSource, NULL);
+	qglShaderSourceARB(fragment, 1, &fragSource, NULL);
+
+	qglCompileShaderARB(vertex);
+	qglCompileShaderARB(fragment);
+
+	qglAttachObjectARB(program, vertex);
+	qglAttachObjectARB(program, fragment);
+
+	qglLinkProgramARB(program);
+
+	//qglUseProgramObjectARB(program);
+
+	if(qglGetInfoLogARB && qglGetShaderiv) {
+		Com_Printf("-%s.vert: ", file);
+		printInfoLog(vertex);
+		Com_Printf("-%s.frag: ", file);
+		printInfoLog(fragment);
+	}
+	Com_Printf("^2Reloaded Shader: %s\n", file);
+}
+
+GLenum loadShader(char *file) {
+	GLenum program;
+	GLenum my_vertex_shader;
+	GLenum my_fragment_shader;
+	char *vertSource;
+	char *fragSource;
+	char filename[MAX_QPATH];
+	int fsize;
+
+	if(getShaderForFile(file,&program,&my_fragment_shader,&my_vertex_shader)) {
+		reloadShader(file,program,my_fragment_shader,my_vertex_shader);
+		return program;
+	}
+
+	if(currentGLSLShader >= MAX_GLSL_SHADERS) {
+		Com_Printf("MAX_GLSL_SHADERS Exceeded > %i\n",MAX_GLSL_SHADERS);
+	}
+
+	if(!loadShaderSource(formatStr("%s.%s",file,"frag"), &fragSource)) return -1;
+	if(!loadShaderSource(formatStr("%s.%s",file,"vert"), &vertSource)) return -1;
+
+	// Create Shader And Program Objects
+	program = qglCreateProgramObjectARB();
+	my_vertex_shader = qglCreateShaderObjectARB(GL_VERTEX_SHADER_ARB);
+	my_fragment_shader = qglCreateShaderObjectARB(GL_FRAGMENT_SHADER_ARB);
+
+	// Load Shader Sources
+	qglShaderSourceARB(my_vertex_shader, 1, &vertSource, NULL);
+	qglShaderSourceARB(my_fragment_shader, 1, &fragSource, NULL);
+
+	// Compile The Shaders
+	qglCompileShaderARB(my_vertex_shader);
+	qglCompileShaderARB(my_fragment_shader);
+
+	// Attach The Shader Objects To The Program Object
+	qglAttachObjectARB(program, my_vertex_shader);
+	qglAttachObjectARB(program, my_fragment_shader);
+
+	// Link The Program Object
+	qglLinkProgramARB(program);
+
+	// Use The Program Object Instead Of Fixed Function OpenGL
+	// qglUseProgramObjectARB(program);
+
+	if(qglGetInfoLogARB && qglGetShaderiv) {
+		Com_Printf("-%s.vert: ",file);
+		printInfoLog(my_vertex_shader);
+		Com_Printf("-%s.frag: ",file);
+		printInfoLog(my_fragment_shader);
+	}
+
+	glslShaders[currentGLSLShader] = program;
+	glslShaderFragment[currentGLSLShader] = my_fragment_shader;
+	glslShaderVertex[currentGLSLShader] = my_vertex_shader;
+
+	Q_strncpyz(filename, file, sizeof(filename));
+
+	fsize = sizeof(filename);
+	glslShaderFiles[currentGLSLShader] = Z_Malloc(fsize);
+	Com_Memset(glslShaderFiles[currentGLSLShader], 0, fsize);
+	Q_strncpyz(glslShaderFiles[currentGLSLShader], file, fsize);
+
+	currentGLSLShader++;
+	
+	return program;
+}
+
+void loadAllGLSLShaders(void) {
+	char **shaderFiles;
+	int numShaders;
+	int i;
+
+	shaderFiles = ri.FS_ListFiles( "GLSL", ".frag", &numShaders );
+
+	if ( !shaderFiles || !numShaders )
+	{
+		ri.Printf( PRINT_WARNING, "WARNING: no GLSL shader files found\n" );
+		return;
+	}
+
+	if ( numShaders > MAX_GLSL_SHADERS ) {
+		numShaders = MAX_GLSL_SHADERS;
+	}
+
+	Com_Printf("^3LOADING GLSL SHADERS[%i]\n",numShaders);
+
+	for ( i = 0; i < numShaders; i++ )
+	{
+		char filename[MAX_QPATH];
+
+		Com_sprintf( filename, sizeof( filename ), "GLSL/%s", shaderFiles[i] );
+		Q_strncpyz(filename, filename, strlen(filename)-4);
+		if(Q_stricmp(filename,"GLSL/base")) {
+			ri.Printf( PRINT_ALL, "...loading '%s'\n", filename );
+			loadShader(filename);
+		}
+	}
+}
+
+void beginGLSL() {
+	if(!qglCreateProgramObjectARB) {Com_Printf("ARB_ERROR: No qglCreateProgramObjectARB"); return;}
+	if(!qglCreateShaderObjectARB) {Com_Printf("ARB_ERROR: No qglCreateShaderObjectARB"); return;}
+	if(!qglCompileShaderARB) {Com_Printf("ARB_ERROR: No qglCompileShaderARB"); return;}
+	if(!qglLinkProgramARB) {Com_Printf("ARB_ERROR: No qglLinkProgramARB"); return;}
+	if(!qglShaderSourceARB) {Com_Printf("ARB_ERROR: No qglShaderSourceARB"); return;}
+	if(!qglAttachObjectARB) {Com_Printf("ARB_ERROR: No qglCompileShaderARB"); return;}
+	if(!qglUseProgramObjectARB) {Com_Printf("ARB_ERROR: No qglUseProgramObjectARB"); return;}
+
+	//base_glsl_shader = loadShader("GLSL/base");
+	//qglUseProgramObjectARB(base_glsl_shader);
+
+	loadAllGLSLShaders();
+
+	ri.Cmd_AddCommand( "reloadShaders", loadAllGLSLShaders );
+}
+
+
 
 static float	s_flipMatrix[16] = {
 	// convert from our coordinate system (looking down X)
@@ -558,6 +800,7 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs, qboolean ov
 	drawSurf_t		*drawSurf;
 	int				oldSort;
 	float			originalTime;
+	int				loc;
 #ifdef __MACOS__
 	int				macEventTime;
 
@@ -567,6 +810,29 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs, qboolean ov
 	// we are going to check every shader change
 	macEventTime = ri.Milliseconds() + MAC_EVENT_PUMP_MSEC;
 #endif
+
+	if(base_glsl_shader) {
+		if(qglUniform1fARB) {
+			loc = qglGetUniformLocationARB(base_glsl_shader, "cgtime");
+			qglUniform1fARB(loc, backEnd.refdef.floatTime);
+		}
+
+		if(qglUniform3fvARB) {
+			loc = qglGetUniformLocationARB(base_glsl_shader, "viewPos");
+			qglUniform3fARB(loc, 
+				backEnd.refdef.vieworg[0],
+				backEnd.refdef.vieworg[1],
+				backEnd.refdef.vieworg[2]);
+		}
+
+		if(qglUniform3fvARB) {
+			loc = qglGetUniformLocationARB(base_glsl_shader, "viewNormal");
+			qglUniform3fARB(loc, 
+				backEnd.refdef.viewaxis[0][0],
+				backEnd.refdef.viewaxis[0][1],
+				backEnd.refdef.viewaxis[0][2]);
+		}
+	}
 
 	rt.valid = qfalse;
 

@@ -405,8 +405,6 @@ void ( APIENTRY * qglVertex4sv )(const GLshort *v);
 void ( APIENTRY * qglVertexPointer )(GLint size, GLenum type, GLsizei stride, const GLvoid *pointer);
 void ( APIENTRY * qglViewport )(GLint x, GLint y, GLsizei width, GLsizei height);
 
-
-
 static void ( APIENTRY * dllAccum )(GLenum op, GLfloat value);
 static void ( APIENTRY * dllAlphaFunc )(GLenum func, GLclampf ref);
 GLboolean ( APIENTRY * dllAreTexturesResident )(GLsizei n, const GLuint *textures, GLboolean *residences);
@@ -3606,6 +3604,7 @@ qboolean QGL_Init( const char *dllname )
 	qglVertexPointer             = 	dllVertexPointer             = GPA( "glVertexPointer" );
 	qglViewport                  = 	dllViewport                  = GPA( "glViewport" );
 
+
 	qwglCopyContext              = GPA( "wglCopyContext" );
 	qwglCreateContext            = GPA( "wglCreateContext" );
 	qwglCreateLayerContext       = GPA( "wglCreateLayerContext" );
@@ -3630,6 +3629,30 @@ qboolean QGL_Init( const char *dllname )
 	qwglSwapBuffers              = GPA( "wglSwapBuffers" );
 
 	qwglSwapIntervalEXT = 0;
+
+	qglCompileShaderARB = 0;
+	qglCreateProgramObjectARB = 0;
+	qglCreateShaderObjectARB = 0;
+	qglLinkProgramARB = 0;
+	qglShaderSourceARB = 0;
+	qglAttachObjectARB = 0;
+	qglUseProgramObjectARB = 0;
+	qglGetInfoLogARB = 0;
+	qglGetUniformLocationARB = 0;
+	qglGetShaderiv = 0;
+	qglUniform1fvARB = 0;
+	qglUniform2fvARB = 0;
+	qglUniform3fvARB = 0;
+	qglUniform4fvARB = 0;
+	qglUniform1fARB = 0;
+	qglUniform2fARB = 0;
+	qglUniform3fARB = 0;
+	qglUniform4fARB = 0;
+	qglUniform1iARB = 0;
+	qglUniform2iARB = 0;
+	qglUniform3iARB = 0;
+	qglUniform4iARB = 0;
+
 	qglActiveTextureARB = 0;
 	qglClientActiveTextureARB = 0;
 	qglMultiTexCoord2fARB = 0;

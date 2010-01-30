@@ -1080,6 +1080,20 @@ static qboolean ParseStage( shaderStage_t *stage, char **text )
 	return qtrue;
 }
 
+static void ParseGLSL( char **text ) {
+	char	*token;
+	token = COM_ParseExt( text, qfalse );
+
+	if ( token[0] == 0 )
+	{
+		ri.Printf( PRINT_WARNING, "WARNING: missing GLSL parm in shader '%s'\n", shader.name );
+		return;
+	}
+
+	shader.GLSL = qtrue;
+	Q_strncpyz(shader.GLSLName, token, sizeof(shader.GLSLName));
+}
+
 /*
 ===============
 ParseDeform
@@ -1521,6 +1535,10 @@ static qboolean ParseShader( char **text )
 			tr.sunDirection[0] = cos( a ) * cos( b );
 			tr.sunDirection[1] = sin( a ) * cos( b );
 			tr.sunDirection[2] = sin( b );
+		}
+		else if ( !Q_stricmp( token, "GLSL" ) ) {
+			ParseGLSL( text );
+			continue;
 		}
 		else if ( !Q_stricmp( token, "deformVertexes" ) ) {
 			ParseDeform( text );

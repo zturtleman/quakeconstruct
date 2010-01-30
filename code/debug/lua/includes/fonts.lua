@@ -84,7 +84,7 @@ function FontT.__call(self,...)
 	end
 end
 
-function LoadFont(ini)
+function LoadFont(ini,shadefunc)
 	local f = loadINI(ini)
 	if(!f) then f = loadINI(ini .. ".ini") end
 	if(!f) then return nil end
@@ -99,6 +99,15 @@ function LoadFont(ini)
 			alphaGen vertex
 		}
 	}]]
+	if(shadefunc and type(shadefunc) == "function") then
+		local b,e = pcall(shadefunc,texture)
+		if(b) then
+			if(e ~= nil) then
+				data = tostring(e)
+			end
+		end
+	end
+	
 	local tab = string.Explode("\n",f)
 	local shader = CreateShader("f",data)
 	local title = tab[1]

@@ -612,8 +612,13 @@ int CL_CgameSystemCalls( int *args ) {
 	case CG_R_MODELBOUNDS:
 		re.ModelBounds( args[1], VMA(2), VMA(3) );
 		return 0;
+	case CG_R_MODELINFO:
+		re.ModelInfo( args[1], VMA(2) );
+		return 0;
 	case CG_R_LERPTAG:
 		return re.LerpTag( VMA(1), args[2], args[3], args[4], VMF(5), VMA(6) );
+	case CG_R_LERPTRIANGLE:
+		return re.LerpTriangle( args[1], args[2], args[3], VMA(4), args[5], args[6], VMF(7) );
 	case CG_R_BEGINMASK:
 		re.BeginMask( VMF(1), VMF(2), VMF(3), VMF(4) );
 		return 0;

@@ -1277,6 +1277,7 @@ void qlua_pushColor(lua_State *L, vec4_t color);
 void checkColor(vec4_t color, qboolean strict);
 void adjustColor(vec4_t color, float amt);
 void RenderQuad(qhandle_t shader, vec3_t v1, vec3_t v2, vec3_t v3, vec3_t v4, vec4_t color, float s1, float t1, float s2, float t2);
+void RenderTriangle(qhandle_t shader, vec3_t v1, vec3_t v2, vec3_t v3, vec4_t color, float s1, float t1, float s2, float t2, float s3, float t3);
 
 void CG_InitLuaVector(lua_State *L);
 void CG_InitLuaEnts(lua_State *L);
@@ -1718,8 +1719,10 @@ void	trap_R_DrawTransformPic( float x, float y, float w, float h,
 void	trap_R_DrawQuadPic( float x0, float y0, float x1, float y1, float x2, float y2, float x3, float y3, 
 						   float s1, float t1, float s2, float t2, qhandle_t hShader );
 void		trap_R_ModelBounds( clipHandle_t model, vec3_t mins, vec3_t maxs );
+void		trap_R_ModelInfo( clipHandle_t model, md3Info_t *info );
 int			trap_R_LerpTag( orientation_t *tag, clipHandle_t mod, int startFrame, int endFrame, 
 					   float frac, const char *tagName );
+int			trap_R_LerpTriangle( clipHandle_t handle, int surfID, int id, refTri_t *tris, int startFrame, int endFrame, float frac );
 void		trap_R_RemapShader( const char *oldShader, const char *newShader, const char *timeOffset );
 void		trap_R_BeginMask( float x, float y, float w, float h );
 void		trap_R_EndMask( void );
@@ -1827,3 +1830,6 @@ void CG_CalcEntityLerpPositions( centity_t *cent );
 void CG_PlayerAngles( centity_t *cent, vec3_t legs[3], vec3_t torso[3], vec3_t head[3] );
 void CG_PlayerAnimation( centity_t *cent, int *legsOld, int *legs, float *legsBackLerp,
 						int *torsoOld, int *torso, float *torsoBackLerp );
+
+void playReplay( void );
+qboolean replayRunning( void );

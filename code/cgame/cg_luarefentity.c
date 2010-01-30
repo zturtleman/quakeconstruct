@@ -722,6 +722,77 @@ int qlua_rgettrailmaplength(lua_State *L) {
 	return 0;
 }
 
+int qlua_rgetinfo(lua_State *L) {
+	refEntity_t	*luaentity;
+	md3Info_t	info;
+	int			i;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	luaentity = lua_torefentity(L,1);
+	if(luaentity != NULL) {
+		trap_R_ModelInfo(luaentity->hModel, &info);
+		lua_newtable(L);
+		for(i=0; i<info.numSurfaces; i++) {
+			lua_pushinteger(L, i+1);
+			lua_pushinteger(L, info.numTriangles[i]);
+			lua_rawset(L, -3);
+		}
+		return 1;
+	}
+	return 0;
+}
+
+int qlua_rlerptriangle(lua_State *L) {
+	refEntity_t	*luaentity;
+	refTri_t	tris;
+	vec3_t		v1,v2,normal,temp;
+	int			i, x, surfID, id;
+	qboolean	raw = qfalse;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TNUMBER);
+	luaL_checktype(L,3,LUA_TNUMBER);
+
+	luaentity = lua_torefentity(L,1);
+	surfID = lua_tointeger(L,2)-1;
+	if(surfID < 0) return 0;
+
+	id = lua_tointeger(L,3)-1;
+	if(id < 0) return 0;
+
+	if(lua_gettop(L) > 3) raw = lua_toboolean(L,4);
+	if(luaentity != NULL) {
+		if(trap_R_LerpTriangle( luaentity->hModel, surfID, id, &tris, luaentity->oldframe, luaentity->frame, 1.0 - luaentity->backlerp )) {
+			lua_newtable(L);
+			for(i=0; i<3; i++) {
+				lua_pushinteger(L, i+1);
+
+				if(!raw) {
+					VectorCopy(luaentity->origin,temp);
+					for (x=0; x<3; x++ ) {
+						VectorMA( temp, tris.verts[i][x], luaentity->axis[x], temp );
+					}
+					VectorCopy(temp,tris.verts[i]);
+				}
+				lua_pushvector(L, temp);
+				lua_rawset(L, -3);
+			}
+
+			VectorSubtract(tris.verts[1],tris.verts[0],v1);
+			VectorSubtract(tris.verts[2],tris.verts[0],v2);
+			VectorNormalize(v1);
+			VectorNormalize(v2);
+			CrossProduct(v2,v1,normal);
+
+			lua_pushvector(L,normal);
+
+			return 2;
+		}
+	}
+	return 0;
+}
+
 static int Entity_tostring (lua_State *L)
 {
   lua_pushfstring(L, "RefEntity: %p", lua_touserdata(L, 1));
@@ -783,6 +854,8 @@ static const luaL_reg REntity_methods[] = {
   {"SetTrailMapLength",	qlua_rsettrailmaplength},
   {"GetTrailStaticMap", qlua_rgettrailstaticmap},
   {"GetTrailMapLength",	qlua_rgettrailmaplength},
+  {"GetInfo",			qlua_rgetinfo},
+  {"LerpTriangle",		qlua_rlerptriangle},
   {0,0}
 };
 

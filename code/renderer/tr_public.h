@@ -93,6 +93,10 @@ typedef struct {
 
 	int		(*LerpTag)( orientation_t *tag,  qhandle_t model, int startFrame, int endFrame, 
 					 float frac, const char *tagName );
+
+	int		(*LerpTriangle)(qhandle_t handle, int surfID, int id, refTri_t *tris, int startFrame, int endFrame, float frac);
+	int		(*ModelInfo)( qhandle_t model, md3Info_t *info );
+
 	void	(*ModelBounds)( qhandle_t model, vec3_t mins, vec3_t maxs );
 
 #ifdef __USEA3D

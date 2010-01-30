@@ -637,6 +637,7 @@ int R_LerpTag( orientation_t *tag, qhandle_t handle, int startFrame, int endFram
 	model_t		*model;
 
 	model = R_GetModelByHandle( handle );
+
 	if ( !model->md3[0] ) {
 		AxisClear( tag->axis );
 		VectorClear( tag->origin );
@@ -666,6 +667,116 @@ int R_LerpTag( orientation_t *tag, qhandle_t handle, int startFrame, int endFram
 	return qtrue;
 }
 
+static md3Triangle_t *R_GetTriangle( md3Header_t *mod, int surfID, int id, int lod ) {
+	md3Surface_t	*surf;
+	md3Triangle_t	*tri;
+	int				i;
+
+	if(surfID < 0 || surfID > mod->numSurfaces) return NULL;
+
+	surf = (md3Surface_t *) ( (byte *)mod + mod->ofsSurfaces );
+	for ( i = 0 ; i < surfID ; i++) {
+		surf = (md3Surface_t *)( (byte *)surf + surf->ofsEnd );
+	}
+
+	if ( id >= 0 && id < surf->numTriangles ) {
+		tri = (md3Triangle_t *) ( (byte *)surf + surf->ofsTriangles );
+		tri += id;
+		return tri;
+	}
+
+	return NULL;
+}
+
+void R_LerpVertex( int id, md3Surface_t *surf, int startFrame, int endFrame, float frac, vec3_t vert ) {
+	short	*oldXyz, *newXyz;
+	float	oldXyzScale, newXyzScale;
+	float	backlerp;
+
+	backlerp = 1.0f - frac;
+	newXyzScale = MD3_XYZ_SCALE * (1.0 - backlerp);
+	oldXyzScale = MD3_XYZ_SCALE * backlerp;
+
+	if(surf != NULL) {
+		oldXyz = (short *)((byte *)surf + surf->ofsXyzNormals) + (startFrame * surf->numVerts * 4);
+		newXyz = (short *)((byte *)surf + surf->ofsXyzNormals) + (endFrame * surf->numVerts * 4);
+
+		oldXyz += 4 * id;
+		newXyz += 4 * id;
+
+		vert[0] = oldXyz[0] * oldXyzScale + newXyz[0] * newXyzScale;
+		vert[1] = oldXyz[1] * oldXyzScale + newXyz[1] * newXyzScale;
+		vert[2] = oldXyz[2] * oldXyzScale + newXyz[2] * newXyzScale;
+	}
+}
+
+/*
+================
+R_LerpTriangle
+================
+*/
+int R_LerpTriangle( qhandle_t handle, int surfID, int id, refTri_t *tris, int startFrame, int endFrame, float frac ) {
+	model_t			*model;
+	md3Header_t		*mod;
+	md3Surface_t	*surf;
+	md3Triangle_t	*tri;
+	int		i,lod;
+
+	lod = 0;
+
+	model = R_GetModelByHandle( handle );
+	mod = model->md3[lod];
+
+	if ( !mod ) {
+		VectorClear( tris->verts[0] );
+		VectorClear( tris->verts[1] );
+		VectorClear( tris->verts[2] );
+		return qfalse;
+	}
+
+	if ( endFrame >= mod->numFrames ) {
+		endFrame = mod->numFrames - 1;
+	}
+
+	/*if ( startFrame > endFrame ) {
+		return qfalse;
+	}*/
+
+	tri = R_GetTriangle(mod, surfID, id, lod);
+	if(tri == NULL) return qfalse;
+
+
+	surf = (md3Surface_t *) ( (byte *)mod + mod->ofsSurfaces );
+	for ( i = 0 ; i < surfID ; i++) {
+		surf = (md3Surface_t *)( (byte *)surf + surf->ofsEnd );
+	}
+	if(tri->indexes[0] == tri->indexes[1]) return qfalse;
+	if(tri->indexes[0] == tri->indexes[2]) return qfalse;
+	if(tri->indexes[1] == tri->indexes[2]) return qfalse;
+
+	R_LerpVertex(tri->indexes[0], surf, startFrame, endFrame, frac, tris->verts[0]);
+	R_LerpVertex(tri->indexes[1], surf, startFrame, endFrame, frac, tris->verts[1]);
+	R_LerpVertex(tri->indexes[2], surf, startFrame, endFrame, frac, tris->verts[2]);
+	return qtrue;
+}
+
+int R_ModelInfo( qhandle_t handle, md3Info_t *info ) {
+	model_t			*model;
+	md3Header_t		*mod;
+	md3Surface_t	*surf;
+	int i, lod = 0;
+
+	model = R_GetModelByHandle( handle );
+	mod = model->md3[lod];
+
+	surf = (md3Surface_t *) ( (byte *)mod + mod->ofsSurfaces );
+	for ( i = 0 ; i < mod->numSurfaces ; i++) {
+		info->numTriangles[i] = surf->numTriangles;
+		surf = (md3Surface_t *)( (byte *)surf + surf->ofsEnd );
+	}
+	info->numSurfaces = mod->numSurfaces;
+	return 0;
+}
 
 /*
 ====================

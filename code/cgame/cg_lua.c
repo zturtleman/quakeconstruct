@@ -229,6 +229,10 @@ qboolean FS_doScript( const char *filename ) {
 		return qfalse;
 	}
 
+	qlua_gethook(L,"ScriptLoaded");
+	lua_pushstring(L,filename);
+	qlua_pcall(L,1,0,qtrue);
+
 	/*char		text[20000];
 	fileHandle_t	f;
 	int			len;
@@ -407,6 +411,11 @@ void CloseClientLua( void ) {
 	}
 }
 
+int replay(lua_State *L) {
+	playReplay();
+	return 0;
+}
+
 int qclose(lua_State *L) {
 	CloseClientLua();
 	return 0;
@@ -446,6 +455,7 @@ void InitClientLua( void ) {
 	lua_register(L,"_profTable",qprof_tabletest);
 	lua_register(L,"_profArgs",qprof_argtest);
 	lua_register(L,"_profFunc",qprof_functest);
+	lua_register(L,"startReplay",replay);
 
 	CG_Printf("----------------Done-----------------\n");
 	ready = qtrue;
