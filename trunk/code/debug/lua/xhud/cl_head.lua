@@ -8,7 +8,7 @@ local skin = inf.headSkin
 local mins,maxs = render.ModelBounds(head)
 local ref = RefEntity()
 local ref2 = RefEntity()
-local DAMAGE_TIME = 800
+local DAMAGE_TIME = 250
 local headOrigin = Vector()
 
 ref:SetModel(head)
@@ -21,7 +21,7 @@ function positionHead()
 
 	headOrigin.x = 2.5 * ( maxs.x - mins.x);
 	headOrigin.y = 0.5 * ( mins.y + maxs.y );
-	headOrigin.z = -0.5 * ( mins.z + maxs.z );
+	headOrigin.z = -0.35 * ( mins.z + maxs.z );
 end
 
 positionHead()
@@ -43,6 +43,12 @@ local nalpha = 0
 local calpha = 0
 local calpha2 = 0
 local ddir = 0
+local frac_spr_x = Spring(0  ,0,  .2,  .90,  0);
+local frac_spr_y = Spring(180,0,  .25,  .8,   0);
+local frac_spr_z = Spring(0  ,0,  .15,  .89,  0);
+local ldamaget = 0
+local finisheddamage = false
+local turning = 0
 function DrawHead(x,y,ICON_SIZE,hp)
 	local inf = LocalPlayer():GetInfo()
 	local nhead = inf.headModel
@@ -67,15 +73,18 @@ function DrawHead(x,y,ICON_SIZE,hp)
 	local damageY = _CG.damageY
 	local delta = (ltime - damageTime)
 	local angles = Vector()
+	local resetf = false
 	if(delta < DAMAGE_TIME) then
+		finisheddamage = true
+		local hpx = 1-(math.min(math.max(hp/100,.3),1))
 		frac = delta / DAMAGE_TIME
-		size = ICON_SIZE * 1.25 * ( 1.5 - frac * 0.5 );
+		size = ICON_SIZE * 1.25 --* ( 1.5 - frac * 0.5 );
 		
-		stretch = size - ICON_SIZE * 1.25;
-		x = x - stretch * 0.5 + damageX * stretch * 0.5;
-		y = y - stretch * 0.5 + damageX * stretch * 0.5;
+		--stretch = size - ICON_SIZE * 1.25;
+		--x = x - stretch * 0.5 + damageX * stretch * 0.5;
+		--y = y - stretch * 0.5 + damageX * stretch * 0.5;
 		
-		headStartYaw = 180 + damageX * 45;
+		headStartYaw = 180 + (damageX * 45) * hpx;
 		
 		if(damageY > 0) then
 			headStartPitch = -30*(1-frac)
@@ -86,14 +95,21 @@ function DrawHead(x,y,ICON_SIZE,hp)
 		headEndYaw = 180 + 20 * math.cos( math.random()*math.pi );
 		headEndPitch = -10 * math.cos( math.random()*math.pi );
 		
-		print(ddir .. "\n")
+		--print(ddir .. "\n")
+		ddir = damageX * (25) + math.random(-10,10)
+		ddir = 45
 		headStartRoll = ddir*(1-frac)
 		headEndRoll = 0
 
 		headStartTime = ltime;
 		headEndTime = ltime + 100 + math.random() * 2000;
+		if(delta < ldamaget) then
+			print(delta .. " - " .. ldamaget .. "\n")
+			resetf = true
+		end
+		ldamaget = delta
 	else
-		ddir = ((math.random(1,2)*2) - 3) * (math.random(6,10))
+		ddir = damageX * (25) + math.random(-10,10)  --((math.random(1,2)*2) - 3) * (math.random(6,10) * 2.5)
 		if ( ltime >= headEndTime ) then
 			headStartYaw = headEndYaw;
 			headStartPitch = headEndPitch;
@@ -102,7 +118,7 @@ function DrawHead(x,y,ICON_SIZE,hp)
 			
 			headEndTime = ltime + 100 + math.random() * 2000;
 
-			local hpx = (math.min(math.max(hp/100,.1),1))
+			local hpx = 1-(math.min(math.max(hp/100,.1),1))
 			
 			if(deadFrac > 0) then
 				headStartTime = ltime;
@@ -111,8 +127,8 @@ function DrawHead(x,y,ICON_SIZE,hp)
 				headEndTime = headEndTime + (1-hpx)*800
 			end
 			
-			headEndYaw = 180 + (20 * math.cos( math.random()*math.pi ))*hpx;
-			headEndPitch = (5 * math.cos( math.random()*math.pi ))*hpx;
+			headEndYaw = 180 + (40 * math.cos( math.random()*math.pi )) --*hpx;
+			headEndPitch = math.abs(15 * math.cos( math.random()*math.pi )) * (1-hpx) * -1;
 			
 			if(deadFrac > 0) then
 				headEndYaw = 180 + 60 * math.cos( math.random()*math.pi );
@@ -129,11 +145,15 @@ function DrawHead(x,y,ICON_SIZE,hp)
 	
 	frac = ( ltime - headStartTime ) / ( headEndTime - headStartTime );
 	frac = frac * frac * ( 3 - 2 * frac );
+	
 	angles.y = headStartYaw + ( headEndYaw - headStartYaw ) * frac;
 	angles.x = headStartPitch + ( headEndPitch - headStartPitch ) * frac;
 	angles.z = headStartRoll + ( headEndRoll - headStartRoll ) * frac;
 
-	render.CreateScene()
+	if(hp > 0) then
+		local hpx = 1-(math.min(math.max(hp/100,.1),1))
+		angles.z = angles.z + (hpx * 15)
+	end
 	
 	if(hp <= 0) then
 		if(dz > 0) then dz = 1 end
@@ -153,6 +173,50 @@ function DrawHead(x,y,ICON_SIZE,hp)
 		dz = math.random(-1,1)
 		deadFrac = 0
 	end
+	
+	if(hp > 100) then hp = 100 end
+	if(hp > 0) then
+		local hp2 = (1-(hp/200))
+		timex = timex + (CurTime() - lct) * ((hp2) * math.random(20,30)/5)
+		
+		angles.x = angles.x + (1-(hp/100))*30
+
+		angles.x = angles.x + math.cos(timex)*(1-(hp/70))*6
+		angles.z = angles.z + math.sin(timex/3)*(1-(hp/70))*4
+		
+		mvz = math.cos(timex)*(1-(hp/100))*.7
+	end
+	
+	local vang = VectorToAngles(_CG.refdef.forward)
+	vang.x = math.cos((vang.x + 90)/57.3)*-90
+	
+	local delta_turn = getDeltaAngle(turning, vang.y)
+	turning = vang.y
+
+	angles.x = angles.x + vang.x/10
+	angles.y = angles.y + delta_turn/2
+	--if(angles.x > 0) then angles.x = angles.x + 360 end
+	
+	if(resetf) then
+		local hpc = ((100-hp)/100) + .35
+		local dy = angles.y - frac_spr_y.val
+		frac_spr_x.val = frac_spr_x.val + (angles.x * hpc)
+		frac_spr_y.val = frac_spr_y.val + (dy * hpc)
+		frac_spr_z.val = frac_spr_z.val + (angles.z * hpc)
+	end
+	frac_spr_x.ideal = angles.x
+	frac_spr_y.ideal = angles.y
+	frac_spr_z.ideal = angles.z
+	
+	frac_spr_x:Update()
+	frac_spr_y:Update()
+	frac_spr_z:Update()
+	
+	angles.x = frac_spr_x.val
+	angles.y = frac_spr_y.val
+	angles.z = frac_spr_z.val
+	
+	render.CreateScene()
 
 	local hpx = (1-(math.min(math.max(hp/100,0),1)/5)) - 0.3
 	if(hpx < 0) then 
@@ -193,23 +257,16 @@ function DrawHead(x,y,ICON_SIZE,hp)
 	ref2:SetColor(1,.2,.2,calpha2)
 	ref2:SetShader(blood1)
 	ref2:Render()
+	
+	ref2:SetColor(.6,.1,.1,(calpha2*.9)+.1)
+	ref2:SetShader(blood1)
+	ref2:Render()
+	
 	ref2:SetColor(1,1,1,calpha)
 	ref2:SetShader(blood2)
 	ref2:Render()
 	
-	if(hp > 100) then hp = 100 end
-	if(hp > 0) then
-		local hp2 = (1-(hp/200))
-		timex = timex + (CurTime() - lct) * ((hp2) * math.random(20,30)/5)
-		
-		angles.x = angles.x + (1-(hp/100))*30
-
-		angles.x = angles.x + math.cos(timex)*(1-(hp/70))*6
-		angles.z = angles.z + math.sin(timex/3)*(1-(hp/70))*4
-		
-		mvz = math.cos(timex)*(1-(hp/100))*.7
-	end
-	
+	--angles.y = angles.y + 180
 	local forward = VectorForward(angles)
 	
 	local refdef = {}

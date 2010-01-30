@@ -177,8 +177,8 @@ local function draw2D()
 	draw.SetColor(1,1,1,1)
 	
 	DrawAmmo(mx+95+shakex,my+430+shakey,50,50)
-	DrawArmor(mx+450+shakex,my+430+shakey,50,50,armor)
-	DrawHead(mx+275,my+335,145,hp)
+	DrawArmor(mx+250+shakex,my+430+shakey,50,50,armor)
+	DrawHead(mx+395,my+275,200,hp)
 	
 	local col_hp = colors.health_norm
 	local col_ammo = colors.ammo_norm
@@ -196,12 +196,12 @@ local function draw2D()
 	--draw.Text(10,50,"" .. deltaang.x .. " - " .. deltaang.y .. "",10,10)
 	
 	if(_CG.weapon != WP_NONE) then draw.Text(mx+5,my+420,"ammo:",10,10) end
-	draw.Text(mx+200,my+420,"health:",10,10)
-	if(armor > 0) then draw.Text(mx+500,my+420,"armor:",10,10) end
+	--draw.Text(mx+200,my+420,"health:",10,10)
+	if(armor > 0) then draw.Text(mx+300,my+420,"armor:",10,10) end
 	if(_CG.weapon != WP_NONE) then drawNumbers(mx,num_y,20,20,ammo,8,unpack(col_ammo)) end
-	drawNumbers(mx+190,num_y,20,20,hp,8,unpack(col_hp))
+	--drawNumbers(mx+190,num_y,20,20,hp,8,unpack(col_hp))
 	
-	if(armor > 0) then drawNumbers(mx+500,num_y,20,20,armor,8,unpack(col_armor)) end
+	if(armor > 0) then drawNumbers(mx+300,num_y,20,20,armor,8,unpack(col_armor)) end
 end
 hook.add("Draw2D","cl_xhud",draw2D)
 

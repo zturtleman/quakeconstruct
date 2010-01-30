@@ -332,6 +332,10 @@ typedef struct {
 	acff_t			adjustColorsForFog;
 
 	qboolean		isDetail;
+
+	qboolean		isGLSL;
+	//qboolean		clamp;
+	int				GLSLIndex;
 } shaderStage_t;
 
 struct shaderCommands_s;
@@ -413,6 +417,9 @@ typedef struct shader_s {
 	shaderStage_t	*stages[MAX_SHADER_STAGES];		
 
 	void		(*optimalStageIteratorFunc)( void );
+
+	qboolean	GLSL;
+	char		GLSLName[MAX_QPATH];
 
   float clampTime;                                  // time this shader is clamped to
   float timeOffset;                                 // current time offset for this shader
@@ -783,7 +790,9 @@ void		R_ModelInit (void);
 model_t		*R_GetModelByHandle( qhandle_t hModel );
 int			R_LerpTag( orientation_t *tag, qhandle_t handle, int startFrame, int endFrame, 
 					 float frac, const char *tagName );
+int			R_LerpTriangle( qhandle_t handle, int surfID, int id, refTri_t *tris, int startFrame, int endFrame, float frac );
 void		R_ModelBounds( qhandle_t handle, vec3_t mins, vec3_t maxs );
+int			R_ModelInfo( qhandle_t handle, md3Info_t *info );
 
 void		R_Modellist_f (void);
 void		R_GetPixel(int x, int y, int *r, int *g, int *b);
@@ -1713,5 +1722,9 @@ void RE_End2D( void );
 void RE_GetPixel( int x, int y, int *r, int *g, int *b );
 
 void setupRT( int index, int width, int height );
+void beginGLSL( void );
+void useShaderProgram(char *file);
+void revertShaderProgram( void );
+GLenum getShaderProgram(char *file);
 
 #endif //TR_LOCAL_H

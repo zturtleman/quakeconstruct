@@ -148,6 +148,31 @@ int		max_polys;
 cvar_t	*r_maxpolyverts;
 int		max_polyverts;
 
+GLenum ( APIENTRY * qglCreateShaderObjectARB )(GLenum arb);
+GLenum ( APIENTRY * qglCompileShaderARB )(GLenum arb);
+GLenum ( APIENTRY * qglCreateProgramObjectARB )(void);
+void ( APIENTRY * qglLinkProgramARB )(GLenum arb);
+void ( APIENTRY * qglShaderSourceARB )(GLint shader, int numOfStrings, const char **strings, int *lenOfStrings);
+void ( APIENTRY * qglAttachObjectARB )(GLenum obj, GLenum prog);
+void ( APIENTRY * qglUseProgramObjectARB )(GLenum prog);
+void ( APIENTRY * qglGetInfoLogARB)(GLenum obj, GLsizei maxLength, GLsizei *length, char *infoLog);
+void ( APIENTRY * qglGetShaderiv )(GLenum prog, GLenum attrib, GLint *v);
+GLint ( APIENTRY * qglGetUniformLocationARB )(GLint programObject, const char *name);
+
+void ( APIENTRY *qglUniform1fvARB )(GLint location, GLsizei count, GLfloat *value);
+void ( APIENTRY *qglUniform2fvARB )(GLint location, GLsizei count, GLfloat *value);
+void ( APIENTRY *qglUniform3fvARB )(GLint location, GLsizei count, GLfloat *value);
+void ( APIENTRY *qglUniform4fvARB )(GLint location, GLsizei count, GLfloat *value);
+
+void ( APIENTRY *qglUniform1fARB )(GLint location, GLfloat v0);
+void ( APIENTRY *qglUniform2fARB )(GLint location, GLfloat v0, GLfloat v1);
+void ( APIENTRY *qglUniform3fARB )(GLint location, GLfloat v0, GLfloat v1, GLfloat v2);
+void ( APIENTRY *qglUniform4fARB )(GLint location, GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3);
+void ( APIENTRY *qglUniform1iARB )(GLint location, GLint v0);
+void ( APIENTRY *qglUniform2iARB )(GLint location, GLint v0, GLint v1);
+void ( APIENTRY *qglUniform3iARB )(GLint location, GLint v0, GLint v1, GLint v2);
+void ( APIENTRY *qglUniform4iARB )(GLint location, GLint v0, GLint v1, GLint v2, GLint v3);
+
 void ( APIENTRY * qglMultiTexCoord2fARB )( GLenum texture, GLfloat s, GLfloat t );
 void ( APIENTRY * qglActiveTextureARB )( GLenum texture );
 void ( APIENTRY * qglClientActiveTextureARB )( GLenum texture );
@@ -250,6 +275,7 @@ static void InitOpenGL( void )
 	GL_SetDefaultState();
 
 	//initRT();
+	beginGLSL();
 }
 
 /*
@@ -1240,6 +1266,8 @@ refexport_t *GetRefAPI ( int apiVersion, refimport_t *rimp ) {
 
 	re.MarkFragments = R_MarkFragments;
 	re.LerpTag = R_LerpTag;
+	re.LerpTriangle = R_LerpTriangle;
+	re.ModelInfo = R_ModelInfo;
 	re.ModelBounds = R_ModelBounds;
 
 	re.ClearScene = RE_ClearScene;

@@ -1,20 +1,51 @@
+local users = {}
+
+function PlayerUseKeyDown(pl)
+	if(type(pl) == "table") then
+		if(pl.EntIndex == nil) then return false end
+		local id = pl:EntIndex()+1
+		if(id > 0 and id <= #users) then
+			return (users[id] == 1)
+		end
+	elseif(type(pl) == "number") then
+		pl = pl + 1
+		if(pl > 0 and pl <= #users) then
+			return (users[pl] == 1)
+		end
+	end
+	return false
+end
+
 if(SERVER) then
-	local users = {}
+	message.Precache("input_playeruse")
+
+	local function sendUse(index,b)
+		local msg = Message("input_playeruse")
+		message.WriteShort(msg,index)
+		message.WriteShort(msg,b)
+		for k,v in pairs(GetAllPlayers()) do
+			SendDataMessage(msg,v)
+		end
+	end
+	
 	local function think()
 		for k,v in pairs(GetAllPlayers()) do
-			users[v:EntIndex()] = users[v:EntIndex()] or 0
+			local id = v:EntIndex()+1
+			users[id] = users[id] or 0
 			local buttons = bitAnd(v:GetInfo().buttons,32)
 			if(buttons == 32) then
-				if(users[v:EntIndex()] == 0) then
-					print("USE\n")
+				if(users[id] == 0) then
+					print("USE: " .. id .. "\n")
 					CallHook("Use",true,v)
-					users[v:EntIndex()] = 1
+					users[id] = 1
+					sendUse(id,1)
 				end
 			else
-				if(users[v:EntIndex()] == 1) then
-					print("UNUSE\n")
+				if(users[id] == 1) then
+					print("UNUSE: " .. id .. "\n")
 					CallHook("Use",false,v)
-					users[v:EntIndex()] = 0
+					users[id] = 0
+					sendUse(id,0)
 				end
 			end
 		end
@@ -119,4 +150,13 @@ else
 	end
 	concommand.Add("+use",press)
 	concommand.Add("-use",depress)
+	
+	local function NetVar(msgid)
+		if(msgid == "input_playeruse") then
+			local tindex = message.ReadShort()
+			local down = message.ReadShort()
+			users[tindex] = down
+		end
+	end
+	hook.add("HandleMessage","input",NetVar)
 end

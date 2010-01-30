@@ -82,10 +82,10 @@ end
 
 function ProfileFunction(func,...)
 	local tps = ticksPerSecond()
-	local s = ticks() / 1000
+	local s = (ticks() / tps)
 	pcall(func,arg)
-	local e = ticks() / 1000
-	return e - s
+	local e = (ticks() / tps)
+	return (e - s) * 1000
 end
 
 function fixcolorstring(s)

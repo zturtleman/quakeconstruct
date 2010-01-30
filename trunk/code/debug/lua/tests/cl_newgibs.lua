@@ -15,8 +15,30 @@ local gibs = {
 	LoadModel("models/gibs/brain.md3"),
 }
 
-local function trDown(pos)
-	local endpos = vAdd(pos,Vector(0,0,-1000))
+local function makeBloodExplosionShader(i)
+	local data = 
+	[[{
+		nopicmip
+		polygonoffset
+		{
+			map gfx/blood]] .. i .. [[_a.tga
+			rgbGen vertex
+			blendFunc blend
+			alphaGen vertex
+		}
+	}]]
+	return CreateShader("f",data)
+end
+
+local bexplosion = {
+	makeBloodExplosionShader(2),
+	makeBloodExplosionShader(3),
+}
+
+local function trDir(pos,dir,limit)
+	limit = limit or 1000
+	dir = dir or Vector(0,0,-1)
+	local endpos = vAdd(pos,dir*limit)
 	local res = TraceLine(pos,endpos,nil,1)
 	return res
 end
@@ -58,7 +80,7 @@ local localents = {}
 local tgtime = 0
 function newParticle(pos,dir,model,scale,skin,head)
 	--if(!flesh) then return end
-	local ex = 0
+	local ex = 5000
 	if(head) then ex = 60000 end
 	scale = scale or 1
 	local r = RefEntity()
@@ -103,7 +125,7 @@ function newParticle(pos,dir,model,scale,skin,head)
 			end
 		end
 		if(VectorLength(le:GetVelocity()) > 10 or math.random(0,2) == 1) then
-			util.CreateMark(blood[math.random(1,#blood)],tr.endpos,tr.normal,math.random(360),1,1,1,1,math.random(18,25),true,math.random(8000,10000)/50)
+			util.CreateMark(blood[math.random(1,#blood)],tr.endpos,tr.normal,math.random(360),1,1,1,1,math.random(18,25),true,math.random(8000,10000)/30)
 		end
 		if(!le:GetTable().stopped) then
 		local ref = le:GetRefEntity()
@@ -155,7 +177,7 @@ function newParticle(pos,dir,model,scale,skin,head)
 		if(head) then
 			print("LE_STOPPED\n")
 			local ref = le:GetRefEntity()
-			local tr = trDown(le:GetPos())
+			local tr = trDir(le:GetPos())
 			ref:SetAngles(Vector(math.random(-40,40),math.random(-60,60),math.random(-60,60)))
 			ref:Scale(Vector(scale,scale,scale))
 			le:SetRefEntity(ref)
@@ -165,9 +187,29 @@ function newParticle(pos,dir,model,scale,skin,head)
 		end
 	end)
 	
+	if(head) then
+		NG_HEADGIB = le
+	end
+	
 	--local re = le:GetRefEntity()
 	--AddLocalEntity(le);
 	--table.insert(localents,le)
+end
+
+local function makeMark(pos)
+	local res = trDir(pos,nil,100)
+	if(res.hit) then
+		local id = math.random(1,#bexplosion)
+		local tex = bexplosion[id]
+		util.CreateMark(
+			tex,
+			res.endpos,
+			res.normal,
+			math.random(360),
+			.4,0,0,1,
+			math.random(80,120),
+			true,3000)
+	end
 end
 
 local function event(entity,event,pos,dir)
@@ -179,11 +221,12 @@ local function event(entity,event,pos,dir)
 			local mdl = list[i]
 			local skin = skins[i]
 			-- + ((math.random(1,6))/20)
-			newParticle(pos,Vector(0,0,.5),mdl,1.5,skin)
+			newParticle(pos,Vector(0,0,0.75),mdl,1,skin)
 		end
-		local mdl = entity:GetInfo().headModel or skull
-		local skin = entity:GetInfo().headSkin
-		newParticle(pos,Vector(0,0,.8),mdl,1.4,skin,true)]]
+		makeMark(pos)]]
+		--local mdl = entity:GetInfo().headModel or skull
+		--local skin = entity:GetInfo().headSkin
+		--newParticle(pos,Vector(0,0,.8),mdl,1.4,skin,true)
 	end
 	if(event == EV_BULLET_HIT_FLESH) then
 		--newParticle(pos,vMul(entity:GetByteDir(),.2),gibs[5])
@@ -202,6 +245,8 @@ local function event(entity,event,pos,dir)
 		local legs = entity:GetInfo().legsModel or skull
 		local legsskin = entity:GetInfo().legsSkin
 		
+		makeMark(pos)
+		
 		newParticle(pos,Vector(0,0,.8) + vel,mdl,1.4,skin,true)
 		if(math.random(0,1) == 1) then
 			--newParticle(pos+Vector(0,0,20) + vel,Vector(0,0,.2),torso,1,torsoskin,false)
@@ -218,6 +263,7 @@ local function event(entity,event,pos,dir)
 				newParticle(pos,Vector(0,0,.5) + vel,mdl,1.5,skin)
 			end
 		--end
+		--util.CreateMark(bexplosion[math.random(1,#bexplosion)],pos,normal,r,.2,0,0,1,tscale*.7,true,5000)
 		return true
 	end
 end

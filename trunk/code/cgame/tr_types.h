@@ -82,6 +82,15 @@ typedef enum {
 } trailFadeType_t;
 
 typedef struct {
+	vec3_t		verts[3];
+} refTri_t;
+
+typedef struct {
+	int			numTriangles[32];
+	int			numSurfaces;
+} md3Info_t;
+
+typedef struct {
 	refEntityType_t	reType;
 	trailFadeType_t tfade;
 	int			renderfx;

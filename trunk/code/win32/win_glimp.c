@@ -1020,6 +1020,78 @@ static void GLW_InitExtensions( void )
 		ri.Printf( PRINT_ALL, "...WGL_EXT_swap_control not found\n" );
 	}
 
+	qglCompileShaderARB = NULL;
+	qglCreateProgramObjectARB = NULL;
+	qglCreateShaderObjectARB = NULL;
+	qglLinkProgramARB = NULL;
+	qglShaderSourceARB = NULL;
+	qglAttachObjectARB = NULL;
+	qglUseProgramObjectARB = NULL;
+	qglGetShaderiv = NULL;
+	qglGetUniformLocationARB = NULL;
+	qglUniform1fvARB = NULL;
+	qglUniform2fvARB = NULL;
+	qglUniform3fvARB = NULL;
+	qglUniform4fvARB = NULL;
+	qglUniform1fARB = NULL;
+	qglUniform2fARB = NULL;
+	qglUniform3fARB = NULL;
+	qglUniform4fARB = NULL;
+	qglUniform1iARB = NULL;
+	qglUniform2iARB = NULL;
+	qglUniform3iARB = NULL;
+	qglUniform4iARB = NULL;
+	if ( strstr( glConfig.extensions_string, "GL_ARB_vertex_program" )  )
+	{
+		qglCreateProgramObjectARB = ( PFNGLCREATEPROGRAMOBJECTARBPROC ) qwglGetProcAddress( "glCreateProgramObjectARB" );
+		qglCreateShaderObjectARB = ( PFNGLCREATESHADEROBJECTARBPROC ) qwglGetProcAddress( "glCreateShaderObjectARB" );
+		qglCompileShaderARB = ( PFNGLCOMPILESHADEROBJECTARBPROC ) qwglGetProcAddress( "glCompileShaderARB" );
+		qglLinkProgramARB = ( PFNGLLINKPROGRAMARBPROC ) qwglGetProcAddress( "glLinkProgramARB" );
+		qglShaderSourceARB = ( PFNGLSHADERSOURCEARBPROC ) qwglGetProcAddress( "glShaderSourceARB" );
+		qglAttachObjectARB = ( PFNGLATTACHOBJECTARBPROC ) qwglGetProcAddress( "glAttachObjectARB" );
+		qglUseProgramObjectARB = ( PFNGLUSEPROGRAMOBJECTARBPROC ) qwglGetProcAddress( "glUseProgramObjectARB" );
+		qglGetInfoLogARB = ( PFNGLGETINFOLOGARBPROC ) qwglGetProcAddress( "glGetInfoLogARB" );
+		qglGetShaderiv = ( PFNGLGETSHADERIVPROC ) qwglGetProcAddress( "glGetShaderiv" );
+		qglGetUniformLocationARB = ( PFNGLGETUNIFORMLOCATIONARBPROC ) qwglGetProcAddress( "glGetUniformLocationARB" );
+
+		qglUniform1fvARB = ( PFNGLUNIFORM1FVARBPROC ) qwglGetProcAddress( "glUniform1fvARB" );
+		qglUniform2fvARB = ( PFNGLUNIFORM2FVARBPROC ) qwglGetProcAddress( "glUniform2fvARB" );
+		qglUniform3fvARB = ( PFNGLUNIFORM3FVARBPROC ) qwglGetProcAddress( "glUniform3fvARB" );
+		qglUniform4fvARB = ( PFNGLUNIFORM4FVARBPROC ) qwglGetProcAddress( "glUniform4fvARB" );
+
+		qglUniform1fARB = ( PFNGLUNIFORM1FARBPROC ) qwglGetProcAddress( "glUniform1fARB" );
+		qglUniform2fARB = ( PFNGLUNIFORM2FARBPROC ) qwglGetProcAddress( "glUniform2fARB" );
+		qglUniform3fARB = ( PFNGLUNIFORM3FARBPROC ) qwglGetProcAddress( "glUniform3fARB" );
+		qglUniform4fARB = ( PFNGLUNIFORM4FARBPROC ) qwglGetProcAddress( "glUniform4fARB" );
+
+		qglUniform1iARB = ( PFNGLUNIFORM1IARBPROC ) qwglGetProcAddress( "glUniform1iARB" );
+		qglUniform2iARB = ( PFNGLUNIFORM2IARBPROC ) qwglGetProcAddress( "glUniform2iARB" );
+		qglUniform3iARB = ( PFNGLUNIFORM3IARBPROC ) qwglGetProcAddress( "glUniform3iARB" );
+		qglUniform4iARB = ( PFNGLUNIFORM4IARBPROC ) qwglGetProcAddress( "glUniform4iARB" );
+
+		if(qglCreateProgramObjectARB) {Com_Printf("^2qglCreateProgramObjectARB Okay!\n");}
+		if(qglGetInfoLogARB) {Com_Printf("^2qglGetInfoLogARB Okay!\n");}
+		if(qglGetShaderiv) {Com_Printf("^2qglGetShaderiv Okay!\n");}
+		if(qglGetUniformLocationARB) {Com_Printf("^2qglGetUniformLocationARB Okay!\n");}
+		
+		if(qglUniform1fvARB) {Com_Printf("^2Uniform1fvARB Okay!\n");}
+		if(qglUniform2fvARB) {Com_Printf("^2Uniform2fvARB Okay!\n");}
+		if(qglUniform3fvARB) {Com_Printf("^2Uniform3fvARB Okay!\n");}
+		if(qglUniform4fvARB) {Com_Printf("^2Uniform4fvARB Okay!\n");}
+
+		if(qglUniform1fARB) {Com_Printf("^2Uniform1fARB Okay!\n");}
+		if(qglUniform2fARB) {Com_Printf("^2Uniform2fARB Okay!\n");}
+		if(qglUniform3fARB) {Com_Printf("^2Uniform3fARB Okay!\n");}
+		if(qglUniform4fARB) {Com_Printf("^2Uniform4fARB Okay!\n");}
+
+		if(qglUniform1iARB) {Com_Printf("^2Uniform1iARB Okay!\n");}
+		if(qglUniform2iARB) {Com_Printf("^2Uniform2iARB Okay!\n");}
+		if(qglUniform3iARB) {Com_Printf("^2Uniform3iARB Okay!\n");}
+		if(qglUniform4iARB) {Com_Printf("^2Uniform4iARB Okay!\n");}
+
+		ri.Printf( PRINT_ALL, "...using GL_ARB_vertex_program and GL_ARB_fragment_program\n" );
+	}
+
 	// GL_ARB_multitexture
 	qglMultiTexCoord2fARB = NULL;
 	qglActiveTextureARB = NULL;

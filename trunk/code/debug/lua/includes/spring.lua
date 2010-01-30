@@ -1,9 +1,11 @@
 local SpringT = {}
 
 local function doValue(val,ideal,spd,vel,fr)
-	val = val + (vel * spd);
 	local dist = ideal - val;
 	vel = vel + (dist * spd);
+	
+	val = val + (vel * spd);
+	
 	vel = vel * fr;
 	return val,vel
 end

@@ -904,8 +904,8 @@ localEntity_t *CG_LocalEntityEmit( localEntity_t *le ) {
 	localEntity_t *newEnt;
 	localEntity_t *next;
 	localEntity_t *prev;
+	vec3_t	origin;
 	int i;
-	//vec3_t	origin;
 
 	if(!le->emitter) return NULL;
 
@@ -915,6 +915,8 @@ localEntity_t *CG_LocalEntityEmit( localEntity_t *le ) {
 	prev = newEnt->prev;
 	i = newEnt->id;
 
+	BG_EvaluateTrajectory(&le->pos,cg.time,origin);
+
 	memcpy(newEnt,le,sizeof(localEntity_t));
 	memcpy(&newEnt->refEntity,&le->refEntity,sizeof(refEntity_t));
 
@@ -922,11 +924,10 @@ localEntity_t *CG_LocalEntityEmit( localEntity_t *le ) {
 	newEnt->next = next;
 	newEnt->id = i;
 
-	//BG_EvaluateTrajectory(&newEnt->pos,cg.time,origin);
-	//VectorCopy(origin,newEnt->pos.trBase);
-
 	newEnt->pos.trTime = cg.time;
 	newEnt->angles.trTime = cg.time;
+
+	VectorCopy(origin,newEnt->pos.trBase);
 
 	newEnt->startTime = le->startTime + cg.time;
 	newEnt->endTime = le->endTime + cg.time;

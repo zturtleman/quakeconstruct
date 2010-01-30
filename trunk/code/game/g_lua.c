@@ -200,6 +200,10 @@ qboolean FS_doScript( const char *filename ) {
 		return qfalse;
 	}
 
+	qlua_gethook(L,"ScriptLoaded");
+	lua_pushstring(L,filename);
+	qlua_pcall(L,1,0,qtrue);
+
 	/*char		text[20000];
 	fileHandle_t	f;
 	int			len;

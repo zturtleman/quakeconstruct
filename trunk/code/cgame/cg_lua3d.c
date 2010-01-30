@@ -253,6 +253,35 @@ int qlua_setuprt(lua_State *L) {
 	return 1;
 }
 
+void RenderTriangle(qhandle_t shader, vec3_t v1, vec3_t v2, vec3_t v3, vec4_t color, float s1, float t1, float s2, float t2, float s3, float t3) {
+	polyVert_t	verts[3];
+	verts[0].st[0] = s1;
+	verts[0].st[1] = t1;
+	verts[0].modulate[0] = (byte) (color[0] * 255);
+	verts[0].modulate[1] = (byte) (color[1] * 255);
+	verts[0].modulate[2] = (byte) (color[2] * 255);
+	verts[0].modulate[3] = (byte) (color[3] * 255);
+	VectorCopy(v1,verts[0].xyz);
+
+	verts[1].st[0] = s2;
+	verts[1].st[1] = t2;
+	verts[1].modulate[0] = (byte) (color[0] * 255);
+	verts[1].modulate[1] = (byte) (color[1] * 255);
+	verts[1].modulate[2] = (byte) (color[2] * 255);
+	verts[1].modulate[3] = (byte) (color[3] * 255);
+	VectorCopy(v2,verts[1].xyz);
+
+	verts[2].st[0] = s3;
+	verts[2].st[1] = t3;
+	verts[2].modulate[0] = (byte) (color[0] * 255);
+	verts[2].modulate[1] = (byte) (color[1] * 255);
+	verts[2].modulate[2] = (byte) (color[2] * 255);
+	verts[2].modulate[3] = (byte) (color[3] * 255);
+	VectorCopy(v3,verts[2].xyz);
+
+	trap_R_AddPolyToScene( shader, 3, verts );
+}
+
 void RenderQuad(qhandle_t shader, vec3_t v1, vec3_t v2, vec3_t v3, vec3_t v4, vec4_t color, float s1, float t1, float s2, float t2) {
 	polyVert_t	verts[4];
 	verts[0].st[0] = s1;
@@ -288,6 +317,98 @@ void RenderQuad(qhandle_t shader, vec3_t v1, vec3_t v2, vec3_t v3, vec3_t v4, ve
 	VectorCopy(v4,verts[3].xyz);
 
 	trap_R_AddPolyToScene( shader, 4, verts );
+}
+
+int qlua_rendermark(lua_State *L) {
+/*	vec3_t origin,dir;
+	float rotation;
+	float radius;
+	vec4_t color;
+	qboolean alphaFade;
+	qhandle_t shader = cgs.media.whiteShader;
+
+	luaL_checktype(L,1,LUA_TNUMBER);
+	luaL_checktype(L,2,LUA_TVECTOR);
+	luaL_checktype(L,3,LUA_TVECTOR);
+	luaL_checktype(L,4,LUA_TNUMBER);
+	luaL_checktype(L,,LUA_TNUMBER);
+
+	shader = lua_tointeger(L,5);
+
+	qlua_toColor(L,6,color,qfalse);
+
+	CG_ImpactMark( shader, origin, dir, 
+				   rotation, color[0], color[1], color[2], color[3],
+				   alphaFade, radius, qtrue, 1 );*/
+
+	int shader;
+	vec3_t origin;
+	vec3_t plane;
+	float orient;
+	float red;
+	float green;
+	float blue;
+	float alpha;
+	qboolean alphafade = qfalse;
+	float radius;
+	float time = cg.time;
+	
+	luaL_checkint(L,1);
+	luaL_checktype(L,2,LUA_TVECTOR);
+	luaL_checktype(L,3,LUA_TVECTOR);
+	luaL_checknumber(L,4);
+	luaL_checknumber(L,5);
+	luaL_checknumber(L,6);
+	luaL_checknumber(L,7);
+	luaL_checknumber(L,8);
+	luaL_checknumber(L,9);
+
+	shader = lua_tointeger(L,1);
+	lua_tovector(L,2,origin);
+	lua_tovector(L,3,plane);
+	orient = lua_tonumber(L,4);
+	red = lua_tonumber(L,5);
+	green = lua_tonumber(L,6);
+	blue = lua_tonumber(L,7);
+	alpha = lua_tonumber(L,8);
+	radius = lua_tonumber(L,9);
+
+	if(radius <= 0) radius = .01f;
+
+	if(lua_type(L,10) == LUA_TBOOLEAN) {
+		alphafade = lua_toboolean(L,10);
+	}
+
+	CG_ImpactMark(shader,origin,plane,orient,red,green,blue,alpha,alphafade,radius,qtrue,time+5);
+	return 0;
+}
+
+int qlua_3Dtriangle(lua_State *L) {
+	float s1,t1,s2,t2,s3,t3;
+	vec3_t v1,v2,v3;
+	vec4_t color;
+	qhandle_t shader = cgs.media.whiteShader;
+
+	luaL_checktype(L,1,LUA_TVECTOR); lua_tovector(L,1,v1);
+	luaL_checktype(L,2,LUA_TVECTOR); lua_tovector(L,2,v2);
+	luaL_checktype(L,3,LUA_TVECTOR); lua_tovector(L,3,v3);
+
+	if(lua_type(L,4) == LUA_TNUMBER) {
+		shader = lua_tointeger(L,4);
+	}
+
+	qlua_toColor(L,5,color,qfalse);
+
+	s1 = luaL_optnumber(L,9,0);
+	t1 = luaL_optnumber(L,10,0);
+	s2 = luaL_optnumber(L,11,1);
+	t2 = luaL_optnumber(L,12,1);
+	s3 = luaL_optnumber(L,13,0);
+	t3 = luaL_optnumber(L,14,1);
+
+	RenderTriangle(shader,v1,v2,v3,color,s1,t1,s2,t2,s3,t3);
+
+	return 0;
 }
 
 int qlua_3Dquad(lua_State *L) {
@@ -334,8 +455,10 @@ static const luaL_reg Render_methods[] = {
   {"AddPacketEntities",	qlua_addPacketEnts},
   {"AddMarks",			qlua_addMarks},
   {"AddLocalEntities",	qlua_addLocalEnts},
+  {"Mark",				qlua_rendermark},
   {"SetupRenderTarget",	qlua_setuprt},
   {"Quad",				qlua_3Dquad},
+  {"Tris",				qlua_3Dtriangle},
   {0,0}
 };
 

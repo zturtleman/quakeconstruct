@@ -104,6 +104,7 @@ void CG_PushCGTab(lua_State *L) {
 	setTableInt(L,"weaponSelect", cg.weaponSelect);
 	setTableInt(L,"weaponSelectTime", cg.weaponSelectTime);
 	setTableRefDef(L,"refdef",cg.refdef);
+	setTableBoolean(L,"showScores",cg.showScores);
 	setTableScores(L);
 
 	if(cg.snap != NULL) {

@@ -1,5 +1,6 @@
 local SpriteT = {}
 local aspect = (1 + ((640 - 480) / 640))
+local quad = {{-1,-1},{1,-1},{1,1},{-1,1}}
 
 function SpriteT:Init()
 	self.w = 10
@@ -8,6 +9,16 @@ function SpriteT:Init()
 	self.shd = 0
 	self.x = 0
 	self.y = 0
+	self.rotcos = 0
+	self.rotsin = 1
+end
+
+function SpriteT:SetColor(r,g,b,a)
+	self.color = {r or 0,g or 0,b or 0,a or 1}
+end
+
+function SpriteT:GetColor()
+	return self.color
 end
 
 function SpriteT:SetPos(x,y)
@@ -24,6 +35,10 @@ function SpriteT:SetSize(w,h)
 	self.h = h
 end
 
+function SpriteT:GetSize()
+	return self.w,self.h
+end
+
 function SpriteT:SetRadius(r)
 	self.w = r
 	self.h = r
@@ -35,6 +50,8 @@ end
 
 function SpriteT:SetRotation(r)
 	self.rot = r
+	self.rotcos = math.cos(r/57.3)
+	self.rotsin = math.sin(r/57.3)
 end
 
 function SpriteT:GetRotation()
@@ -52,6 +69,10 @@ function SpriteT:GetShader()
 end
 
 function SpriteT:Draw()
+	if(self.color) then
+		local r,g,b,a = unpack(self.color)
+		draw.SetColor(r,g,b,a)
+	end
 	if(self.animsprite == true) then self:DrawAnim() return end
 	draw.RectRotated(self.x,self.y,self.w*2,self.h*2,self.shd,self.rot)
 end
@@ -82,6 +103,56 @@ function SpriteT:GetCoords()
 	local cx1 = cx + (1/self.cols)
 	
 	return rx,cx,rx1,cx1
+end
+
+function SpriteT:GetQuad()
+	local vt = {}
+	local rs = self.rotsin
+	local rc = self.rotcos
+	local tx,ty,vx,vy = 0,0,0,0
+	for i=1, #quad do
+		vx = quad[i][1]
+		vy = quad[i][2]
+
+		vx = vx * self.w;
+		vy = vy * self.h;
+
+		tx = vx;
+		ty = vy;
+
+		vx = (rc*tx) - (rs*ty);
+		vy = (rs*tx) + (rc*ty);
+
+		vt[i] = {vx + self.x,vy + self.y}
+	end
+	return vt
+end
+
+function SpriteT:GetBounds()
+	local v = self:GetQuad()
+	local v2 = {}
+	local mins = {10000,10000}
+	local maxs = {-10000,-10000}
+	for i=1,#v do
+		local tx = v[i][1]
+		local ty = v[i][2]
+		if(tx > maxs[1]) then maxs[1] = tx end
+		if(tx < mins[1]) then mins[1] = tx end
+		if(ty > maxs[2]) then maxs[2] = ty end
+		if(ty < mins[2]) then mins[2] = ty end
+	end
+	return mins,maxs
+end
+
+function SpriteT:OnScreen()
+	local mins,maxs = self:GetBounds()
+	if((maxs[1] > 640 and mins[1] > 640) or
+	   (maxs[2] > 480 and mins[2] > 480)) then return false end
+	   
+	if((maxs[1] < 0 and mins[1] < 0) or
+	   (maxs[2] < 0 and mins[2] < 0)) then return false end
+
+	return true
 end
 
 function SpriteT:Animate()

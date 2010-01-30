@@ -85,9 +85,13 @@ if(CLIENT) then
 		local r = _CG.refdef.right
 		local u = _CG.refdef.up
 		local fov = _CG.refdef.fov_x/2
-		if(in_fov) then fov = in_fov/2 end
 		
-		fov = ((3.58 - (fov/25.2))*5) - (3.58 + 1.79 + 1.79)
+		if(in_fov == 0) then
+			fov = 0
+		else
+			if(in_fov) then fov = in_fov/2 end
+			fov = ((3.58 - (fov/25.2))*5) - (3.58 + 1.79 + 1.79)
+		end
 		
 		if(ang != nil) then
 			f,r,u = AngleVectors(ang)
@@ -105,19 +109,25 @@ if(CLIENT) then
 		if(mat ~= nil) then
 			local mt = mat
 			mt = (rotation * (mt - camera))
-					
-			local d = {x=mt[1][1],y=mt[2][1],z=mt[3][1]}
-			local e = {x=0,y=0,z=fov}
-			mt = m_projection(e,d,mt)
+				
+			if(fov ~= 0) then
+				local d = {x=mt[1][1],y=mt[2][1],z=mt[3][1]}
+				local e = {x=0,y=0,z=fov}
+				mt = m_projection(e,d,mt)
 
-			mt[1][1] = mt[1][1] * -1.12
-			mt[2][1] = mt[2][1] * -1.5
+				mt[1][1] = mt[1][1] * -1.12
+				mt[2][1] = mt[2][1] * -1.5
+				
+				mt[1][1] = mt[1][1] + 1
+				mt[2][1] = mt[2][1] + 1
+				
+				out.x = mt[1][1] * (w/2) + w/2
+				out.y = mt[2][1] * (h/2) + h/2
+			else
+				out.x = mt[1][1]
+				out.y = mt[2][1]
+			end
 			
-			mt[1][1] = mt[1][1] + 1
-			mt[2][1] = mt[2][1] + 1
-			
-			out.x = mt[1][1] * (w/2) + w/2
-			out.y = mt[2][1] * (h/2) + h/2
 			out.z = mt[3][1]
 			
 			mt = nil

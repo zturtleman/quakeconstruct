@@ -38,6 +38,7 @@ local toadd = {}
 concommand = {}
 concommand.Add = function(strcmd,func) table.insert(toadd,{strcmd,func}) end
 
+includex("linkedlist")
 includex("tools")
 includex("extensions/init")
 includex("base64")

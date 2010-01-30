@@ -20,6 +20,7 @@ luac -o compiled\functiondump.luc functiondump.lua
 luac -o compiled\hooks.luc hooks.lua
 luac -o compiled\init.luc init.lua
 luac -o compiled\input.luc input.lua
+luac -o compiled\linkedlist.luc linkedlist.lua
 luac -o compiled\matrix.luc matrix.lua
 luac -o compiled\messages.luc messages.lua
 luac -o compiled\model.luc model.lua

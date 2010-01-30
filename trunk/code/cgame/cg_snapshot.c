@@ -23,9 +23,54 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // cg_snapshot.c -- things that happen on snapshot transition,
 // not necessarily every single rendered frame
 
+#define	 replayLen 512
+
 #include "cg_local.h"
 
+int recStartTime = 0;
+int recPlayTime = 0;
+int count = 0;
+int playbackFrame = 0;
+int	lastCapTime = 0;
+snapshot_t replaySnaps[replayLen];
+qboolean playBack = qfalse;
+qboolean wasPlaying = qfalse;
 
+qboolean replayRunning() {
+	return playBack;
+}
+
+void recordSnap() {
+	snapshot_t snap;
+	entityState_t *state;
+	int i=0;
+	trap_GetSnapshot(cgs.processedSnapshotNum,&snap);
+	snap.serverTime -= recStartTime;
+	for(i=0; i<snap.numEntities; i++) {
+		state = &snap.entities[i];
+		if(state->time != 0) state->time -= recStartTime;
+		if(state->time2 != 0) state->time2 -= recStartTime;
+		state->pos.trTime -= recStartTime;
+		state->apos.trTime -= recStartTime;
+	}
+
+	if(count < replayLen) {
+		CG_Printf("Recorded Snapshot: %i\n", count);
+		replaySnaps[count] = snap;
+		count++;
+	} else {
+		CG_Printf("Recorded Snapshot MAX\n");
+
+		//Shift the array back and put a new frame in.
+
+		//memmove( replaySnaps, replaySnaps+1, sizeof( replaySnaps ) -sizeof( replaySnaps[ 0 ] ) );
+
+		/*for(i=0; i<replayLen-1; i++) {
+			replaySnaps[i] = replaySnaps[i+1];
+		}*/
+		replaySnaps[replayLen-1] = snap;
+	}
+}
 
 /*
 ==================
@@ -54,7 +99,7 @@ static void CG_ResetEntity( centity_t *cent ) {
 
 	// if the previous snapshot this entity was updated in is at least
 	// an event window back in time then we can reset the previous event
-	if ( cent->snapShotTime < cg.time - EVENT_VALID_MSEC ) {
+	if ( cent->snapShotTime < cg.time - EVENT_VALID_MSEC || playBack ) {
 		cent->previousEvent = 0;
 	}
 
@@ -65,6 +110,72 @@ static void CG_ResetEntity( centity_t *cent ) {
 	if ( cent->currentState.eType == ET_PLAYER ) {
 		CG_ResetPlayerEntity( cent );
 	}
+}
+
+void firstReplayFrame() {
+	int				i;
+	snapshot_t		*snap;
+	centity_t		*cent;
+	entityState_t	*state;
+	lua_State		*L = GetClientLuaState();
+
+	snap = &replaySnaps[0];
+	cg.snap = snap;
+	cg.snap->serverTime += cg.time;
+
+	BG_PlayerStateToEntityState( &snap->ps, &cg_entities[ snap->ps.clientNum ].currentState, qfalse );
+
+	CG_BuildSolidList();
+	CG_ExecuteNewServerCommands( snap->serverCommandSequence );
+	CG_Respawn();
+
+	for ( i = 0 ; i < sizeof(cg_entities) / sizeof(cg_entities[0]); i++ ) {
+		CG_ResetEntity(&cg_entities[i]);
+	}
+
+	for ( i = 0 ; i < cg.snap->numEntities ; i++ ) {
+		state = &cg.snap->entities[ i ];
+		cent = &cg_entities[ state->number ];
+
+		if(state->time != 0) state->time += cg.time;
+		if(state->time2 != 0) state->time2 += cg.time;
+		state->pos.trTime += cg.time;
+		state->apos.trTime += cg.time;
+
+		memcpy(&cent->currentState, state, sizeof(entityState_t));
+		cent->interpolate = qtrue;
+		cent->currentValid = qtrue;
+		CG_ResetEntity( cent );
+
+		CG_CheckEvents( cent );
+
+		cent->previousEvent = 0;
+	}
+
+	//cg.time = snap->serverTime;
+}
+
+void playReplay() {
+	/*playBack = qtrue;
+	wasPlaying = qtrue;
+	recPlayTime = cg.time;
+	firstReplayFrame();
+	playbackFrame++;*/
+}
+
+snapshot_t *getReplaySnap(int off) {
+	if(playbackFrame < replayLen-1) {
+		return &replaySnaps[playbackFrame + off];
+	} else {
+		if(wasPlaying) {
+			wasPlaying = qfalse;
+			playBack = qfalse;
+			playbackFrame = 0;
+			count = 0;
+			return NULL;
+		}
+	}
+	return cg.snap;
 }
 
 /*
@@ -136,7 +247,7 @@ void CG_SetInitialSnapshot( snapshot_t *snap ) {
 		CG_CheckEvents( cent );
 	}
 
-	if(L != NULL) {
+	if(L != NULL && !playBack) {
 		qlua_gethook(L,"InitialSnapshot");
 		qlua_pcall(L,0,0,qtrue);
 	}
@@ -385,9 +496,10 @@ of an interpolating one)
 
 ============
 */
+
 void CG_ProcessSnapshots( void ) {
 	snapshot_t		*snap;
-	int				n;
+	int				n,i;
 
 	// see what the latest snapshot the client system has is
 	trap_GetCurrentSnapshotNumber( &n, &cg.latestSnapshotTime );
@@ -421,33 +533,63 @@ void CG_ProcessSnapshots( void ) {
 	// out of available snapshots
 	do {
 		// if we don't have a nextframe, try and read a new one in
-		if ( !cg.nextSnap ) {
-			snap = CG_ReadNextSnapshot();
+		if ( !playBack ) {
+			if ( !cg.nextSnap ) {
+				snap = CG_ReadNextSnapshot();
 
-			// if we still don't have a nextframe, we will just have to
-			// extrapolate
-			if ( !snap ) {
+				// if we still don't have a nextframe, we will just have to
+				// extrapolate
+				if ( !snap ) {
+					break;
+				}
+
+				CG_SetNextSnap( snap );
+
+
+				// if time went backwards, we have a level restart
+				if ( cg.nextSnap->serverTime < cg.snap->serverTime ) {
+					CG_Error( "CG_ProcessSnapshots: Server time went backwards" );
+				}
+			}
+
+			// if our time is < nextFrame's, we have a nice interpolating state
+			if ( cg.time >= cg.snap->serverTime && cg.time < cg.nextSnap->serverTime ) {
 				break;
 			}
-
-			CG_SetNextSnap( snap );
-
-
-			// if time went backwards, we have a level restart
-			if ( cg.nextSnap->serverTime < cg.snap->serverTime ) {
-				CG_Error( "CG_ProcessSnapshots: Server time went backwards" );
-			}
-		}
-
-		// if our time is < nextFrame's, we have a nice interpolating state
-		if ( cg.time >= cg.snap->serverTime && cg.time < cg.nextSnap->serverTime ) {
-			break;
 		}
 
 		// we have passed the transition from nextFrame to frame
+		/*if(playBack) {
+			snap = getReplaySnap(0);
+			if(snap != NULL) {
+				snap->serverTime += recPlayTime;
+				for(i=0; i<snap->numEntities; i++) {
+					if(snap->entities[i].time != 0) snap->entities[i].time += recPlayTime;
+					if(snap->entities[i].time2 != 0) snap->entities[i].time2 += recPlayTime;
+					snap->entities[i].pos.trTime += recPlayTime;
+					snap->entities[i].apos.trTime += recPlayTime;
+				}
+
+				CG_SetNextSnap(snap);
+				CG_Printf("Transition: %i > %i\n",cg.snap->serverTime,snap->serverTime);
+				CG_TransitionSnapshot();
+
+				playbackFrame++;
+				return;
+			} else {
+				cg.snap = NULL;
+				cg.nextSnap = NULL;
+				CG_ProcessSnapshots();
+				return;
+			}
+		} else {
+			if(cg.nextSnap->serverTime != lastCapTime) {
+				recordSnap();
+				lastCapTime = cg.nextSnap->serverTime;
+			}
+		}*/
 		CG_TransitionSnapshot();
 	} while ( 1 );
-
 	// assert our valid conditions upon exiting
 	if ( cg.snap == NULL ) {
 		CG_Error( "CG_ProcessSnapshots: cg.snap == NULL" );

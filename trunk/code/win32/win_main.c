@@ -569,8 +569,10 @@ void * QDECL Sys_LoadDll( const char *name, char *fqpath , int (QDECL **entryPoi
 	libHandle = LoadLibrary( filename );
   if (libHandle)
     Com_Printf("LoadLibrary '%s' ok\n", filename);
-  else
+  else {
     Com_Printf("LoadLibrary '%s' failed\n", filename);
+	Com_Error(ERR_FATAL, "Couldn't load '%s'\n", filename);
+  }
 	if ( !libHandle ) {
 #endif
 	basepath = Cvar_VariableString( "fs_basepath" );
@@ -582,8 +584,10 @@ void * QDECL Sys_LoadDll( const char *name, char *fqpath , int (QDECL **entryPoi
 #ifndef NDEBUG
   if (libHandle)
     Com_Printf("LoadLibrary '%s' ok\n", fn);
-  else
+  else {
     Com_Printf("LoadLibrary '%s' failed\n", fn);
+	Com_Error(ERR_FATAL, "Couldn't load '%s'\n", filename);
+  }
 #endif
 
 	if ( !libHandle ) {
@@ -593,8 +597,10 @@ void * QDECL Sys_LoadDll( const char *name, char *fqpath , int (QDECL **entryPoi
 #ifndef NDEBUG
       if (libHandle)
         Com_Printf("LoadLibrary '%s' ok\n", fn);
-      else
+	  else {
         Com_Printf("LoadLibrary '%s' failed\n", fn);
+		Com_Error(ERR_FATAL, "Couldn't load '%s'\n", filename);
+	  }
 #endif
 		}
 
