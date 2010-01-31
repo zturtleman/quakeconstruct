@@ -91,6 +91,17 @@ int qlua_pullint(lua_State *L, char *str, qboolean req, int def) {
 	return v;
 }
 
+const char *qlua_pullstring(lua_State *L, char *str, qboolean req, const char *def) {
+	const char *v = def;
+	lua_pushstring(L,str);
+	lua_gettable(L,1);
+	if(req) luaL_checktype(L,lua_gettop(L),LUA_TSTRING);
+	if(lua_type(L,lua_gettop(L)) == LUA_TNUMBER) {
+		v = lua_tostring(L,lua_gettop(L));
+	}
+	return v;
+}
+
 int qlua_pullint_i(lua_State *L, int i, qboolean req, int def, int m) {
 	int v = def;
 	lua_pushinteger(L,i);

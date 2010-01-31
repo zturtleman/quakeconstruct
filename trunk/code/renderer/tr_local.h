@@ -482,7 +482,7 @@ typedef struct {
 	int			numTempSurfs;
 	struct drawSurf_s	*tempSurfs;
 
-
+	const char *glsl_override;
 } trRefdef_t;
 
 

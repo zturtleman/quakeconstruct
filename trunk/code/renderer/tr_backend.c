@@ -811,6 +811,14 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs, qboolean ov
 	macEventTime = ri.Milliseconds() + MAC_EVENT_PUMP_MSEC;
 #endif
 
+	if(backEnd.refdef.glsl_override != NULL) {
+		if(strlen(backEnd.refdef.glsl_override) > 0) {
+			//Com_Printf("GLSL OVERRIDE: %s\n",backEnd.refdef.glsl_override);
+			base_glsl_shader = getShaderProgram((char*)backEnd.refdef.glsl_override);
+			qglUseProgramObjectARB(base_glsl_shader);
+		}
+	}
+
 	if(base_glsl_shader) {
 		if(qglUniform1fARB) {
 			loc = qglGetUniformLocationARB(base_glsl_shader, "cgtime");
