@@ -129,11 +129,16 @@ function AnimationT:GetFrame()
 end
 
 function AnimationT:SetFPS(f)
+	self.fps = f
 	self.lerp = f/1000
 end
 
 function AnimationT:GetFPS()
 	return self.fps
+end
+
+function AnimationT:New()
+	return Animation(self.start,self.length,self.fps)
 end
 
 function Animation(_start,_end,_lerp)
