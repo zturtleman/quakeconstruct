@@ -21,7 +21,8 @@ int lua_torefdef(lua_State *L, int idx, refdef_t *refdef, qboolean a640) {
 	refdef->zNear = qlua_pullfloat(L,"zNear",qfalse,0);
 	refdef->rt_index = qlua_pullint(L,"renderTarget",qfalse,0);
 	refdef->renderTarget = qlua_pullboolean(L,"isRenderTarget",qfalse,qfalse);
-	
+	refdef->glsl_override = qlua_pullstring(L,"glsl_override",qfalse,"");
+
 	//if(angles[0] != 0 || angles[1] != 0 || angles[2] != 0) {
 		AnglesToAxis(angles,refdef->viewaxis);
 	//}
@@ -444,6 +445,16 @@ int qlua_3Dquad(lua_State *L) {
 	return 0;
 }
 
+int qlua_3DBaseglsl(lua_State *L) {
+	const char *str;
+
+	luaL_checktype(L,1,LUA_TSTRING);
+	str = lua_tostring(L,1);
+
+	cg.refdef.glsl_override = str;
+	return 0;
+}
+
 static const luaL_reg Render_methods[] = {
   {"CreateScene",		qlua_createscene},
   {"DLight",			qlua_dlight},
@@ -459,6 +470,7 @@ static const luaL_reg Render_methods[] = {
   {"SetupRenderTarget",	qlua_setuprt},
   {"Quad",				qlua_3Dquad},
   {"Tris",				qlua_3Dtriangle},
+  {"SetBaseGLSL",		qlua_3DBaseglsl},
   {0,0}
 };
 

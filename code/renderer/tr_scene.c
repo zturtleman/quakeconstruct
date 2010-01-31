@@ -394,6 +394,7 @@ void RE_RenderScene( const refdef_t *fd ) {
 	tr.refdef.height = fd->height;
 	tr.refdef.fov_x = fd->fov_x;
 	tr.refdef.fov_y = fd->fov_y;
+	tr.refdef.glsl_override = fd->glsl_override;
 
 	VectorCopy( fd->vieworg, tr.refdef.vieworg );
 	VectorCopy( fd->viewaxis[0], tr.refdef.viewaxis[0] );
