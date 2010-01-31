@@ -960,6 +960,10 @@ void CG_AddEmitter( localEntity_t *le ) {
 		return;
 	}
 
+	if(le->parent != NULL) {
+		CG_AddFragment( le );
+	}
+
 	CG_LocalEntityEmit( le );
 }
 
@@ -1017,6 +1021,9 @@ CG_AddLocalEntities
 */
 void CG_AddLocalEntities( void ) {
 	localEntity_t	*le, *next;
+	vec3_t		vlen;
+	vec3_t		temp[256];
+	int			size,i,size2;
 
 	// walk the list backwards, so any new local entities generated
 	// (trails, marks, etc) will be present this frame
@@ -1045,6 +1052,27 @@ void CG_AddLocalEntities( void ) {
 		if( le->emitter ) {
 			CG_AddEmitter( le );
 			continue;
+		}
+
+		if(le->refEntity.reType == RT_TRAIL) {
+			VectorSubtract(le->refEntity.trailVerts[0],le->refEntity.origin,vlen);
+			le->refEntity.trailCoordBump -= VectorLength(vlen) / le->refEntity.trailCoordLength;
+
+			size2 = sizeof(le->refEntity.trailVerts) / sizeof(le->refEntity.trailVerts[0]);
+			if(le->refEntity.numVerts2 > size2) le->refEntity.numVerts2 = size2;
+			if(le->refEntity.numVerts2 <= 1) le->refEntity.numVerts2 = 2;
+			size = le->refEntity.numVerts2; //sizeof(luaentity->trailVerts) / sizeof(luaentity->trailVerts[0]);
+
+			//Com_Printf("Shifted: %i verts\n",size);
+
+			for(i=0; i<size; i++) {
+				VectorCopy(le->refEntity.trailVerts[i],temp[i]);
+			}
+
+			for(i=1; i<size; i++) {
+				VectorCopy(temp[i-1],le->refEntity.trailVerts[i]);
+			}
+			VectorCopy(le->refEntity.origin,le->refEntity.trailVerts[0]);
 		}
 
 		switch ( le->leType ) {
