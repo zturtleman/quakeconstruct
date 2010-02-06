@@ -21,6 +21,13 @@ trajectory_t *lua_totrajectory(lua_State *L, int i) {
 	return tr;
 }
 
+int lua_newtrajectory(lua_State *L) {
+	trajectory_t	tr;
+
+	lua_pushtrajectory(L,&tr);
+	return 1;
+}
+
 int qlua_getbase(lua_State *L) {
 	trajectory_t	*tr = lua_totrajectory(L,1);
 
@@ -221,6 +228,8 @@ int Tr_register (lua_State *L) {
 	lua_setglobal(L,"M_Trajectory");
 
 	lua_pop(L, 1);
+
+	lua_register(L,"Trajectory",lua_newtrajectory);
 	return 1;
 }
 

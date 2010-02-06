@@ -152,11 +152,11 @@ local function ss2d()
 end
 hook.add("Draw2D","cl_init",ss2d)
 
-local function shouldDraw(str)
+--[[local function shouldDraw(str)
 	if(str == "HUD" and _CG.stats[STAT_HEALTH] <= 0) then return false end
 	return (sshot == 0)
 end
-hook.add("ShouldDraw","cl_init",shouldDraw)
+hook.add("ShouldDraw","cl_init",shouldDraw)]]
 
 local function takeShot()
 	util.ClearImage("screenshots/lua/test.jpg") --Clear the image from the renderer's cache

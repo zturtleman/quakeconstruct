@@ -196,6 +196,7 @@ int qlua_setclientinfo(lua_State *L) {
 		} else if (inf == PLAYERINFO_SCORE) {
 			luaL_checktype(L,3,LUA_TNUMBER);
 			luaentity->client->ps.persistant[PERS_SCORE] = lua_tonumber(L,3);
+			CalculateRanks();
 		} else {
 			lua_pushfstring(L,"Invalid Argument For \"SetClientInfo\": %s.",inf);
 			lua_error(L);
@@ -857,6 +858,21 @@ int qlua_respawn(lua_State *L) {
 				lua_pushentity(L,body);
 				return 1;
 			}
+		}
+	}
+	return 0;
+}
+
+int qlua_setrespawntime(lua_State *L) {
+	gentity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TNUMBER);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		if(luaentity->client) {
+			luaentity->client->respawnTime = lua_tointeger(L,2);
 		}
 	}
 	return 0;
@@ -1861,6 +1877,7 @@ static const luaL_reg Entity_methods[] = {
   {"SetSpectatorType",	qlua_setspectatorstate},
   {"GetSpectatorType",	qlua_getspectatorstate},
   {"Respawn",			qlua_respawn},
+  {"SetRespawnTime",	qlua_setrespawntime},
   {"GetVelocity",		qlua_getvel},
   {"SetVelocity",		qlua_setvel},
   {"GetOtherEntity",	qlua_getotherentity},

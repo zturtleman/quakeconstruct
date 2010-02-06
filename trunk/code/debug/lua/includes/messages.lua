@@ -22,6 +22,8 @@ defaults[D_LONG] = 0
 defaults[D_STRING] = ""
 defaults[D_FLOAT] = 0
 
+local connections = {}
+
 message = {}
 
 if(SERVER) then
@@ -114,7 +116,7 @@ if(SERVER) then
 			msgIDs[id] = nextid
 			nextid = nextid + 1
 		end
-		if(pl != nil and pl:GetTable()._mconnected) then
+		if(pl != nil and connections[pl:EntIndex()]) then
 			local tab = pl:GetTable()
 			tab.msglist = tab.msglist or {}
 			if(tab.msglist[id] != true) then
@@ -160,6 +162,8 @@ if(SERVER) then
 		d_Send(msg)
 	end
 	
+	--pl:GetTable()._mconnected
+	
 	function message.Precache(str)
 		if(str != nil and type(str) == "string") then
 			str = string.lower(str)
@@ -169,7 +173,7 @@ if(SERVER) then
 				
 				debugprint("Message Precache[" .. str .. "]:\n")
 				for k,v in pairs(GetAllPlayers()) do
-					if(v:GetTable()._mconnected) then
+					if(connections[v:EntIndex()]) then
 						SendCache(v)
 					end
 				end
@@ -194,7 +198,7 @@ if(SERVER) then
 			if(pl:IsBot()) then return end
 			if(pl == nil) then error("^5MESSAGE ERROR[F-1]: Nil Player\n") end
 			if(pl:GetTable() == nil) then error("^5MESSAGE ERROR[F-2]: Nil Player Table\n" .. printPl(pl)) end
-			if(pl:GetTable()._mconnected == false) then error("^5MESSAGE ERROR[F-3]: Nil Player Not Connected\n" .. printPl(pl)) end
+			if(connections[pl:EntIndex()] == false) then error("^5MESSAGE ERROR[F-3]: Nil Player Not Connected\n" .. printPl(pl)) end
 			if(msgid == nil) then error("^5MESSAGE ERROR[G]: Nil Message Id\n") end
 			msgid = string.lower(msgid)
 			local prev = msgid
@@ -236,7 +240,7 @@ if(SERVER) then
 		msgid = msgid or m.msgid
 		--print("Message To All!\n")
 		for k,v in pairs(GetAllPlayers()) do
-			if(v:GetTable()._mconnected) then
+			if(connections[v:EntIndex()]) then
 				SendDataMessage(m,v,msgid)
 			end
 		end	
@@ -244,7 +248,7 @@ if(SERVER) then
 	
 	local function PlayerJoined(pl)
 		if(pl == nil) then return end
-		if(!pl:IsBot()) then pl:GetTable()._mconnected = true end
+		if(!pl:IsBot()) then connections[pl:EntIndex()] = true end
 		debugprint("ClientReadyHook:\n")
 		SendCache(pl,true)
 	end
@@ -252,7 +256,7 @@ if(SERVER) then
 	
 	local function PlayerStop(pl)
 		if(pl == nil) then return end
-		if(!pl:IsBot()) then pl:GetTable()._mconnected = false end
+		if(!pl:IsBot()) then connections[pl:EntIndex()] = false end
 		debugprint("ClientStopHook:\n")
 	end
 	hook.add("ClientShutdownLua","messages",PlayerStop,9999)
