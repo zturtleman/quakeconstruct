@@ -30,6 +30,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #endif
 //==========================================================================
 
+qboolean	enableObituaryCenterPrint = qtrue;
+
 /*
 ===================
 CG_PlaceString
@@ -72,6 +74,10 @@ const char	*CG_PlaceString( int rank ) {
 
 	Com_sprintf( str, sizeof( str ), "%s%s", t, s );
 	return str;
+}
+
+void CG_EnableObituaryCP( qboolean enable ) {
+	enableObituaryCenterPrint = enable;
 }
 
 /*
@@ -211,7 +217,7 @@ static void CG_Obituary( entityState_t *ent ) {
 	}
 
 	// check for kill messages from the current clientNum
-	if ( attacker == cg.snap->ps.clientNum ) {
+	if ( attacker == cg.snap->ps.clientNum && enableObituaryCenterPrint ) {
 		char	*s;
 
 		if ( cgs.gametype < GT_TEAM ) {

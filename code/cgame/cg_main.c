@@ -2306,6 +2306,8 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum ) {
 
 	CG_ShaderStateChanged();
 
+	CG_EnableObituaryCP(qtrue);
+
 	trap_S_ClearLoopingSounds( qtrue );
 	if(GetClientLuaState()) {
 		CG_PushCGTab(GetClientLuaState());

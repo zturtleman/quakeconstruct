@@ -16,10 +16,12 @@ function LinkedListT:Init()
 	end
 	self.count = 0
 	self.start = nil
+	self.current = nil
 end
 
 local function GetLinkAtIndex(self,index)
 	if(self.start == nil) then return end
+	if(index == nil) then return end
 	if(index <= 0) then error("index Out Of Bounds " .. index .. " <= 0") return end
 	local l = self.start
 	local i = 1
@@ -67,8 +69,7 @@ function LinkedListT:Clear()
 	self.start = nil
 end
 
-function LinkedListT:Remove(index)
-	local l = GetLinkAtIndex(self,index)
+local function LRemove(self,l)
 	if(l == nil) then return end
 	if(l.prev == nil) then
 		if(l.next ~= nil) then
@@ -91,6 +92,16 @@ function LinkedListT:Remove(index)
 	self.removeCall = true
 end
 
+function LinkedListT:Remove(index)
+	if(index == nil and self.current ~= nil) then
+		LRemove(self,self.current)
+		self.current = nil
+		return;
+	end
+	local l = GetLinkAtIndex(self,index)
+	LRemove(self,l)
+end
+
 function LinkedListT:Len()
 	return self.count
 end
@@ -106,15 +117,19 @@ function LinkedListT:Iter(func)
 			self.removeCall = false
 		end
 		
+		self.current = l
 		if(i > self:Len() or i <= 0) then return end
 		local b,e = pcall(func,l.__o,i)
+		self.current = nil
 		if(b ~= true) then error(e) end
 		l = l.next
 		i = i + 1
 	end
 	
+	self.current = l
 	if(i > self:Len() or i <= 0) then return end
 	local b,e = pcall(func,l.__o,i)
+	self.current = nil
 	if(b ~= true) then error(e) end
 end
 

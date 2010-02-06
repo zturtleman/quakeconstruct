@@ -501,6 +501,13 @@ int qlua_pointcontents(lua_State *L) {
 	return 1;
 }
 
+int qlua_enableCP(lua_State *L) {
+	luaL_checktype(L,1,LUA_TBOOLEAN);
+
+	CG_EnableObituaryCP(lua_toboolean(L,1));
+	return 0;
+}
+
 static const luaL_reg Util_methods[] = {
   {"GetNumItems",		qlua_numitems},
   {"GetItemIcon",		qlua_getitemicon},
@@ -528,6 +535,7 @@ static const luaL_reg Util_methods[] = {
   {"GetClientInfo",		qlua_getclientinfo2},
   {"GetPointContents",	qlua_pointcontents},
   {"SetCvar",			qlua_cvar},
+  {"EnableCenterPrint",	qlua_enableCP},
   {0,0}
 };
 
