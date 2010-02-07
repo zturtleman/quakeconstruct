@@ -69,6 +69,7 @@ if(CLIENT) then includex("qml") end
 includex("input")
 includex("packs")
 includex("custom")
+includex("persistance")
 --require "includes/functiondump"
 
 for k,v in pairs(toadd) do

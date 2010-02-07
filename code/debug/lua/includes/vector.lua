@@ -147,6 +147,16 @@ end
 	return {x=x,y=y,z=z}
 end]]
 
+function IsVector(v)
+	local s,r = pcall(function()
+		if(type(v) ~= "userdata") then return end
+		if(v.x == nil) then return end
+		return true
+	end)
+	if(r == true) then return true end
+	return false
+end
+
 function Vectorv(tab)
 	return Vector(tab.x,tab.y,tab.z) --{x=tab.x,y=tab.y,z=tab.z}
 end

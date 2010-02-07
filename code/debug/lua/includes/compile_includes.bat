@@ -28,6 +28,7 @@ luac -o compiled\netvars.luc netvars.lua
 luac -o compiled\packs.luc packs.lua
 luac -o compiled\player.luc player.lua
 luac -o compiled\poly.luc poly.lua
+luac -o compiled\persistance.luc persistance.lua
 luac -o compiled\qml.luc qml.lua
 luac -o compiled\scriptmanager.luc scriptmanager.lua
 luac -o compiled\sequence.luc sequence.lua

@@ -214,10 +214,10 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 	case GAME_SHUTDOWN:
 		G_ShutdownGame( arg0 );
 		return 0;
-	case GAME_RESTART:
+/*	case GAME_RESTART:
 		CloseServerLua();
 		G_InitLua();
-		return 0;
+		return 0;*/
 	case GAME_CLIENT_CONNECT:
 		return (int)ClientConnect( arg0, arg1, arg2 );
 	case GAME_CLIENT_THINK:
