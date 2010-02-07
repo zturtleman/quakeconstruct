@@ -5,6 +5,7 @@ local pairs = pairs
 local ipairs = ipairs
 local type = type
 local pcall = pcall
+local string = string
 local tostring = tostring
 local io = io
 local IsVector = IsVector
@@ -66,19 +67,17 @@ WriteValue = function(v)
 	--print(t .. "\n")
 	if(t == "table") then
 		WriteTable(v)
-	end
-	if(t == "userdata") then
+	elseif(t == "userdata") then
 		if(IsVector(v)) then
 			write("Vector(" .. v.x .. "," .. v.y .. "," .. v.z .. ")")
 		end
-	end
-	if(t == "string") then
+	elseif(t == "string") then
 		write("\"" .. tostring(v) .. "\"")
-	end
-	if(t == "number") then
+	elseif(t == "number") then
 		write(tostring(v))
-	end
-	if(t == "nil") then
+	elseif(t == "function") then
+		write("loadstring(\"" .. string.dump(v) .. "\")")
+	else
 		write("nil")
 	end
 end
