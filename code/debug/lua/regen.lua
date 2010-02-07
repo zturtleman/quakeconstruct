@@ -10,7 +10,7 @@ local function clThink(client)
 			if(myHp < 100 and myHp > 0) then
 				client:SetInfo(PLAYERINFO_HEALTH,myHp + 1)
 			end
-			tab.lastrecharge = (LevelTime() + 100/vel) + 40 --5 hp every 2 seconds when standing still
+			tab.lastrecharge = (LevelTime() + 320/vel) + 60 --5 hp every 2 seconds when standing still
 		end
 	end
 end

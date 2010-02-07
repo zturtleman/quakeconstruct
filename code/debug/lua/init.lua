@@ -15,6 +15,8 @@ end
 hook.add("EntityLinked","super",Fuse)
 ]]
 
+print("^2CURRENT GAME: " .. GetCvar("g_luagame") .. "\n")
+
 local function writeVector(msg,v)
 	message.WriteFloat(msg,v.x)
 	message.WriteFloat(msg,v.y)
