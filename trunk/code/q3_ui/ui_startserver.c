@@ -638,6 +638,8 @@ typedef struct {
 	menuradiobutton_s	pure;
 	menulist_s			botSkill;
 
+	menufield_s			lua_game;
+
 	menutext_s			player0;
 	menulist_s			playerType[PLAYER_SLOTS];
 	menutext_s			playerName[PLAYER_SLOTS];
@@ -786,6 +788,7 @@ static void ServerOptions_Start( void ) {
 	trap_Cvar_SetValue( "g_friendlyfire", friendlyfire );
 	trap_Cvar_SetValue( "sv_pure", pure );
 	trap_Cvar_Set("sv_hostname", s_serveroptions.hostname.field.buffer );
+	trap_Cvar_Set("g_luagame", s_serveroptions.lua_game.field.buffer );
 	
 	trap_Cvar_SetValue( "sv_punkbuster", s_serveroptions.punkbuster.curvalue );
 
@@ -1295,6 +1298,15 @@ static void ServerOptions_MenuInit( qboolean multiplayer ) {
 	s_serveroptions.timelimit.field.widthInChars = 3;
 	s_serveroptions.timelimit.field.maxchars     = 3;
 
+	y += BIGCHAR_HEIGHT+2;
+	s_serveroptions.lua_game.generic.type		 = MTYPE_FIELD;
+	s_serveroptions.lua_game.generic.name		 = "Lua Game";
+	s_serveroptions.lua_game.generic.flags		 = QMF_PULSEIFFOCUS|QMF_SMALLFONT;
+	s_serveroptions.lua_game.generic.x			 = OPTIONS_X;
+	s_serveroptions.lua_game.generic.y			 = y;
+	s_serveroptions.lua_game.field.widthInChars = 64;
+	s_serveroptions.lua_game.field.maxchars     = 64;
+
 	if( s_serveroptions.gametype >= GT_TEAM ) {
 		y += BIGCHAR_HEIGHT+2;
 		s_serveroptions.friendlyfire.generic.type     = MTYPE_RADIOBUTTON;
@@ -1467,6 +1479,7 @@ static void ServerOptions_MenuInit( qboolean multiplayer ) {
 	Menu_AddItem( &s_serveroptions.menu, &s_serveroptions.go );
 
 	Menu_AddItem( &s_serveroptions.menu, (void*) &s_serveroptions.punkbuster );
+	Menu_AddItem( &s_serveroptions.menu, &s_serveroptions.lua_game );
 	
 	ServerOptions_SetMenuItems();
 }
