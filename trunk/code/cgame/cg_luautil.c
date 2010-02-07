@@ -196,6 +196,11 @@ int qlua_createmark(lua_State *L) {
 	return 0;
 }
 
+int qlua_clearmarks(lua_State *L) {
+	CG_InitMarkPolys();
+	return 0;
+}
+
 int qlua_playeranim(lua_State *L) {
 	refEntity_t	*legs;
 	refEntity_t	*torso;
@@ -518,6 +523,7 @@ static const luaL_reg Util_methods[] = {
   {"LockMouse",			qlua_lockmouse},
   {"LoadSkin",			qlua_loadskin},
   {"CreateMark",		qlua_createmark},
+  {"ClearMarks",		qlua_clearmarks},
   {"AnimatePlayer",		qlua_playeranim},
   {"AnglePlayer",		qlua_playerangles},
   {"PlayerWeapon",		qlua_playerweapon},

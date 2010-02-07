@@ -23,6 +23,27 @@ function GetAllEntities()
 	return game_entities
 end
 
+function GetEntitiesByType(t)
+	if(t < ET_GENERAL or t > ET_LUA) then return end
+	local out = {}
+	for k,v in pairs(GetAllEntities()) do
+		if(type(v) == "userdata") then
+			if(type(t) == "number") then
+				if(v:GetType() == t) then
+					table.insert(out,v)
+				end
+			elseif(type(t) == "table") then
+				for _,c in pairs(t) do
+					if(v:GetType() == c) then
+						table.insert(out,v)
+					end
+				end
+			end
+		end
+	end
+	return out
+end
+
 function GetEntitiesByClass(class)
 	local out = {}
 	for k,v in pairs(GetAllEntities()) do
