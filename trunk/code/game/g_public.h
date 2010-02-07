@@ -412,7 +412,7 @@ typedef enum {
 
 	GAME_SHUTDOWN,	// (void);
 
-	GAME_RESTART,
+	//GAME_RESTART,
 
 	GAME_CLIENT_CONNECT,	// ( int clientNum, qboolean firstTime, qboolean isBot );
 	// return NULL if the client is allowed to connect, otherwise return
