@@ -1731,8 +1731,43 @@ int qlua_setflags(lua_State *L) {
 	luaL_checktype(L,2,LUA_TNUMBER);
 	luaentity = lua_toentity(L,1);
 	flags = lua_tointeger(L,2);
-	if(luaentity != NULL && flags >= EF_DEAD) {
-		luaentity->s.eType = flags;
+	if(luaentity != NULL) {
+		luaentity->flags = flags;
+	}
+	return 0;
+}
+
+int qlua_getflags(lua_State *L) {
+	gentity_t	*luaentity;
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		lua_pushinteger(L,luaentity->flags);
+		return 1;
+	}
+	return 0;
+}
+
+int qlua_seteflags(lua_State *L) {
+	gentity_t	*luaentity;
+	int flags = 0;
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TNUMBER);
+	luaentity = lua_toentity(L,1);
+	flags = lua_tointeger(L,2);
+	if(luaentity != NULL) {
+		luaentity->s.eFlags = flags;
+	}
+	return 0;
+}
+
+int qlua_geteflags(lua_State *L) {
+	gentity_t	*luaentity;
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		lua_pushinteger(L,luaentity->s.eFlags);
+		return 1;
 	}
 	return 0;
 }
@@ -1744,8 +1779,18 @@ int qlua_setsvflags(lua_State *L) {
 	luaL_checktype(L,2,LUA_TNUMBER);
 	luaentity = lua_toentity(L,1);
 	flags = lua_tointeger(L,2);
-	if(luaentity != NULL && flags >= SVF_NOCLIENT) {
+	if(luaentity != NULL) {
 		luaentity->r.svFlags = flags;
+	}
+	return 0;
+}
+
+int qlua_getsvflags(lua_State *L) {
+	gentity_t	*luaentity;
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		lua_pushinteger(L,luaentity->r.svFlags);
 	}
 	return 0;
 }
@@ -1949,7 +1994,11 @@ static const luaL_reg Entity_methods[] = {
   {"SetType",		qlua_setetype},
   {"GetType",		qlua_getetype},
   {"SetFlags",		qlua_setflags},
-  {"SetSvFlag",		qlua_setsvflags},
+  {"GetFlags",		qlua_getflags},
+  {"SetEFlags",		qlua_seteflags},
+  {"GetEFlags",		qlua_geteflags},
+  {"SetSvFlags",	qlua_setsvflags},
+  {"GetSvFlags",	qlua_getsvflags},
   {"SetDamage",		qlua_setdamage},
   {"SetOwner",		qlua_setowner},
   {"SetDeathMethod", qlua_setmod},

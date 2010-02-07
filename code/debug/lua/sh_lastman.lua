@@ -1,11 +1,24 @@
 --H.clear = true
 local deadClients = {}
-local GAME_DURATION = 1 --minutes
+local GAME_DURATION = 1.5 --minutes
 local startTime = LevelTime()
 
 local function GameMinutes()
 	return GAME_DURATION*1000*60
 end
+
+local freezePlayers = true
+
+function FiredWeapon()
+	if(freezePlayers) then return -1 end
+end
+hook.add("FiredWeapon","sh_lastman",FiredWeapon)
+
+function PlayerMove()
+	if(freezePlayers) then return true end
+end
+hook.add("PlayerMove","sh_lastman",PlayerMove)
+
 
 if(SERVER) then
 //__DL_BLOCK
@@ -16,6 +29,20 @@ if(SERVER) then
 	team.CustomScores(true)
 	
 	local lastKill = 0
+	local surviveTimer = nil
+	
+	local function respawnItems()
+		local it = GetEntitiesByType(ET_ITEM)
+		for k,v in pairs(it) do
+			if(bitAnd(v:GetFlags(),FL_DROPPED_ITEM) == 0) then
+				print("^2Respawn: ^3" .. v:Classname() .. "\n")
+				v:Respawn()
+			else
+				print("^1Must Remove: ^3" .. v:Classname() .. "\n")
+				v:Remove()
+			end
+		end
+	end
 	
 	local function sendPLOut(pl)
 		local msg = Message()
@@ -42,34 +69,37 @@ if(SERVER) then
 		end
 	end
 	
-	sendReset()
-	
 	function testStrMessage()
 		sendMessage("Line #1\nLine #2")
 	end
 	
 	local function PlayerKilled(pl,inflictor,attacker,damage,means)
+		lastKill = LevelTime()
 		print("Hook " .. tostring(pl) .. " | " .. tostring(inflictor) .. " | " .. tostring(attacker) .. " | " .. tostring(damage) .. " | " .. tostring(means) .. "\n")
 		if(pl == nil) then return end
 		print("Player Killed\n")
+		sendMessage(pl:GetInfo().name .. " is out!");
+		sendPLOut(pl)
 		Timer(1,function()
 			local t = LevelTime() + 6000000
 			pl:SetRespawnTime(t)
 			print("Set RespawnTime: " .. t .. "\n")
 			table.insert(deadClients,pl)
-			sendMessage(pl:GetInfo().name .. " is out!");
 			
-			Timer(1,function()
+			if(surviveTimer ~= nil) then
+				StopTimer(surviveTimer)
+			end
+			
+			surviveTimer = Timer(1,function()
 				checkAndPrintSurvivor()
 			end)
-			sendPLOut(pl)
+
 			if(pl:GetTable() and pl:GetTable().body) then
 				pl:GetTable().body:SetNextThink(t)
 			end
 			--pl:SetAnim(BOTH_DEATH1,ANIM_LEGS,6000)
 			--pl:SetAnim(BOTH_DEATH1,ANIM_TORSO,6000)
 		end)
-		lastKill = LevelTime()
 	end
 	hook.add("PlayerKilled","sh_lastman",PlayerKilled)
 
@@ -89,6 +119,7 @@ if(SERVER) then
 	function checkAndPrintSurvivor()
 		local live,last = countLivePlayers()
 		if(live <= 1) then
+			if(waitingReset == true) then return end
 			if(live == 0) then
 				sendMessage("Nobody Survived!");
 			else
@@ -109,7 +140,11 @@ if(SERVER) then
 				body:Remove()
 			end
 		end
+		respawnItems()
+		freezePlayers = true
+		Timer(3,function() freezePlayers = false end)
 	end
+	reset()
 	
 	function H:Think()
 		if(startTime + GameMinutes() < LevelTime() and waitingReset ~= true) then
@@ -215,6 +250,9 @@ else
 			elseif(t == 2) then
 				deadClients = {}
 				startTime = LevelTime()
+				util.ClearMarks()
+				freezePlayers = true
+				Timer(3,function() freezePlayers = false end)
 			elseif(t == 3) then
 				local msg = message.ReadString()
 				svmessage = msg
