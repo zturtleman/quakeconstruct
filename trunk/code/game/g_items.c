@@ -688,7 +688,8 @@ gentity_t *LaunchItem( gitem_t *item, vec3_t origin, vec3_t velocity ) {
 
 	dropped->flags = FL_DROPPED_ITEM;
 
-	trap_LinkEntity (dropped);
+	//trap_LinkEntity (dropped);
+	qlua_LinkEntity (dropped);
 
 	return dropped;
 }

@@ -1540,6 +1540,7 @@ Generates weapon events and modifes the weapon counter
 */
 static void PM_Weapon( void ) {
 	int		addTime;
+	lua_State *L = GetServerLuaState();
 
 	// don't allow attack until all buttons are up
 	if ( pm->ps->pm_flags & PMF_RESPAWNED ) {
@@ -1555,6 +1556,80 @@ static void PM_Weapon( void ) {
 	if ( pm->ps->stats[STAT_HEALTH] <= 0 ) {
 		pm->ps->weapon = WP_NONE;
 		return;
+	}
+
+	switch( pm->ps->weapon ) {
+	default:
+	case WP_GAUNTLET:
+		addTime = 400;
+		break;
+	case WP_LIGHTNING:
+		addTime = 50;
+		break;
+	case WP_SHOTGUN:
+		addTime = 1000;
+		break;
+	case WP_MACHINEGUN:
+		addTime = 100;
+		break;
+	case WP_GRENADE_LAUNCHER:
+		addTime = 800;
+		break;
+	case WP_ROCKET_LAUNCHER:
+		addTime = 800;
+		break;
+	case WP_PLASMAGUN:
+		addTime = 100;
+		break;
+	case WP_RAILGUN:
+		addTime = 1500;
+		break;
+	case WP_BFG:
+		addTime = 200;
+		break;
+	case WP_GRAPPLING_HOOK:
+		addTime = 400;
+		break;
+#ifdef MISSIONPACK
+	case WP_NAILGUN:
+		addTime = 1000;
+		break;
+	case WP_PROX_LAUNCHER:
+		addTime = 800;
+		break;
+	case WP_CHAINGUN:
+		addTime = 30;
+		break;
+#endif
+	}
+
+	if(L != NULL) {
+		qlua_gethook(L, "FiredWeapon");
+		lua_pushinteger(L, pm->ps->clientNum);
+		lua_pushinteger(L, pm->ps->weapon);
+		lua_pushinteger(L, addTime);
+		lua_pushvector(L, pm->ps->viewangles);
+		qlua_pcall(L,4,1,qtrue);
+		if(lua_type(L,-1) == LUA_TNUMBER) {
+			addTime = lua_tointeger(L,-1);
+			if(addTime == -1) {
+				return;
+			}
+		}
+	}
+
+#ifdef MISSIONPACK
+	if( bg_itemlist[pm->ps->stats[STAT_PERSISTANT_POWERUP]].giTag == PW_SCOUT ) {
+		addTime /= 1.5;
+	}
+	else
+	if( bg_itemlist[pm->ps->stats[STAT_PERSISTANT_POWERUP]].giTag == PW_AMMOREGEN ) {
+		addTime /= 1.3;
+  }
+  else
+#endif
+	if ( pm->ps->powerups[PW_HASTE] ) {
+		addTime /= 1.3;
 	}
 
 	// check for item using
@@ -1645,65 +1720,6 @@ static void PM_Weapon( void ) {
 
 	// fire weapon
 	PM_AddEvent( EV_FIRE_WEAPON );
-
-	switch( pm->ps->weapon ) {
-	default:
-	case WP_GAUNTLET:
-		addTime = 400;
-		break;
-	case WP_LIGHTNING:
-		addTime = 50;
-		break;
-	case WP_SHOTGUN:
-		addTime = 1000;
-		break;
-	case WP_MACHINEGUN:
-		addTime = 100;
-		break;
-	case WP_GRENADE_LAUNCHER:
-		addTime = 800;
-		break;
-	case WP_ROCKET_LAUNCHER:
-		addTime = 800;
-		break;
-	case WP_PLASMAGUN:
-		addTime = 100;
-		break;
-	case WP_RAILGUN:
-		addTime = 1500;
-		break;
-	case WP_BFG:
-		addTime = 200;
-		break;
-	case WP_GRAPPLING_HOOK:
-		addTime = 400;
-		break;
-#ifdef MISSIONPACK
-	case WP_NAILGUN:
-		addTime = 1000;
-		break;
-	case WP_PROX_LAUNCHER:
-		addTime = 800;
-		break;
-	case WP_CHAINGUN:
-		addTime = 30;
-		break;
-#endif
-	}
-
-#ifdef MISSIONPACK
-	if( bg_itemlist[pm->ps->stats[STAT_PERSISTANT_POWERUP]].giTag == PW_SCOUT ) {
-		addTime /= 1.5;
-	}
-	else
-	if( bg_itemlist[pm->ps->stats[STAT_PERSISTANT_POWERUP]].giTag == PW_AMMOREGEN ) {
-		addTime /= 1.3;
-  }
-  else
-#endif
-	if ( pm->ps->powerups[PW_HASTE] ) {
-		addTime /= 1.3;
-	}
 
 	pm->ps->weaponTime += addTime;
 }
