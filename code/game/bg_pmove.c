@@ -1538,9 +1538,8 @@ PM_Weapon
 Generates weapon events and modifes the weapon counter
 ==============
 */
-static void PM_Weapon( void ) {
+static void PM_Weapon(lua_State *L) {
 	int		addTime;
-	lua_State *L = GetServerLuaState();
 
 	// don't allow attack until all buttons are up
 	if ( pm->ps->pm_flags & PMF_RESPAWNED ) {
@@ -1956,7 +1955,7 @@ void PmoveBegin (pmove_t *pmove) {
 	PM_GroundTrace();
 }
 
-void PmoveEnd () {
+void PmoveEnd (lua_State *L) {
 	PM_DropTimers();
 	PM_Animate();
 
@@ -1965,7 +1964,7 @@ void PmoveEnd () {
 	PM_SetWaterLevel();
 
 	// weapons
-	PM_Weapon();
+	PM_Weapon(L);
 
 	// torso animation
 	PM_TorsoAnimation();
@@ -2104,15 +2103,15 @@ void Pmove (pmove_t *pmove, lua_State *L) {
 			lua_pushvector(L,pml.right);
 			qlua_pcall(L,4,1,qtrue);
 			if(lua_type(L,-1) == LUA_TBOOLEAN || lua_toboolean(L,-1)) {
-				PmoveEnd();
+				PmoveEnd(L);
 			} else {
 				PmoveSingle(pmove);
-				PmoveEnd();
+				PmoveEnd(L);
 			}
 		} else {
 			PmoveBegin( pmove );
 			PmoveSingle( pmove );
-			PmoveEnd();
+			PmoveEnd(NULL);
 		}
 
 
