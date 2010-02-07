@@ -851,6 +851,14 @@ int qlua_respawn(lua_State *L) {
 
 	luaentity = lua_toentity(L,1);
 	if(luaentity != NULL) {
+		if(luaentity->s.eType == ET_ITEM && luaentity->item->giType != 0) {
+			if((luaentity->r.svFlags & SVF_NOCLIENT) == 0) return 0;
+			if((luaentity->s.eFlags & EF_NODRAW) == 0) return 0;
+			if(luaentity->r.contents != 0) return 0;
+			luaentity->think = RespawnItem;
+			luaentity->nextthink = level.time;
+			return 0;
+		}
 		if(luaentity->client) {
 			if(luaentity->health <= 0) body = CopyToBodyQue(luaentity);
 			ClientSpawn(luaentity,NULL);
