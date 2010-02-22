@@ -810,6 +810,7 @@ FireWeapon
 ===============
 */
 void FireWeapon( gentity_t *ent ) {
+	lua_State *L = GetServerLuaState();
 	if (ent->client->ps.powerups[PW_QUAD] ) {
 		s_quadFactor = g_quadfactor.value;
 	} else {
@@ -838,6 +839,19 @@ void FireWeapon( gentity_t *ent ) {
 	AngleVectors (ent->client->ps.viewangles, forward, right, up);
 
 	CalcMuzzlePointOrigin ( ent, ent->client->oldOrigin, forward, right, up, muzzle );
+
+	if(L != NULL) {
+		qlua_gethook(L, "SVFiredWeapon");
+		lua_pushinteger(L, ent->s.clientNum);
+		lua_pushinteger(L, ent->s.weapon);
+		lua_pushinteger(L, ent->client->ps.weaponTime);
+		lua_pushvector(L, muzzle);
+		lua_pushvector(L, ent->client->ps.viewangles);
+		qlua_pcall(L,5,1,qtrue);
+		if(lua_type(L,-1) == LUA_TNUMBER) {
+			ent->client->ps.weaponTime = lua_tointeger(L,-1);
+		}
+	}
 
 	// fire the specific weapon
 	switch( ent->s.weapon ) {
