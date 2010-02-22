@@ -139,7 +139,8 @@ local function PreDamage(self,inflictor,attacker,damage,dtype)
 	end
 end
 
-local function FiredWeapon(player,weapon,delay,pos,angle)
+local function SVFiredWeapon(player,weapon,delay,pos,angle)
+	player = GetAllPlayers()[player+1]
 	if(weapon == WP_RAILGUN and player != nil) then
 		local color = player:GetTable().color or math.random(0,360)
 		local rt = IG_RELOADTIME
@@ -195,7 +196,6 @@ local function FiredWeapon(player,weapon,delay,pos,angle)
 				mpos = pos
 			end
 		end
-		
 		return rv --fire rate
 	end
 end
@@ -231,7 +231,7 @@ concommand.add("ig_bounces",plcolor,true)
 hook.add("ClientThink","instagib",CLThink)
 hook.add("PlayerSpawned","instagib",setupPlayer)
 hook.add("PrePlayerDamaged","instagib",PreDamage)
-hook.add("FiredWeapon","instagib",FiredWeapon)
+hook.add("SVFiredWeapon","instagib",SVFiredWeapon)
 hook.add("ShouldDropItem","instagib",function() return false end) --Don't drop items (like railguns)
 hook.add("PlayerKilled","instagib",function(p)  end)
 --Timer(1.5,spawnPlayer,p)
