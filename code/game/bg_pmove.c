@@ -1538,7 +1538,7 @@ PM_Weapon
 Generates weapon events and modifes the weapon counter
 ==============
 */
-static void PM_Weapon(lua_State *L) {
+static void PM_Weapon( lua_State *L ) {
 	int		addTime;
 
 	// don't allow attack until all buttons are up
@@ -2111,7 +2111,7 @@ void Pmove (pmove_t *pmove, lua_State *L) {
 		} else {
 			PmoveBegin( pmove );
 			PmoveSingle( pmove );
-			PmoveEnd(NULL);
+			PmoveEnd(L);
 		}
 
 

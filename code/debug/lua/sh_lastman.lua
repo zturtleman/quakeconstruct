@@ -44,6 +44,12 @@ if(SERVER) then
 		end
 	end
 	
+	local function sendFreeze()
+		local msg = Message()
+		message.WriteShort(msg,4)
+		SendDataMessageToAll(msg,"lastman_update")
+	end
+	
 	local function sendPLOut(pl)
 		local msg = Message()
 		message.WriteShort(msg,1)
@@ -77,6 +83,7 @@ if(SERVER) then
 		lastKill = LevelTime()
 		print("Hook " .. tostring(pl) .. " | " .. tostring(inflictor) .. " | " .. tostring(attacker) .. " | " .. tostring(damage) .. " | " .. tostring(means) .. "\n")
 		if(pl == nil) then return end
+		table.insert(deadClients,pl)
 		print("Player Killed\n")
 		sendMessage(pl:GetInfo().name .. " is out!");
 		sendPLOut(pl)
@@ -84,7 +91,6 @@ if(SERVER) then
 			local t = LevelTime() + 6000000
 			pl:SetRespawnTime(t)
 			print("Set RespawnTime: " .. t .. "\n")
-			table.insert(deadClients,pl)
 			
 			if(surviveTimer ~= nil) then
 				StopTimer(surviveTimer)
@@ -94,7 +100,7 @@ if(SERVER) then
 				checkAndPrintSurvivor()
 			end)
 
-			if(pl:GetTable() and pl:GetTable().body) then
+			if(pl and pl:GetTable() and pl:GetTable().body) then
 				pl:GetTable().body:SetNextThink(t)
 			end
 			--pl:SetAnim(BOTH_DEATH1,ANIM_LEGS,6000)
@@ -107,9 +113,11 @@ if(SERVER) then
 		local c = 0
 		local last = ""
 		for k,v in pairs(GetAllPlayers()) do
-			if(v:GetHealth() > 0) then
-				c = c + 1
-				last = v
+			if(v:GetInfo().team ~= TEAM_SPECTATOR) then
+				if(v:GetHealth() > 0) then
+					c = c + 1
+					last = v
+				end
 			end
 		end
 		return c,last
@@ -126,6 +134,8 @@ if(SERVER) then
 				sendMessage(last:GetInfo().name .. " is the last survivor!\n 1 Point")
 				last:SetInfo(PLAYERINFO_SCORE,last:GetInfo().score + 1)
 			end
+			freezePlayers = true
+			sendFreeze()
 			waitingReset = true
 		end
 	end
@@ -146,7 +156,7 @@ if(SERVER) then
 	end
 	reset()
 	
-	function H:Think()
+	local function Think()
 		if(startTime + GameMinutes() < LevelTime() and waitingReset ~= true) then
 			sendMessage("Time's Up, Restarting...")
 			startTime = LevelTime()
@@ -160,6 +170,7 @@ if(SERVER) then
 			end
 		end
 	end
+	hook.add("Think","sh_lastman",Think)
 	
 
 	local function PlayerDamaged(self,inflictor,attacker,damage,meansOfDeath)
@@ -206,7 +217,7 @@ else
 		for k,v in pairs(tab) do
 			local info = util.GetClientInfo(v.client)
 			if(info != nil) then	
-				if(info.connected) then
+				if(info.connected and info.team ~= TEAM_SPECTATOR) then
 					y = y + 10
 					local name = fixcolorstring(info.name)
 					draw.SetColor(1,1,1,1)
@@ -225,7 +236,7 @@ else
 			local h = 26 * s
 			local y = 300
 			if(_CG.stats[STAT_HEALTH] <= 0) then
-				y = 400
+				y = 380
 			end
 			
 			y = y - (h * #msgC) / 2
@@ -238,8 +249,29 @@ else
 			end
 		end
 		drawTimer()
+		if(_CG.stats[STAT_HEALTH] <= 0) then
+			draw.SetColor(0,0,0,.7)
+			draw.Rect(0,415,640,60)
+			local tstr = "You Are Dead!"
+			local s = math.sin(LevelTime()/100)*.06
+			local w = draw.Text2Width(tstr) * (.8 + s)
+			draw.SetColor(.8,0,0,1)
+			draw.Text2(320 - (w/2), 425, tstr, (.8 + s), false)
+			tstr = "Wait For The Round To Finish"
+			local w = draw.Text2Width(tstr) * .6
+			draw.SetColor(1,1,1,.7)
+			draw.Text2(320 - (w/2), 450, tstr, .6, false)
+		end
 	end
 	hook.add("Draw2D","sh_lastman",Draw2D)
+	
+	local function shouldDraw(str)
+		if(_CG.stats[STAT_HEALTH] <= 0) then
+			if(str == "HUD_SCOREBOARD") then return false end
+			if(str == "HUD_TWOSCORE") then return false end
+		end
+	end
+	hook.add("ShouldDraw","sh_lastman",shouldDraw)
 	
 	local function HandleMessage(msgid)
 		if(msgid == "lastman_update") then
@@ -257,6 +289,8 @@ else
 				local msg = message.ReadString()
 				svmessage = msg
 				svmessageTime = LevelTime()
+			elseif(t == 4) then
+				freezePlayers = true
 			end
 		end
 	end

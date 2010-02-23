@@ -507,7 +507,9 @@ void SV_ConnectionlessPacket( netadr_t from, msg_t *msg ) {
 	MSG_ReadLong( msg );		// skip the -1 marker
 
 	if (!Q_strncmp("connect", &msg->data[4], 7)) {
-		Huff_Decompress(msg, 12);
+		if (Q_strncmp("connect2", &msg->data[4], 8)) {
+			Huff_Decompress(msg, 12);
+		}
 	}
 
 	s = MSG_ReadStringLine( msg );
@@ -523,6 +525,8 @@ void SV_ConnectionlessPacket( netadr_t from, msg_t *msg ) {
 	} else if (!Q_stricmp(c, "getchallenge")) {
 		SV_GetChallenge( from );
 	} else if (!Q_stricmp(c, "connect")) {
+		SV_DirectConnect( from );
+	} else if (!Q_stricmp(c, "connect2")) {
 		SV_DirectConnect( from );
 	} else if (!Q_stricmp(c, "ipAuthorize")) {
 		SV_AuthorizeIpPacket( from );

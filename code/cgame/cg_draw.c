@@ -1092,6 +1092,8 @@ static float CG_DrawScores( float y ) {
 	float		y1;
 	gitem_t		*item;
 
+	if(CG_ShouldDraw("HUD_TWOSCORE") == qfalse) return 0;
+
 	s1 = cgs.scores1;
 	s2 = cgs.scores2;
 
