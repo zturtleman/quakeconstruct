@@ -17,11 +17,11 @@ function SkinPanel(p)
 end
 
 function Skin:DefaultBG()
-	return {.2,.25,.35,1}
+	return {0.1,0.1,0.1,1}
 end
 
 function Skin:DefaultFG()
-	return {.75,.8,.7,1}
+	return {0.8,0.5,0.04,1}
 end
 
 function Skin:StartMask(x,y,w,h)
