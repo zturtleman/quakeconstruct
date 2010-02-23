@@ -139,6 +139,33 @@ function LinkedListT:Len()
 	return self.count
 end
 
+function LinkedListT:IterReverse(func)
+	if(type(func) ~= "function") then return end
+	if(self.last == nil) then return end
+	local i = 1
+	local l = self.last
+	while(l.prev ~= nil) do
+		if(self.removeCall == true) then
+			i = i - 1
+			self.removeCall = false
+		end
+		
+		self.current = l
+		if(i > self:Len() or i <= 0) then return end
+		local b,e = pcall(func,l.__o,i)
+		self.current = nil
+		if(b ~= true) then error(e) end
+		l = l.prev
+		i = i + 1
+	end
+	
+	self.current = l
+	if(i > self:Len() or i <= 0) then return end
+	local b,e = pcall(func,l.__o,i)
+	self.current = nil
+	if(b ~= true) then error(e) end
+end
+
 function LinkedListT:Iter(func)
 	if(type(func) ~= "function") then return end
 	if(self.start == nil) then return end
