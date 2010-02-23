@@ -33,6 +33,10 @@ local function GetLinkAtIndex(self,index)
 	return l
 end
 
+function LinkedListT:GetLink(index)
+	return GetLinkAtIndex(self,index)
+end
+
 function LinkedListT:Get(index)
 	local l = GetLinkAtIndex(self,index)
 	if(l == nil) then return end
@@ -62,6 +66,35 @@ function LinkedListT:Replace(index,v)
 		return
 	end
 	l.__o = v
+end
+
+function LinkedListT:Sort(comparator)
+	if(self.start == nil) then return end
+	local temp, temp1, temp2
+	local d
+	local head = self.start
+	
+	temp=head
+	temp1=head
+	
+	while(temp.next ~= nil) do
+		temp=temp.next
+		while(temp1.next ~= nil) do
+			temp2=temp1
+			temp1=temp1.next
+			local b,e = pcall(comparator,temp2.__o,temp1.__o)
+			if(b == nil) then error("LinkedListT Comparator Error: " .. e .. "\n") end
+			
+			if(e) then
+				d = temp2.__o
+				temp2.__o = temp1.__o
+				temp1.__o = d
+			end
+		end
+		
+		temp2=head
+		temp1=head
+	end
 end
 
 function LinkedListT:Clear()
