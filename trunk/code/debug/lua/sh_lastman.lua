@@ -194,9 +194,10 @@ else
 	
 	local MESSAGE_DURATION = 3000
 	
-	function H:Think()
+	local function Think()
 		util.EnableCenterPrint(false)
 	end
+	hook.add("Think","sh_lastman",Think)
 	
 	local function drawTimer()
 		local m = GameMinutes()
@@ -264,6 +265,39 @@ else
 		end
 	end
 	hook.add("Draw2D","sh_lastman",Draw2D)
+	
+	local dtime = LevelTime()
+	function deadview(pos,ang,fovx,fovy)
+		if(_CG.stats[STAT_HEALTH] <= 0) then
+		local pl = LocalPlayer()
+		local legs,torso,head = LoadPlayerModels(pl)
+		legs:SetPos(pl:GetPos())
+		util.AnimatePlayer(pl,legs,torso)
+		util.AnglePlayer(pl,legs,torso,head)
+		torso:PositionOnTag(legs,"tag_torso")
+		head:PositionOnTag(torso,"tag_head")
+		
+		local tx = (LevelTime() - dtime)/15000
+		if(tx > 1) then tx = 1 end
+		tx = 1.0 - tx
+		tx = tx * tx
+		pos = head:GetPos() + Vector(0,0,70 + tx*-30)
+		local normal = VectorNormalize(pos - torso:GetPos())
+		local ax = VectorToAngles(normal)
+		ang.p = ax.p*-1
+		ang.y = ax.y+180
+		ang.z = 0
+		
+		ApplyView(pos,ang)
+				legs:Render()
+				torso:Render()
+				head:Render()
+
+		else
+			dtime = LevelTime()
+		end
+	end
+	hook.add("CalcView","sh_lastman",deadview)
 	
 	local function shouldDraw(str)
 		if(_CG.stats[STAT_HEALTH] <= 0) then
