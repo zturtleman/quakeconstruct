@@ -52,3 +52,32 @@ LVSHOP = {}
 		LVSHOP[1][WP_PLASMAGUN] = {2,2,2,0,0,0,0}
 		LVSHOP[1][WP_LIGHTNING] = {1,3,0,0,0,1,0}
 		LVSHOP[1][WP_BFG] = {8,4,0,0,0,0,0}
+		
+function LVEncodeWeapons(t)
+	local str = ""
+	for k,v in pairs(t) do
+		str = str .. k .. "|" .. v .. "|"
+	end
+	return str
+end
+
+function LVDecodeWeapons(t)
+	t = string.Explode("|",t)
+	local key = 0
+	local value = 0
+	local c = 0
+	local tab = {}
+	for k,v in pairs(t) do
+		if(c == 2) then
+			tab[key] = value
+			c = 0
+		end
+		if(c == 0) then
+			key = tonumber(v)
+		elseif(c == 1) then
+			value = tonumber(v)
+		end
+		c = c + 1
+	end
+	return tab
+end
