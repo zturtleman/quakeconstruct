@@ -14,17 +14,34 @@ local function cstat(s,i)
 	if(i == 7) then return " stealth +" .. v end
 end
 
+local function getWeaponCost(id)
+	local w = LVweapons[id] or 0
+	return LVSHOP[1][id][1] * (600 + (w * 600))
+end
+
 local function updateWeaponButton(id)
+	local w = LVweapons[id] or 0
 	local name = WEAPONNAMES[id]
 	local lb = weaponLabels[id]
-	local cost = LVSHOP[1][id][1] * 600
-	lb:SetText(name .. " - " .. cost .. "xp")
+	local cost = getWeaponCost(id)
+	lb:SetText("lvl" .. (w+1) .. " " .. name .. " - " .. cost .. "xp")
 	lb:ScaleToContents()
 	
-	if(LVcurrentXP >= cost) then
+	if(LVcurrentMoney >= cost) then
 		lb:SetBGColor(.8,.7,.3,1)
 	else
 		lb:SetBGColor(.3,0,0,1)
+	end
+end
+
+local function buy(id)
+	if(LVcurrentMoney >= getWeaponCost(id)) then
+		SendString("lvbuy" .. id)
+		Timer(0.2,function()
+			for i=WP_GAUNTLET,WP_BFG do
+				updateWeaponButton(i)
+			end
+		end)
 	end
 end
 
@@ -33,6 +50,9 @@ local function buildWeaponSlot(id,pane)
 	local lb = UI_Create("button",pane)
 	lb:SetFGColor(0,0,0,1)
 	lb:TextAlignCenter()
+	lb.DoClick = function()
+		buy(id)
+	end
 	weaponLabels[id] = lb
 	
 	updateWeaponButton(id)

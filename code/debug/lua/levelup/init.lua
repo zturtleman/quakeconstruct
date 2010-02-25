@@ -28,10 +28,17 @@ downloader.add("lua/levelup/cl_init.lua")
 
 local function beginPlayerTable(id)
 	pT[id] = {}
-	pT[id].xp = 0
+	pT[id].xp = 2800
 	pT[id].targetxp = 800
 	pT[id].level = 1
+	if(pT[id].xp > 0) then
+		pT[id].money = pT[id].xp / 2
+	else
+		pT[id].money = 0
+	end
 	pT[id].weapons = {}
+	pT[id].weapons[WP_GAUNTLET] = 1
+	pT[id].weapons[WP_MACHINEGUN] = 1
 end
 
 local function tableForPlayer(pl)
@@ -46,28 +53,32 @@ end
 
 LV_tableForPlayer = tableForPlayer
 
-local function gamestate(pl)
+function LVgamestate(pl)
 	local t = tableForPlayer(pl)
 	
 	E.event(LVMSG_GAMESTATE)
 	E.WriteShort(t.xp)
 	E.WriteShort(t.targetxp)
 	E.WriteShort(t.level)
+	E.WriteShort(t.money)
+	E.WriteString(LVEncodeWeapons(t.weapons))
 	E.dispatch(pl)
 end
 hook.add("MessageReceived","levelup",function(str,pl) 
 	if(str == "lvl_gamestate") then
 		print("SV: Player: " .. pl:GetInfo().name .. " requested gamestate\n")
-		gamestate(pl)
+		LVgamestate(pl)
 	end 
 end)
 
 local function addXP(pl,xp,source)
 	local t = tableForPlayer(pl)
 	t.xp = t.xp + xp
+	t.money = t.money + math.floor(xp/2)
 	
 	E.event(LVMSG_XP_ADDED)
 	E.WriteShort(t.xp)
+	E.WriteShort(t.money)
 	E.WriteVector(source)
 	E.dispatch(pl)
 	
@@ -95,3 +106,22 @@ local function PlayerDamaged(self,inflictor,attacker,damage,dtype)
 	end
 end
 hook.add("PlayerDamaged","levelup",PlayerDamaged)
+
+local function PlayerSpawned(pl)
+	local t = tableForPlayer(pl)
+	if(t == nil) then return end
+	pl:RemoveWeapons()
+	for i=WP_GAUNTLET, WP_BFG do
+		if(t.weapons[i] ~= nil and t.weapons[i] > 0) then
+			pl:GiveWeapon(i)
+			if(i == WP_GAUNTLET) then
+				pl:SetAmmo(i,-1)
+			end
+		end
+	end
+end
+hook.add("PlayerSpawned","levelup",PlayerSpawned)
+
+for k,v in pairs(GetAllPlayers()) do
+	PlayerSpawned(v)
+end
