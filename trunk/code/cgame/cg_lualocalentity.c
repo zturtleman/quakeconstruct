@@ -22,7 +22,10 @@ localEntity_t *qlua_lgetrealentity( int id ) {
 			return NULL;
 		}
 
-		if(next->id == 0) zc ++;
+/*		if(next->id == 0) {
+			le = cg_activeLocalEntities.prev;
+			zc ++;
+		}*/
 
 		if(le != NULL && le->id == id) {
 			return le;
@@ -31,7 +34,7 @@ localEntity_t *qlua_lgetrealentity( int id ) {
 	return NULL;
 }
 
-int qlua_lgetnextid() {
+/*int qlua_lgetnextid() {
 	int nextid = 1;
 	int x;
 	qboolean bad = qfalse;
@@ -55,7 +58,7 @@ int qlua_lgetnextid() {
 		}
 	}
 	return 2001;
-}
+}*/
 
 void lua_leentitytab(lua_State *L, localEntity_t *ent) {
 	if(ent->luatable == 0) {
@@ -89,7 +92,7 @@ void lua_pushlocalentity(lua_State *L, localEntity_t *cl) {
 	if(cl->id == 0) {
 		cl->id = idx;
 		idx++;
-		if(idx > 2000) {
+		if(idx > 20000) {
 			idx = 1;
 		}
 	}
