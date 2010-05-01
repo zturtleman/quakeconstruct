@@ -144,6 +144,7 @@ function Skin:DrawBackground(d)
 	local x,y = panel:GetPos()
 	d = d or .04
 	sk.coloradjust(nil,0,panel:GetAlpha())
+	--draw.Rect(x,y,panel.w,panel.h)
 	SkinCall("DrawBevelRect",x,y,panel.w,panel.h,d,1)
 	--SkinCall("DrawNeon",x,y,panel.w,panel.h,-1)
 end
