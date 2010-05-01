@@ -469,6 +469,29 @@ int qlua_setanim(lua_State *L) {
 	return 0;
 }
 
+int qlua_getpowerup(lua_State *L) {
+	gentity_t	*luaentity;
+	int pw = PW_NONE;
+	int time = 0;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checkint(L,2);
+
+	pw = lua_tointeger(L,2);
+
+	if(pw < PW_NONE || pw > PW_BLUEFLAG) {
+		lua_pushstring(L,"Invalid Argument For \"GetPowerup\"\n (out of range).\n");
+		lua_error(L);
+		return 1;
+	}
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL && luaentity->client != NULL) {
+		lua_pushinteger(L,luaentity->client->ps.powerups[pw]);
+	}
+	return 1;
+}
+
 int qlua_setpowerup(lua_State *L) {
 	gentity_t	*luaentity;
 	int pw = PW_NONE;
@@ -1551,6 +1574,7 @@ int lua_setclip(lua_State *L) {
 	luaentity = lua_toentity(L,1);
 	if(luaentity != NULL) {
 		mask = lua_tointeger(L,2);
+		luaentity->r.contents = mask;
 		luaentity->clipmask = mask;
 	}
 	return 0;
@@ -1948,6 +1972,7 @@ static const luaL_reg Entity_methods[] = {
   {"GetAmmo",		qlua_getammo},
   {"SetAnim",		qlua_setanim},
   {"SetPowerup",	qlua_setpowerup},
+  {"GetPowerup",	qlua_getpowerup},
   {"GetMaxHealth",	qlua_getmaxhealth},
   {"SetMaxHealth",	qlua_setmaxhealth},
   {"RemoveWeapons", qlua_removeweapons},

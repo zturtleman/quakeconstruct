@@ -155,6 +155,7 @@ function LinkedListT:IterReverse(func)
 		local b,e = pcall(func,l.__o,i)
 		self.current = nil
 		if(b ~= true) then error(e) end
+		if(e ~= nil) then return e end
 		l = l.prev
 		i = i + 1
 	end
@@ -164,6 +165,7 @@ function LinkedListT:IterReverse(func)
 	local b,e = pcall(func,l.__o,i)
 	self.current = nil
 	if(b ~= true) then error(e) end
+	if(e ~= nil) then return e end
 end
 
 function LinkedListT:Iter(func)
@@ -182,6 +184,7 @@ function LinkedListT:Iter(func)
 		local b,e = pcall(func,l.__o,i)
 		self.current = nil
 		if(b ~= true) then error(e) end
+		if(e ~= nil) then return e end
 		l = l.next
 		i = i + 1
 	end
@@ -191,6 +194,7 @@ function LinkedListT:Iter(func)
 	local b,e = pcall(func,l.__o,i)
 	self.current = nil
 	if(b ~= true) then error(e) end
+	if(e ~= nil) then return e end
 end
 
 function LinkedList()
