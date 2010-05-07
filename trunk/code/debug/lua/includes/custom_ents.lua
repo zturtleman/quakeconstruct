@@ -41,6 +41,18 @@ local function WriteEntityFunctions(cent) --Write internal entity functions into
 	end
 end
 
+local function metaCall(tab,func,...)
+	if(tab[func] != nil) then
+		local b,e = pcall(tab[func],tab,unpack(arg))
+		if(!b) then
+			print("^1Entity Error[" .. tab._classname .. "]: ^2" .. e .. "\n")
+		else
+			return true
+		end
+	end
+	return false
+end
+
 function ExecuteEntity(v)
 	ENT = {}
 	
@@ -59,17 +71,21 @@ function ExecuteEntity(v)
 end
 
 function ExecuteEntitySub(v)
+	print("^1EXECUTE ENTITY SUB! [" .. v[2] .. "]\n")
 	local class = string.lower(v[2])
 	local current = ENTS[class]
 	if(current != nil) then
 		ENT = {}
 		Execute(v[1])
 		
-		ENTS[class] = table.Inherit( ENT, ENTS[class] )
+		--ENTS[class] = table.Inherit( ENT, ENTS[class] )
+		table.Update(ENTS[class],ENT)
 		
 		for k,v in pairs(active) do
 			if(active[k]._classname == class) then
-				active[k] = table.Inherit(ENTS[class], active[k])
+				--active[k] = table.Inherit(ENTS[class], active[k])
+				table.Update(active[k],ENT)
+				metaCall(active[k],"ReInitialize")
 			end
 		end
 	else
@@ -118,18 +134,6 @@ InheritEntities()
 
 local function FindEntity(name)
 	return ENTS[string.lower(name)]
-end
-
-local function metaCall(tab,func,...)
-	if(tab[func] != nil) then
-		local b,e = pcall(tab[func],tab,unpack(arg))
-		if(!b) then
-			print("^1Entity Error[" .. tab._classname .. "]: ^2" .. e .. "\n")
-		else
-			return true
-		end
-	end
-	return false
 end
 
 local function SetCallbacks(ent,tab)
@@ -264,14 +268,14 @@ else
 	end
 	hook.add("UserCommand","checkcustom",UserCommand)
 	
-	local function messagetest(...)
+	--[[local function messagetest(...)
 		for k,v in pairs(active) do
 			if(v != nil) then
 				metaCall(active[k],"MessageReceived",unpack(arg))
 			end
 		end
 	end
-	hook.add("MessageReceived","checkcustom",messagetest)
+	hook.add("MessageReceived","checkcustom",messagetest)]]
 	
 	local function dlhook(file)
 		if(string.find(file,"/lua.entities.") and
@@ -292,15 +296,19 @@ else
 			if(current != nil) then
 				ENT = {}
 				pcall(include,file)
+
+				--ENT
 				
-				ENTS[class] = table.Inherit( ENT, ENTS[class] )
+				table.Update(ENTS[class], ENT)
 				
+				print("REPLACING CURRENT: " .. class .. "\n")
 				for k,v in pairs(active) do
 					if(active[k]._classname == class) then
-						active[k] = table.Inherit(ENTS[class], active[k])
+						--active[k] = table.Inherit(ENTS[class], active[k])
+						table.Update(active[k], ENT)
+						metaCall(active[k],"ReInitialize")
 					end
 				end
-				--print("REPLACED CURRENT: " .. class .. "\n")
 			else
 				ENT = {}
 				

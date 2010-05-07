@@ -29,9 +29,6 @@ function ENT:Initialized()
 	self.Entity:SetClip(CONTENTS_PLAYERCLIP)
 	self.Entity:SetMins(Vector(-5,-5,-5))
 	self.Entity:SetMaxs(Vector(5,5,5))
-	self.Entity:SetTakeDamage(true)
-	self.Entity:SetHealth(1000)
-	self.Entity:SetBounce(.7)
 	--self.Entity:SetAngles(Vector(0,self.Entity:GetSpawnAngle(),0))
 end
 
