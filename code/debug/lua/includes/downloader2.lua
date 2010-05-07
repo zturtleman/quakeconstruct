@@ -548,7 +548,7 @@ if(CLIENT) then
 			if(checkForFile(FILENAME,md5)) then
 				--print("F_SENT_CANCEL\n")
 				SendString("_downloadaction cancel")
-				includeFile(FILENAME)
+				includeFile(FILENAME) --FIX THIS OMG! -Hxrmn
 				finished()
 			else
 				if(frame == nil) then

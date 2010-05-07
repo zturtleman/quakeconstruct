@@ -38,6 +38,26 @@ function table.Copy(t, lookup_table)
 end
 
 
+function table.Update(dest, source, tf)
+	for k,v in pairs(source) do
+		if(tf ~= nil) then
+			if(type(v) == tf) then
+				dest[k] = source[k]
+			end
+		else
+			dest[k] = source[k]		
+		end
+	end
+end
+
+function table.Instance(t)
+	local o = {}
+	for k,v in pairs(t) do
+		o[k] = v
+	end
+	return o
+end
+
 function table.Merge(dest, source)
 	for k,v in pairs(source) do
 		if type(v)=='table' and type(dest[k])=='table' then
