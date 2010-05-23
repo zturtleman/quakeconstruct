@@ -21,6 +21,7 @@ local eventBuffer = nil
 includesimple("levelup/shared")
 includesimple("levelup/eventdispatcher")
 includesimple("levelup/shop")
+includesimple("levelup/combat")
 
 downloader.add("lua/levelup/shared.lua")
 downloader.add("lua/levelup/cl_effects.lua")
@@ -28,7 +29,7 @@ downloader.add("lua/levelup/cl_init.lua")
 
 local function beginPlayerTable(id)
 	pT[id] = {}
-	pT[id].xp = 2800
+	pT[id].xp = 12800
 	pT[id].targetxp = 800
 	pT[id].level = 1
 	if(pT[id].xp > 0) then

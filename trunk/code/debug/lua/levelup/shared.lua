@@ -19,6 +19,13 @@ if(CLIENT) then print("OPENED SHARED ON CLIENT\n") end
 --LG should be speed / damage over time
 --BG should be damage over time
 
+WP_AT_DAMAGE = 2
+WP_AT_FIRERATE = 3
+WP_AT_HEALTH = 4
+WP_AT_RESIST = 5
+WP_AT_SPEED = 6
+WP_AT_STEALTH = 7
+
 WEAPONNAMES = {}
 	WEAPONNAMES[WP_GAUNTLET] = "Gauntlet"
 	WEAPONNAMES[WP_MACHINEGUN] = "Machine Gun"
