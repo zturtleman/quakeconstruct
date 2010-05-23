@@ -21,6 +21,17 @@ function intToBool(i)
 	return true
 end
 
+function entityWaterLevel(pl)
+	local level = 0
+	local pos = pl:GetPos()
+	local mask = CONTENTS_WATER
+	local res = TraceLine(pos + Vector(0,0,28),pos,pl,mask)
+	if(res.fraction < .5) then level = 1 end
+	if(res.fraction < .35) then level = 2 end
+	if(res.fraction <= 0) then level = 3 end
+	return level
+end
+
 function ColorToLong(r,g,b,a)
 	if (a == nil) then a = 0 end
 	

@@ -443,6 +443,7 @@ Also called by playerstate transition
 */
 void CG_PainEvent( centity_t *cent, int health ) {
 	char	*snd;
+	lua_State		*L = GetClientLuaState();
 
 	// don't do more than two pain sounds a second
 	if ( cg.time - cent->pe.painTime < 500 ) {
@@ -458,6 +459,19 @@ void CG_PainEvent( centity_t *cent, int health ) {
 	} else {
 		snd = "*pain100_1.wav";
 	}
+
+	if(L != NULL) {
+		qlua_gethook(L, "EventReceived");
+		lua_pushentity(L,cent);
+		lua_pushinteger(L,EV_PAIN);
+		lua_pushvector(L,cent->currentState.origin);
+		lua_pushvector(L,cent->currentState.angles);
+		qlua_pcall(L,4,1,qtrue);
+		if(lua_type(L,-1) == LUA_TBOOLEAN && lua_toboolean(L,-1)) {
+			return;
+		}
+	}
+
 	trap_S_StartSound( NULL, cent->currentState.number, CHAN_VOICE, 
 		CG_CustomSound( cent->currentState.number, snd ) );
 
@@ -504,7 +518,7 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 	}
 	ci = &cgs.clientinfo[ clientNum ];
 
-	if(L != NULL) {
+	if(L != NULL && event != EV_PAIN) {
 		qlua_gethook(L, "EventReceived");
 		lua_pushentity(L,cent);
 		lua_pushinteger(L,event);

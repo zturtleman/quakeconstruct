@@ -3,6 +3,49 @@
 
 qboolean		maskOn = qfalse;
 
+static float	s_flipMatrix[16] = {
+	// convert from our coordinate system (looking down X)
+	// to OpenGL's coordinate system (looking down -Z)
+	0, 0, -1, 0,
+	-1, 0, 0, 0,
+	0, 1, 0, 0,
+	0, 0, 0, 1
+};
+
+int matrixPos(int r, int c) {
+        return ((r*4)+1*c+1)-1;         
+}
+
+float mrowcol(int p, float *m1, float *m2) {
+        int c = p % 4;
+        int r = p / 4;
+        float mv = 0;
+        int i=0;
+        for(i=0; i<4; i++) {
+                int p1 = matrixPos(r,i);
+                int p2 = matrixPos(i,c);
+                mv += m1[p1] * m2[p2];
+        }
+        return mv;
+}
+
+void quickMultiply1x4by4x4(float *mat1, float *mat2, float *out) {
+        int i,j;
+        for(i=0; i<4; i++) {
+                for(j=0; j<4; j++) {
+                        int rc = (j*4) + i;
+                        out[i] += mat1[j] * mat2[rc];
+                }
+        }       
+}
+
+void quickMultiply4x4(float *mat1, float *mat2, float *out) {
+        int i;
+        for(i=0; i<16; i++) {
+                out[i] = mrowcol(i,mat1,mat2);
+        }
+}
+
 int qlua_start3D(lua_State *L) {
 	vec3_t origin,right,down,forward;
 
@@ -392,6 +435,116 @@ int qlua_getpixel(lua_State *L) {
 	return 3;
 }
 
+int qlua_vectorToScreen(lua_State *L) {
+	vec3_t v,origin,v2;
+	refdef_t		refdef;
+	int				view[4];
+	float			vout[4];
+	float			voutm[4];
+	float			temp[16];
+	float			temp2[16];
+	float			temp3[16];
+	float			modelMatrix[16];
+	float			perspectiveMatrix[16];
+	float			xmin, xmax, ymin, ymax;
+	float			width, height, depth;
+	float			zNear, zFar;
+
+	luaL_checktype(L,1,LUA_TVECTOR);
+	lua_tovector(L,1,v);
+	if(lua_type(L,2) == LUA_TTABLE) {
+		lua_torefdef(L, 1, &refdef, qtrue);
+	} else {
+		refdef = cg.refdef;
+	}
+	VectorCopy(refdef.vieworg,origin);
+
+
+	modelMatrix[0] = refdef.viewaxis[0][0];
+	modelMatrix[4] = refdef.viewaxis[0][1];
+	modelMatrix[8] = refdef.viewaxis[0][2];
+	modelMatrix[12] = -origin[0] * modelMatrix[0] + -origin[1] * modelMatrix[4] + -origin[2] * modelMatrix[8];
+
+	modelMatrix[1] = refdef.viewaxis[1][0];
+	modelMatrix[5] = refdef.viewaxis[1][1];
+	modelMatrix[9] = refdef.viewaxis[1][2];
+	modelMatrix[13] = -origin[0] * modelMatrix[1] + -origin[1] * modelMatrix[5] + -origin[2] * modelMatrix[9];
+
+	modelMatrix[2] = refdef.viewaxis[2][0];
+	modelMatrix[6] = refdef.viewaxis[2][1];
+	modelMatrix[10] = refdef.viewaxis[2][2];
+	modelMatrix[14] = -origin[0] * modelMatrix[2] + -origin[1] * modelMatrix[6] + -origin[2] * modelMatrix[10];
+
+	modelMatrix[3] = 0;
+	modelMatrix[7] = 0;
+	modelMatrix[11] = 0;
+	modelMatrix[15] = 1;
+
+	zNear = 4;
+	zFar = 2048;
+
+	ymax = zNear * tan( refdef.fov_y * M_PI / 360.0f );
+	ymin = -ymax;
+
+	xmax = zNear * tan( refdef.fov_x * M_PI / 360.0f );
+	xmin = -xmax;
+
+	width = xmax - xmin;
+	height = ymax - ymin;
+	depth = zFar - zNear;
+
+	perspectiveMatrix[0] = 2 * zNear / width;
+	perspectiveMatrix[4] = 0;
+	perspectiveMatrix[8] = ( xmax + xmin ) / width;	// normally 0
+	perspectiveMatrix[12] = 0;
+
+	perspectiveMatrix[1] = 0;
+	perspectiveMatrix[5] = 2 * zNear / height;
+	perspectiveMatrix[9] = ( ymax + ymin ) / height;	// normally 0
+	perspectiveMatrix[13] = 0;
+
+	perspectiveMatrix[2] = 0;
+	perspectiveMatrix[6] = 0;
+	perspectiveMatrix[10] = -( zFar + zNear ) / depth;
+	perspectiveMatrix[14] = -2 * zFar * zNear / depth;
+
+	perspectiveMatrix[3] = 0;
+	perspectiveMatrix[7] = 0;
+	perspectiveMatrix[11] = -1;
+	perspectiveMatrix[15] = 0;
+
+	voutm[0] = v[0];
+	voutm[1] = v[1];
+	voutm[2] = v[2];
+	voutm[3] = 1;
+
+	view[0] = refdef.x;
+	view[1] = refdef.y;
+	view[2] = refdef.width;
+	view[3] = refdef.height;
+
+	quickMultiply4x4(modelMatrix,s_flipMatrix,temp);
+	quickMultiply4x4(temp,perspectiveMatrix,temp2);
+	quickMultiply4x4(temp,temp2,temp3);
+	quickMultiply1x4by4x4(voutm,temp3,vout);
+
+		vout[0] /= vout[3];
+		vout[1] /= vout[3];
+		vout[2] /= vout[3];
+		
+		vout[0] = view[0] + (view[2] * (vout[0] + 1)) / 2;
+		vout[1] = view[1] + (view[3] * (vout[1] + 1)) / 2;
+		vout[2] = (vout[2] + 1) / 2;
+
+	v2[0] = vout[0];
+	v2[1] = vout[1];
+	v2[2] = vout[2];
+
+	lua_pushvector(L,v2);
+
+	return 1;
+}
+
 static const luaL_reg Draw_methods[] = {
   {"SetColor",		qlua_setcolor},
   {"Rect",			qlua_rect},
@@ -408,6 +561,7 @@ static const luaL_reg Draw_methods[] = {
   {"End3D",			qlua_end3D},
   {"Get3DCoord",	qlua_get3DCoord},
   {"GetPixel",		qlua_getpixel},
+  {"VectorToScreen",qlua_vectorToScreen},
   {0,0}
 };
 
