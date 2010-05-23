@@ -24,13 +24,23 @@ local function updateWeaponButton(id)
 	local name = WEAPONNAMES[id]
 	local lb = weaponLabels[id]
 	local cost = getWeaponCost(id)
-	lb:SetText("lvl" .. (w+1) .. " " .. name .. " - " .. cost .. "xp")
+	lb:SetText("lvl" .. (w+1) .. " " .. name .. " - $" .. cost .. "")
 	lb:ScaleToContents()
 	
 	if(LVcurrentMoney >= cost) then
 		lb:SetBGColor(.8,.7,.3,1)
 	else
 		lb:SetBGColor(.3,0,0,1)
+	end
+	
+	local str = ""
+	if(LVweapons[id] or 0 >= 1) then
+		if(LVcurrentMoney >= cost) then
+			for i=2,7 do
+				str = str .. cstat(LVSHOP[1][id],i)
+			end
+		end
+		weaponLabels[id].lb2:SetText(str)
 	end
 end
 
@@ -55,13 +65,13 @@ local function buildWeaponSlot(id,pane)
 	end
 	weaponLabels[id] = lb
 	
-	updateWeaponButton(id)
-	
 	--DAMAGE,FIRERATE,HEALTH,RESIST,SPEED,STEALTH
 	local cost = st[1]
 	local str = ""
-	for i=2,7 do
-		str = str .. cstat(st,i)
+	if(LVweapons[id] or 0 >= 1) then
+		for i=2,7 do
+			str = str .. cstat(st,i)
+		end
 	end
 	
 	local lb2 = UI_Create("label",pane)
@@ -70,6 +80,9 @@ local function buildWeaponSlot(id,pane)
 	lb2:TextAlignLeft()
 	lb2:ScaleToContents()
 	lb2:SetPos(20,20)
+	weaponLabels[id].lb2 = lb2
+	
+	updateWeaponButton(id)
 end
 
 local function addShopWeapons()

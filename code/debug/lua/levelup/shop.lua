@@ -21,6 +21,9 @@ local function buyWeapon(pl,id)
 		t.money = t.money - bcost
 		pl:GiveWeapon(id)
 		pl:SetWeapon(id)
+		if(id == WP_GAUNTLET) then
+			pl:SetAmmo(id,-1)
+		end
 	end
 end
 
