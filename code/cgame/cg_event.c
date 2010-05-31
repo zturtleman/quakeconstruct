@@ -519,6 +519,7 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 	ci = &cgs.clientinfo[ clientNum ];
 
 	if(L != NULL && event != EV_PAIN) {
+		ByteToDir( es->eventParm, dir );
 		qlua_gethook(L, "EventReceived");
 		lua_pushentity(L,cent);
 		lua_pushinteger(L,event);

@@ -186,12 +186,21 @@ cent->nextState is moved to cent->currentState and events are fired
 ===============
 */
 static void CG_TransitionEntity( centity_t *cent ) {
+	lua_State		*L = GetClientLuaState();
 	cent->currentState = cent->nextState;
 	cent->currentValid = qtrue;
 
 	// reset if the entity wasn't in the last frame or was teleported
 	if ( !cent->interpolate ) {
 		CG_ResetEntity( cent );
+
+		if(L != NULL && cent->linked == qfalse && cent->currentState.eType <= ET_LUA && 
+			cent->currentState.eType != ET_GENERAL) {
+			qlua_gethook(L,"EntityLinked");
+			lua_pushentity(L,cent);
+			qlua_pcall(L,1,0,qtrue);
+			cent->linked = qtrue;
+		}
 	}
 
 	// clear the next state.  if will be set by the next CG_SetNextSnap
@@ -361,14 +370,6 @@ static void CG_SetNextSnap( snapshot_t *snap ) {
 			cent->interpolate = qfalse;
 		} else {
 			cent->interpolate = qtrue;
-		}
-
-		if(L != NULL && cent->linked == qfalse && cent->currentState.eType <= ET_LUA && 
-			cent->currentState.eType != ET_GENERAL) {
-			qlua_gethook(L,"EntityLinked");
-			lua_pushentity(L,cent);
-			qlua_pcall(L,1,0,qtrue);
-			cent->linked = qtrue;
 		}
 	}
 
