@@ -6,7 +6,7 @@ local function attachBeam(ent)
 end
 
 local etab = {}
-local splodes = {}
+local splodes = LinkedList()
 local function makeTrail(cr,cg,cb,ca,size,ft)
 	local r,g,b = hsv(math.random(360),1,.5)
 	local trail = RefEntity()
@@ -51,10 +51,14 @@ local function d3d()
 			
 				vx.trail:SetPos(pos + o)
 				vx.trail2:SetPos(pos)
-				vx.flare:SetPos(pos)
-				vx.flare:Render()
-				vx.flare2:SetPos(pos)
-				vx.flare2:Render()
+				if(vx.flare ~= nil) then
+					vx.flare:SetPos(pos)
+					vx.flare:Render()
+				end
+				if(vx.flare2 ~= nil) then
+					vx.flare2:SetPos(pos)
+					vx.flare2:Render()
+				end
 				vx.lt = leveltime
 				vx.die = vx.lt
 			end
@@ -64,6 +68,16 @@ local function d3d()
 		if(v.trail ~= nil and v.trail2 ~= nil) then
 			v.trail:Render()
 			v.trail2:Render()
+			
+			--[[local h = (leveltime - v.start*1.4)/5
+			local r,g,b = hsv(h,1,1)
+			
+			if(v.flare ~= nil and v.flare2 ~= nil) then
+				v.flare:SetColor(r,g,b,1)
+				v.flare2:SetColor(r,g,b,1)
+			end
+			v.trail:SetColor(r,g,b,1)
+			v.trail2:SetColor(r,g,b,1)]]
 			if(v.lt < leveltime - 60) then
 				v.trail:SetPos(v.trail:GetPos())
 				v.trail2:SetPos(v.trail2:GetPos())
@@ -74,16 +88,16 @@ local function d3d()
 			end
 		end
 	end
-	for k,v in pairs(splodes) do
+	splodes:Iter(function(v)
 		if(v.trail) then
 			for i=0, 1 do v.trail:SetPos(v.trail:GetPos()) end
 			v.trail:Render()
 			if(v.start < LevelTime() - 1000) then
 				v.trail = nil
-				table.remove(splodes,k)
+				splodes:Remove()
 			end
 		end
-	end
+	end)
 end
 hook.add("Draw3D","cl_missiletrail",d3d)
 
@@ -97,7 +111,7 @@ local function splode(pos,ptr,dir)
 		tr:SetPos(tr:GetPos() + dir*2 + VectorRandom()*(4+i/10))
 	end
 	
-	table.insert(splodes,{trail=tr,start=LevelTime(),pos=pos})
+	splodes:Add({trail=tr,start=LevelTime(),pos=pos})
 end
 
 local function LinkEntity(e)
@@ -164,6 +178,8 @@ local function event(entity,event,pos,dir)
 		local vx = etab[id]
 		if(vx ~= nil) then
 			splode(entity:GetPos(),vx.trail,dir)
+			vx.flare = nil
+			vx.flare2 = nil
 		end
 	end
 	if(event == EV_GRENADE_BOUNCE) then
