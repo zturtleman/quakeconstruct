@@ -159,7 +159,7 @@ function onHookCall(event,...)
 
 end
 
-function CallHook(event,...)
+function CallHookArgTForm(event,tform,...)
 	for k,v in pairs(arg) do
 		if(type(v) == "vector3") then
 			arg[k] = Vectorv(v)
@@ -172,6 +172,20 @@ function CallHook(event,...)
 		if (hook.debugflags[event] == true) then debugprint("Calling Function: " .. fname .. "\n") end
 		
 		onHookCall(event,unpack(arg))
+		if(tform ~= nil and type(tform) == "function") then
+			--print("TFORM\n")
+			local b,e = pcall(tform,unpack(arg))
+			if not b then
+				print("^1HOOK TFORM ERROR[" .. event .. "]: " .. e .. "\n")
+			elseif(e ~= nil and type(e) == "table") then
+				if(#e == #arg) then
+					arg = e
+				else
+					print("^1HOOK TFORM ERROR[" .. event .. "]: bad tform arg count[" .. #e .. "] != " .. #arg .. "\n")
+				end
+			end
+		end
+		
 		local b,e = pcall(v.func,unpack(arg))
 		if not b then
 			print("^1HOOK ERROR[" .. event .. "]: " .. e .. "\n")
@@ -192,6 +206,10 @@ function CallHook(event,...)
 		end
 	end
 	if(retVal != nil) then return retVal end
+end
+
+function CallHook(event,...)
+	CallHookArgTForm(event,nil,unpack(arg))
 end
 
 hook.add("ScriptLoaded","_scriptloadhooks",function(script)

@@ -1,13 +1,16 @@
 local SpringT = {}
 
-local function doValue(val,ideal,spd,vel,fr)
-	local dist = ideal - val;
+local function doValue(val,dist,spd,vel,fr)
 	vel = vel + (dist * spd);
 	
 	val = val + (vel * spd);
 	
 	vel = vel * fr;
 	return val,vel
+end
+
+function SpringT:GetDelta()
+	return self.ideal - self.val
 end
 
 function SpringT:GetValue()
@@ -21,7 +24,7 @@ function SpringT:Update(lcompensate)
 		local l = Lag()
 		spd = spd * l
 	end
-	self.val,self.vel = doValue(self.val,self.ideal,self.spd,self.vel,fr)
+	self.val,self.vel = doValue(self.val,self:GetDelta(),self.spd,self.vel,fr)
 end
 
 function SpringT:__index()

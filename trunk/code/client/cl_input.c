@@ -27,6 +27,7 @@ unsigned	frame_msec;
 int			old_com_frameTime;
 qboolean	lockmouse = qfalse;
 qboolean	use_replace = qfalse;
+qboolean	replace_valid = qfalse;
 usercmd_t	replace;
 usercmd_t	real;
 
@@ -546,6 +547,7 @@ CL_CreateCmd
 usercmd_t CL_CreateCmd( void ) {
 	usercmd_t	cmd;
 	vec3_t		oldAngles;
+	int i;
 
 	VectorCopy( cl.viewangles, oldAngles );
 
@@ -577,6 +579,8 @@ usercmd_t CL_CreateCmd( void ) {
 	// store out the final values
 	CL_FinishMove( &cmd );
 
+	//Com_Printf("~PITCH: %f | %i | %f\n",cl.viewangles[0],cmd.angles[0],SHORT2ANGLE(cmd.angles[0]));
+
 	real.angles[0] = cmd.angles[0];
 	real.angles[1] = cmd.angles[1];
 	real.angles[2] = cmd.angles[2];
@@ -587,6 +591,7 @@ usercmd_t CL_CreateCmd( void ) {
 	real.weapon = cmd.weapon;
 
 	if(cgvm != NULL) {
+		replace_valid = qfalse;
 		VM_Call (cgvm, CG_LUA_USERCMD);
 	}
 
@@ -599,6 +604,24 @@ usercmd_t CL_CreateCmd( void ) {
 		cmd.rightmove = replace.rightmove;
 		cmd.upmove = replace.upmove;
 		cmd.weapon = replace.weapon;
+
+		/*for (i=0 ; i<3 ; i++) {
+			cl.viewangles[i] = (float) (cmd.angles[i])*360.0/65536;
+		}
+
+		Com_Printf("|PITCH: %f\n",cl.viewangles[0]);
+
+		if ( cl.viewangles[PITCH] - oldAngles[PITCH] > 90 ) {
+			cl.viewangles[PITCH] = oldAngles[PITCH] + 90;
+		} else if ( oldAngles[PITCH] - cl.viewangles[PITCH] > 90 ) {
+			cl.viewangles[PITCH] = oldAngles[PITCH] - 90;
+		}
+
+		Com_Printf("PITCH: %f\n",cl.viewangles[0]);
+
+		for (i=0 ; i<3 ; i++) {
+			cmd.angles[i] = ANGLE2SHORT(cl.viewangles[i]);
+		}*/
 		//memcpy(&cmd,&replace,sizeof(usercmd_t));
 	}
 
@@ -617,6 +640,7 @@ usercmd_t CL_CreateCmd( void ) {
 
 void CL_ChangeCommand (usercmd_t *cmd) {
 	memcpy(&replace,cmd,sizeof(usercmd_t));
+	replace_valid = qtrue;
 }
 
 void CL_SetCommandOverride (qboolean b) {
@@ -625,6 +649,9 @@ void CL_SetCommandOverride (qboolean b) {
 
 void CL_GetRealCommand (usercmd_t *cmd) {
 	*cmd = real;
+	if(replace_valid) {
+		*cmd = replace;
+	}
 }
 /*
 =================
