@@ -1926,15 +1926,25 @@ void qlua_HandleUsercmd() {
 int qlua_SetUserCommand(lua_State *L) {
 	usercmd_t	cmd;
 	vec3_t		angles;
+	float pitch;
 
 	trap_GetCurrentUserCommand( &cmd );
 
 	if(lua_gettop(L) >= 1) {
 		lua_tovector(L,1,angles);
+
+		/*pitch = angles[PITCH];
+		if ( pitch > 90 ) {
+			pitch = 90;
+		} else if ( pitch < -90 ) {
+			pitch = -90;
+		}
+		angles[PITCH] = pitch;*/
+
 		cmd.angles[0] = ANGLE2SHORT(angles[0]);
 		cmd.angles[1] = ANGLE2SHORT(angles[1]);
 		cmd.angles[2] = ANGLE2SHORT(angles[2]);
-		VectorCopy(angles,cg.predictedPlayerState.viewangles);
+		//VectorCopy(angles,cg.predictedPlayerState.viewangles);
 	}
 	if(lua_gettop(L) >= 2) cmd.forwardmove = (signed char) lua_tonumber(L,2);
 	if(lua_gettop(L) >= 3) cmd.rightmove = (signed char) lua_tonumber(L,3);
