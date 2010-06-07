@@ -49,6 +49,7 @@ HOOKS.CL = {
 	"Draw3D",
 	"DrawCustomEntity",
 	"DrawInfo",
+	"DrawPlayerModel",
 	"EventReceived",
 	"HandleMessage",
 	"InitialSnapshot",
@@ -209,7 +210,7 @@ function CallHookArgTForm(event,tform,...)
 end
 
 function CallHook(event,...)
-	CallHookArgTForm(event,nil,unpack(arg))
+	return CallHookArgTForm(event,nil,unpack(arg))
 end
 
 hook.add("ScriptLoaded","_scriptloadhooks",function(script)

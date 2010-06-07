@@ -480,6 +480,7 @@ int qlua_lsetcallback(lua_State *L) {
 				case 2: ent->lua_die = qlua_storefunc(L,3,ent->lua_die); break;
 				case 3: ent->lua_stopped = qlua_storefunc(L,3,ent->lua_stopped); break;
 				case 4: ent->lua_parentgone = qlua_storefunc(L,3,ent->lua_parentgone); break;
+				case 5: ent->lua_render = qlua_storefunc(L,3,ent->lua_render); break;
 			}		
 		}
 	}
@@ -542,6 +543,25 @@ int qlua_lbounce(lua_State *L) {
 	luaentity = lua_tolocalentity(L,1);
 	if(luaentity != NULL) {
 		luaentity->bounceFactor = lua_tonumber(L,2);
+	}
+	return 0;
+}
+
+int qlua_lasgib(lua_State *L) {
+	localEntity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TBOOLEAN);
+
+	luaentity = lua_tolocalentity(L,1);
+	if(luaentity != NULL) {
+		if(lua_toboolean(L,2)) {
+			luaentity->leBounceSoundType = LEBS_BLOOD;
+			luaentity->leMarkType = LEMT_BLOOD;
+		} else {
+			luaentity->leBounceSoundType = LEBS_NONE;
+			luaentity->leMarkType = LEMT_NONE;
+		}
 	}
 	return 0;
 }
@@ -726,6 +746,7 @@ static const luaL_reg LEntity_methods[] = {
   {"SetCallback",	qlua_lsetcallback},
   {"SetNextThink",	qlua_lnextthink},
   {"SetBounceFactor", qlua_lbounce},
+  {"SetAsGib",		qlua_lasgib},
   {"GetTable",		lua_legetentitytable},
   {"SetParent",		qlua_lsetparent},
   {"Emitter",	qlua_setemitter},
