@@ -71,6 +71,7 @@ void CG_FreeLocalEntity( localEntity_t *le ) {
 		qlua_clearfunc(GetClientLuaState(),le->lua_bounce);
 		qlua_clearfunc(GetClientLuaState(),le->lua_think);
 		qlua_clearfunc(GetClientLuaState(),le->lua_stopped);
+		qlua_clearfunc(GetClientLuaState(),le->lua_render);
 	}
 
 	le->lua_die = 0;
@@ -78,6 +79,7 @@ void CG_FreeLocalEntity( localEntity_t *le ) {
 	le->lua_bounce = 0;
 	le->lua_stopped = 0;
 	le->lua_parentgone = 0;
+	le->lua_render = 0;
 	le->hadparent = qfalse;
 	le->parent = NULL;
 	le->parent_tag = "";
@@ -1073,6 +1075,14 @@ void CG_AddLocalEntities( void ) {
 				VectorCopy(temp[i-1],le->refEntity.trailVerts[i]);
 			}
 			VectorCopy(le->refEntity.origin,le->refEntity.trailVerts[0]);
+		}
+
+
+		if(GetClientLuaState() != NULL && !le->emitter) {
+			if(qlua_getstored(GetClientLuaState(), le->lua_render)) {
+				lua_pushlocalentity(GetClientLuaState(), le);
+				qlua_pcall(GetClientLuaState(), 1, 0, qfalse);
+			}
 		}
 
 		switch ( le->leType ) {

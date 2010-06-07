@@ -2156,7 +2156,20 @@ Adds a piece with modifications or duplications for powerups
 Also called by CG_Missile for quad rockets, but nobody can tell...
 ===============
 */
-void CG_AddRefEntityWithPowerups( refEntity_t *ent, entityState_t *state, int team ) {
+void CG_AddRefEntityWithPowerups( refEntity_t *ent, entityState_t *state, int team, int part ) {
+	lua_State *L = GetClientLuaState();
+
+	if(L != NULL) {
+		qlua_gethook(L,"DrawPlayerModel");
+		lua_pushrefentity(L,ent);
+		lua_pushentity(L,&cg_entities[ state->clientNum ]);
+		lua_pushinteger(L,part);
+		lua_pushinteger(L,team);
+		qlua_pcall(L,4,1,qtrue);
+		if(lua_type(L,-1) == LUA_TBOOLEAN && lua_toboolean(L,-1)) {
+			return;
+		}
+	}
 
 	if ( state->powerups & ( 1 << PW_INVIS ) ) {
 		ent->customShader = cgs.media.invisShader;
@@ -2248,6 +2261,7 @@ CG_Player
 ===============
 */
 void CG_Player( centity_t *cent ) {
+	lua_State *L = GetClientLuaState();
 	clientInfo_t	*ci;
 	refEntity_t		legs;
 	refEntity_t		torso;
@@ -2335,7 +2349,7 @@ void CG_Player( centity_t *cent ) {
 	legs.renderfx = renderfx;
 	VectorCopy (legs.origin, legs.oldorigin);	// don't positionally lerp at all
 
-	CG_AddRefEntityWithPowerups( &legs, &cent->currentState, ci->team );
+	CG_AddRefEntityWithPowerups( &legs, &cent->currentState, ci->team, 1 );
 
 	// if the model failed, allow the default nullmodel to be displayed
 	if (!legs.hModel) {
@@ -2359,7 +2373,7 @@ void CG_Player( centity_t *cent ) {
 	torso.shadowPlane = shadowPlane;
 	torso.renderfx = renderfx;
 
-	CG_AddRefEntityWithPowerups( &torso, &cent->currentState, ci->team );
+	CG_AddRefEntityWithPowerups( &torso, &cent->currentState, ci->team, 2 );
 
 #ifdef MISSIONPACK
 	if ( cent->currentState.eFlags & EF_KAMIKAZE ) {
@@ -2581,7 +2595,7 @@ void CG_Player( centity_t *cent ) {
 	head.shadowPlane = shadowPlane;
 	head.renderfx = renderfx;
 
-	CG_AddRefEntityWithPowerups( &head, &cent->currentState, ci->team );
+	CG_AddRefEntityWithPowerups( &head, &cent->currentState, ci->team, 3 );
 
 #ifdef MISSIONPACK
 	CG_BreathPuffs(cent, &head);
