@@ -161,6 +161,7 @@ function onHookCall(event,...)
 end
 
 function CallHookArgTForm(event,tform,...)
+	--For overriding arguments
 	for k,v in pairs(arg) do
 		if(type(v) == "vector3") then
 			arg[k] = Vectorv(v)
