@@ -83,7 +83,28 @@ local function makeEnt(p,c,a)
 	ent:SetTrType(TR_STATIONARY)
 	--ent:SetSpawnFlags(1)
 end
-concommand.add("entity",makeEnt)
+concommand.add("entity",makeEnt,true)
+
+local function makeEnt(p,c,a)
+	local r = 0
+	if(a[1] == nil) then return end
+	a[1] = tostring(a[1])
+	if(string.len(a[1]) < 1) then return end
+	local ents = {}
+	for k,v in pairs(GetAllEntities()) do
+		local class = v:Classname()
+		if(string.find(class,a[1])) then
+			table.insert(ents,class)
+			v:Remove()
+			r = r + 1
+		end
+	end
+	print("Removed " .. r .. " entities:\n")
+	for k,v in pairs(ents) do
+		print("   " .. v .. "\n")
+	end
+end
+concommand.add("remove",makeEnt,true)
 
 local function makeEnt(p,c,a)
 	local tr = PlayerTrace(p)
@@ -98,4 +119,4 @@ local function makeEnt(p,c,a)
 	ent:SetOwner(p)
 	ent:Spawn()]]
 end
-concommand.add("grenade",makeEnt)
+concommand.add("grenade",makeEnt,true)
