@@ -9,6 +9,17 @@ local flaretex = CreateShader("f",[[
 }
 ]])
 
+local white = CreateShader("f",[[
+{
+	{
+		map $whiteimage
+		blendFunc add
+		rgbGen entity
+		alphaGen entity
+	}
+}
+]])
+
 local data = 
 [[{
 	{
@@ -25,7 +36,7 @@ print("YO!!\n")
 function ENT:GetColor(a)
 	a = a or 1
 	local col = self.net.color
-	local r,g,b = 0,.2,.8
+	local r,g,b = 0*a,.2*a,.8*a
 	if(col) then
 		r,g,b = LongToColor(col)
 	end
@@ -68,6 +79,10 @@ function ENT:GetScale()
 	self.start = self.start or LevelTime()
 	local scale = 1
 	local scalet = 0
+	
+	if(self.net.fadetime == 0) then
+		return scale,scalet
+	end
 	
 	if(self.start != nil and fade != nil) then
 		scale = (LevelTime() - self.start) / (fade/2)
@@ -158,7 +173,7 @@ function ENT:DLight(pos)
 	render.DLight(pos,1,1,1,(30 + math.cos(LevelTime()/200)*2)*scale)
 end
 
-function ENT:DrawModel()
+function ENT:DrawModel(active)
 	local pos = self.Entity:GetPos()
 	local scale,scalet = self:GetScale()
 	
@@ -175,20 +190,42 @@ function ENT:DrawModel()
 	
 	self.ref = RefEntity()
 	self.ref:SetModel(model or self.CustomModel)
-	self.ref:SetPos(pos)
 	self.ref:SetAngles(Vector(0,LevelTime()/6,0))
 	self.ref:Scale(Vector(scale))
+	
+	local mins,maxs = render.ModelBounds(self.ref:GetModel())
+	
+	pos.z = pos.z + ((maxs.z - mins.z)/2) * (1 - scale)
+	
+	self.ref:SetPos(pos)
+	
+	if(active == false) then
+		self.ref:SetColor(.1,.1,.1,1)
+		self.ref:SetShader(white)
+	end
 	self.ref:Render()
 	
 	maxs.z = maxs.z / 2
 	pos = pos + (maxs + mins) * scale
 	
-	self:DLight(pos)
-	self:DrawFadeSprite(pos)
-	self:DrawTrail(pos)
+	if(active) then
+		self:DLight(pos)
+		self:DrawFadeSprite(pos)
+		self:DrawTrail(pos)
+	end
 end
 
-
 function ENT:Draw()
-	self:DrawModel()
+	if(self.net.draw == 1) then
+		if(self.wasgone) then
+			print("SCALE UP!\n")
+			self.start = LevelTime()
+			self.wasgone = nil
+		end
+		self:DrawModel(true)
+	else
+		--print("Draw Non-Active\n")
+		self:DrawModel(false)
+		self.wasgone = true
+	end
 end

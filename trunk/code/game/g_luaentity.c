@@ -1574,7 +1574,7 @@ int lua_setclip(lua_State *L) {
 	luaentity = lua_toentity(L,1);
 	if(luaentity != NULL) {
 		mask = lua_tointeger(L,2);
-		luaentity->r.contents = mask;
+		//luaentity->r.contents = mask;
 		luaentity->clipmask = mask;
 	}
 	return 0;
