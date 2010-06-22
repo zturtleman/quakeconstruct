@@ -277,6 +277,21 @@ else
 	end
 	hook.add("MessageReceived","checkcustom",messagetest)]]
 	
+	local function Event(ent,id,pos,angle)
+		for k,v in pairs(active) do
+			if(v != nil and v.entity ~= nil and v.entity:EntIndex() == ent:EntIndex()) then
+				if(metaCall(active[k],"EventReceived",id,pos,angle) == false) then
+					if(metaCall(active[k],"OnEvent",id,pos,angle)) then
+						return true
+					end
+				else
+					return true
+				end
+			end
+		end	
+	end
+	hook.add("EventReceived","checkcustom",Event,999)
+	
 	local function dlhook(file)
 		if(string.find(file,"/lua.entities.") and
 		   (string.find(file,"shared.lua") or
@@ -295,8 +310,11 @@ else
 			local current = ENTS[class]
 			if(current != nil) then
 				ENT = {}
-				pcall(include,file)
-
+				local b,e = pcall(include,file)
+				if not (b) then
+					print("^1Error loading entity file: " .. e .. "\n")
+				end
+				
 				--ENT
 				
 				table.Update(ENTS[class], ENT)

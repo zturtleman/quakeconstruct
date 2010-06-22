@@ -1401,7 +1401,6 @@ void RB_MaskTessFinish( void ) {
 	qglDisable(GL_STENCIL_TEST);
 }
 
-
 /*
 ** RB_EndSurface
 */
