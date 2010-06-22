@@ -78,7 +78,11 @@ local function makeEnt(p,c,a)
 	if(a[1] == nil) then return end
 	local tr = PlayerTrace(p)
 	local ent = CreateEntity(a[1])
-	ent:SetPos(tr.endpos + Vector(0,0,20))
+	if(a[2] == "drop") then
+		ent:SetPos(tr.endpos)
+	else
+		ent:SetPos(tr.endpos + Vector(0,0,20))
+	end
 	--ent:SetWait(1)
 	ent:SetTrType(TR_STATIONARY)
 	--ent:SetSpawnFlags(1)

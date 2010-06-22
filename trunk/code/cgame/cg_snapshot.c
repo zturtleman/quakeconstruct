@@ -254,6 +254,14 @@ void CG_SetInitialSnapshot( snapshot_t *snap ) {
 
 		// check for events
 		CG_CheckEvents( cent );
+
+		if(L != NULL && cent->linked == qfalse && cent->currentState.eType <= ET_LUA && 
+			cent->currentState.eType != ET_GENERAL) {
+			qlua_gethook(L,"EntityLinked");
+			lua_pushentity(L,cent);
+			qlua_pcall(L,1,0,qtrue);
+			cent->linked = qtrue;
+		}
 	}
 
 	if(L != NULL && !playBack) {

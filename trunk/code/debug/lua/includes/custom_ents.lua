@@ -131,6 +131,7 @@ for k,v in pairs(list) do
 	ExecuteEntity(v)
 end
 InheritEntities()
+print("Loading custom entities\n")
 
 local function FindEntity(name)
 	return ENTS[string.lower(name)]

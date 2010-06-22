@@ -2005,9 +2005,11 @@ void pushents(lua_State *L) {
 			i < numEnts;
 			i++, ent++) {
 
-			qlua_gethook(L,"EntityLinked");
-			lua_pushentity(L,ent);
-			qlua_pcall(L,1,0,qtrue);
+			if(ent->currentState.eType != ET_GENERAL) {
+				qlua_gethook(L,"EntityLinked");
+				lua_pushentity(L,ent);
+				qlua_pcall(L,1,0,qtrue);
+			}
 			n++;
 	}
 }
@@ -2215,8 +2217,6 @@ void CG_InitLua() {
 	lua_register(L,"LoopSound",qlua_loopsound);
 	lua_register(L,"SetUserCommand",qlua_SetUserCommand);
 
-	pushents(L);
-
 	DoLuaIncludes();
 }
 
@@ -2334,6 +2334,10 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum ) {
 	trap_S_ClearLoopingSounds( qtrue );
 	if(GetClientLuaState()) {
 		CG_PushCGTab(GetClientLuaState());
+	}
+
+	if(GetClientLuaState()) {
+		pushents(GetClientLuaState());
 	}
 	
 	if(GetClientLuaState()) {
