@@ -455,6 +455,13 @@ int qlua_3DBaseglsl(lua_State *L) {
 	return 0;
 }
 
+/*int qlua_SetClipPlane(lua_State *L) {
+	vec3_t plane;
+
+	if(!IsVector(L,1)) return 0;
+	if(lua_type(L,2) != LUA_TBOOLEAN) return 0;
+}*/
+
 static const luaL_reg Render_methods[] = {
   {"CreateScene",		qlua_createscene},
   {"DLight",			qlua_dlight},

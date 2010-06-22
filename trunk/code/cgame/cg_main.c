@@ -2085,18 +2085,26 @@ int qlua_playsound(lua_State *L) {
 	centity_t *ent;
 	vec3_t	origin;
 	sfxHandle_t	handle;
+	soundChannel_t channel = CHAN_AUTO;
 	
 	if(IsEntity(L,1)) {
 		ent = lua_toentity(L,1);
 		if(lua_type(L,2) == LUA_TNUMBER) {
 			handle = lua_tointeger(L,2);
 		}
+		if(lua_type(L,3) == LUA_TNUMBER) {
+			channel = lua_tointeger(L,3);
+		}
 	} else if(IsVector(L,1)) {
 		if(lua_type(L,2) == LUA_TNUMBER) {
 			handle = lua_tointeger(L,2);
+			if(lua_type(L,3) == LUA_TNUMBER) {
+				channel = lua_tointeger(L,3);
+				if(channel > CHAN_ANNOUNCER || channel < 0) channel = CHAN_AUTO;
+			}
 			lua_tovector(L,1,origin);
 			if(handle > 0) {
-				trap_S_StartSoundLua( origin, ENTITYNUM_WORLD, CHAN_AUTO, handle );
+				trap_S_StartSoundLua( origin, ENTITYNUM_WORLD, channel, handle );
 			}
 		}
 		return 0;
@@ -2105,10 +2113,15 @@ int qlua_playsound(lua_State *L) {
 		if(lua_type(L,1) == LUA_TNUMBER) {
 			handle = lua_tointeger(L,1);
 		}
+		if(lua_type(L,2) == LUA_TNUMBER) {
+			channel = lua_tointeger(L,3);
+		}
 	}
 
+	if(channel > CHAN_ANNOUNCER || channel < 0) channel = CHAN_AUTO;
+
 	if(ent != NULL && handle > 0) {
-		trap_S_StartSoundLua(NULL, ent->currentState.number, CHAN_AUTO, handle );
+		trap_S_StartSoundLua(NULL, ent->currentState.number, channel, handle );
 	}
 	return 0;
 }
