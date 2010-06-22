@@ -2,6 +2,7 @@ _NetTables = _NetTables or {}
 local network_meta = {}
 
 local n_msgid = "_ntbvar"
+local n_initid = "_newnt"
 local types = {}
 types["number"] = 1
 types["string"] = 1
@@ -98,7 +99,7 @@ if(SERVER) then
 	end
 
 	function network_meta:SendVars(pl)
-		debugprint("Sending Vars To " .. pl:GetInfo().name .. "\n")
+		print("Sending Vars To " .. pl:GetInfo().name .. "\n")
 		for k,v in pairs(self._protected) do
 			debugprint("Sent: " .. tostring(k) .. "\n")
 			sendVariable(self,k,v,true,pl)
@@ -160,6 +161,19 @@ if(SERVER) then
 		end
 	end
 	hook.add("ClientReady","netvars2",PlayerJoined)
+	
+	local function DemoStart(pl)
+		Timer(1,function()
+			local add = 0
+			for k,v in pairs(_NetTables) do
+				if(v != nil) then
+					Timer(.05+add,v.SendVars,v,pl)
+					add = add + .05
+				end
+			end
+		end)
+	end
+	hook.add("DemoStarted","netvars2",DemoStart)
 else
 	function network_meta:Reset()
 		self.__mt._vars = {}

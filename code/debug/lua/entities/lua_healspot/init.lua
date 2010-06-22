@@ -14,7 +14,13 @@ function ENT:Initialized()
 	
 	self.respawning = false
 	
-	self:SetDelay(1000)
+	self.autorestock = 45000
+	self.storedhp = 150
+	self:SetDelay(180)
+	self.net.remain = self.storedhp
+	self.net.restock = 35000
+	self.net.hp = self.storedhp
+	self.restocking = false
 end
 
 function ENT:SetDelay(d)
@@ -27,24 +33,48 @@ function ENT:Removed()
 end
 
 function ENT:Think()
-
+	if(self.net.remain < self.storedhp) then
+		self.net.remain = self.storedhp
+		self.Entity:AddEvent(3)
+		self.restocking = false
+		print("Restocked\n")
+	end
+	self.Entity:SetNextThink(LevelTime() + self.autorestock)
 end
 
 function ENT:Affect(other)
-	other:SetHealth(other:GetHealth() + 10)
+	local hp = other:GetHealth()
+	other:SetHealth(hp + 5)
+	if(hp + 10 > 100) then
+		other:SetHealth(100)
+	end
+	
+	self.net.remain = self.net.remain - 5
+	if(self.net.remain <= 0) then
+		print("We're out, restock in " .. self.net.restock/1000 .. " seconds\n")
+		self.Entity:SetNextThink(LevelTime() + self.net.restock)
+		self.Entity:AddEvent(2)
+		self.restocking = true
+		return
+	end
+	
 	self.nextgive = LevelTime() + self.delay
 	
 	self.Entity:AddEvent(1)
 end
 
 function ENT:CanEffect(other,trace)
+	if(self.restocking) then return false end
+	if(other:GetHealth() <= 0) then return false end
 	if(other:IsPlayer() == false) then return false end
 	if(self.nextgive > LevelTime()) then return false end
+	if(other:GetHealth() + 5 > 100) then return false end
 	return true
 end
 
 function ENT:Touch(other,trace)
 	if(other != nil and self:CanEffect(other,trace)) then
+		self.Entity:SetNextThink(LevelTime() + self.autorestock)
 		self:Affect(other)
 	end
 end
