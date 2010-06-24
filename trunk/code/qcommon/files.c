@@ -201,10 +201,11 @@ or configs will never get loaded from disk!
 // every time a new demo pk3 file is built, this checksum must be updated.
 // the easiest way to get it is to just run the game and see what it spits out
 #define	DEMO_PAK_CHECKSUM	2985612116 //437558517u
-#define QC_CONTENT_PAK_CHECKSUM		1732214438
+#define QC_CONTENT_PAK_CHECKSUM		3901944831
 #define QC_GIBS_PAK_CHECKSUM		3376319979
 #define QC_PRESENTS_PAK_CHECKSUM	222703110
 #define QC_GEOM_PAK_CHECKSUM		148146879
+#define QC_MAPS_PAK_CHECKSUM		1863004583
 
 // if this is defined, the executable positively won't work with any paks other
 // than the demo pak, even if productid is present.  This is only used for our
@@ -2774,6 +2775,11 @@ static void FS_Startup( const char *gameName ) {
 	if (fs_basepath->string[0] && Q_stricmp(fs_homepath->string,fs_basepath->string)) {
 		FS_AddGameDirectory ( fs_homepath->string, gameName );
 	}
+
+	//If we're running demo, load paks anyway (as long as they're valid)
+	if ( !Q_stricmp( gameName, DEMOGAME ) ) {
+		FS_AddGameDirectory(fs_basepath->string, fs_basegame->string);
+	}
         
 	// check for additional base game so mods can be based upon other mods
 	if ( fs_basegame->string[0] && !Q_stricmp( gameName, BASEGAME ) && Q_stricmp( fs_basegame->string, gameName ) ) {
@@ -2876,7 +2882,7 @@ static void FS_SetRestrictions( void ) {
 #endif
 	Cvar_Set( "fs_restrict", "1" );
 
-	Com_Printf( "\nRunning in restricted demo mode.\n\n" );
+	Com_Printf( "\n^1::^2Running in restricted demo mode.\n\n" );
 
 	// restart the filesystem with just the demo directory
 	FS_Shutdown(qfalse);
@@ -2887,6 +2893,7 @@ static void FS_SetRestrictions( void ) {
 		if ( path->pack ) {
 			// a tiny attempt to keep the checksum from being scannable from the exe
 			//QC_CONTENT_PAK_CHECKSUM
+			//Com_Printf("^3Checksum: ^1[%s] = %u\n",path->pack->pakBasename, path->pack->checksum);
 			if (!strcmp(path->pack->pakBasename, "pak0")) {
 				if ( (path->pack->checksum ^ 0x02261994u) != (DEMO_PAK_CHECKSUM ^ 0x02261994u) ) {
 					Com_Error( ERR_FATAL, "Corrupted pak0.pk3: %u", path->pack->checksum );
@@ -2911,7 +2918,12 @@ static void FS_SetRestrictions( void ) {
 				if ( (path->pack->checksum ^ 0x02261994u) != (QC_GEOM_PAK_CHECKSUM ^ 0x02261994u) ) {
 					Com_Error( ERR_FATAL, "Corrupted qcGeom.pk3: %u", path->pack->checksum );
 				}
-			} 
+			}
+			else if (!strcmp(path->pack->pakBasename, "qcMaps")) {
+				if ( (path->pack->checksum ^ 0x02261994u) != (QC_MAPS_PAK_CHECKSUM ^ 0x02261994u) ) {
+					Com_Error( ERR_FATAL, "Corrupted qcMaps.pk3: %u", path->pack->checksum );
+				}
+			}
 			else {
 				Com_Error( ERR_FATAL, "Add-on paks are NOT allowed in the demo version of Quake3." );
 			}

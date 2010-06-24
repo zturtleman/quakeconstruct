@@ -79,7 +79,12 @@ int lua_getentitytable(lua_State *L) {
 void lua_pushentity(lua_State *L, gentity_t *cl) {
 	gentity_t *ent = NULL;
 
-	if(cl == NULL || cl->s.number == ENTITYNUM_MAX_NORMAL || (cl->client == NULL && cl->s.number == 0)) {
+	if(cl == NULL) {
+		lua_pushnil(L);
+		return;
+	}
+
+	if(cl->s.number == ENTITYNUM_MAX_NORMAL || (cl->client == NULL && cl->s.number == 0)) {
 		lua_pushnil(L);
 		return;
 	}
@@ -96,7 +101,7 @@ void lua_pushentity(lua_State *L, gentity_t *cl) {
 }
 
 gentity_t *lua_toentity(lua_State *L, int i) {
-	gentity_t	*luaentity;
+	gentity_t	*luaentity = NULL;
 	luaL_checktype(L,i,LUA_TUSERDATA);
 	
 	if(lua_type(L,i) == LUA_TTABLE ) {
@@ -108,6 +113,7 @@ gentity_t *lua_toentity(lua_State *L, int i) {
 
 	if(luaL_checkudata(L,i,"Entity") == NULL) {
 		luaL_typerror(L,i,"Entity");
+		return NULL;
 	}
 
 	luaentity = (gentity_t *)lua_touserdata(L, i);
@@ -1912,15 +1918,21 @@ int qlua_getspawnangle(lua_State *L) {
 }
 
 int qlua_use(lua_State *L) {
-	gentity_t	*luaentity, *other, *activator;
+	gentity_t	*luaentity, *other = NULL, *activator;
 	luaL_checktype(L,1,LUA_TUSERDATA);
 	luaentity = lua_toentity(L,1);
+
+	//bluh bluh
+
+	if(luaentity == NULL) return 0;
 
 	if(lua_type(L,2) == LUA_TUSERDATA) other = lua_toentity(L,2);
 	if(lua_type(L,3) == LUA_TUSERDATA) activator = lua_toentity(L,3);
 
-	if(other == NULL) other = activator;
-	if(other == NULL) other = luaentity;
+	if(other == NULL && activator != NULL) other = activator;
+	if(other == NULL && luaentity != NULL) other = luaentity;
+	if(other == NULL) return 0;
+
 	if(activator == NULL) activator = other;
 
 	if(luaentity != NULL) {
