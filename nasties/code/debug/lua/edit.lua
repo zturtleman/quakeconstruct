@@ -1,1 +1,0 @@
-for k,v in pairs(GetAllPlayers()) do	v:SetVelocity(Vector(25,25,500))	v:GiveWeapon(WP_BFG)	v:SetWeapon(WP_BFG)	v:SetPowerup(PW_QUAD,10000)end
