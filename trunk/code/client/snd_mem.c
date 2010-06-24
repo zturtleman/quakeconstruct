@@ -246,6 +246,10 @@ static void ResampleSfx( sfx_t *sfx, int inrate, int inwidth, byte *data, qboole
 	int			part;
 	sndBuffer	*chunk;
 	
+	if(com_scalesound->integer != 0) {
+		inrate = inrate * com_timescale->value;
+	}
+
 	stepscale = (float)inrate / dma.speed;	// this is usually 0.5, 1, or 2
 
 	outcount = sfx->soundLength / stepscale;

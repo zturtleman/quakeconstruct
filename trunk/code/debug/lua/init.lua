@@ -87,7 +87,7 @@ local function makeEnt(p,c,a)
 	ent:SetTrType(TR_STATIONARY)
 	--ent:SetSpawnFlags(1)
 end
-concommand.add("entity",makeEnt,true)
+concommand.add("entity",makeEnt)
 
 local function makeEnt(p,c,a)
 	local r = 0
@@ -95,7 +95,8 @@ local function makeEnt(p,c,a)
 	a[1] = tostring(a[1])
 	if(string.len(a[1]) < 1) then return end
 	local ents = {}
-	for k,v in pairs(GetAllEntities()) do
+	local tmp = table.Copy(GetAllEntities())
+	for k,v in pairs(tmp) do
 		local class = v:Classname()
 		if(string.find(class,a[1])) then
 			table.insert(ents,class)
