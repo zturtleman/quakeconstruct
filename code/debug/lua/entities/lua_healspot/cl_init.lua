@@ -38,7 +38,8 @@ local restock = LoadSound("sound/items/wearoff.wav")
 
 function ENT:Initialized()
 	self.model = LoadModel("models/mapobjects/jets/jets01.md3")
-	self.model2 = LoadModel("models/geom/plane.md3")
+	self.model2 = LoadModel("models/powerups/health/large_cross.md3")
+	self.planemodel = LoadModel("models/geom/plane.md3")
 	self.scaletime = 0
 	self.resettime = 0
 	self.rstart = 0
@@ -148,18 +149,22 @@ function ENT:DrawModel(active)
 		scl = .4
 	end
 	
+	local imdl,iscale,irotate = self:GetIconModel()
+	
 	local vrotate = Vector(90,rotate,0)
 	self.ref:SetColor(r,g,b,a)
 	self.ref:SetPos(pos+Vector(0,0,20))
-	self.ref:SetAngles(vrotate)
-	self.ref:SetModel(self.model2)
+	self.ref:SetAngles(vrotate + irotate)
+	self.ref:SetModel(imdl)
 	self.ref:SetShader(white)
-	self.ref:Scale(Vector(20,8,1)*scl)
+	self.ref:Scale(iscale*scl)
+	--[[self.ref:Scale(Vector(20,8,1)*scl)
 	self.ref:Render()
 	self.ref:SetAngles(vrotate)
-	self.ref:Scale(Vector(8,20,1)*scl)
+	self.ref:Scale(Vector(8,20,1)*scl)]]
 	self.ref:Render()
 	
+	self.ref:SetModel(self.planemodel)
 	self.ref:SetPos(pos+Vector(0,0,40))
 	self.ref:SetAngles(vrotate)
 	self.ref:Scale(Vector(2,20*rem,1))
@@ -169,6 +174,10 @@ function ENT:DrawModel(active)
 	self.ref:SetAngles(vrotate)
 	self.ref:Scale(Vector(2.8,20.8,1))
 	self.ref:Render()
+end
+
+function ENT:GetIconModel()
+	return self.model2, Vector(.01,1,1), Vector(-90,0,0)
 end
 
 function ENT:Draw()

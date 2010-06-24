@@ -497,6 +497,9 @@ static void CG_MapRestart( void ) {
 	}
 
 	CG_InitLua();
+	if(cg_scalesound.integer != 0) {
+		CG_RegisterSounds();
+	}
 
 	for (i = 0, tent = cg_entities, n = 1;
 			i < numEnts;

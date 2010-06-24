@@ -1209,6 +1209,7 @@ extern	vmCvar_t		cg_cameraOrbitDelay;
 extern	vmCvar_t		cg_timescaleFadeEnd;
 extern	vmCvar_t		cg_timescaleFadeSpeed;
 extern	vmCvar_t		cg_timescale;
+extern  vmCvar_t		cg_scalesound;
 extern	vmCvar_t		cg_cameraMode;
 extern  vmCvar_t		cg_smallFont;
 extern  vmCvar_t		cg_bigFont;
@@ -1834,3 +1835,4 @@ void CG_PlayerAnimation( centity_t *cent, int *legsOld, int *legs, float *legsBa
 
 void playReplay( void );
 qboolean replayRunning( void );
+void CG_RegisterSounds( void );

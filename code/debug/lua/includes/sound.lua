@@ -15,11 +15,11 @@ function GetSoundFile(i)
 end
 
 function LoadSound(str,compressed)
-	for k,v in pairs(sounds) do
+	--[[for k,v in pairs(sounds) do
 		if(v[1] == str) then
 			debugprint("Loaded Sound From Cache: " .. v[1] .. "(" .. v[2] .. ")\n")
 			return v[2]
 		end
-	end
+	end]]
 	return __loadsound(str,compressed)
 end
