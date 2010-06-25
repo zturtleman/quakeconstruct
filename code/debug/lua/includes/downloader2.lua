@@ -507,8 +507,8 @@ if(CLIENT) then
 	local function checkMD5(f1,md5)
 		local fmd5 = fileMD5(f1,function(l,n) return (fixLine(l) != nil) end)
 		fmd5 = base64.dec(base64.enc(fmd5))
-		print("^3" .. base64.enc(fmd5) .. "\n")
-		print("^3" .. base64.enc(md5) .. "\n")
+		--print("^3" .. base64.enc(fmd5) .. "\n")
+		--print("^3" .. base64.enc(md5) .. "\n")
 		if(fmd5 == md5) then return true end
 		return false	
 	end
