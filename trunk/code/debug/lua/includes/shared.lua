@@ -14,9 +14,9 @@ local function includex(s)
 		print("^1Failure To Load \"" .. s .. "\":\n" .. e .. "\n")
 	else
 		if(COMPILED) then
-			print("^2Loaded[compiled]: " .. s .. "\n")
+			--print("^2Loaded[compiled]: " .. s .. "\n")
 		else
-			print("^2Loaded: " .. s .. "\n")
+			--print("^2Loaded: " .. s .. "\n")
 		end
 	end
 end

@@ -4,6 +4,7 @@ int idx = 1;
 
 localEntity_t *qlua_lgetrealentity( int id ) {
 	int zc = 0;
+	qboolean b = qfalse;
 	localEntity_t	*le, *next;
 	localEntity_t	cg_activeLocalEntities = CG_GetLocalEntityList();
 
@@ -17,8 +18,7 @@ localEntity_t *qlua_lgetrealentity( int id ) {
 
 		next = le->prev;
 
-		if(zc > 10) {
-			CG_Printf("Searched 10x\n");
+		if(zc > MAX_LOCAL_ENTITIES+1) {
 			return NULL;
 		}
 
@@ -26,6 +26,8 @@ localEntity_t *qlua_lgetrealentity( int id ) {
 			le = cg_activeLocalEntities.prev;
 			zc ++;
 		}*/
+
+		zc++;
 
 		if(le != NULL && le->id == id) {
 			return le;

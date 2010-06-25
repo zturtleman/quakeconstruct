@@ -99,7 +99,7 @@ if(SERVER) then
 	end
 
 	function network_meta:SendVars(pl)
-		print("Sending Vars To " .. pl:GetInfo().name .. "\n")
+		--print("Sending Vars To " .. pl:GetInfo().name .. "\n")
 		for k,v in pairs(self._protected) do
 			debugprint("Sent: " .. tostring(k) .. "\n")
 			sendVariable(self,k,v,true,pl)
@@ -272,9 +272,9 @@ local function Internal_CreateNetworkedTable(index)
 		_NetTables[index]:Init()
 		nt = _NetTables[index]
 		if(SERVER) then
-			print("Server Created Networked Table: " .. index .. "\n")
+			--print("Server Created Networked Table: " .. index .. "\n")
 		else
-			print("Client Created Networked Table: " .. index .. "\n")
+			--print("Client Created Networked Table: " .. index .. "\n")
 		end
 	end
 	return nt

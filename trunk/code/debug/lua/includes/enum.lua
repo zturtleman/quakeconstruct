@@ -109,7 +109,7 @@ end
 local enumfiles = findFileByType("enum")
 for k,v in pairs(enumfiles) do
 	if(string.sub(v,1,4) == "lua/") then
-		print("^3Found Enumeration Set '" .. v .. "'.\n")
+		--print("^3Found Enumeration Set '" .. v .. "'.\n")
 		parseEnumerationSet(v)
 	end
 end
@@ -119,7 +119,7 @@ local count = 0
 local val = 0
 local forced = 0
 for n,e in pairs(enum) do
-	debugprint("^3Enumerated '" .. n .. "'.\n")
+	--debugprint("^3Enumerated '" .. n .. "'.\n")
 	for k,v in pairs(e) do
 		--print(v.name)
 		local value = val

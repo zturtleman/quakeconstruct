@@ -1507,6 +1507,8 @@ void	CG_ImpactMark( qhandle_t markShader,
 //
 // cg_localents.c
 //
+#define	MAX_LOCAL_ENTITIES	2048
+
 void	CG_InitLocalEntities( void );
 localEntity_t	*CG_AllocLocalEntity( void );
 void	CG_AddLocalEntities( void );

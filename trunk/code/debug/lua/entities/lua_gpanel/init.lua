@@ -22,9 +22,9 @@ function ENT:Initialized()
 		self.net.locked = 0
 	end
 	
-	print("SPAWN ANGLE: " .. self.Entity:GetSpawnAngle() .. "\n")
-	print("SPAWN ANGLE2: " .. tostring(self.Entity:GetAngles()) .. "\n")
-	print("SPAWN MESSAGE: " .. tostring(self.net.message) .. "\n")
+	--print("SPAWN ANGLE: " .. self.Entity:GetSpawnAngle() .. "\n")
+	--print("SPAWN ANGLE2: " .. tostring(self.Entity:GetAngles()) .. "\n")
+	--print("SPAWN MESSAGE: " .. tostring(self.net.message) .. "\n")
 	
 	self.Entity:SetClip(CONTENTS_PLAYERCLIP)
 	self.Entity:SetMins(Vector(-5,-5,-5))

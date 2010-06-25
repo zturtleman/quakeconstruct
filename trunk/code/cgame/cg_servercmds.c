@@ -488,6 +488,7 @@ require a reload of all the media
 */
 static void CG_MapRestart( void ) {
 	centity_t	*tent = NULL;
+	lua_State	*L;
 	int numEnts = sizeof(cg_entities) / sizeof(cg_entities[0]);
 	int i=0;
 	int n=0;
@@ -501,6 +502,11 @@ static void CG_MapRestart( void ) {
 		CG_RegisterSounds();
 	}
 
+	L = GetClientLuaState();
+	if(L != NULL) {
+		CG_PushCGTab(L);
+	}
+
 	for (i = 0, tent = cg_entities, n = 1;
 			i < numEnts;
 			i++, tent++) {
@@ -509,6 +515,12 @@ static void CG_MapRestart( void ) {
 				tent->customdraw = qfalse;
 				if(tent->luatablecent != 0) {
 					tent->luatablecent = 0;
+				}
+				if(L != NULL) {
+					qlua_gethook(L,"EntityLinked");
+					lua_pushentity(L,tent);
+					qlua_pcall(L,1,0,qtrue);
+					tent->linked = qtrue;
 				}
 			}
 			n++;

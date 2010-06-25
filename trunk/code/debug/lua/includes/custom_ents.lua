@@ -156,6 +156,7 @@ local function LinkEntity(ent)
 
 	if(found != nil) then
 		local id = ent:EntIndex()
+		if(id == 0) then return end
 		if(active[id] != nil) then return active[id] end
 		local cent = {}--table.Copy(found)
 		setmetatable(cent,found)
@@ -191,6 +192,7 @@ local function UnlinkEntity(ent)
 	if(cent != nil) then
 		metaCall(cent,"Removed")
 	end
+	if(id == 0) then return end
 	ClearEntityNetworkedTable(id)
 	active[id] = nil
 	
