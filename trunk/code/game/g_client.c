@@ -1090,6 +1090,7 @@ void ClientSpawn(gentity_t *ent, gentity_t *plbody) {
 	int		accuracy_hits, accuracy_shots;
 	int		eventSequence;
 	char	userinfo[MAX_INFO_STRING];
+	lua_State *L = NULL;
 
 	index = ent - g_entities;
 	client = ent->client;
@@ -1227,18 +1228,6 @@ void ClientSpawn(gentity_t *ent, gentity_t *plbody) {
 	trap_GetUsercmd( client - level.clients, &ent->client->pers.cmd );
 	SetClientViewAngle( ent, spawn_angles );
 
-	if ( ent->client->sess.sessionTeam == TEAM_SPECTATOR ) {
-
-	} else {
-		G_KillBox( ent );
-		trap_LinkEntity (ent);
-
-		// force the base weapon up
-		client->ps.weapon = WP_MACHINEGUN;
-		client->ps.weaponstate = WEAPON_READY;
-
-	}
-
 	// don't allow full run speed for a bit
 	client->ps.pm_flags |= PMF_TIME_KNOCKBACK;
 	client->ps.pm_time = 100;
@@ -1289,15 +1278,29 @@ void ClientSpawn(gentity_t *ent, gentity_t *plbody) {
 
 	//trap_SendServerCommand( -1, va("playerhealth %i %i", ent->s.number, ent->health) );
 
-	if(GetServerLuaState() == NULL) return;
+	L = GetServerLuaState();
+	if(L == NULL) return;
 
-	qlua_gethook(GetServerLuaState(), "PlayerSpawned");
-	lua_pushentity(GetServerLuaState(),ent);
+	qlua_gethook(L, "PlayerSpawned");
+	lua_pushentity(L,ent);
 	if(plbody != NULL) {
-		lua_pushentity(GetServerLuaState(),plbody);
-		qlua_pcall(GetServerLuaState(),2,0,qtrue);
+		lua_pushentity(L,plbody);
+		qlua_pcall(L,2,1,qtrue);
 	} else {
-		qlua_pcall(GetServerLuaState(),1,0,qtrue);
+		qlua_pcall(L,1,1,qtrue);
+	}
+	if(lua_type(L,-1) == LUA_TNUMBER && lua_tointeger(L,-1) == 1) {
+
+	} else {
+		if ( ent->client->sess.sessionTeam != TEAM_SPECTATOR ) {
+			trap_UnlinkEntity(ent);
+			G_KillBox( ent );
+			trap_LinkEntity (ent);
+		}
+	}
+	if ( ent->client->sess.sessionTeam != TEAM_SPECTATOR ) {
+		client->ps.weapon = WP_MACHINEGUN;
+		client->ps.weaponstate = WEAPON_READY;
 	}
 }
 
