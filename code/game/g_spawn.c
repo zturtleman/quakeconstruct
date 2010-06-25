@@ -91,9 +91,23 @@ int L_SpawnString(lua_State *L) {
 	return 0;
 }
 
+int L_KillBox(lua_State *L) {
+	gentity_t *ent = lua_toentity(L,1);
+	if(ent == NULL) return 0;
+
+	qlua_UnlinkEntity(ent);
+	G_KillBox(ent);
+	qlua_LinkEntity(ent);
+
+	return 0;
+}
+
 void G_InitSpawnLua(lua_State *L) {
 	lua_pushcfunction(L,L_SpawnString);
 	lua_setglobal(L,"G_SpawnString");
+
+	lua_pushcfunction(L,L_KillBox);
+	lua_setglobal(L,"G_KillBox");
 }
 
 

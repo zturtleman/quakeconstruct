@@ -99,6 +99,11 @@ typedef enum {
 	ANIM_TORSO
 } animTarget_t;
 
+typedef enum {
+	PLS_NONE,
+	PLS_NO_KILLBOX
+} plspawnsettings_t;
+
 // animations
 typedef enum {
 	BOTH_DEATH1,
