@@ -331,6 +331,7 @@ qboolean G_CallSpawn( gentity_t *ent ) {
 	// check item spawn functions
 	for ( item=bg_itemlist+1 ; item->classname ; item++ ) {
 		if ( !strcmp(item->classname, ent->classname) ) {
+			G_Printf("Found Item: %s\n",item->classname);
 			G_SpawnItem( ent, item );
 			qlua_gethook(GetServerLuaState(),"EntityLinked");
 			lua_pushentity(GetServerLuaState(),ent);

@@ -603,12 +603,29 @@ CG_RegisterWeapon
 The server says this item is used on this level
 =================
 */
+int qlua_pullint_m(lua_State *L, char *str, qboolean req, int def) {
+	int v = def;
+	int idx = lua_gettop(L);
+	lua_pushstring(L,str);
+	lua_gettable(L,-2);
+	if(req) luaL_checktype(L,lua_gettop(L),LUA_TNUMBER);
+	if(lua_type(L,lua_gettop(L)) == LUA_TNUMBER) {
+		v = lua_tointeger(L,lua_gettop(L));
+		CG_Printf("Reg: %s = %i\n",str,v);
+	}
+	lua_pop(L,1);
+	return v;
+}
+
 void CG_RegisterWeapon( int weaponNum ) {
 	weaponInfo_t	*weaponInfo;
 	gitem_t			*item, *ammo;
 	char			path[MAX_QPATH];
 	vec3_t			mins, maxs;
-	int				i;
+	int				i,idx;
+	lua_State		*L;
+
+	L = GetClientLuaState();
 
 	weaponInfo = &cg_weapons[weaponNum];
 
@@ -630,7 +647,8 @@ void CG_RegisterWeapon( int weaponNum ) {
 		}
 	}
 	if ( !item->classname ) {
-		CG_Error( "Couldn't find weapon %i", weaponNum );
+		//CG_Error( "Couldn't find weapon %i", weaponNum );
+		return;
 	}
 	CG_RegisterItemVisuals( item - bg_itemlist );
 
@@ -821,6 +839,16 @@ void CG_RegisterWeapon( int weaponNum ) {
 		MAKERGB( weaponInfo->flashDlightColor, 1, 1, 1 );
 		weaponInfo->flashSound[0] = trap_S_RegisterSound( "sound/weapons/rocket/rocklf1a.wav", qfalse );
 		break;
+	}
+
+	if(L == NULL) return;
+	qlua_gethook(L,"RegisterWeapon");
+	lua_pushinteger(L,weaponNum);
+	qlua_pcall(L,1,1,qtrue);
+	if(lua_type(L,-1) == LUA_TTABLE) {
+		weaponInfo->flashSound[0] = qlua_pullint_m(L,"flashSound",qfalse,weaponInfo->flashSound[0]);
+		weaponInfo->readySound = qlua_pullint_m(L,"readySound",qfalse,weaponInfo->readySound);
+		weaponInfo->firingSound = qlua_pullint_m(L,"firingSound",qfalse,weaponInfo->firingSound);
 	}
 }
 

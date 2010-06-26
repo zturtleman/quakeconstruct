@@ -4,6 +4,7 @@ include("lua/cl_testmenu2.lua")
 --include("lua/cl_fonts.lua")
 include("lua/cl_help.lua")
 --include("lua/cl_emitters.lua")
+include("lua/shared.lua")
 
 local flare = LoadShader("flareShader")
 local blood = LoadShader("bloodMark")

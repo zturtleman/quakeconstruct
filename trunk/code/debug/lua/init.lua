@@ -5,6 +5,7 @@
 message.Precache("itempickup")
 message.Precache("playerdamage")
 message.Precache("playerrespawn")
+include("lua/shared.lua")
 
 --[[
 local function Fuse(v)
