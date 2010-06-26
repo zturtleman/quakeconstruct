@@ -2137,6 +2137,9 @@ int qlua_createEntity(lua_State *L) {
 		if(G_CallSpawn(ent)) {
 			lua_pushentity(L,ent);
 			qlua_LinkEntity(ent);
+			if(ent->item != NULL) {
+				SaveRegisteredItems();
+			}
 			return 1;
 		}
 

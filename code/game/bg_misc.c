@@ -917,38 +917,38 @@ Only in One Flag CTF games
 	},
 #endif
 
-/*	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
-	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
-	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
-	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
-	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
-	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
-	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
-	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
-	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
-	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
-	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
-	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
-	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
-	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
-	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
-	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
-	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
-	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
-	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
-	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
-	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
-	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
-	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
-	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
-	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
-	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
-	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
-	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
-	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
-	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
-	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},
-	{"", NULL, { NULL, 0, 0, 0} , NULL, NULL,0,0,0,"",""},*/
+	{"reserved0", "", { "", 0, 0, 0} , "", "",0,0,0,"",""},
+	{"reserved1", "", { "", 0, 0, 0} , "", "",0,0,0,"",""},
+	{"reserved2", "", { "", 0, 0, 0} , "", "",0,0,0,"",""},
+	{"reserved3", "", { "", 0, 0, 0} , "", "",0,0,0,"",""},
+	{"reserved4", "", { "", 0, 0, 0} , "", "",0,0,0,"",""},
+	{"reserved5", "", { "", 0, 0, 0} , "", "",0,0,0,"",""},
+	{"reserved6", "", { "", 0, 0, 0} , "", "",0,0,0,"",""},
+	{"reserved7", "", { "", 0, 0, 0} , "", "",0,0,0,"",""},
+	{"reserved8", "", { "", 0, 0, 0} , "", "",0,0,0,"",""},
+	{"reserved9", "", { "", 0, 0, 0} , "", "",0,0,0,"",""},
+	{"reserved10", "", { "", 0, 0, 0} , "", "",0,0,0,"",""},
+	{"reserved11", "", { "", 0, 0, 0} , "", "",0,0,0,"",""},
+	{"reserved12", "", { "", 0, 0, 0} , "", "",0,0,0,"",""},
+	{"reserved13", "", { "", 0, 0, 0} , "", "",0,0,0,"",""},
+	{"reserved14", "", { "", 0, 0, 0} , "", "",0,0,0,"",""},
+	{"reserved15", "", { "", 0, 0, 0} , "", "",0,0,0,"",""},
+	{"reserved16", "", { "", 0, 0, 0} , "", "",0,0,0,"",""},
+	{"reserved17", "", { "", 0, 0, 0} , "", "",0,0,0,"",""},
+	{"reserved18", "", { "", 0, 0, 0} , "", "",0,0,0,"",""},
+	{"reserved19", "", { "", 0, 0, 0} , "", "",0,0,0,"",""},
+	{"reserved20", "", { "", 0, 0, 0} , "", "",0,0,0,"",""},
+	{"reserved21", "", { "", 0, 0, 0} , "", "",0,0,0,"",""},
+	{"reserved22", "", { "", 0, 0, 0} , "", "",0,0,0,"",""},
+	{"reserved23", "", { "", 0, 0, 0} , "", "",0,0,0,"",""},
+	{"reserved24", "", { "", 0, 0, 0} , "", "",0,0,0,"",""},
+	{"reserved25", "", { "", 0, 0, 0} , "", "",0,0,0,"",""},
+	{"reserved26", "", { "", 0, 0, 0} , "", "",0,0,0,"",""},
+	{"reserved27", "", { "", 0, 0, 0} , "", "",0,0,0,"",""},
+	{"reserved28", "", { "", 0, 0, 0} , "", "",0,0,0,"",""},
+	{"reserved29", "", { "", 0, 0, 0} , "", "",0,0,0,"",""},
+	{"reserved30", "", { "", 0, 0, 0} , "", "",0,0,0,"",""},
+	{"reserved31", "", { "", 0, 0, 0} , "", "",0,0,0,"",""},
 
 	// end of list marker
 	{NULL}
@@ -962,48 +962,77 @@ int		bg_numItems = sizeof(bg_itemlist) / sizeof(bg_itemlist[0]) - 1;
 
 void BG_InitItems(void) {
 	gitem_t	*it;
+	int i;
 	int size = 1;
+	int n2 = bg_numItems - custom_band;
 	
+	for ( i=n2; i<bg_numItems; i++) {
+		gitem_t *slot = &bg_itemlist[i];
+		if(slot != NULL) {
+			Com_Printf("Init Slot: %s\n",slot->classname);
+			slot->pickup_sound = "sound/misc/w_pkup.wav";
+		}
+	}
+
 	for ( it = bg_itemlist + 1 ; it->classname ; it++) {
 		it->id = size;
 		size = size + 1;
 	}
 }
 
-void BG_AddItem(gitem_t *item) {
-	int free = custom_band - customItems;
-	int customid = (bg_numItems - custom_band) + customItems;
-	gitem_t slot;
+void BG_AllocAndCopy(char **ptr, char *v) {
+	int size;
+	if(ptr == NULL) return;
+	if(v == NULL) {
+		*ptr = malloc(sizeof(char));
+		strcpy(*ptr,"\0");
+		return;
+	}
+	size = strlen(v);
+	*ptr = malloc(sizeof(char)*size);
+	strcpy(*ptr,v);
+}
+
+void BG_AddItem(gitem_t *item, int id) {
+	int free = custom_band - id;
+	int customid = (bg_numItems - custom_band) + id;
+	gitem_t *slot;
 
 	if(free <= 0) {
 		Com_Printf("^1No free custom item slots.\n");
 		return;
 	}
 
-	slot = bg_itemlist[customid];
+	slot = &bg_itemlist[customid];
+	if(slot == NULL) return;
 
-	Com_Printf("^2Pre Slot: %s.\n", slot.classname);
-	slot.classname = item->classname;
-	slot.giTag = item->giTag;
-	slot.giType = item->giType;
-	slot.icon = item->icon;
-	slot.pickup_name = item->pickup_name;
-	slot.pickup_sound = item->pickup_sound;
-	slot.precaches = item->precaches;
-	slot.quantity = item->quantity;
-	slot.sounds = item->sounds;
-	slot.world_model[0] = item->world_model[0];
-	slot.world_model[1] = item->world_model[1];
-	slot.world_model[2] = item->world_model[2];
-	slot.world_model[3] = item->world_model[3];
+	Com_Printf("^2Pre Slot: %s.\n", slot->classname);
 
+	//bg_itemlist[customid] = *item;
+
+	//strcpy(slot->classname,item->classname);
+	//slot->classname = item->classname;
+
+	BG_AllocAndCopy(&slot->classname, item->classname);
+	BG_AllocAndCopy(&slot->pickup_name, item->pickup_name);
+	BG_AllocAndCopy(&slot->pickup_sound, item->pickup_sound);
+	BG_AllocAndCopy(&slot->precaches, item->precaches);
+	BG_AllocAndCopy(&slot->sounds, item->sounds);
+	BG_AllocAndCopy(&slot->icon, item->icon);
+	BG_AllocAndCopy(&slot->world_model[0], item->world_model[0]);
+	BG_AllocAndCopy(&slot->world_model[1], item->world_model[1]);
+	BG_AllocAndCopy(&slot->world_model[2], item->world_model[2]);
+	BG_AllocAndCopy(&slot->world_model[3], item->world_model[3]);
+	slot->giTag = item->giTag;
+	slot->giType = item->giType;
+	slot->quantity = item->quantity;
+
+	//memcpy(slot,item,sizeof(gitem_t));
 	
+	Com_Printf("^2Registered Item: %s.\n", slot->classname);
+	Com_Printf("  ^2%i Free Slots Left.\n", free-1);
 
-	//memcpy(&bg_itemlist[customid],item,sizeof(*item));
-	
-	Com_Printf("^2Registered Item: %s.\n", slot.classname);
-
-	customItems++;
+	//customItems++;
 	/*memcpy(bg_itemlist[bg_numItems],*item,sizeof(item));*/
 
 

@@ -338,6 +338,11 @@ typedef enum {
 	WP_PROX_LAUNCHER,
 	WP_CHAINGUN,
 #endif
+	WP_RESERVED0,
+	WP_RESERVED1,
+	WP_RESERVED2,
+	WP_RESERVED3,
+	WP_RESERVED4,
 
 	WP_NUM_WEAPONS
 } weapon_t;
@@ -677,7 +682,7 @@ extern	gitem_t	bg_itemlist[];
 extern	int		bg_numItems;
 
 void BG_InitItems(void);
-void BG_AddItem(gitem_t *item);
+void BG_AddItem(gitem_t *item, int id);
 gitem_t	*BG_FindItem( const char *pickupName );
 gitem_t *BG_FindItemByClass( const char *pickupName );
 int BG_FindItemIndexByClass( const char *pickupName );
