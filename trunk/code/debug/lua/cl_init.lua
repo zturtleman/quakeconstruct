@@ -1,3 +1,4 @@
+include("lua/counters.lua")
 include("lua/cl_ginfo.lua")
 include("lua/cl_menu2.lua")
 include("lua/cl_testmenu2.lua")
@@ -69,6 +70,7 @@ local function bool(i)
 	end
 end
 
+local lhp = 0
 local function ParseDamage()
 	local attacker = nil
 	local pos = Vector()
@@ -83,6 +85,20 @@ local function ParseDamage()
 	local dir = ByteToDir(message.ReadShort())
 	local atkid = message.ReadShort()
 	local atkname = ""
+	if(self) then
+		_INCREMENT_COUNTER("damage_taken",dmg)
+		if(lhp > 0) then
+			if(hp <= 0) then
+				_INCREMENT_COUNTER("deaths",1)
+			end
+		end
+		if(lhp > -40) then
+			if(hp <= -40) then
+				_INCREMENT_COUNTER("gibbed",1)
+			end
+		end
+		lhp = hp
+	end
 	if(atkid != -1) then
 		attacker = GetEntityByIndex(atkid)
 		suicide = (atkid == LocalPlayer():EntIndex())
@@ -105,6 +121,7 @@ local function HandleMessage(msgid)
 		local itemid = message.ReadLong()
 		
 		ItemPickup(class,pos,vel,itemid)
+		_INCREMENT_COUNTER("item_pickups",1)
 	elseif(msgid == "playerdamage") then
 		ParseDamage()
 	elseif(msgid == "playerrespawn") then
@@ -114,7 +131,9 @@ local function HandleMessage(msgid)
 		CallHook("PlayerRespawned",self2,id)
 		print("^2RESPAWN!\n")
 		if(self) then
+			lhp = 125
 			CallHook("Respawned")
+			_INCREMENT_COUNTER("respawns",1)
 		end
 	end
 end

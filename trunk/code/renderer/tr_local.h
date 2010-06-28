@@ -796,6 +796,7 @@ int			R_ModelInfo( qhandle_t handle, md3Info_t *info );
 
 void		R_Modellist_f (void);
 void		R_GetPixel(int x, int y, int *r, int *g, int *b);
+void		R_ToScreen(float *x, float *y, float *z, refdef_t refdef);
 
 //====================================================
 extern	refimport_t		ri;
@@ -1128,6 +1129,7 @@ void  R_NoiseInit( void );
 void R_SwapBuffers( int );
 
 void R_RenderView( viewParms_t *parms );
+void R_SetupViewMatrix ( viewParms_t *parms );
 
 void R_AddMD3Surfaces( trRefEntity_t *e );
 void R_AddNullModelSurfaces( trRefEntity_t *e );
@@ -1621,6 +1623,12 @@ typedef struct {
 } getPixelCommand_t;
 
 typedef struct {
+	int	commandId;
+	float *x, *y, *z;
+	refdef_t refdef;
+} toScreenCommand_t;
+
+typedef struct {
 	int commandId;
 	int x;
 	int y;
@@ -1644,6 +1652,7 @@ typedef enum {
 	RC_BEGIN2D,
 	RC_END2D,
 	RC_GETPIXEL,
+	RC_TOSCREEN,
 } renderCommand_t;
 
 typedef struct {
@@ -1720,6 +1729,7 @@ void RE_EndMask( void );
 void RE_Begin2D( void );
 void RE_End2D( void );
 void RE_GetPixel( int x, int y, int *r, int *g, int *b );
+void RE_ToScreen( float *x, float *y, float *z, refdef_t *refdef );
 
 void setupRT( int index, int width, int height );
 void beginGLSL( void );

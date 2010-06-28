@@ -17,7 +17,7 @@ local function LoadInTable(file)
 	end
 	local t = PERSISTANCE_TABLE
 	PERSISTANCE_TABLE = nil
-	return t
+	return t or {}
 end
 
 module("persist")

@@ -1733,7 +1733,7 @@ void		trap_R_EndMask( void );
 void		trap_R_Begin2D( void );
 void		trap_R_End2D( void );
 void		trap_R_GetPixel( int x, int y, int *r, int *g, int *b );
-
+void		trap_R_ToScreen( float *x, float *y, float *z, refdef_t refdef );
 
 // The glconfig_t will not change during the life of a cgame.
 // If it needs to change, the entire cgame will be restarted, because

@@ -117,6 +117,7 @@ typedef struct {
 	void (*SetupRenderTarget)(int index, int width, int height);
 	void (*ClearImage)(const char* name);
 	void (*GetPixel)(int x, int y, int *r, int *g, int *b);
+	void (*ToScreen)(float *x, float *y, float *z, refdef_t *refdef);
 } refexport_t;
 
 //
