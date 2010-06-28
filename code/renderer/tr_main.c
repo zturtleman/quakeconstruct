@@ -1467,6 +1467,18 @@ void R_DebugGraphics( void ) {
 	ri.CM_DrawDebugSurface( R_DebugPolygon );
 }
 
+void R_SetupViewMatrix (viewParms_t *parms) {
+	tr.viewParms = *parms;
+
+	R_RotateForViewer ();
+
+	R_SetupFrustum ();
+
+	R_SetupProjection ();
+
+	*parms = tr.viewParms;
+}
+
 
 /*
 ================

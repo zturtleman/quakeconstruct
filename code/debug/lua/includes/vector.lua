@@ -75,9 +75,17 @@ end
 
 if(CLIENT) then
 	local w,h = 320,240
-	function VectorToScreen(vec,pos,ang,in_fov)
+	function VectorToScreen(vec,refdef)
 		if(vec == nil) then return end
-		local mat = identityx(vec.x,vec.y,vec.z)
+		local out;
+		if(refdef == nil) then
+			out = render.ToScreen(vec);
+		else
+			out = render.ToScreen(refdef,vec);
+		end
+		out.z = -(1 - out.z)
+		return out,(out.z <= 0)
+		--[[local mat = identityx(vec.x,vec.y,vec.z)
 		local out = Vector()
 		
 		local o = pos or _CG.viewOrigin
@@ -136,7 +144,7 @@ if(CLIENT) then
 		local draw = true
 		if(out.z > 0) then draw = false end
 		
-		return out,draw
+		return out,draw]]
 	end
 end
 

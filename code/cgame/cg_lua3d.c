@@ -8,6 +8,8 @@ int lua_torefdef(lua_State *L, int idx, refdef_t *refdef, qboolean a640) {
 
 	luaL_checktype(L,idx,LUA_TTABLE);
 
+	VectorClear(angles);
+
 	x = qlua_pullfloat(L,"x",qfalse,refdef->x);
 	y = qlua_pullfloat(L,"y",qfalse,refdef->y);
 	w = qlua_pullfloat(L,"width",qfalse,refdef->width);
@@ -455,6 +457,38 @@ int qlua_3DBaseglsl(lua_State *L) {
 	return 0;
 }
 
+int qlua_ToScreen(lua_State *L) {
+	vec3_t v;
+	refdef_t refdef;
+	int error = 1;
+
+	refdef.x = 0;
+	refdef.y = 0;
+	refdef.width = cg.refdef.width;
+	refdef.height = cg.refdef.height;
+	refdef.fov_x = cg.refdef.fov_x;
+	refdef.fov_y = cg.refdef.fov_y;
+	VectorCopy(cg.refdef.vieworg,refdef.vieworg);
+	AxisCopy(cg.refdef.viewaxis,refdef.viewaxis);
+
+	if(lua_type(L,1) == LUA_TTABLE) {
+		error = lua_torefdef(L, 1, &refdef, qtrue);
+		luaL_checktype(L,2,LUA_TVECTOR);
+		lua_tovector(L,2,v);
+	} else {
+		luaL_checktype(L,1,LUA_TVECTOR);
+		lua_tovector(L,1,v);
+	}
+
+	trap_R_ToScreen(&v[0],&v[1],&v[2],refdef);
+
+	v[0] = v[0]/cgs.screenXScale;
+	v[1] = v[1]/cgs.screenYScale;
+
+	lua_pushvector(L,v);
+	return 1;
+}
+
 /*int qlua_SetClipPlane(lua_State *L) {
 	vec3_t plane;
 
@@ -478,6 +512,7 @@ static const luaL_reg Render_methods[] = {
   {"Quad",				qlua_3Dquad},
   {"Tris",				qlua_3Dtriangle},
   {"SetBaseGLSL",		qlua_3DBaseglsl},
+  {"ToScreen",			qlua_ToScreen},
   {0,0}
 };
 

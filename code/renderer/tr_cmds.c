@@ -354,6 +354,29 @@ void RE_GetPixel( int x, int y, int *r, int *g, int *b ) {
 	*b = *cmd->b;
 }
 
+void RE_ToScreen( float *x, float *y, float *z, refdef_t *refdef ) {
+	toScreenCommand_t *cmd;
+
+	if ( !tr.registered ) {
+		return;
+	}
+	cmd = R_GetCommandBuffer( sizeof( *cmd ) );
+	if ( !cmd ) {
+		return;
+	}
+
+	cmd->commandId = RC_TOSCREEN;
+	cmd->x = x;
+	cmd->y = y;
+	cmd->z = z;
+	cmd->refdef = *refdef;
+
+	R_IssueRenderCommands( qfalse );
+
+	*x = *cmd->x;
+	*y = *cmd->y;
+	*z = *cmd->z;
+}
 
 /*
 =============

@@ -453,7 +453,7 @@ int qlua_vectorToScreen(lua_State *L) {
 	luaL_checktype(L,1,LUA_TVECTOR);
 	lua_tovector(L,1,v);
 	if(lua_type(L,2) == LUA_TTABLE) {
-		lua_torefdef(L, 1, &refdef, qtrue);
+		lua_torefdef(L, 2, &refdef, qtrue);
 	} else {
 		refdef = cg.refdef;
 	}

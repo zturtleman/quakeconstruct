@@ -774,6 +774,115 @@ void R_GetPixel(int x, int y, int *r, int *g, int *b) {
 	ri.Hunk_FreeTempMemory( buffer );
 }
 
+int matrixPos(int r, int c) {
+        return ((r*4)+1*c+1)-1;         
+}
+
+float mrowcol(int p, float *m1, float *m2) {
+        int c = p % 4;
+        int r = p / 4;
+        float mv = 0;
+        int i=0;
+        for(i=0; i<4; i++) {
+                int p1 = matrixPos(r,i);
+                int p2 = matrixPos(i,c);
+                mv += m1[p1] * m2[p2];
+        }
+        return mv;
+}
+
+void quickMultiply1x4by4x4(float *mat1, float *mat2, float *out) {
+        int i,j;
+        for(i=0; i<4; i++) {
+                for(j=0; j<4; j++) {
+                        int rc = (j*4) + i;
+                        out[i] += mat1[j] * mat2[rc];
+                }
+        }       
+}
+
+void quickMultiply4x4(float *mat1, float *mat2, float *out) {
+        int i;
+        for(i=0; i<16; i++) {
+                out[i] = mrowcol(i,mat1,mat2);
+        }
+}
+
+void printVec(const char *name, vec3_t v) {
+	Com_Printf("V[%s]:[%f,%f,%f]\n",name,v[0],v[1],v[2]);
+}
+
+void printVecf(const char *name, float x, float y, float z) {
+	Com_Printf("V[%s]:[%f,%f,%f]\n",name,x,y,z);
+}
+
+void clearMatrix(float *mat) {
+	int i;
+	for(i=0; i<16; i++) {
+		mat[i] = 0;
+	}
+}
+
+void R_ToScreen(float *x, float *y, float *z, refdef_t def) {
+	int view[4];
+	float vin[4];
+	float vout[4];
+	float temp[16];
+
+	//qglGetIntegerv(GL_VIEWPORT, view);
+	view[0] = def.x;
+	view[1] = def.y;
+	view[2] = def.width;
+	view[3] = def.height;
+
+	backEnd.viewParms.fovX = def.fov_x;
+	backEnd.viewParms.fovY = def.fov_y;
+	tr.refdef.fov_x = def.fov_x;
+	tr.refdef.fov_y = def.fov_y;
+
+	VectorCopy(def.viewaxis[0],backEnd.viewParms.or.axis[0]);
+	VectorCopy(def.viewaxis[1],backEnd.viewParms.or.axis[1]);
+	VectorCopy(def.viewaxis[2],backEnd.viewParms.or.axis[2]);
+	VectorCopy(def.vieworg,backEnd.viewParms.or.origin);
+	
+	backEnd.viewParms.viewportX = view[0];
+	backEnd.viewParms.viewportY = view[1];
+	backEnd.viewParms.viewportWidth = view[2];
+	backEnd.viewParms.viewportHeight = view[3];
+
+	R_SetupViewMatrix(&backEnd.viewParms);
+
+	vin[0] = *x;
+	vin[1] = *y;
+	vin[2] = *z;
+	vin[3] = 1;
+
+	vout[0] = 0;
+	vout[1] = 0;
+	vout[2] = 0;
+	vout[3] = 0;
+
+	clearMatrix(temp);
+
+	quickMultiply4x4(backEnd.viewParms.world.modelMatrix,
+		backEnd.viewParms.projectionMatrix,temp);
+
+	quickMultiply1x4by4x4(vin,temp,vout);
+
+	vout[0] /= vout[3];
+	vout[1] /= vout[3];
+	vout[2] /= vout[3];
+
+	vout[0] = view[0] + (view[2] * (vout[0] + 1)) / 2;
+	vout[1] = view[3] - (view[3] * (vout[1] + 1)) / 2;
+	vout[1] += view[1];
+	vout[2] = (vout[2] + 1) / 2;
+
+	*x = vout[0];
+	*y = vout[1];
+	*z = vout[2];
+}
+
 //============================================================================
 
 /*
@@ -1302,6 +1411,7 @@ refexport_t *GetRefAPI ( int apiVersion, refimport_t *rimp ) {
 	re.ClearImage = R_ClearImageHash;
 	re.SetupRenderTarget = setupRT;
 	re.GetPixel = RE_GetPixel;
+	re.ToScreen = RE_ToScreen;
 
 	return &re;
 }

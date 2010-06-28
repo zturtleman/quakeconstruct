@@ -2445,6 +2445,7 @@ void CL_Shutdown( void ) {
 	CL_ShutdownRef();
 	
 	CL_ShutdownUI();
+	CL_ShutdownCGame();
 
 	Cmd_RemoveCommand ("cmd");
 	Cmd_RemoveCommand ("configstrings");

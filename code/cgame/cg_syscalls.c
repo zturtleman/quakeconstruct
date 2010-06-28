@@ -291,6 +291,10 @@ void	trap_R_GetPixel( int x, int y, int *r, int *g, int *b ) {
 	syscall( CG_R_GETPIXEL, x, y, r, g, b );
 }
 
+void	trap_R_ToScreen( float *x, float *y, float *z, refdef_t ref ) {
+	syscall( CG_R_TOSCREEN, x, y, z, &ref );
+}
+
 qhandle_t trap_R_RegisterModel( const char *name ) {
 	int load = syscall( CG_R_REGISTERMODEL, name );
 	lua_State *L = GetClientLuaState();

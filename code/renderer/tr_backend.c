@@ -1637,6 +1637,16 @@ const void *RB_GetPixel( const void *data ) {
 	return (const void *)(cmd + 1);
 }
 
+const void *RB_ToScreen( const void *data ) {
+	const toScreenCommand_t *cmd;
+
+	cmd = (const toScreenCommand_t *)data;
+
+	R_ToScreen(cmd->x, cmd->y, cmd->z, cmd->refdef);
+
+	return (const void *)(cmd + 1);
+}
+
 const void *RB_Advance( const void *data ) {
 	const voidCommand_t *cmd;
 	cmd = (const voidCommand_t *)data;
@@ -1711,6 +1721,9 @@ void RB_ExecuteRenderCommands( const void *data ) {
 			break;
 		case RC_GETPIXEL:
 			data = RB_GetPixel(data);
+			break;
+		case RC_TOSCREEN:
+			data = RB_ToScreen(data);
 			break;
 		case RC_END_OF_LIST:
 		default:

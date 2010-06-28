@@ -211,6 +211,7 @@ typedef enum {
 	CG_R_CREATESHADER,
 	CG_R_LERPTRIANGLE,
 	CG_R_MODELINFO,
+	CG_R_TOSCREEN,
 } cgameImport_t;
 
 

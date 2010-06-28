@@ -637,6 +637,9 @@ int CL_CgameSystemCalls( int *args ) {
 	case CG_R_GETPIXEL:
 		re.GetPixel( args[1], args[2], VMA(3), VMA(4), VMA(5) );
 		return 0;
+	case CG_R_TOSCREEN:
+		re.ToScreen( VMA(1), VMA(2), VMA(3), VMA(4) );
+		return 0;
 	case CG_GETGLCONFIG:
 		CL_GetGlconfig( VMA(1) );
 		return 0;
