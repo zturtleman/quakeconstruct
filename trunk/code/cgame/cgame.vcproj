@@ -143,6 +143,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
+				AdditionalIncludeDirectories="C:\libs\bullet\src"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;CGAME"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="0"
@@ -984,6 +985,10 @@
 			</File>
 			<File
 				RelativePath=".\cg_luamessages.c"
+				>
+			</File>
+			<File
+				RelativePath=".\cg_luaphysics.c"
 				>
 			</File>
 			<File

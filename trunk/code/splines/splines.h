@@ -935,6 +935,8 @@ public:
 		return totalTime;
 	}
 	
+	void AnglesToQuat(float *angles, float *quaternion);
+	void QuatToAngles(float *quaternion, float *angles);
 	void startCamera(long t);
 	void stopCamera() {
 		cameraRunning = true;

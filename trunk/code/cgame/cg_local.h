@@ -24,6 +24,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "tr_types.h"
 #include "../game/bg_public.h"
 #include "cg_public.h"
+//#include "cg_physics.h"
 
 /*#include "../lua-src/lua.h"
 #include "../lua-src/lauxlib.h"
@@ -1290,6 +1291,8 @@ void CG_InitLua2D(lua_State *L);
 void CG_InitLua3D(lua_State *L);
 void CG_InitLuaGui(lua_State *L);
 void CG_InitLuaUtil(lua_State *L);
+void CG_InitLuaPhysics(lua_State *L);
+void CG_ShutdownLuaPhysics();
 
 void CG_RunGui(lua_State *L);
 qboolean CG_MouseGui(lua_State *L, int x, int y);
@@ -1811,6 +1814,8 @@ void trap_SnapVector( float *v );
 qboolean	trap_loadCamera(const char *name);
 void		trap_startCamera(int time);
 qboolean	trap_getCameraInfo(int time, vec3_t *origin, vec3_t *angles);
+void		trap_AnglesToQuat( float *angles, float *quat );
+void		trap_QuatToAngles( float *quat, float *angles );
 
 qboolean	trap_GetEntityToken( char *buffer, int bufferSize );
 

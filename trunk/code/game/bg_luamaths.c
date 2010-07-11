@@ -1,4 +1,5 @@
 #include "q_shared.h"
+
 #ifdef GAME
 	#include "../game/g_local.h"
 #else

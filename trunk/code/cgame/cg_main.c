@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //
 // cg_main.c -- initialization and primary entry point for cgame
 #include "cg_local.h"
+#include "Bullet-C-Api.h"
 
 #ifdef MISSIONPACK
 #include "../ui/ui_shared.h"
@@ -386,6 +387,43 @@ void CG_RegisterCvars( void ) {
 	trap_Cvar_Register(NULL, "headmodel", DEFAULT_MODEL, CVAR_USERINFO | CVAR_ARCHIVE );
 	trap_Cvar_Register(NULL, "team_model", DEFAULT_TEAM_MODEL, CVAR_USERINFO | CVAR_ARCHIVE );
 	trap_Cvar_Register(NULL, "team_headmodel", DEFAULT_TEAM_HEAD, CVAR_USERINFO | CVAR_ARCHIVE );
+}
+
+void CG_DoPhysicsTest() {
+	int i;
+	plVector3 pos,bpos,grav;
+	plPhysicsSdkHandle sdk;
+	plDynamicsWorldHandle world;
+	plRigidBodyHandle body;
+	plCollisionShapeHandle shape;
+	//plBroadphaseProxyHandle proxy;
+
+	sdk = plNewBulletSdk();
+	world = plCreateDynamicsWorld(sdk);
+
+	shape = plNewBoxShape(5,5,5);
+	body = plCreateRigidBody(NULL,5,shape);
+
+	bpos[0] = 0.0f;
+	bpos[1] = 0.0f;
+	bpos[2] = 0.0f;
+
+	grav[0] = 0.0f;
+	grav[1] = 0.0f;
+	grav[2] = 10.0f;
+
+	plSetGravity(world,grav);
+	plAddRigidBody(world,body);
+	plSetPosition(body,bpos);
+
+	for(i=0; i<32; i++) {
+		plStepSimulation(world,0.01f);
+		plGetPosition(body,pos);
+		CG_Printf("SIM: %f,%f,%f\n",pos[0],pos[1],pos[2]);
+	}
+
+	plDeleteDynamicsWorld(world);
+	plDeletePhysicsSdk(sdk);
 }
 
 /*																																			
@@ -2206,6 +2244,7 @@ void CG_InitLua() {
 	CG_InitLuaGui(L);
 	CG_InitLuaUtil(L);
 	CG_InitLuaMessages(L);
+	CG_InitLuaPhysics(L);
 
 	lua_register(L,"LevelTime",qlua_curtime);
 	lua_register(L,"LastTime",qlua_lasttime);
@@ -2280,6 +2319,9 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum ) {
 
 	CG_InitLua();
 	DoLuaInit();
+
+	CG_Printf("PhysicsTest\n");
+	//CG_DoPhysicsTest();
 
 	// load the new map
 	CG_LoadingString( "collision map" );
@@ -2356,6 +2398,7 @@ Called before every level change or subsystem restart
 =================
 */
 void CG_Shutdown( void ) {
+	CG_ShutdownLuaPhysics();
 	CloseClientLua();
 	// some mods may need to do cleanup work here,
 	// like closing files or archiving session data

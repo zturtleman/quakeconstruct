@@ -1245,6 +1245,32 @@ void startCamera(int time) {
 	camera.startCamera(time);
 }
 
+void AnglesToQuat(float *angles, float *quaternion) {
+	angles_t ang;
+	quat_t quat;
+
+	ang.set(angles[0],angles[1],angles[2]);
+	toQuat(ang,quat);
+
+	quaternion[0] = quat.x;
+	quaternion[1] = quat.y;
+	quaternion[2] = quat.z;
+	quaternion[3] = quat.w;
+}
+
+void QuatToAngles(float *quaternion, float *angles) {
+	angles_t ang;
+	idVec3_t vec;
+	quat_t quat;
+	
+	quat.set(quaternion[0],quaternion[1],quaternion[2],quaternion[3]);
+	toAngles(quat,ang);
+
+	angles[0] = ang.pitch;
+	angles[1] = ang.yaw;
+	angles[2] = ang.roll;
+}
+
 }
 
 

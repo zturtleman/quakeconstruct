@@ -212,6 +212,8 @@ typedef enum {
 	CG_R_LERPTRIANGLE,
 	CG_R_MODELINFO,
 	CG_R_TOSCREEN,
+	CG_QUAT_TO_ANGLES,
+	CG_ANGLES_TO_QUAT,
 } cgameImport_t;
 
 

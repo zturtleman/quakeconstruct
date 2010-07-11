@@ -295,6 +295,14 @@ void	trap_R_ToScreen( float *x, float *y, float *z, refdef_t ref ) {
 	syscall( CG_R_TOSCREEN, x, y, z, &ref );
 }
 
+void	trap_AnglesToQuat( float *angles, float *quat ) {
+	syscall( CG_ANGLES_TO_QUAT, angles, quat );
+}
+
+void	trap_QuatToAngles( float *quat, float *angles ) {
+	syscall( CG_QUAT_TO_ANGLES, quat, angles );
+}
+
 qhandle_t trap_R_RegisterModel( const char *name ) {
 	int load = syscall( CG_R_REGISTERMODEL, name );
 	lua_State *L = GetClientLuaState();

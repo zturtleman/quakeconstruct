@@ -31,6 +31,8 @@ extern	botlib_export_t	*botlib_export;
 extern qboolean loadCamera(const char *name);
 extern void startCamera(int time);
 extern qboolean getCameraInfo(int time, vec3_t *origin, vec3_t *angles);
+extern void AnglesToQuat(float *angles, float *quaternion);
+extern void QuatToAngles(float *quaternion, float *angles);
 
 msg_t *message;
 
@@ -783,6 +785,12 @@ int CL_CgameSystemCalls( int *args ) {
 		return re.GetEntityToken( VMA(1), args[2] );
 	case CG_R_INPVS:
 		return re.inPVS( VMA(1), VMA(2) );
+	case CG_QUAT_TO_ANGLES:
+		QuatToAngles(VMA(1), VMA(2));
+		return 0;
+	case CG_ANGLES_TO_QUAT:
+		AnglesToQuat(VMA(1), VMA(2));
+		return 0;
 
 	default:
 	        assert(0); // bk010102
