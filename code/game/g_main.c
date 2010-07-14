@@ -495,6 +495,7 @@ void G_InitLua() {
 	G_InitLuaVector(L);
 	G_InitLuaMessages(L);
 	G_InitLuaTeam(L);
+	G_InitLuaWeapon(L);
 
 	lua_register(L,"LevelTime",qlua_curtime);
 	lua_register(L,"LastTime",qlua_lasttime);

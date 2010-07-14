@@ -945,6 +945,36 @@ int qlua_getotherentity2(lua_State *L) {
 	return 0;
 }
 
+int qlua_setotherentity(lua_State *L) {
+	gentity_t	*luaentity,*other;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TUSERDATA);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		other = lua_toentity(L,2);
+		if(other == NULL) return 0;
+		luaentity->s.otherEntityNum = other->s.number;
+	}
+	return 0;
+}
+
+int qlua_setotherentity2(lua_State *L) {
+	gentity_t	*luaentity,*other;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TUSERDATA);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		other = lua_toentity(L,2);
+		if(other == NULL) return 0;
+		luaentity->s.otherEntityNum2 = other->s.number;
+	}
+	return 0;
+}
+
 int qlua_settargetname(lua_State *L) {
 	gentity_t	*luaentity;
 
@@ -1949,6 +1979,19 @@ int qlua_use(lua_State *L) {
 	return 0;
 }
 
+int qlua_eventparm(lua_State *L) {
+	gentity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TNUMBER);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		luaentity->s.eventParm = lua_tointeger(L,2);
+	}
+	return 0;
+}
+
 static const luaL_reg Entity_methods[] = {
   {"GetInfo",		qlua_getclientinfo},
   {"SetInfo",		qlua_setclientinfo},
@@ -1970,7 +2013,9 @@ static const luaL_reg Entity_methods[] = {
   {"GetVelocity",		qlua_getvel},
   {"SetVelocity",		qlua_setvel},
   {"GetOtherEntity",	qlua_getotherentity},
-  {"GetOtherEntity2",	qlua_getotherentity},
+  {"GetOtherEntity2",	qlua_getotherentity2},
+  {"SetOtherEntity",	qlua_setotherentity},
+  {"SetOtherEntity2",	qlua_setotherentity2},
   {"GetTargetEnt",		qlua_gettargetent},
   {"GetTarget",			qlua_gettarget},
   {"SetTarget",			qlua_settarget},
@@ -2039,6 +2084,7 @@ static const luaL_reg Entity_methods[] = {
   {"SetDamage",		qlua_setdamage},
   {"SetOwner",		qlua_setowner},
   {"SetDeathMethod", qlua_setmod},
+  {"SetEventParm",	qlua_eventparm},
   {"Spawn",			qlua_espawn},
   {"Fire",			qlua_use},
   {0,0}

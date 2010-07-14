@@ -508,6 +508,15 @@ int qlua_vproject(lua_State *L) {
 	lua_pushvector(L,dst);
 	return 1;
 }
+
+int qlua_vperpendicular(lua_State *L) {
+	vec3_t a,b;
+	lua_tovector(L,1,a);
+	PerpendicularVector(b,a);
+	lua_pushvector(L,b);
+	return 1;
+}
+
 void BG_InitLuaVector(lua_State *L) {
 	lua_register(L,"VectorToAngles",qlua_VectorToAngles);
 	lua_register(L,"VectorNormalize",qlua_VectorNormalize);
@@ -523,6 +532,7 @@ void BG_InitLuaVector(lua_State *L) {
 	lua_register(L,"VectorSpline",qlua_vspline);
 	lua_register(L,"RotatePointAroundVector",qlua_vrotate);
 	lua_register(L,"ProjectPointOnPlane",qlua_vproject);
+	lua_register(L,"PerpendicularVector",qlua_vperpendicular);
 
 	Vector_register(L);
 }

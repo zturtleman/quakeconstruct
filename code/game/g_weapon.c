@@ -802,7 +802,15 @@ void CalcMuzzlePointOrigin ( gentity_t *ent, vec3_t origin, vec3_t forward, vec3
 	SnapVector( muzzlePoint );
 }
 
+int lua_firebullets(lua_State *L) {
+	//Bullet_Fire(ent,spread,damage);
+	return 0;
+}
 
+
+void G_InitLuaWeapon(lua_State *L) {
+	//lua_register(L,"G_FireBullet",lua_firebullets);
+}
 
 /*
 ===============
@@ -850,6 +858,11 @@ void FireWeapon( gentity_t *ent ) {
 		qlua_pcall(L,5,1,qtrue);
 		if(lua_type(L,-1) == LUA_TNUMBER) {
 			ent->client->ps.weaponTime = lua_tointeger(L,-1);
+		}
+		if(lua_type(L,-1) == LUA_TBOOLEAN) {
+			if(lua_toboolean(L,-1) == qtrue) {
+				return;
+			}
 		}
 	}
 
