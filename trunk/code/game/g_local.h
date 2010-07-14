@@ -488,6 +488,7 @@ void G_InitLuaVector(lua_State *L);
 void G_InitLuaEnts(lua_State *L);
 void G_InitLuaTeam(lua_State *L);
 void G_InitSpawnLua(lua_State *L);
+void G_InitLuaWeapon(lua_State *L);
 
 static qboolean qlua_lockdamage = qfalse;
 

@@ -75,6 +75,20 @@ function GetOwner()
 	return nil
 end
 
+if(SERVER) then
+	function GetPlayerByIndex(id)
+		for _,v in pairs(GetEntitiesByClass("player")) do
+			if(v:EntIndex() == id) then return v end
+		end
+	end
+
+	function GetEntityByIndex(id)
+		for _,v in pairs(GetAllEntities()) do
+			if(v:EntIndex() == id) then return v end
+		end
+	end
+end
+
 function FindEntityTargets(ent)
 	local targets = {}
 	for k,v in pairs(GetAllEntities()) do

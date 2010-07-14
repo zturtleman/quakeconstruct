@@ -22,6 +22,20 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "qfiles.h"
 
+typedef struct {
+	cplane_t	*plane;
+	int			surfaceFlags;
+	int			shaderNum;
+} cbrushside_t;
+
+typedef struct {
+	int			shaderNum;		// the shader that determined the contents
+	int			contents;
+	vec3_t		bounds[2];
+	int			numsides;
+	cbrushside_t	*sides;
+	int			checkcount;		// to avoid repeated testings
+} cbrush_t;
 
 void		CM_LoadMap( const char *name, qboolean clientload, int *checksum);
 void		CM_ClearMap( void );
