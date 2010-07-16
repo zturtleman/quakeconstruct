@@ -88,3 +88,8 @@ int	CM_MarkFragments( int numPoints, const vec3_t *points, const vec3_t projecti
 
 // cm_patch.c
 void CM_DrawDebugSurface( void (*drawPoly)(int color, int numPoints, float *points) );
+
+// cm_physics.c
+void CM_InitPhysics();
+void CM_ShutdownPhysics();
+qhandle_t CM_GetPhysicsWorld();

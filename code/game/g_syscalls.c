@@ -812,3 +812,7 @@ void trap_N_WriteString( msg_t *msg, const char *str ) {
 void trap_N_WriteFloat( msg_t *msg, float f ) {
 	syscall( TRAP_N_WRITEFLOAT, msg, &f );
 }
+
+qhandle_t trap_CM_GetPhysicsWorld() {
+	return syscall(G_CM_GETPHYSICSWORLD);
+}

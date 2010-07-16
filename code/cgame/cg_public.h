@@ -214,6 +214,7 @@ typedef enum {
 	CG_R_TOSCREEN,
 	CG_QUAT_TO_ANGLES,
 	CG_ANGLES_TO_QUAT,
+	CG_CM_GETPHYSICSWORLD,
 } cgameImport_t;
 
 

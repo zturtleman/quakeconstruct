@@ -899,6 +899,8 @@ int SV_GameSystemCalls( int *args ) {
 		ptrf = VMA(2);
 		MSG_WriteFloat( VMA(1), *ptrf );
 		return 0;
+	case G_CM_GETPHYSICSWORLD:
+		return CM_GetPhysicsWorld();
 
 	default:
 		Com_Error( ERR_DROP, "Bad game system trap: %i", args[0] );

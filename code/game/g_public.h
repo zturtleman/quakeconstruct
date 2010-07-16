@@ -398,6 +398,7 @@ typedef enum {
 	TRAP_N_WRITEFLOAT,
 	TRAP_N_WRITEDATA,
 
+	G_CM_GETPHYSICSWORLD,
 } gameImport_t;
 
 

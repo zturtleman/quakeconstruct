@@ -1,6 +1,6 @@
 //__DL_BLOCK
 if(SERVER) then
-downloader.add("lua/bullets.lua")
+downloader.add("lua/bouncybullets.lua")
 
 local MASK_SHOT = gOR(CONTENTS_SOLID,CONTENTS_BODY,CONTENTS_CORPSE)
 
@@ -10,10 +10,13 @@ local function crand()
 	return 2 * (math.random() - 0.5)
 end
 
-local function sendline(s,e)
+local function sendline(s,e,t,p)
 	local msg = Message()
+	local ttype = bitShift(t,-8)
+	local t = bitOr(ttype,p)
 	message.WriteVector(msg,s)
 	message.WriteVector(msg,e)
+	message.WriteShort(msg,t)
 	SendDataMessageToAll(msg,"bulletbounce")
 end
 
@@ -33,7 +36,8 @@ local function bullet(i,start,angle,pl,spread,damage,mod)
 	local tr = TraceLine(start,vend,ignore,MASK_SHOT)
 	
 	if(tr.hit) then
-		if(bitAnd(tr.surfaceflags, SURF_NOIMPACT) == 1) then
+		if(bitAnd(tr.surfaceflags, SURF_NOIMPACT) ~= 0) then
+			if(i ~= -1) then sendline(start,vend,mod,i) end
 			return
 		end
 		
@@ -56,13 +60,13 @@ local function bullet(i,start,angle,pl,spread,damage,mod)
 				local reflect = VectorNormalize(vAdd(forward,vMul(tr.normal,-2*dot)))
 				local angle = VectorToAngles(reflect)
 				Timer(.06,function()
-					bullet(i+1,tr.endpos,angle,pl,spread,damage,mod)
+					bullet(i+1,tr.endpos,angle,pl,spread/2,damage*2,mod)
 				end)
 			end
 		end
-		sendline(start,tr.endpos)
+		if(i ~= -1) then sendline(start,tr.endpos,mod,i) end
 	else
-		sendline(start,vend)
+		if(i ~= -1) then sendline(start,vend,mod,i) end
 	end
 end
 
@@ -71,12 +75,16 @@ function FireBullet(start,angle,pl,spread,damage,mod)
 end
 
 local function fired(clientnum,weapon,t,muzzle,forward)
+	local pl = GetPlayerByIndex(clientnum)
+	if(pl == nil) then return end
+
 	if(weapon == WP_MACHINEGUN) then
-		local pl = GetPlayerByIndex(clientnum)
-		if(pl == nil) then return end
-		
-		FireBullet(muzzle,forward,pl,0,32,MOD_MACHINEGUN)
-		
+		FireBullet(muzzle,forward,pl,200,7,MOD_MACHINEGUN)
+		return true
+	elseif(weapon == WP_SHOTGUN) then
+		for i=0, 7 do
+			FireBullet(muzzle,forward,pl,1200,15,MOD_SHOTGUN)
+		end
 		return true
 	end
 end
@@ -136,8 +144,27 @@ local function HandleMessage(msgid)
 	if(msgid == "bulletbounce") then
 		local s = message.ReadVector()
 		local e = message.ReadVector()
+		local t = message.ReadShort()
 		
-		qbeam(s,e,1,.7,.4,1,false,800)
+		local ttype = bitShift(t,8)
+		local power = bitAnd(t,255)
+		
+		local r,g,b = 1,.7,.4
+		local size = 1
+		local c = .3 + power/5
+		
+		if(ttype == MOD_SHOTGUN) then
+			size = size + 3
+			r = 0.8 + math.random()*.2
+			g = 0.3 + math.random()*.4
+		end
+		
+		size = size * (power+0.5)
+		
+		r = r * c
+		g = g * c
+		b = b * c
+		qbeam(s,e,r,g,b,size,false,800)
 	end
 end
 hook.add("HandleMessage","cl_instagib",HandleMessage)

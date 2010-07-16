@@ -791,6 +791,8 @@ int CL_CgameSystemCalls( int *args ) {
 	case CG_ANGLES_TO_QUAT:
 		AnglesToQuat(VMA(1), VMA(2));
 		return 0;
+	case CG_CM_GETPHYSICSWORLD:
+		return CM_GetPhysicsWorld();
 
 	default:
 	        assert(0); // bk010102

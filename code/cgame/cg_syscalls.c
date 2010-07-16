@@ -685,3 +685,7 @@ void trap_R_Screenshot(int x, int y, int w, int h, char *file) {
 void trap_R_ClearImage(const char *file) {
 	syscall(CG_CLEARIMAGE, file);
 }
+
+qhandle_t trap_CM_GetPhysicsWorld() {
+	return syscall(CG_CM_GETPHYSICSWORLD);
+}
