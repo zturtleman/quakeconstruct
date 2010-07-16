@@ -284,6 +284,7 @@ function DrawHead(x,y,ICON_SIZE,hp)
 	refdef.origin.z = refdef.origin.z + mvz
 	
 	refdef.angles = aim
+	refdef.angles.z = refdef.angles.z + angles.z/1.5
 	local b, e = pcall(render.RenderScene,refdef)
 	if(!b) then
 		print("^1" .. e .. "\n")

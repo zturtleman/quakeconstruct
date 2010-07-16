@@ -2317,8 +2317,6 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum ) {
 
 	CG_ParseServerinfo();
 
-	CG_InitLua();
-	DoLuaInit();
 
 	CG_Printf("PhysicsTest\n");
 	//CG_DoPhysicsTest();
@@ -2327,6 +2325,10 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum ) {
 	CG_LoadingString( "collision map" );
 
 	trap_CM_LoadMap( cgs.mapname );
+
+	CG_InitLua();
+	DoLuaInit();
+
 
 #ifdef MISSIONPACK
 	String_Init();

@@ -1065,3 +1065,4 @@ void	trap_N_WriteString( msg_t *msg, const char *str );
 void	trap_N_WriteFloat( msg_t *msg, float f );
 
 void	trap_SnapVector( float *v );
+qhandle_t trap_CM_GetPhysicsWorld();

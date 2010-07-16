@@ -655,6 +655,8 @@ void CM_LoadMap( const char *name, qboolean clientload, int *checksum ) {
 	if ( !clientload ) {
 		Q_strncpyz( cm.name, name, sizeof( cm.name ) );
 	}
+
+	CM_InitPhysics();
 }
 
 /*
@@ -665,6 +667,7 @@ CM_ClearMap
 void CM_ClearMap( void ) {
 	Com_Memset( &cm, 0, sizeof( cm ) );
 	CM_ClearLevelPatches();
+	CM_ShutdownPhysics();
 }
 
 /*

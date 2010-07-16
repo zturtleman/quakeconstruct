@@ -824,7 +824,7 @@ void PM_DeadMove( void ) {
 	// extra friction
 
 	forward = VectorLength (pm->ps->velocity);
-	forward -= 20;
+	forward -= 10; //20 -HXRMN
 	if ( forward <= 0 ) {
 		VectorClear (pm->ps->velocity);
 	} else {
