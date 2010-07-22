@@ -989,7 +989,7 @@ CG_AddCEntity
 
 ===============
 */
-static void CG_AddCEntity( centity_t *cent, qhandle_t cShader ) {
+static void CG_AddCEntity( centity_t *cent, qhandle_t cShader, qboolean clearCDFlag ) {
 	// event-only entities will have been dealt with already
 	customShader = cShader;
 	if ( cent->currentState.eType >= (ET_EVENTS) ) {
@@ -1003,7 +1003,7 @@ static void CG_AddCEntity( centity_t *cent, qhandle_t cShader ) {
 	CG_EntityEffects( cent );
 
 	if(cent->customdraw) {
-		cent->customdraw = qfalse;
+		if(clearCDFlag) cent->customdraw = qfalse;
 		return;
 	}
 
@@ -1057,7 +1057,7 @@ CG_AddPacketEntities
 
 ===============
 */
-void CG_AddPacketEntities( qhandle_t customShader ) {
+void CG_AddPacketEntities( qhandle_t customShader, qboolean lua ) {
 	int					num;
 	centity_t			*cent;
 	playerState_t		*ps;
@@ -1092,7 +1092,7 @@ void CG_AddPacketEntities( qhandle_t customShader ) {
 	// generate and add the entity from the playerstate
 	ps = &cg.predictedPlayerState;
 	BG_PlayerStateToEntityState( ps, &cg.predictedPlayerEntity.currentState, qfalse );
-	CG_AddCEntity( &cg.predictedPlayerEntity, 0 );
+	CG_AddCEntity( &cg.predictedPlayerEntity, 0, !lua );
 
 	// lerp the non-predicted value for lightning gun origins
 	CG_CalcEntityLerpPositions( &cg_entities[ cg.snap->ps.clientNum ] );
@@ -1100,7 +1100,7 @@ void CG_AddPacketEntities( qhandle_t customShader ) {
 	// add each entity sent over by the server
 	for ( num = 0 ; num < cg.snap->numEntities ; num++ ) {
 		cent = &cg_entities[ cg.snap->entities[ num ].number ];
-		CG_AddCEntity( cent, customShader );
+		CG_AddCEntity( cent, customShader, !lua );
 	}
 }
 

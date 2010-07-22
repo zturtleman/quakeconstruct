@@ -85,7 +85,7 @@ int qlua_renderscene(lua_State *L) {
 int qlua_addPacketEnts(lua_State *L) {
 	qhandle_t customShader = 0;
 	if(lua_type(L,1) == LUA_TNUMBER) customShader = lua_tointeger(L,1);
-	CG_AddPacketEntities(customShader);
+	CG_AddPacketEntities(customShader,qtrue);
 	CG_AddMarks();
 	CG_AddParticles ();
 	CG_AddLocalEntities();

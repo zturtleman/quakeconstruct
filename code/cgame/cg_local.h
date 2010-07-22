@@ -1457,7 +1457,7 @@ void CG_EnableObituaryCP( qboolean enable );
 // cg_ents.c
 //
 void CG_SetEntitySoundPosition( centity_t *cent );
-void CG_AddPacketEntities( qhandle_t customShader );
+void CG_AddPacketEntities( qhandle_t customShader, qboolean lua );
 void CG_Beam( centity_t *cent );
 void CG_AdjustPositionForMover( const vec3_t in, int moverNum, int fromTime, int toTime, vec3_t out );
 
