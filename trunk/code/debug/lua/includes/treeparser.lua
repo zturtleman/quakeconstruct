@@ -2,9 +2,19 @@ local parser = {}
 parser.keys = {}
 parser.codebuffer = {}
 parser.nodes = {}
+parser.filecache = {}
 
 function parser.keys.import(s)
-	parser.parsefile(s)
+	local p = parser.filecache[s]
+	if(p) then
+		for k,v in pairs(p) do
+			if(parser.nodes[k] == nil) then
+				parser.nodes[k] = v
+			end
+		end
+		return
+	end
+	parser.parsefile(s,true)
 end
 
 function parser.checkkeys(n,line)
@@ -118,32 +128,34 @@ end
 function parser.checkField(n,line)
 	line = killGaps(line)
 	local c = string.find(line,":")
-	if not c then return end
+	if not c then return true end
 	
 	local k = string.sub(line,1,c-1)
 	local v = string.sub(line,c+1,string.len(line))
 	
 	local s,v = parser.checkValue(n,v)
-	if(s ~= true) then return end
+	if(s ~= true) then return true end
 	parser.codebuffer[parser.level].fields[k] = v
 end
 
-function parser.setup()
+function parser.setup(keepnodes)
 	parser.level = 0
 	parser.locs = {}
 	parser.codebuffer = {}
-	parser.nodes = {}
+	if not (keepnodes) then
+		parser.nodes = {}
+	end
 end
 
 function parser.parseLine(n,line)
 	if(parser.checkLevel(n,line)) then return end
 	if(parser.checkkeys(n,line)) then return end
 	if(parser.checkField(n,line)) then return end
-	--print(n .. ": " .. line .. "\n")
 end
 
-function parser.parse(str)
-	parser.setup()
+function parser.parse(str,keepnodes)
+	str = string.Replace(str,"\r","\n")
+	parser.setup(keepnodes)
 	local lines = string.Explode("\n",str)
 	for k,v in pairs(lines) do
 		parser.checkGrouping(k,v)
@@ -155,14 +167,65 @@ function parser.parse(str)
 	return parser.nodes
 end
 
-function parser.parsefile(file)
+function parser.parsefile(file,keepnodes)
 	local txt = packRead(file)
+	if(txt == nil) then
+		ffile = io.open("../../" .. file,"r")
+		if(ffile ~= nil) then
+			local lines = 0
+			local content = ""
+			for line in ffile:lines() do
+				content = content .. line .. "\n"
+			end
+			ffile:close()
+		end
+	end
 	if(txt == nil) then 
 		print("^1Error: Could Not Read File: " .. file .. ".\n") 
 		return nil
 	end
-	return parser.parse(txt)
+	local p = parser.parse(txt,keepnodes)
+	parser.filecache[file] = p
+	return p
 end
 
-ParseTreeFile = parser.parsefile
-ParseTreeString = parser.parse
+function parser.clear()
+	parser.filecache = {}
+end
+
+local ParserT = {}
+
+function ParserT:ParseFile(f,tab)
+	local p = parser.parsefile(f)
+	if(type(tab) == "table" and p) then
+		for k,v in pairs(p) do
+			tab[k] = v
+		end
+	end
+	return p
+end
+
+function ParserT:ParseString(s,tab)
+	local p = parser.parse(s)
+	if(type(tab) == "table" and p) then
+		for k,v in pairs(p) do
+			tab[k] = v
+		end
+	end
+	return p
+end
+
+function ParserT:Clear()
+	 parser.clear()
+end
+
+function TreeParser()
+	local o = {}
+
+	setmetatable(o,ParserT)
+	ParserT.__index = ParserT
+
+	parser.clear()
+	
+	return o;
+end
