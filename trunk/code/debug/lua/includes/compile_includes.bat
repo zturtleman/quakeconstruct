@@ -41,5 +41,6 @@ luac -o compiled\test_complex.luc test_complex.lua
 luac -o compiled\test_matrix.luc test_matrix.lua
 luac -o compiled\timer.luc timer.lua
 luac -o compiled\tools.luc tools.lua
+luac -o compiled\treeparser.luc treeparser.lua
 luac -o compiled\vector.luc vector.lua
 luac -o compiled\view.luc view.lua
