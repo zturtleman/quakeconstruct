@@ -1,3 +1,4 @@
+local NULL = "null"
 local parser = {}
 parser.keys = {}
 parser.codebuffer = {}
@@ -73,6 +74,7 @@ function parser.checkLevel(n,line)
 			parser.codebuffer[parser.level] = {}
 			parser.codebuffer[parser.level].title = b
 			parser.codebuffer[parser.level].fields = {}
+			parser.codebuffer[parser.level].fieldcount = 0
 			return true
 		end
 		if(ch == "}") then
@@ -170,10 +172,34 @@ function parser.checkOp(n,v,s,ff)
 end
 
 function parser.checkValue(n,v)
+	if(v == NULL or v == "nil") then
+		return true,NULL
+	end
+
 	if(string.find(v,"\"")) then 
 		v = string.Replace(v,"\"","")
 		return true,v
 	end
+	
+	local n = tonumber(v)
+	if(n ~= nil) then
+		return true,n
+	end
+	
+	local b,e = parser.checkOp(n,v,"*",function(v1,v2) return v1*v2 end)
+	if(b) then return b,e end
+	
+	local b,e = parser.checkOp(n,v,"-",function(v1,v2) return v1-v2 end)
+	if(b) then return b,e end
+	
+	local b,e = parser.checkOp(n,v,"+",function(v1,v2) return v1+v2 end)
+	if(b) then return b,e end
+	
+	local b,e = parser.checkOp(n,v,"/",function(v1,v2) return v1/v2 end)
+	if(b) then return b,e end
+	
+	local b,e = parser.checkOp(n,v,"|",function(v1,v2) return v1 + math.random()*(v2-v1) end)
+	if(b) then return b,e end
 	
 	if(firstChar(v) == "[" and lastChar(v) == "]") then
 		v = string.sub(v,2,string.len(v)-1)
@@ -204,26 +230,6 @@ function parser.checkValue(n,v)
 		return true,tv
 	end
 	
-	local n = tonumber(v)
-	if(n ~= nil) then
-		return true,n
-	end
-	
-	local b,e = parser.checkOp(n,v,"*",function(v1,v2) return v1*v2 end)
-	if(b) then return b,e end
-	
-	local b,e = parser.checkOp(n,v,"-",function(v1,v2) return v1-v2 end)
-	if(b) then return b,e end
-	
-	local b,e = parser.checkOp(n,v,"+",function(v1,v2) return v1+v2 end)
-	if(b) then return b,e end
-	
-	local b,e = parser.checkOp(n,v,"/",function(v1,v2) return v1/v2 end)
-	if(b) then return b,e end
-	
-	local b,e = parser.checkOp(n,v,"|",function(v1,v2) return v1 + math.random()*(v2-v1) end)
-	if(b) then return b,e end
-	
 	if(parser.nodes[v] ~= nil) then
 		return true,parser.nodes[v]
 	end
@@ -239,7 +245,26 @@ end
 function parser.checkField(n,line)
 	line = killGaps(line)
 	local c = string.find(line,":")
-	if not c then return true end
+	if not c then
+		local v = killGaps(line)
+		if(parser.nodes[v] ~= nil) then
+			local k = parser.codebuffer[parser.level].fieldcount + 1
+			print("NODE: " .. k .. " " .. v .. "\n")
+			local node = parser.nodes[v]
+			node = parser.setMeta(node)
+			table.insert(parser.codebuffer[parser.level].fields,node)
+			--parser.codebuffer[parser.level].fields[k] = v
+			parser.codebuffer[parser.level].fieldcount = k
+			return true
+		end
+		s,v = parser.checkValue(n,v)
+		if(s) then
+			table.insert(parser.codebuffer[parser.level].fields,v)
+			return true
+		end
+		
+		return true
+	end
 	
 	local k = string.sub(line,1,c-1)
 	local v = string.sub(line,c+1,string.len(line))
@@ -306,6 +331,33 @@ function parser.clear()
 	parser.filecache = {}
 end
 
+function parser.setMeta(tab)
+	if(getmetatable(tab) ~= nil) then return tab end
+	local __node = tab
+	local mtnew = {}
+	local mt = {}
+	mt.__index = function(self,v)
+		local t = __node
+		local fv = t[v]
+		local o = rawget(__node,fv)
+		if(o == NULL) then return nil end
+		if(v ~= "base") then
+			while(fv == nil and t.base ~= nil) do
+				t = t.base
+				fv = t[v]
+			end
+			o = fv
+		end
+		if(type(o) == "function") then
+			local b,e = pcall(o)
+			if(b) then o = e end
+		end
+		return o
+	end
+	setmetatable(mtnew,mt)
+	return mtnew
+end
+
 local ParserT = {}
 
 function ParserT:ParseFile(f,tab)
@@ -330,28 +382,7 @@ end
 
 function ParserT:SetMeta(tab)
 	for k,v in pairs(tab) do
-		local __node = tab[k]
-		local mtnew = {}
-		local mt = {}
-		mt.__index = function(self,v)
-			local t = __node
-			local fv = t[v]
-			local o = rawget(__node,fv)
-			if(v ~= "base") then
-				while(fv == nil and t.base ~= nil) do
-					t = t.base
-					fv = t[v]
-				end
-				o = fv
-			end
-			if(type(o) == "function") then
-				local b,e = pcall(o)
-				if(b) then o = e end
-			end
-			return o
-		end
-		setmetatable(mtnew,mt)
-		tab[k] = mtnew
+		tab[k] = parser.setMeta(tab[k])
 	end
 end
 
