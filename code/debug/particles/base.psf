@@ -12,12 +12,13 @@ Simple {
 	shader:"flareshader"
 	type:LE_FRAGMENT
 	time:1000
+	render:RT_SPRITE
 	scale {
 		start:10
 		end:0
 	}
 	color {
-		start:[1,1,1]*EMITTER_TIME
+		start:[1,1,1]
 		end:[0,0,0]
 	}
 	emit {
@@ -25,5 +26,26 @@ Simple {
 		delay:10
 		spread:360
 		speed:50|100
+	}
+}
+
+SimpleSlow {
+	base:Simple
+	type:LE_FADE_TWEEN
+	tr:TR_STATIONARY
+	time:500
+	color {
+		start:[1,1,1]/2
+		end:[0,0,0]
+	}
+	radius {
+		start:30
+		end:40
+	}
+	emit {
+		time:1000|4000
+		delay:100
+		speed:1000/3
+		spread:360
 	}
 }

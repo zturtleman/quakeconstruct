@@ -1,45 +1,25 @@
 include("lua/includes/treeparser.lua")
 
-local s = [[
-//import particles/base.psf
+HSV = 2
 
-Test {
-	base:null
-	shader:"flareshader"
-	render:RT_SPRITE
-	type:LE_FRAGMENT
-	time:4000
-	scale:[1,1,1]
-	radius {
-		start:0|80
-		end:0
-	}
-	color {
-		start:[EMITTER_TIME,EMITTER_TIME,EMITTER_TIME/2]*EMITTER_TIME
-		end:[0,1-EMITTER_TIME*EMITTER_TIME,0]
-	}
-	emit {
-		time:5000
-		delay:10
-		spread:360
-		speed:50|100
-	}
-}
-]]
-
-local b = [[
-import particles/base.psf
-TestA {
-	type:100
-}
-
-TestB {
-	base:TestA
-}
-
-TestC {
-	base:TestB
-}]]
+local function RValueFromT(t,d)
+	if(t == nil) then return d end
+	if(type(t) == "table") then
+		local k = 1
+		local v = t[k]
+		while(v ~= nil) do	
+			k = k + 1
+			v = t[k]
+		end
+		k = k - 1
+		if(k ~= 0) then
+			return t[math.random(1,k)]
+		end
+	else
+		return t
+	end
+	return d
+end
 
 local function VectorFromT(v,d)
 	if(type(v) == "number") then return Vector(v) end
@@ -59,39 +39,108 @@ local function ColorFromT(v,d)
 	local b = v[3] or g
 	local a = v[4] or 1
 	
+	if(r < 0 or g < 0 or b < 0 or a < 0) then
+		r = r + HSV
+		g = g + HSV
+		b = b + HSV
+		a = a + HSV
+		
+		if(g > 1) then g = 1 end
+		if(b > 1) then b = 1 end
+		r,g,b = hsv(r,g,b)
+	end
+	
 	--print("COLOR: " .. r .. ", " .. g .. ", " .. b .. "\n")
 	return r,g,b,a
 end
 
-local function BuildParticleEmitter(t,pos)
+local function BuildParticleEmitter(t)
 	local ref = RefEntity()
 	--ref:SetColor(ColorFromT(t.color.start,{1,1,1,1}))
-	ref:SetAngles(angle or Vector(0))
-	ref:Scale(VectorFromT(t.scale,Vector(1)))
-	ref:SetType(t.render or RT_SPRITE)
-	if(model != nil) then ref:SetType(RT_MODEL) end
-	if(model != nil) then ref:SetModel(model) end
-	ref:SetShader(LoadShader(t.shader) or 0)
-	if(t.radius == nil) then t.radius = {} end
-	ref:SetRadius(t.radius.start or 5)
-	ref:SetPos(pos)
 	
 	local le = LocalEntity()
-	le:SetPos(pos)
 	le:SetAngles(Vector(0))
 	le:SetRefEntity(ref)
-	le:SetStartTime(LevelTime())
-	le:SetEndTime(LevelTime() + (t.time or 1000))
 	le:SetType(t.type)
-	if(t.type == LE_FRAGMENT and t.tr == nil) then
-		t.tr = TR_GRAVITY
+	return le,ref
+end
+
+function SetupParticleRef(t,l)
+	local ref = l:GetRefEntity()
+	if(t.scale) then ref:Scale(VectorFromT(t.scale,Vector(1))) end
+	if(t.render) then ref:SetType(t.render or RT_SPRITE) end
+	if(t.model) then
+		local model = RValueFromT(t.model)
+		if(model ~= nil) then
+			--print("model: " .. model .. "\n")
+			model = LoadModel(model)
+		end
+		if(model ~= nil) then ref:SetType(RT_MODEL) end
+		if(model ~= nil) then ref:SetModel(model) end
 	end
 	
-	local trtype = t.tr or TR_LINEAR
+	if(t.shader) then ref:SetShader(LoadShader(RValueFromT(t.shader)) or 0) end
+	if(t.radius) then ref:SetRadius(t.radius.start or 5) end
+	if(t.trail) then
+		ref:SetTrailLength(t.trail.length or 10)
+		ref:SetTrailFade(t.trail.fade or FT_ALPHA)
+	end
+	
+	l:SetRefEntity(ref)
+end
+
+function SetupParticle(t,l)
+	if(t.type == LE_FRAGMENT and t.tr == nil) then t.tr = TR_GRAVITY end
+	local trtype = t.tr
+	local angle = VectorFromT(t.angle,nil)
+	local anglevel = VectorFromT(t.spin,nil)
+	if(angle ~= nil) then l:SetAngles(angle) end
+	if(t.time ~= nil) then
+		l:SetStartTime(LevelTime())
+		l:SetEndTime(LevelTime() + t.time)
+	end
+	if(trtype ~= nil) then l:SetTrType(trtype) end
+	if(anglevel ~= nil) then l:SetAngleVelocity(anglevel) end
+	if(t.color) then
+		local r,g,b,a = ColorFromT(t.color.start,{1,1,1,1})
+		l:SetStartColor(r,g,b,a)
+		l:SetEndColor(ColorFromT(t.color["end"],{r,g,b,a}))
+	end
+	if(t.radius) then
+		local start = t.radius.start or 5
+		--print(t.radius["end"] .. "\n")
+		l:SetStartRadius(start)
+		l:SetEndRadius(t.radius["end"] or start)
+	end
+	if(t.bounce) then
+		l:SetBounceFactor(t.bounce)
+	end
+	if(t.stopped) then
+		l:SetCallback(LOCALENTITY_CALLBACK_STOPPED,function(le)
+			SetupParticle(t.stopped,le)
+		end)
+	end
+	
+	SetupParticleRef(t,l)
+end
+
+function StartEmitter(t,le,cb)
 	if(t.emit) then
 		local estart = t.emit.start or 0
 		local duration = t.emit.time or 0
 		local d = t.emit.delay or 10
+		if(t.emit.others) then
+			local k = 1
+			local v = t.emit.others[k]
+			while(v ~= nil) do
+				local lle,lref = BuildParticleEmitter(v)
+				lle:SetPos(le:GetPos())
+				lle:SetAngles(le:GetAngles())
+				StartEmitter(v,lle)
+				k = k + 1
+				v = t.emit.others[k]
+			end
+		end
 		le:Emitter(LevelTime()+estart, LevelTime()+estart+duration, d, function(l,lt)
 			EMITTER_TIME = (1 - lt)
 			--print(EMITTER_TIME .. "\n")
@@ -101,17 +150,64 @@ local function BuildParticleEmitter(t,pos)
 			local f,r,u = AngleVectors(a)
 			f = f  +  rnd/180
 			f = VectorNormalize(f)
+			SetupParticle(t,l)
 			l:SetVelocity(f*(t.emit.speed or 0))
 			l:SetPos(le:GetPos())
-			l:SetTrType(trtype)
-			local r,g,b,a = ColorFromT(t.color.start,{1,1,1,1})
-			l:SetStartColor(r,g,b,a)
-			l:SetEndColor(ColorFromT(t.color["end"],{r,g,b,a}))
-			local start = t.radius.start or 5
-			--print(t.radius["end"] .. "\n")
-			l:SetStartRadius(start)
-			l:SetEndRadius(t.radius["end"] or start)
+			if(t.emit.attach) then
+				local k = 1
+				local v = t.emit.attach[k]
+				while(v ~= nil and l ~= nil) do
+					local lle,lref = BuildParticleEmitter(v)
+					StartEmitter(v,lle,function(le2,lt2)
+						if(l ~= nil) then
+							if(l:GetPos() ~= nil) then
+								le2:SetPos(l:GetPos())
+								le2:SetAngles(l:GetAngles())
+							else
+								le2:SetEndTime(0)
+							end
+						end
+					end)
+					k = k + 1
+					v = t.emit.attach[k]
+				end
+			end
+			if(t.emit.attachstatic) then
+				local k = 1
+				local v = t.emit.attachstatic[k]
+				local particles = {}
+				while(v ~= nil and l ~= nil) do
+					local lle,lref = BuildParticleEmitter(v)
+					local b,e = pcall(SetupParticle,v,lle)
+					if not (b) then print("^1Error: " .. e .. "\n") end
+					lle:SetPos(l:GetPos())					
+					table.insert(particles,lle)
+					k = k + 1
+					v = t.emit.attachstatic[k]
+				end
+				l:SetCallback(LOCALENTITY_CALLBACK_THINK,function(lex)
+					local pos = lex:GetPos()
+					local angles = lex:GetAngles()
+					for k,v in pairs(particles) do
+						if(v ~= nil and pos ~= nil) then
+							v:SetPos(pos)
+							v:SetAngles(angles)
+						end
+					end
+					lex:SetNextThink(LevelTime())
+				end)
+				l:SetNextThink(LevelTime())
+			end
+			if(cb) then
+				local b,e = pcall(cb,l,lt)
+				if not (b) then print("^1Error: " .. e .. "\n") end
+			end
 		end)
+		if(t.emit.count and t.emit.count > 1) then
+			for i=1, t.emit.count do
+				le:Emit()
+			end
+		end
 	end
 	
 	le:SetTrType(TR_STATIONARY)
@@ -126,7 +222,6 @@ local test = packList("particles",".psf")
 for k,v in pairs(test) do
 	parser:ParseFile("particles/" .. v,tree)
 end
-parser:ParseString(s,tree)
 parser:SetMeta(tree)
 
 --print(tree["Test"].time .. "\n")
@@ -137,11 +232,16 @@ for k,v in pairs(tree) do
 	print(k .. ": " .. t .. "\n")
 end
 
-local tr = PlayerTrace()
-local le,ref = BuildParticleEmitter(tree["Simple"],tr.endpos)
+local function spawn(p,c,a)
+	local n = a[1] or "Test"
+	local tr = PlayerTrace()
+	local le,ref = BuildParticleEmitter(tree[n])
 
-le:SetPos(tr.endpos + tr.normal * 100)
-le:SetAngles(VectorToAngles(tr.normal))
+	le:SetPos(tr.endpos + tr.normal * 40)
+	le:SetAngles(VectorToAngles(tr.normal))
 
+	StartEmitter(tree[n],le)
+end
 
+concommand.add("particles",spawn)
 --parser.parse(s)
