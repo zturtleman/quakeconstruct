@@ -78,7 +78,18 @@ function parser.checkLevel(n,line)
 		if(ch == "}") then
 			local t = parser.codebuffer[parser.level]
 			if(parser.level > 1) then
-				parser.codebuffer[parser.level-1].fields[t.title] = t.fields
+				local tb = {}
+				local function pindex(self,v)
+					--Meta check here for functions
+					local o = t.fields[v]
+					if(type(o) == "function") then
+						local b,e = pcall(o)
+						if(b) then o = e end
+					end
+					return o
+				end
+				setmetatable(tb,{__index=pindex})
+				parser.codebuffer[parser.level-1].fields[t.title] = tb
 			else
 				parser.nodes[t.title] = t.fields
 			end
@@ -89,11 +100,81 @@ function parser.checkLevel(n,line)
 	end
 end
 
+function parser.checkOp(n,v,s,ff)
+	local mu = string.find(v,s)
+	if(mu) then
+		local v1 = string.sub(v,1,mu-1)
+		local v2 = string.sub(v,mu+1,string.len(v))
+		local sv = nil
+		sv,v1 = parser.checkValue(n,v1)
+		sv,v2 = parser.checkValue(n,v2)
+		if(v1 ~= nil and v2 ~= nil) then
+			if(type(v1) == "table") then
+				if(type(v1) == type(v2)) then
+					local f = function()
+						local t = {}
+						local k = 1
+						while(v1[k] ~= nil) do
+							local v1v = v1[k]
+							local v2v = v2[k]
+							if(type(v1[k]) == "function") then sv,v1v = pcall(v1[k]) end
+							if(type(v2[k]) == "function") then sv,v2v = pcall(v2[k]) end
+							if(type(v1v) == "number") then
+								sv,t[k] = pcall(ff,v1v,v2v)
+							else
+								t[k] = v1v
+							end
+							k = k + 1
+						end
+						return t
+					end
+					return true,f
+				else
+					local f = function()
+						local t = {}
+						local k = 1
+						while(v1[k] ~= nil) do
+							local v1v = v1[k]
+							local v2v = v2
+							if(type(v2) == "function") then sv,v2v = pcall(v2) end
+							if(type(v2v) == "number") then
+								sv,t[k] = pcall(ff,v1v,v2v)
+							else
+								t[k] = v1v
+							end
+							k = k + 1
+						end
+						return t
+					end
+					return true,f
+				end
+			end
+			return true,function()
+				local v1v = v1
+				local v2v = v2
+				if(type(v1) == "function") then sv,v1v = pcall(v1) end
+				if(type(v2) == "function") then sv,v2v = pcall(v2) end
+				if(type(v1v) ~= "number") then 
+					print("ErrorV1: " .. v1v .. "\n")
+					return 0 
+				end
+				if(type(v2v) ~= "number") then
+					print("ErrorV2: " .. v2v .. "\n")
+					return 0 
+				end
+				local sv,m = pcall(ff,v1v,v2v)
+				return m
+			end
+		end
+	end
+end
+
 function parser.checkValue(n,v)
 	if(string.find(v,"\"")) then 
 		v = string.Replace(v,"\"","")
 		return true,v
 	end
+	
 	if(firstChar(v) == "[" and lastChar(v) == "]") then
 		v = string.sub(v,2,string.len(v)-1)
 		v = v
@@ -105,20 +186,50 @@ function parser.checkValue(n,v)
 				tab[lk] = llv
 			end
 		end
-		v = tab
+		local tv = {}
 		
-		return true,v
+		local function pindex(self,k)
+			--Meta check here for functions
+			local o = tab[k]
+			if(type(o) == "function") then
+				--print("INDEX: " .. k .. "\n")
+				local b,e = pcall(o)
+				if(b) then o = e end
+			end
+			return o
+		end
+		local n = #tab
+		setmetatable(tv,{__index=pindex})
+		
+		return true,tv
 	end
+	
+	local n = tonumber(v)
+	if(n ~= nil) then
+		return true,n
+	end
+	
+	local b,e = parser.checkOp(n,v,"*",function(v1,v2) return v1*v2 end)
+	if(b) then return b,e end
+	
+	local b,e = parser.checkOp(n,v,"-",function(v1,v2) return v1-v2 end)
+	if(b) then return b,e end
+	
+	local b,e = parser.checkOp(n,v,"+",function(v1,v2) return v1+v2 end)
+	if(b) then return b,e end
+	
+	local b,e = parser.checkOp(n,v,"/",function(v1,v2) return v1/v2 end)
+	if(b) then return b,e end
+	
+	local b,e = parser.checkOp(n,v,"|",function(v1,v2) return v1 + math.random()*(v2-v1) end)
+	if(b) then return b,e end
+	
 	if(parser.nodes[v] ~= nil) then
 		return true,parser.nodes[v]
 	end
 	if(_G[v] ~= nil) then
-		v = _G[v]
-		return true,v
-	end
-	local n = tonumber(v)
-	if(n ~= nil) then
-		return true,n
+		--v = _G[v]
+		return true,function() return _G[v] end
 	end
 	
 	
@@ -148,6 +259,7 @@ function parser.setup(keepnodes)
 end
 
 function parser.parseLine(n,line)
+	if(string.find(line,"//")) then return end
 	if(parser.checkLevel(n,line)) then return end
 	if(parser.checkkeys(n,line)) then return end
 	if(parser.checkField(n,line)) then return end
@@ -163,7 +275,8 @@ function parser.parse(str,keepnodes)
 	parser.checkGrouping(nil,nil,true)
 	for k,v in pairs(lines) do
 		parser.parseLine(k,v)
-	end
+	end	
+	
 	return parser.nodes
 end
 
@@ -215,6 +328,33 @@ function ParserT:ParseString(s,tab)
 	return p
 end
 
+function ParserT:SetMeta(tab)
+	for k,v in pairs(tab) do
+		local __node = tab[k]
+		local mtnew = {}
+		local mt = {}
+		mt.__index = function(self,v)
+			local t = __node
+			local fv = t[v]
+			local o = rawget(__node,fv)
+			if(v ~= "base") then
+				while(fv == nil and t.base ~= nil) do
+					t = t.base
+					fv = t[v]
+				end
+				o = fv
+			end
+			if(type(o) == "function") then
+				local b,e = pcall(o)
+				if(b) then o = e end
+			end
+			return o
+		end
+		setmetatable(mtnew,mt)
+		tab[k] = mtnew
+	end
+end
+
 function ParserT:Clear()
 	 parser.clear()
 end
@@ -229,3 +369,5 @@ function TreeParser()
 	
 	return o;
 end
+
+print("^1Loaded TreeParser\n")
