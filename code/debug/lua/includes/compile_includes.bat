@@ -26,6 +26,7 @@ luac -o compiled\messages.luc messages.lua
 luac -o compiled\model.luc model.lua
 luac -o compiled\netvars.luc netvars.lua
 luac -o compiled\packs.luc packs.lua
+luac -o compiled\particletools.luc particletools.lua
 luac -o compiled\player.luc player.lua
 luac -o compiled\poly.luc poly.lua
 luac -o compiled\persistance.luc persistance.lua

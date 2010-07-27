@@ -67,6 +67,7 @@ if(CLIENT) then includex("poly") end
 if(CLIENT) then includex("fonts") end
 if(CLIENT) then includex("view") end
 if(CLIENT) then includex("qml") end
+if(CLIENT) then includex("particletools") end
 includex("input")
 includex("packs")
 includex("custom")
