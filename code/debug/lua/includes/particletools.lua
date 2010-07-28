@@ -247,7 +247,7 @@ function ParticleEffect(name,pos,normal)
 	
 	le:SetPos(pos)
 	
-	StartEmitter(tree[n],le)
+	StartEmitter(tree[name],le)
 	return le,ref
 end
 

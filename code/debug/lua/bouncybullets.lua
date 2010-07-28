@@ -146,6 +146,14 @@ local function HandleMessage(msgid)
 		local e = message.ReadVector()
 		local t = message.ReadShort()
 		
+		local d = VectorNormalize(e-s)
+		local tr = TraceLine(s,e+d*1000)
+		ParticleEffect("Spark",e,tr.normal)
+		
+		for k,v in pairs(tr) do
+			print(k .. " = " .. tostring(v) .. "\n")
+		end
+		
 		local ttype = bitShift(t,8)
 		local power = bitAnd(t,255)
 		
