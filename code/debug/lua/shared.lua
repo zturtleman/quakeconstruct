@@ -1,23 +1,3 @@
-<<<<<<< .mine
-AddItem(
-"item_test",
-IT_AMMO,
-WP_GRAPPLING_HOOK,
-"icons/iconw_grapple",
-"Test Item",
-"sound/misc/w_pkup.wav",
-100,
-"models/powerups/health/medium_cross.md3")
-
-AddItem(
-"item_test2",
-IT_AMMO,
-WP_GRAPPLING_HOOK,
-"icons/iconw_grapple",
-"Test Item2",
-"sound/misc/w_pkup.wav",
-100,
-"models/powerups/health/medium_cross.md3")=======
 print("^1SHARED\n")
 
 AddItem(0,
@@ -62,4 +42,4 @@ else
 		return t
 	end
 	hook.add("RegisterWeapon","shared",register)
-end>>>>>>> .r413
+end
