@@ -27,11 +27,12 @@ void CM_InitPhysics()
 	cmodel = CM_ClipHandleToModel(clip);
 
 	//leaf = cmodel->leaf;
+	Com_Printf("Init Physics\n");
 
 	for (j=0; j<cm.numLeafs; j++) {
 		leaf = cm.leafs[j];
 
-		Com_Printf("\n----\n--------ADDING BRUSHES[%i]--------\n----\n", leaf.numLeafBrushes);
+		//Com_Printf("\n----\n--------ADDING BRUSHES[%i]--------\n----\n", leaf.numLeafBrushes);
 
 		for (k=0 ; k<leaf.numLeafBrushes ; k++) {
 			brushnum = cm.leafbrushes[leaf.firstLeafBrush+k];
@@ -63,7 +64,7 @@ void CM_InitPhysics()
 			plSetPosition(body, pos);
 			plSetRestitution(body, 1);
 
-			Com_Printf("Added Brush: %i\n",k);
+			//Com_Printf("Added Brush: %i\n",k);
 
 			plAddRigidBody(world,body);
 		}

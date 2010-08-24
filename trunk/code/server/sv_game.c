@@ -26,6 +26,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "../game/botlib.h"
 
 botlib_export_t	*botlib_export;
+extern void AnglesToQuat(float *angles, float *quaternion);
 
 void SV_GameError( const char *string ) {
 	Com_Error( ERR_DROP, "%s", string );
@@ -898,6 +899,9 @@ int SV_GameSystemCalls( int *args ) {
 	case TRAP_N_WRITEFLOAT:
 		ptrf = VMA(2);
 		MSG_WriteFloat( VMA(1), *ptrf );
+		return 0;
+	case G_ANGLES_TO_QUAT:
+		AnglesToQuat(VMA(1), VMA(2));
 		return 0;
 	case G_CM_GETPHYSICSWORLD:
 		return CM_GetPhysicsWorld();

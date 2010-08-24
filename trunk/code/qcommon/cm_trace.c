@@ -20,6 +20,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
 #include "cm_local.h"
+#include "Bullet-C-Api.h"
 
 // always use bbox vs. bbox collision and never capsule vs. bbox or vice versa
 //#define ALWAYS_BBOX_VS_BBOX
@@ -1152,6 +1153,10 @@ void CM_Trace( trace_t *results, const vec3_t start, const vec3_t end, vec3_t mi
 	traceWork_t	tw;
 	vec3_t		offset;
 	cmodel_t	*cmod;
+	//vec3_t		sm_start,sm_end;
+	//plDynamicsWorldHandle pworld;
+	//plRigidBodyHandle body = NULL;
+	//float pfraction;
 
 	cmod = CM_ClipHandleToModel( model );
 
@@ -1163,6 +1168,19 @@ void CM_Trace( trace_t *results, const vec3_t start, const vec3_t end, vec3_t mi
 	Com_Memset( &tw, 0, sizeof(tw) );
 	tw.trace.fraction = 1;	// assume it goes the entire distance until shown otherwise
 	VectorCopy(origin, tw.modelOrigin);
+
+	//pworld = (plDynamicsWorldHandle) CM_GetPhysicsWorld();
+	/*if(pworld) {
+		VectorScale(start,0.1f,sm_start);
+		VectorScale(end,0.1f,sm_end);
+		plRayTrace(pworld,sm_start,sm_end,results->endpos,results->plane.normal,&body,&pfraction);
+		if(pfraction != 1.0) {
+			results->contents = CONTENTS_SOLID;
+			results->fraction = pfraction;
+			VectorScale(results->endpos,1.0f/0.1f,results->endpos);
+			return;
+		}
+	}*/
 
 	if (!cm.numNodes) {
 		*results = tw.trace;

@@ -343,11 +343,27 @@ int qclose(lua_State *L) {
 	return 0;
 }
 
+void SetGlobal(const char *n, int v) {
+	lua_pushinteger(L,v);
+	lua_setglobal(L,n);
+}
+
 void InitServerLua( void ) {
 	CloseServerLua();
 	L = lua_open();
 
 	G_Printf("-----Initializing ServerSide Lua-----\n");
+
+	SetGlobal("ENTITYNUM_NONE",ENTITYNUM_NONE);
+	SetGlobal("ENTITYNUM_WORLD",ENTITYNUM_WORLD);
+	
+	SetGlobal("MASK_ALL",MASK_ALL);
+	SetGlobal("MASK_SOLID",MASK_SOLID);
+	SetGlobal("MASK_PLAYERSOLID",MASK_PLAYERSOLID);
+	SetGlobal("MASK_DEADSOLID",MASK_DEADSOLID);
+	SetGlobal("MASK_WATER",MASK_WATER);
+	SetGlobal("MASK_OPAQUE",MASK_OPAQUE);
+	SetGlobal("MASK_SHOT",MASK_SHOT);
 
 	lua_pushboolean(L,1);
 	lua_setglobal(L,"SERVER");

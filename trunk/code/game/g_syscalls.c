@@ -813,6 +813,10 @@ void trap_N_WriteFloat( msg_t *msg, float f ) {
 	syscall( TRAP_N_WRITEFLOAT, msg, &f );
 }
 
+void trap_AnglesToQuat( float *angles, float *quat ) {
+	syscall( G_ANGLES_TO_QUAT, angles, quat );
+}
+
 qhandle_t trap_CM_GetPhysicsWorld() {
 	return syscall(G_CM_GETPHYSICSWORLD);
 }

@@ -89,6 +89,12 @@ local function SetupParticleRef(t,l)
 		ref:SetTrailLength(t.trail.length or 10)
 		ref:SetTrailFade(t.trail.fade or FT_ALPHA)
 	end
+	if(t.shadersync ~= nil) then
+		ref:SetTime(LevelTime() + t.shadersync)
+	end
+	if(t.rotation) then
+		ref:SetRotation(t.rotation)
+	end
 	
 	l:SetRefEntity(ref)
 end
