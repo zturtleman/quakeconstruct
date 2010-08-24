@@ -496,6 +496,7 @@ void G_InitLua() {
 	G_InitLuaMessages(L);
 	G_InitLuaTeam(L);
 	G_InitLuaWeapon(L);
+	G_InitLuaPhysics(L);
 
 	lua_register(L,"LevelTime",qlua_curtime);
 	lua_register(L,"LastTime",qlua_lasttime);
@@ -1871,6 +1872,68 @@ void PlayerInfoMessage( gentity_t *ent ) {
 	trap_SendServerCommand( ent-g_entities, va("playerinfo %i %s", cnt, string) );
 }
 
+void G_RunClientless( gentity_t *ent ) {
+	lua_State *L = GetServerLuaState();
+	pmove_t		pm;
+	playerState_t ps;
+	usercmd_t	*ucmd;
+
+	if(L == NULL) return;
+	
+	memset (&ps,0,sizeof(ps));
+	memset (&pm, 0, sizeof(pm));
+	memset (&pm.cmd, 0, sizeof(pm.cmd));
+
+	ps.clientNum = 0;
+	ps.commandTime = level.time;
+	ps.legsAnim = ent->s.legsAnim;
+	ps.torsoAnim = ent->s.torsoAnim;
+	ps.pm_type = PM_NORMAL;
+	ps.pm_flags = 0;
+	ps.pm_time = level.time;
+	ps.movementDir = 0;
+	ps.speed = 0;
+	ps.bobCycle = 0;
+	VectorClear(ps.delta_angles);
+	VectorClear(ps.viewangles);
+	VectorCopy(ent->r.currentOrigin,ps.origin);
+
+	pm.ps = &ps;
+
+	VectorClear(pm.cmd.angles);
+	VectorClear(pm.ps->velocity);
+	VectorCopy(ent->r.mins, pm.mins);
+	VectorCopy(ent->r.maxs, pm.maxs);
+
+	//pm.ps
+	//pm.cmd = *ucmd;
+	if ( pm.ps->pm_type == PM_DEAD ) {
+		pm.tracemask = MASK_PLAYERSOLID & ~CONTENTS_BODY;
+	}
+	else if ( ent->r.svFlags & SVF_BOT ) {
+		pm.tracemask = MASK_PLAYERSOLID | CONTENTS_BOTCLIP;
+	}
+	else {
+		pm.tracemask = MASK_PLAYERSOLID;
+	}
+	pm.trace = trap_Trace;
+	pm.pointcontents = trap_PointContents;
+	pm.debugLevel = g_debugMove.integer;
+	pm.noFootsteps = ( g_dmflags.integer & DF_NO_FOOTSTEPS ) > 0;
+
+	pm.pmove_fixed = pmove_fixed.integer;
+	pm.pmove_msec = pmove_msec.integer;
+	Pmove (&pm,L);
+
+	if (g_smoothClients.integer) {
+		BG_PlayerStateToEntityStateExtraPolate( pm.ps, &ent->s, pm.ps->commandTime, qtrue );
+	}
+	else {
+		BG_PlayerStateToEntityState( pm.ps, &ent->s, qtrue );
+	}
+	//SendPendingPredictableEvents( pm.ps );
+}
+
 /*
 ================
 G_RunFrame
@@ -1948,6 +2011,10 @@ void G_RunFrame( int levelTime ) {
 			G_RunMissile( ent );
 			continue;
 		}
+
+/*		if ( ent->s.eType == ET_PLAYER && ent->client == NULL ) {
+			G_RunClientless( ent );
+		}*/
 
 		if ( ent->s.eType == ET_LUA ) {
 			G_RunMissile( ent );

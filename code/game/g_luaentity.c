@@ -947,30 +947,48 @@ int qlua_getotherentity2(lua_State *L) {
 
 int qlua_setotherentity(lua_State *L) {
 	gentity_t	*luaentity,*other;
+	int i;
 
 	luaL_checktype(L,1,LUA_TUSERDATA);
-	luaL_checktype(L,2,LUA_TUSERDATA);
 
 	luaentity = lua_toentity(L,1);
 	if(luaentity != NULL) {
-		other = lua_toentity(L,2);
-		if(other == NULL) return 0;
-		luaentity->s.otherEntityNum = other->s.number;
+		if(lua_type(L,2) == LUA_TUSERDATA) {
+			other = lua_toentity(L,2);
+			if(other == NULL) return 0;
+			luaentity->s.otherEntityNum = other->s.number;
+		} else if (lua_type(L,2) == LUA_TNUMBER) {
+			i = lua_tointeger(L,2);
+			if(i < 0) return 0;
+			if(i >= MAX_GENTITIES) return 0;
+			luaentity->s.otherEntityNum = i;
+		} else {
+			luaentity->s.otherEntityNum = ENTITYNUM_NONE;
+		}
 	}
 	return 0;
 }
 
 int qlua_setotherentity2(lua_State *L) {
 	gentity_t	*luaentity,*other;
+	int i;
 
 	luaL_checktype(L,1,LUA_TUSERDATA);
-	luaL_checktype(L,2,LUA_TUSERDATA);
 
 	luaentity = lua_toentity(L,1);
 	if(luaentity != NULL) {
-		other = lua_toentity(L,2);
-		if(other == NULL) return 0;
-		luaentity->s.otherEntityNum2 = other->s.number;
+		if(lua_type(L,2) == LUA_TUSERDATA) {
+			other = lua_toentity(L,2);
+			if(other == NULL) return 0;
+			luaentity->s.otherEntityNum2 = other->s.number;
+		} else if (lua_type(L,2) == LUA_TNUMBER) {
+			i = lua_tointeger(L,2);
+			if(i < 0) return 0;
+			if(i >= MAX_GENTITIES) return 0;
+			luaentity->s.otherEntityNum = i;
+		} else {
+			luaentity->s.otherEntityNum2 = ENTITYNUM_NONE;
+		}
 	}
 	return 0;
 }
@@ -1694,7 +1712,7 @@ int qlua_setground(lua_State *L) {
 
 	luaentity = lua_toentity(L,1);
 	if(luaentity != NULL) {
-		luaentity->s.groundEntityNum = ground;		
+		luaentity->s.groundEntityNum = ground;
 	}
 	return 0;
 }
@@ -1851,6 +1869,7 @@ int qlua_getsvflags(lua_State *L) {
 	luaentity = lua_toentity(L,1);
 	if(luaentity != NULL) {
 		lua_pushinteger(L,luaentity->r.svFlags);
+		return 1;
 	}
 	return 0;
 }
@@ -1992,6 +2011,35 @@ int qlua_eventparm(lua_State *L) {
 	return 0;
 }
 
+int qlua_clientnum(lua_State *L) {
+	gentity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TNUMBER);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		luaentity->s.clientNum = lua_tointeger(L,2);
+	}
+	return 0;
+}
+
+int qlua_setanims(lua_State *L) {
+	gentity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TNUMBER);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		luaentity->s.legsAnim = lua_tointeger(L,2);
+		if(lua_type(L,3) == LUA_TNUMBER) {
+			luaentity->s.torsoAnim = lua_tointeger(L,3);
+		}
+	}
+	return 0;
+}
+
 static const luaL_reg Entity_methods[] = {
   {"GetInfo",		qlua_getclientinfo},
   {"SetInfo",		qlua_setclientinfo},
@@ -2087,6 +2135,8 @@ static const luaL_reg Entity_methods[] = {
   {"SetEventParm",	qlua_eventparm},
   {"Spawn",			qlua_espawn},
   {"Fire",			qlua_use},
+  {"SetClientNum",  qlua_clientnum},
+  {"SetAnims",		qlua_setanims},
   {0,0}
 };
 
@@ -2199,7 +2249,8 @@ int qlua_createEntity(lua_State *L) {
 		ent->s.pos.trType = TR_GRAVITY;
 		ent->s.pos.trTime = level.time;
 		strcpy(ent->s.luaname, classname);
-		ent->classname = "luaentity";
+		ent->inuse = qtrue;
+		//ent->classname = "luaentity";
 		VectorCopy(ent->s.pos.trBase,ent->s.origin2); 
 		qlua_LinkEntity(ent);
 		//strcpy(ent->classname, classname);

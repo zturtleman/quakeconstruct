@@ -46,6 +46,34 @@ int qlua_finditem(lua_State *L) {
 	return 1;
 }
 
+/*int qlua_pmove(lua_State *L) {
+	pmove_t		pm;
+	usercmd_t	*ucmd;
+	
+	memset (&pm, 0, sizeof(pm));
+	memset (&pm.ps, 0, sizeof(pm.ps));
+	memset (&pm.cmd, 0, sizeof(pm.cmd));
+
+
+	if ( pm.ps->pm_type == PM_DEAD ) {
+		pm.tracemask = MASK_PLAYERSOLID & ~CONTENTS_BODY;
+	}
+	else if ( ent->r.svFlags & SVF_BOT ) {
+		pm.tracemask = MASK_PLAYERSOLID | CONTENTS_BOTCLIP;
+	}
+	else {
+		pm.tracemask = MASK_PLAYERSOLID;
+	}
+	pm.trace = trap_Trace;
+	pm.pointcontents = trap_PointContents;
+	pm.debugLevel = g_debugMove.integer;
+	pm.noFootsteps = ( g_dmflags.integer & DF_NO_FOOTSTEPS ) > 0;
+
+	pm.pmove_fixed = pmove_fixed.integer;
+	pm.pmove_msec = pmove_msec.integer;
+	Pmove (&pm,L);
+}*/
+
 void BG_InitLuaMisc(lua_State *L) {
 	lua_register(L,"AddItem",additem);
 	lua_register(L,"FindItemByClassname",qlua_finditem);

@@ -1721,6 +1721,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\g_luaphysics.c"
+				>
+			</File>
+			<File
 				RelativePath=".\g_luateam.c"
 				>
 			</File>

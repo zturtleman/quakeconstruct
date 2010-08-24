@@ -4,7 +4,7 @@
 //plPhysicsSdkHandle sdk;
 plDynamicsWorldHandle world;
 
-float worldscale = 1;
+float worldscale = 0.1;
 
 int qlua_phnewmodelbody(lua_State *L) {
 	int mass;
@@ -195,6 +195,7 @@ int qlua_phapplytorque(lua_State *L) {
 }
 
 int qlua_phtraceline(lua_State *L) {
+	float fraction;
 	vec3_t start,end;
 	vec3_t rpos,rnormal;
 	plRigidBodyHandle body = NULL;
@@ -205,7 +206,7 @@ int qlua_phtraceline(lua_State *L) {
 	VectorScale(start,worldscale,start);
 	VectorScale(end,worldscale,end);
 	
-	plRayTrace(world,start,end,rpos,rnormal,&body);
+	plRayTrace(world,start,end,rpos,rnormal,&body,&fraction);
 
 	VectorScale(rpos,1.0f/worldscale,rpos);
 
@@ -288,7 +289,7 @@ void CG_InitLuaPhysics(lua_State *L) {
 
 	grav[0] = 0.0f;
 	grav[1] = 0.0f;
-	grav[2] = -DEFAULT_GRAVITY;
+	grav[2] = -DEFAULT_GRAVITY * worldscale;
 
 	plSetGravity(world,grav);
 }
