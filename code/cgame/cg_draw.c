@@ -2679,11 +2679,6 @@ void CG_DrawActive( stereoFrame_t stereoView ) {
 		return;
 	}
 
-	if(L != NULL) {
-		CG_PushCGTab(L);
-		CG_InitLuaView(L);
-	}
-
 	switch ( stereoView ) {
 	case STEREO_CENTER:
 		separation = 0;
@@ -2723,6 +2718,13 @@ void CG_DrawActive( stereoFrame_t stereoView ) {
 
 	trap_R_RenderScene( &cg.refdef );
 
+	if(L != NULL) {
+		qlua_gethook(L,"PostRender");
+		qlua_pcall(L,0,0,qtrue);
+		qlua_gethook(L,"PreDraw");
+		qlua_pcall(L,0,0,qtrue);
+	}
+
 	// restore original viewpoint if running stereo
 	if ( separation != 0 ) {
 		VectorCopy( baseOrg, cg.refdef.vieworg );
@@ -2740,6 +2742,9 @@ void CG_DrawActive( stereoFrame_t stereoView ) {
 		qlua_pcall(L,0,0,qtrue);
 
 		qlua_gethook(L,"Think");
+		qlua_pcall(L,0,0,qtrue);
+
+		qlua_gethook(L,"PostDraw");
 		qlua_pcall(L,0,0,qtrue);
 	}
 	CG_KillMasks();

@@ -1,5 +1,73 @@
 #include "cg_local.h"
 
+void matrixMult3x3( const float *a, const float *b, float *out ) {
+	int		i, j;
+
+	for ( i = 0 ; i < 3 ; i++ ) {
+		for ( j = 0 ; j < 3 ; j++ ) {
+			out[ i * 3 + j ] =
+				a [ i * 3 + 0 ] * b [ 0 * 3 + j ]
+				+ a [ i * 3 + 1 ] * b [ 1 * 3 + j ]
+				+ a [ i * 3 + 2 ] * b [ 2 * 3 + j ];
+		}
+	}
+}
+
+void matrixMult1x3to3x3( const float *a, const float *b, float *out ) {
+	int		j;
+
+	for ( j = 0 ; j < 3 ; j++ ) {
+		out[ j ] =
+			a [ 0 ] * b [ j ]
+			+ a [ 1 ] * b [ 3 + j ]
+			+ a [ 2 ] * b [ 6 + j ];
+	}
+}
+
+vec3_t p;
+vec3_t plane[3];
+float pr[9] = {
+	0,0,0,
+	0,0,0,
+	0,0,0};
+
+void setupPlane(vec3_t pos, vec3_t axis[3]) {
+	int i,j = 0;
+	VectorCopy(pos,p);
+	pr[0] = axis[1][0]; pr[1] = axis[1][1]; pr[2] = axis[1][2];
+	pr[3] = axis[2][0]; pr[4] = axis[2][1]; pr[5] = axis[2][2];
+	pr[6] = axis[0][0]; pr[7] = axis[0][1]; pr[8] = axis[0][2];
+
+/*	pr[0] = axis[1][0]; pr[1] = axis[2][0]; pr[2] = axis[0][0];
+	pr[3] = axis[1][1]; pr[4] = axis[2][1]; pr[5] = axis[0][1];
+	pr[6] = axis[1][2]; pr[7] = axis[2][2]; pr[8] = axis[0][2];
+*/
+
+	//VectorCopy(axis[0],plane[0]);
+	//VectorCopy(axis[1],plane[1]);
+	//VectorCopy(axis[2],plane[2]);
+}
+
+void RotateFoxAxis(vec3_t v, vec3_t axis[3]) {
+	int i;
+	vec3_t temp,temp2;
+	VectorClear(temp);
+	VectorClear(temp2);
+	for(i=0; i<3; i++) {
+		VectorScale(axis[i], v[i], temp);
+		VectorAdd(temp,temp2,temp2);
+	}
+	VectorCopy(temp2,v);
+}
+
+void projectRPointOnPlane(vec3_t point) {
+	vec3_t temp;
+	VectorSubtract(point,p,point);
+	matrixMult1x3to3x3(point,pr,temp);
+	//RotateFoxAxis(point,plane);
+	VectorCopy(temp,point);
+}
+
 //lua_pushlightuserdata(L,cl);
 void lua_pushrefentity(lua_State *L, refEntity_t *cl) {
 	refEntity_t *ent = NULL;
@@ -542,12 +610,51 @@ int qlua_rgetcolor(lua_State *L) {
 
 int qlua_rrender(lua_State *L) {
 	refEntity_t	*e;
+	//refTri_t	tris;
+	//vec3_t		temp;
+	//vec4_t		color;
+	//int i=0,j=0,k=0,x,size;
 
 	luaL_checktype(L,1,LUA_TUSERDATA);
-
+/*
+	color[0] = 1;
+	color[1] = 1;
+	color[2] = 1;
+	color[3] = 1;
+*/
 	e = lua_torefentity(L,1);
 	if(e != NULL) {
 		trap_R_AddRefEntityToScene( e );
+/*		if(e->ndecals == 0) return 0;
+		for(i=0; i<e->ndecals; i++) {
+			//if(e->decals[i].tris[0] != NULL) {
+				size = e->decals[i].num;
+				CG_Printf("Render Decal %i,%i\n",i,size);
+				for(j=0; j<size; j++) {
+					if(trap_R_LerpTriangle( e->hModel, e->decals[i].tris[j].surface, e->decals[i].tris[j].triangle, &tris, e->oldframe, e->frame, 1.0 - e->backlerp )) {
+						for(k=0; k<3; k++) {
+							VectorCopy(e->origin,temp);
+							for (x=0; x<3; x++ ) {
+								VectorMA( temp, tris.verts[k][x], e->axis[x], temp );
+							}
+							VectorCopy(temp,tris.verts[k]);
+						}
+						RenderTriangle(
+							cgs.media.bloodMarkShader, 
+							tris.verts[0], 
+							tris.verts[1],
+							tris.verts[2],
+							color, 
+							e->decals[i].tris[j].verts[0].st[0],
+							e->decals[i].tris[j].verts[0].st[1],
+							e->decals[i].tris[j].verts[1].st[0],
+							e->decals[i].tris[j].verts[1].st[1],
+							e->decals[i].tris[j].verts[2].st[0],
+							e->decals[i].tris[j].verts[2].st[1]);
+					}
+				}
+			//}
+		}*/
 	}
 	return 0;
 }
@@ -793,6 +900,122 @@ int qlua_rlerptriangle(lua_State *L) {
 	return 0;
 }
 
+/*int qlua_rdecal(lua_State *L) {
+	int i,j,k,x;
+	int alloc = 0;
+	qboolean d = qfalse;
+	float size,s2,ts2,tt2;
+	refTriMap_t maptris[64];
+	refEntity_t	*luaentity;
+	refTri_t	tris;
+	vec3_t temp,v1,v2;
+	vec3_t pos;
+	vec3_t normal,tnormal;
+	vec3_t axis[3];
+	float map[3][2];
+	md3Info_t	info;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TVECTOR);
+	luaL_checktype(L,3,LUA_TVECTOR);
+	luaL_checktype(L,4,LUA_TVECTOR);
+	luaL_checktype(L,5,LUA_TVECTOR);
+	luaL_checktype(L,6,LUA_TNUMBER);
+
+	luaentity = lua_torefentity(L,1);
+	if(luaentity != NULL) {
+		lua_tovector(L,2,pos);
+		lua_tovector(L,3,axis[0]);
+		lua_tovector(L,4,axis[1]);
+		lua_tovector(L,5,axis[2]);
+		size = lua_tonumber(L,4); s2 = size/2;
+		trap_R_ModelInfo(luaentity->hModel, &info);
+
+		//VectorCopy(normal,axis[0]);
+		//PerpendicularVector(axis[1],axis[0]);
+		//CrossProduct(axis[0],axis[1],axis[2]);
+
+		setupPlane(pos,axis);
+
+		CG_Printf("Projecting Verts\n");
+
+		for(i=0; i<info.numSurfaces; i++) {
+			for(j=0; j<info.numTriangles[i]; j++) {
+				if(trap_R_LerpTriangle( luaentity->hModel, i, j, &tris, luaentity->oldframe, luaentity->frame, 1.0 - luaentity->backlerp )) {
+					lua_newtable(L);
+					d = qfalse;
+
+					VectorSubtract(tris.verts[1],tris.verts[0],v1);
+					VectorSubtract(tris.verts[2],tris.verts[0],v2);
+					VectorNormalize(v1);
+					VectorNormalize(v2);
+					CrossProduct(v2,v1,tnormal);
+
+					for(k=0; k<3; k++) {
+						VectorCopy(luaentity->origin,temp);
+						for (x=0; x<3; x++ ) {
+							VectorMA( temp, tris.verts[i][x], luaentity->axis[x], temp );
+						}
+						VectorCopy(temp,tris.verts[k]);
+
+						//VectorSubtract(tris.verts[k],p,tris.verts[k]);
+						projectRPointOnPlane(tris.verts[k]);
+						ts2 = tris.verts[k][0]/s2;
+						tt2 = tris.verts[k][1]/s2;
+						map[k][0] = (ts2/size)+.5;
+						map[k][1] = (tt2/size)+.5;
+
+						//CG_Printf("[%i, %i, %i] {%f,%f}\n",i,j,k,ts2,tt2);
+
+						if(ts2 > -1 && ts2 < 1 && tt2 > -1 && tt2 < 1) {
+							d = qtrue;
+							CG_Printf("DRAW\n");
+						}
+					}
+					if(d) {
+						if(alloc < 64) {
+							if(DotProduct(axis[0],tnormal) < 0) {
+								for(k=0; k<3; k++) {
+									maptris[alloc].verts[k].st[0] = map[k][0];
+									maptris[alloc].verts[k].st[1] = map[k][1];
+								}
+								maptris[alloc].surface = i;
+								maptris[alloc].triangle = j;
+								alloc++;
+							}
+						} else {
+							break;
+						}
+					};
+				}
+			}
+		}
+
+		if(alloc > 0) {
+			if(luaentity->ndecals < 32) {
+				CG_Printf("Added Decal With %i tris\n", alloc);
+				//memset(luaentity->decals[luaentity->ndecals].tris, 0, sizeof(refTriMap_t) * alloc);
+				
+				luaentity->decals[luaentity->ndecals].tris = malloc(sizeof(refTriMap_t) * alloc);
+				//memcpy(luaentity->decals[luaentity->ndecals].tris, maptris, sizeof(refTriMap_t) * alloc);
+				for(i=0; i<alloc; i++) {
+					luaentity->decals[luaentity->ndecals].tris[i].surface = maptris[i].surface;
+					luaentity->decals[luaentity->ndecals].tris[i].triangle = maptris[i].triangle;
+					for(j=0; j<3; j++) {
+						luaentity->decals[luaentity->ndecals].tris[i].verts[j].st[0] = maptris[i].verts[j].st[0];
+						luaentity->decals[luaentity->ndecals].tris[i].verts[j].st[1] = maptris[i].verts[j].st[1];
+					}
+				}
+				
+				luaentity->decals[luaentity->ndecals].num = alloc;
+				luaentity->ndecals++;
+			}
+		}
+	}
+
+	return 0;
+}*/
+
 static int Entity_tostring (lua_State *L)
 {
   lua_pushfstring(L, "RefEntity: %p", lua_touserdata(L, 1));
@@ -856,6 +1079,7 @@ static const luaL_reg REntity_methods[] = {
   {"GetTrailMapLength",	qlua_rgettrailmaplength},
   {"GetInfo",			qlua_rgetinfo},
   {"LerpTriangle",		qlua_rlerptriangle},
+//  {"AddDecal",			qlua_rdecal},
   {0,0}
 };
 

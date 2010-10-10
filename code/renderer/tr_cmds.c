@@ -578,6 +578,21 @@ void RE_BeginFrame( stereoFrame_t stereoFrame ) {
 	}
 }
 
+void R_ForceRenderCommands( qboolean unused ) {
+	/*swapBuffersCommand_t	*cmd;
+
+	cmd = R_GetCommandBuffer( sizeof( *cmd ) );
+	if ( !cmd ) {
+		return;
+	}
+	cmd->commandId = RC_SWAP_BUFFERS;
+
+	R_IssueRenderCommands( qtrue );*/
+	
+	R_IssueRenderCommands( qfalse );
+	RB_EndSurface(qfalse);
+}
+
 
 /*
 =============

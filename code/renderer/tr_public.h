@@ -112,12 +112,14 @@ typedef struct {
 
 	void (*Begin2D)(void);
 	void (*End2D)(void);
+	void (*ForceRenderCommands)(qboolean runPerformanceCounters);
 
 	void (*TakeScreenshot)(int x, int y, int w, int h, char* file, qboolean jpeg);
 	void (*SetupRenderTarget)(int index, int width, int height);
 	void (*ClearImage)(const char* name);
 	void (*GetPixel)(int x, int y, int *r, int *g, int *b);
 	void (*ToScreen)(float *x, float *y, float *z, refdef_t *refdef);
+	void (*UpdateRenderTarget)(int rt);
 } refexport_t;
 
 //

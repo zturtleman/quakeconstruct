@@ -62,7 +62,7 @@ function AnimationT:Animate()
 			elseif(self.act == ANIM_ACT_STOP) then
 				self.frame = self.endf
 				self.oldframe = self.endf
-				--self:Stop()
+				self:Stop()
 			elseif(self.act == ANIM_ACT_PINGPONG) then
 				self.frame = self.endf
 				self.oldframe = self.endf
@@ -71,10 +71,12 @@ function AnimationT:Animate()
 		end
 		
 		if(self.frame < self.start) then
+			self.frame = self.start
+			self.oldframe = self.start
 			if(self.act == ANIM_ACT_PINGPONG) then
-				self.frame = self.start
-				self.oldframe = self.start
 				self.reverse = !self.reverse
+			else
+				self:Stop()
 			end		
 		end
 		
@@ -199,6 +201,7 @@ local function fixLegs(tab)
 			end
 		end
 	end
+	if(torsoStart == 9999 and torsoEnd == 0) then return animtab end
 	for k,v in pairs(animtab) do
 		if(string.find(k,"LEGS")) then
 			local start = v:GetStart()

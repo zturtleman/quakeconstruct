@@ -1730,11 +1730,13 @@ void RE_Begin2D( void );
 void RE_End2D( void );
 void RE_GetPixel( int x, int y, int *r, int *g, int *b );
 void RE_ToScreen( float *x, float *y, float *z, refdef_t *refdef );
+void RE_UpdateRenderTarget( int rt );
 
 void setupRT( int index, int width, int height );
 void beginGLSL( void );
 void useShaderProgram(char *file);
 void revertShaderProgram( void );
 GLenum getShaderProgram(char *file);
+void R_ForceRenderCommands( qboolean unused );
 
 #endif //TR_LOCAL_H

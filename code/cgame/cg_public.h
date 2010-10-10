@@ -215,6 +215,8 @@ typedef enum {
 	CG_QUAT_TO_ANGLES,
 	CG_ANGLES_TO_QUAT,
 	CG_CM_GETPHYSICSWORLD,
+	CG_R_ForceRenderCommands,
+	CG_R_UpdateRenderTarget,
 } cgameImport_t;
 
 

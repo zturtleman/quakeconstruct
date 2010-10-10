@@ -29,6 +29,10 @@ int lua_torefdef(lua_State *L, int idx, refdef_t *refdef, qboolean a640) {
 		AnglesToAxis(angles,refdef->viewaxis);
 	//}
 
+	qlua_pullvector(L,"forward",refdef->viewaxis[0],qfalse);
+	qlua_pullvector(L,"right",refdef->viewaxis[1],qfalse);
+	qlua_pullvector(L,"up",refdef->viewaxis[2],qfalse);
+
 	if(w > 0 && h > 0) {
 		if(a640) {
 			CG_AdjustFrom640( &x, &y, &w, &h );
@@ -245,12 +249,21 @@ int qlua_modelbounds(lua_State *L) {
 }
 
 int qlua_setuprt(lua_State *L) {
-	int index,width,height;
-	index = luaL_checkint(L,1);
-	width = luaL_checkint(L,2);
+	int index;
+	float width,height,dumb;
+	qboolean autoscale;
+	index = luaL_checknumber(L,1);
+	width = luaL_checknumber(L,2);
 	height = luaL_checkint(L,3);
+	autoscale = lua_toboolean(L,4);
 
-	trap_R_SetupRenderTarget(index,width,height);
+	if(index < 0 || index >= 32) return 0;
+
+	if(autoscale) {
+		CG_AdjustFrom640(&dumb,&dumb,&width,&height);
+	}
+
+	trap_R_SetupRenderTarget(index,(int)width,(int)height);
 
 	lua_pushinteger(L,index);
 	return 1;
@@ -489,6 +502,21 @@ int qlua_ToScreen(lua_State *L) {
 	return 1;
 }
 
+int qlua_ForceCommands(lua_State *L) {
+	trap_R_ForceRenderCommands();
+	return 0;
+}
+
+int qlua_UpdateRT(lua_State *L) {
+	int i = 0;
+
+	i = lua_tointeger(L,1);
+
+	if(i < 0 || i >= 32) return 0;
+	trap_R_UpdateRenderTarget(i);
+	return 0;
+}
+
 /*int qlua_SetClipPlane(lua_State *L) {
 	vec3_t plane;
 
@@ -513,6 +541,8 @@ static const luaL_reg Render_methods[] = {
   {"Tris",				qlua_3Dtriangle},
   {"SetBaseGLSL",		qlua_3DBaseglsl},
   {"ToScreen",			qlua_ToScreen},
+  {"ForceCommands",		qlua_ForceCommands},
+  {"UpdateRenderTarget",qlua_UpdateRT},
   {0,0}
 };
 

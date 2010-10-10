@@ -71,16 +71,27 @@ end
 
 local function SetupParticleRef(t,l)
 	local ref = l:GetRefEntity()
+	local skin = nil
 	if(t.scale) then ref:Scale(VectorFromT(t.scale,Vector(1))) end
 	if(t.render) then ref:SetType(t.render or RT_SPRITE) end
 	if(t.model) then
 		local model = RValueFromT(t.model)
 		if(model ~= nil) then
 			--print("model: " .. model .. "\n")
-			model = LoadModel(model)
+			if(type(model) == "string") then
+				model = LoadModel(model)
+			end
+			if(type(model) == "function") then
+				s,model = pcall(model)
+				if(type(model) == "table") then
+					skin = model[2]
+					model = model[1]
+				end
+			end
 		end
 		if(model ~= nil) then ref:SetType(RT_MODEL) end
 		if(model ~= nil) then ref:SetModel(model) end
+		if(skin ~= nil) then ref:SetSkin(skin) end
 	end
 	
 	if(t.shader) then ref:SetShader(LoadShader(RValueFromT(t.shader)) or 0) end
@@ -130,6 +141,19 @@ local function SetupParticle(t,l)
 			SetupParticle(t.stopped,le)
 		end)
 	end
+	if(t.touch) then
+		l:SetCallback(LOCALENTITY_CALLBACK_TOUCH,function(le,tr)
+			if(t.touch.markshader) then
+				local sh = LoadShader(RValueFromT(t.touch.markshader))
+				local size = t.touch.marksize or 10
+				local rot = t.touch.markrotation or math.random(360)
+				local r,g,b,a = ColorFromT(t.touch.markcolor,{1,1,1,1})
+				local duration = t.touch.markduration or 0
+				local alpha = (t.touch.markalpha == 1)
+				util.CreateMark(sh,tr.endpos,tr.normal,rot,r,g,b,a,size,alpha,duration)
+			end
+		end)	
+	end
 	
 	SetupParticleRef(t,l)
 end
@@ -163,6 +187,11 @@ local function StartEmitter(t,le,cb)
 			SetupParticle(t,l)
 			l:SetVelocity(f*(t.emit.speed or 0))
 			l:SetPos(le:GetPos())
+			
+			if(t.emit.velocity) then
+				l:SetVelocity(VectorFromT(t.emit.velocity,Vector(0)))
+			end
+			
 			if(t.emit.attach) then
 				local k = 1
 				local v = t.emit.attach[k]

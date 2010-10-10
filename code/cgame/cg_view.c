@@ -794,6 +794,7 @@ void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demo
 
 	// set up cg.snap and possibly cg.nextSnap
 	CG_ProcessSnapshots();
+	L = GetClientLuaState(); //Because we might have run a map_restart command.
 
 	// if we haven't received any snapshots yet, all
 	// we can draw is the information screen
@@ -816,6 +817,13 @@ void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demo
 
 	// build cg.refdef
 	inwater = CG_CalcViewValues();
+
+	if(L != NULL) {
+		CG_PushCGTab(L);
+		CG_InitLuaView(L);
+		qlua_gethook(L,"PreRender");
+		qlua_pcall(L,0,0,qtrue);
+	}
 
 	if(doRT) {
 		if(L != NULL) {

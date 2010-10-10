@@ -52,6 +52,11 @@ typedef struct {
 	byte		modulate[4];
 } polyVert_t;
 
+typedef struct {
+	float		st[2];
+	byte		modulate[4];
+} polyVertMap_t;
+
 typedef struct poly_s {
 	qhandle_t			hShader;
 	int					numVerts;
@@ -84,6 +89,17 @@ typedef enum {
 typedef struct {
 	vec3_t		verts[3];
 } refTri_t;
+
+typedef struct {
+	polyVertMap_t	verts[3];
+	int				triangle;
+	int				surface;
+} refTriMap_t;
+
+typedef struct {
+	refTriMap_t		*tris;
+	int				num;
+} refDecal_t;
 
 typedef struct {
 	int			numTriangles[32];
@@ -129,8 +145,10 @@ typedef struct {
 
 	int numVerts;
 	int numVerts2;
+	int ndecals;
 
 	polyVert_t	verts[128];		//Hxrmn's poly code
+//	refDecal_t	decals[32];
 	vec3_t		lua_scale;
 	float		trailCoordBump;
 	float		trailCoordLength;

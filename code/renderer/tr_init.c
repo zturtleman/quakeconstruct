@@ -1372,6 +1372,7 @@ refexport_t *GetRefAPI ( int apiVersion, refimport_t *rimp ) {
 
 	re.BeginFrame = RE_BeginFrame;
 	re.EndFrame = RE_EndFrame;
+	re.ForceRenderCommands = R_ForceRenderCommands;
 
 	re.MarkFragments = R_MarkFragments;
 	re.LerpTag = R_LerpTag;
@@ -1412,6 +1413,7 @@ refexport_t *GetRefAPI ( int apiVersion, refimport_t *rimp ) {
 	re.SetupRenderTarget = setupRT;
 	re.GetPixel = RE_GetPixel;
 	re.ToScreen = RE_ToScreen;
+	re.UpdateRenderTarget = RE_UpdateRenderTarget;
 
 	return &re;
 }

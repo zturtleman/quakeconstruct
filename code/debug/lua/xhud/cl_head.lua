@@ -11,6 +11,10 @@ local ref2 = RefEntity()
 local DAMAGE_TIME = 250
 local headOrigin = Vector()
 
+local wDamageX = 0
+local wDamageY = 0
+local wDamageTime = 0
+
 ref:SetModel(head)
 ref:SetSkin(skin)
 ref2:SetModel(head)
@@ -35,6 +39,7 @@ local headEndRoll = 0
 local headStartTime = 0
 local headEndTime = 0
 local deadFrac = 0
+local deadFrac2 = 0;
 local dz = math.random(-1,1)
 local timex = 0
 local lct = CurTime()
@@ -49,10 +54,75 @@ local frac_spr_z = Spring(0  ,0,  .15,  .89,  0);
 local ldamaget = 0
 local finisheddamage = false
 local turning = 0
-function DrawHead(x,y,ICON_SIZE,hp)
+local waterdamage = 0
+local oldhealth = 100
+local firstloop = true
+local modelname = nil
+local m_headmodel = nil
+local m_headanims = nil
+local animate = false
+
+local function findModel(name)
+	return LoadModel("models/players/" .. name .. "/head_anim.md3")
+end
+
+function loadHeadAnimations(name)
+	local path = "models/players/" .. name .. "/head_animation.cfg"
+	local txt = packRead(path)
+	if(txt == nil) then 
+		return nil
+	end
+	
+	return parseAnims(txt)
+end
+
+local function initHeadAnimations()
+	for k,v in pairs(m_headanims) do
+		v:SetType(ANIM_ACT_STOP)
+		v:Reset()
+		v:Stop()
+	end
+	m_headanims["IDLE"]:SetType(ANIM_ACT_PINGPONG)
+	m_headanims["DEAD"]:SetType(ANIM_ACT_LOOP)
+	m_headanims["WATER_DEAD"]:SetType(ANIM_ACT_LOOP)
+end
+
+local function playingPainAnimations()
+	if(m_headanims["PAIN_L"].playing) then return true end
+	if(m_headanims["PAIN_R"].playing) then return true end
+	if(m_headanims["WATER_PAIN_L"].playing) then return true end
+	if(m_headanims["WATER_PAIN_R"].playing) then return true end
+	return false
+end
+
+function loadHeadModel(inf)
+	if(modelname != inf.modelName) then
+		print("Model changed to: " .. inf.modelName .. "\n")
+		modelname = inf.modelName
+		local m = findModel(modelname)
+		if(m == nil or m == 0) then
+			animate = false
+		else
+			m_headmodel = m
+			m_headanims = loadHeadAnimations(modelname)
+			if(m_headanims != nil) then
+				animate = true
+				initHeadAnimations()
+			else
+				animate = false
+			end
+		end
+	end
+	return m_headmodel or inf.headModel
+end
+
+function DrawHead(x,y,ICON_SIZE,HEALTH)
+	local hp = HEALTH
+	local hp2 = HEALTH + waterdamage
 	local inf = LocalPlayer():GetInfo()
-	local nhead = inf.headModel
+	local nhead = loadHeadModel(inf)
 	local nskin = inf.headSkin
+	local waterlevel = entityWaterLevel(LocalPlayer())
 	if(nhead != head or nskin != skin) then
 		ref:SetModel(nhead)
 		ref:SetSkin(nskin)
@@ -63,7 +133,102 @@ function DrawHead(x,y,ICON_SIZE,hp)
 		
 		positionHead()
 	end
+	
+	if(animate) then
+		local a = m_headanims
+		if(playingPainAnimations() or HEALTH <= 0) then
+			a["INWATER"]:Stop()
+			a["IDLE"]:Stop()
+		else
+			if(waterlevel < 2) then
+				if(a["INWATER"].playing) then
+					a["INWATER"].reverse = true
+				else
+					if(a["INWATER"].start < a["INWATER"].frame) then
+						a["INWATER"].reverse = true
+						a["INWATER"]:Play()
+					else
+						a["INWATER"].reverse = false
+						a["INWATER"]:Reset()
+						a["INWATER"]:Stop()
+					end
+					if(a["INWATER"].playing) then
+					
+					else
+						a["IDLE"]:Play()
+					end
+				end
+			else
+				a["IDLE"]:Reset()
+				a["IDLE"]:Stop()
+				a["INWATER"].reverse = false
+				a["INWATER"]:Play()
+			end
+		end
+		
+		--m_headanims["PAIN_L"]:Play()
+		
+		for k,v in pairs(m_headanims) do
+			v:SetRef(ref)
+			v:Animate()
+		end
+		
+		ref2:SetFrame(ref:GetFrame())
+		ref2:SetLerp(ref:GetLerp())
+		ref2:SetOldFrame(ref:GetOldFrame())
+	end
+	
+	if not (oldhealth == HEALTH) then
+		if(firstloop) then
+		else
+			if(oldhealth < HEALTH) then
+				local heal = HEALTH - oldhealth
+				waterdamage = waterdamage - heal
+				if(waterdamage < 0) then waterdamage = 0 end
+			else
 
+			end
+		end
+		oldhealth = HEALTH
+	end
+
+	if(animate) then
+		if(HEALTH <= 0) then
+			if(waterlevel < 2) then
+				if(m_headanims["DEATH"].frame == m_headanims["DEATH"].start) then
+					m_headanims["DEATH"]:Play()
+				end
+				if not (m_headanims["DEATH"].playing) then
+					m_headanims["DEAD"]:Play()
+				end
+			else
+				if(m_headanims["WATER_DEATH"].frame == m_headanims["WATER_DEATH"].start) then
+					m_headanims["WATER_DEATH"]:Play()
+				end
+				if not (m_headanims["WATER_DEATH"].playing) then
+					m_headanims["WATER_DEAD"]:Play()
+				end
+			end	
+		else
+			if(m_headanims["DEATH"].playing or 
+				m_headanims["DEAD"].playing or 
+				m_headanims["WATER_DEATH"].playing or
+				m_headanims["WATER_DEAD"].playing) then
+				print("RESET\n")
+				m_headanims["INWATER"]:Reset()
+				m_headanims["INWATER"]:Stop()
+				m_headanims["DEAD"]:Reset()
+				m_headanims["DEAD"]:Stop()
+				m_headanims["WATER_DEAD"]:Reset()
+				m_headanims["WATER_DEAD"]:Stop()
+				m_headanims["DEATH"]:Reset()
+				m_headanims["DEATH"]:Stop()
+				m_headanims["WATER_DEATH"]:Reset()
+				m_headanims["WATER_DEATH"]:Stop()
+			end
+		end
+	end
+	
 	local frac = 0
 	local size = 0
 	local stretch = 0
@@ -75,6 +240,21 @@ function DrawHead(x,y,ICON_SIZE,hp)
 	local angles = Vector()
 	local resetf = false
 	if(delta < DAMAGE_TIME) then
+		if(HEALTH > 0) then
+			if(waterlevel < 2) then
+				if(damageX < 0) then
+					m_headanims["PAIN_R"]:Reset()
+				else
+					m_headanims["PAIN_L"]:Reset()
+				end
+			else
+				if(damageX < 0) then
+					m_headanims["WATER_PAIN_R"]:Reset()
+				else
+					m_headanims["WATER_PAIN_L"]:Reset()
+				end
+			end
+		end
 		finisheddamage = true
 		local hpx = 1-(math.min(math.max(hp/100,.3),1))
 		frac = delta / DAMAGE_TIME
@@ -97,7 +277,6 @@ function DrawHead(x,y,ICON_SIZE,hp)
 		
 		--print(ddir .. "\n")
 		ddir = damageX * (25) + math.random(-10,10)
-		ddir = 45
 		headStartRoll = ddir*(1-frac)
 		headEndRoll = 0
 
@@ -159,19 +338,27 @@ function DrawHead(x,y,ICON_SIZE,hp)
 		if(dz > 0) then dz = 1 end
 		if(dz <= 0) then dz = -1 end
 		angles.y = angles.y - (angles.y - 180)*deadFrac
-		angles.x = angles.x - (angles.x - 30)*deadFrac
+		angles.x = angles.x - (angles.x - 10)*deadFrac
 		angles.z = 13*dz
+		
+		--if(waterlevel >= 2) then
+			angles.x = angles.x - 30 * (1-deadFrac2)
+		--end
+		
 		if(deadFrac == 0) then
-			headStartPitch = -50
+			headStartPitch = -30
 			headStartTime = ltime;
-			headEndPitch = -30
+			headEndPitch = -10
 			headEndTime = ltime+200;
 		end
 		deadFrac = deadFrac + 0.008
+		deadFrac2 = deadFrac2 + 0.001
 		if(deadFrac > 1) then deadFrac = 1 end
+		if(deadFrac2 > 1) then deadFrac2 = 1 end
 	else
 		dz = math.random(-1,1)
 		deadFrac = 0
+		deadFrac2 = 0
 	end
 	
 	if(hp > 100) then hp = 100 end
@@ -179,7 +366,7 @@ function DrawHead(x,y,ICON_SIZE,hp)
 		local hp2 = (1-(hp/200))
 		timex = timex + (CurTime() - lct) * ((hp2) * math.random(20,30)/5)
 		
-		angles.x = angles.x + (1-(hp/100))*30
+		angles.x = angles.x + (1-(hp/100))*18
 
 		angles.x = angles.x + math.cos(timex)*(1-(hp/70))*6
 		angles.z = angles.z + math.sin(timex/3)*(1-(hp/70))*4
@@ -218,7 +405,7 @@ function DrawHead(x,y,ICON_SIZE,hp)
 	
 	render.CreateScene()
 
-	local hpx = (1-(math.min(math.max(hp/100,0),1)/5)) - 0.3
+	local hpx = (1-(math.min(math.max(hp2/100,0),1)/5)) - 0.3
 	if(hpx < 0) then 
 		hpx = 0
 	end
@@ -246,7 +433,7 @@ function DrawHead(x,y,ICON_SIZE,hp)
 	ref:SetPos(Vector(0,headOrigin.y,headOrigin.z))
 	ref2:SetPos(Vector(0,headOrigin.y,headOrigin.z))
 	
-	local hp2x = math.min(math.max(hp/100,0),1)
+	local hp2x = math.min(math.max(hp2/100,0),1)
 	local na2 = math.min((hp2x/3) + .6,1)
 	
 	calpha = nalpha --calpha + (nalpha - calpha)*.01
@@ -290,7 +477,48 @@ function DrawHead(x,y,ICON_SIZE,hp)
 		print("^1" .. e .. "\n")
 	end
 	lct = CurTime()
+	
+	if(firstloop) then
+		firstloop = false
+	end
 end
+
+local function processDamage(attacker,pos,dmg,death,waslocal,wasme,health)
+	if(waslocal == false) then return end
+	if(death == MOD_FALLING) then
+		m_headanims["PAIN_L"]:Reset()
+		headStartYaw = 180;
+		headStartPitch = 25
+		
+		headEndYaw = 180;
+		headEndPitch = -10;
+		
+		headStartRoll = -5
+		headEndRoll = 0
+
+		headStartTime = LevelTime();
+		headEndTime = LevelTime() + 200;
+	end
+	if(death == MOD_WATER) then
+		m_headanims["WATER_PAIN_L"]:Reset()
+		headStartYaw = 180 + (2);
+		
+		headStartPitch = -30
+
+		
+		headEndYaw = 180 -- + 0 * math.cos( math.random()*math.pi );
+		headEndPitch = 0
+		
+		headStartRoll = 2
+		headEndRoll = 0
+
+		headStartTime = LevelTime();
+		headEndTime = LevelTime() + 800 + math.random() * 100;
+		
+		waterdamage = waterdamage + dmg
+	end
+end
+hook.add("Damaged","cl_xhud_head",processDamage)
 
 --[[local function newClientInfo(newinfo,entity)
 	if(entity:IsClient()) then

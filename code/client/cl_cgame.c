@@ -602,6 +602,12 @@ int CL_CgameSystemCalls( int *args ) {
 	case CG_R_SETCOLOR:
 		re.SetColor( VMA(1) );
 		return 0;
+	case CG_R_ForceRenderCommands:
+		re.ForceRenderCommands(qfalse);
+		return 0;
+	case CG_R_UpdateRenderTarget:
+		re.UpdateRenderTarget( args[1] );
+		return 0;
 	case CG_R_DRAWSTRETCHPIC:
 		re.DrawStretchPic( VMF(1), VMF(2), VMF(3), VMF(4), VMF(5), VMF(6), VMF(7), VMF(8), args[9] );
 		return 0;

@@ -603,6 +603,7 @@ int qlua_link(lua_State *L) {
 
 int qlua_localplayer(lua_State *L) {
 	centity_t *ent = &cg.predictedPlayerEntity;//&cg_entities[ cg.clientNum ];
+	ent->currentState.clientNum = cg.snap->ps.clientNum;
 	if(ent != NULL) {
 		lua_pushentity(L, ent);
 		return 1;
