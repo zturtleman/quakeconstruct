@@ -14,6 +14,17 @@ local lastang = nil
 local deltaang = Vector()
 local h_red = 0
 
+local data = 
+[[{
+	{
+		blendfunc add
+		map $whiteimage
+		alphaGen vertex
+		rgbGen vertex
+	}
+}]]
+local bright = CreateShader("f",data)
+
 includesimple("xhud/cl_head")
 includesimple("xhud/cl_items")
 
@@ -135,6 +146,55 @@ local function angles()
 	lastz = lastz + (deltaz)*.2
 end
 
+local function HealthBar(recty,mx,my)
+	if(hp <= 0) then return end
+	
+	local col_hp = colors.health_norm
+	if(hp > 100) then col_hp = colors.health_high end
+	if(hp <= 25) then col_hp = colors.health_low end
+
+	local hpp = (hp/100)
+	local crecty = 480 - recty
+	local hrh = 10
+	local hrw = 150
+	local cx = 2
+	local hrx = mx+cx --(hrw/2)
+	local hry = recty-hrh  --+(crecty/2)-(hrh/2)
+	
+	local r,g,b,a = unpack(col_hp[1])
+	r = (r / 3) + .2
+	g = (g / 3) + .2
+	b = (b / 3) + .2
+	
+	draw.SetColor(r,g,b,a)
+	draw.Rect(hrx-2,hry-2,hrw+4,hrh+4,bright)
+	
+	local hppx = (hpp - 1)
+	local ew = (hrw*hppx)
+		
+	if(hpp > 1) then
+		draw.Rect((hrx-2) + hrw+4,hry-10,ew,hrh+12,bright)
+	end
+	
+	r,g,b,a = unpack(col_hp[2])
+	r = (r / 3)
+	g = (g / 3)
+	b = (b / 3)
+
+	draw.SetColor(r,g,b,a/2)
+	local e = 0
+	if(hpp > 1) then 
+		hpp = 1
+		e = 4
+		draw.Rect(hrx+e+hrw*hpp,hry-8,ew-4,hrh+8)
+	end
+	draw.Rect(hrx,hry,e+hrw*hpp,hrh)
+	
+	draw.SetColor(1,1,1,1)
+	draw.Text(mx+5,recty-hrh,"health",10,10)
+end
+
+local HEAD_CENTER = true
 local function draw2D()
 	hp = _CG.stats[STAT_HEALTH]
 	local mx = deltaang.y
@@ -177,14 +237,15 @@ local function draw2D()
 	draw.SetColor(1,1,1,1)
 	
 	DrawAmmo(mx+95+shakex,my+430+shakey,50,50)
-	DrawArmor(mx+250+shakex,my+430+shakey,50,50,armor)
-	DrawHead(mx+395,my+275,200,hp)
 	
-	local col_hp = colors.health_norm
+	if(HEAD_CENTER) then
+		DrawHead(mx+(200),my+295,180,hp)
+	else
+		DrawHead(mx+395,my+275,200,hp)
+	end
+	
 	local col_ammo = colors.ammo_norm
 	local col_armor = colors.ammo_norm
-	if(hp > 100) then col_hp = colors.health_high end
-	if(hp <= 25) then col_hp = colors.health_low end
 	if(ammo <= 5) then col_ammo = colors.ammo_low end
 	if(armor > 100) then col_armor = colors.health_high end
 	
@@ -192,16 +253,24 @@ local function draw2D()
 	local c1 = {1,.5,0,1}
 	local c2 = {1,.8,0,1}
 	local num_y = my+(480-45)
+	
+	HealthBar(recty,mx,my)
+	
 	draw.SetColor(1,1,1,1)
 	--draw.Text(10,50,"" .. deltaang.x .. " - " .. deltaang.y .. "",10,10)
 	
 	if(_CG.weapon != WP_NONE) then draw.Text(mx+5,my+420,"ammo:",10,10) end
 	--draw.Text(mx+200,my+420,"health:",10,10)
-	if(armor > 0) then draw.Text(mx+300,my+420,"armor:",10,10) end
 	if(_CG.weapon != WP_NONE) then drawNumbers(mx,num_y,20,20,ammo,8,unpack(col_ammo)) end
+	
 	--drawNumbers(mx+190,num_y,20,20,hp,8,unpack(col_hp))
 	
-	if(armor > 0) then drawNumbers(mx+300,num_y,20,20,armor,8,unpack(col_armor)) end
+	local armorx = mx+300
+	if(HEAD_CENTER) then armorx = mx+500 end
+	DrawArmor((armorx - 50)+shakex,my+430+shakey,50,50,armor)
+	draw.SetColor(1,1,1,1)
+	if(armor > 0) then draw.Text(armorx,my+420,"armor:",10,10) end
+	if(armor > 0) then drawNumbers(armorx,num_y,20,20,armor,8,unpack(col_armor)) end
 end
 hook.add("Draw2D","cl_xhud",draw2D)
 
@@ -210,6 +279,9 @@ function DrawXHUD()
 end
 
 local function processDamage(attacker,pos,dmg,death,waslocal,wasme,health)
+	if(death == MOD_WATER) then
+		dmg = dmg * 40
+	end
 	if(dmg > 50) then dmg = 50 end
 	if(waslocal) then
 		h_red = LevelTime() + (dmg*50)

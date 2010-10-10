@@ -1403,6 +1403,7 @@ void CG_AddViewWeapon( playerState_t *ps ) {
 	float		fovOffset;
 	vec3_t		angles;
 	weaponInfo_t	*weapon;
+	lua_State *L = GetClientLuaState();
 
 	if ( ps->persistant[PERS_TEAM] == TEAM_SPECTATOR ) {
 		return;
@@ -1474,6 +1475,15 @@ void CG_AddViewWeapon( playerState_t *ps ) {
 
 	hand.hModel = weapon->handsModel;
 	hand.renderfx = RF_DEPTHHACK | RF_FIRST_PERSON | RF_MINLIGHT;
+
+	if(L != NULL) {
+		qlua_gethook(L,"AdjustWeaponHand");
+		lua_pushrefentity(L,&hand);
+		qlua_pcall(L,1,1,qtrue);
+		if(lua_type(L,-1) == LUA_TUSERDATA) {
+			hand = *lua_torefentity(L,-1);
+		}
+	}
 
 	// add everything onto the hand
 	CG_AddPlayerWeapon( &hand, ps, &cg.predictedPlayerEntity, ps->persistant[PERS_TEAM] );

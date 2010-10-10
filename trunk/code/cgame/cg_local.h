@@ -1819,6 +1819,8 @@ void		trap_AnglesToQuat( float *angles, float *quat );
 void		trap_QuatToAngles( float *quat, float *angles );
 
 qboolean	trap_GetEntityToken( char *buffer, int bufferSize );
+void		trap_R_ForceRenderCommands();
+void		trap_R_UpdateRenderTarget(int id);
 
 void	CG_ClearParticles (void);
 void	CG_AddParticles (void);

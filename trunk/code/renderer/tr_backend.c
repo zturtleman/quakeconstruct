@@ -38,6 +38,14 @@ GLenum glslShaderFragment[MAX_GLSL_SHADERS];
 GLenum glslShaderVertex[MAX_GLSL_SHADERS];
 char* glslShaderFiles[MAX_GLSL_SHADERS];
 
+void RE_UpdateRenderTarget(int irt) {
+	rendertarget_t rt;
+
+	if(irt < 0 || irt >= 32) return;
+	rt = renderTargets[irt];
+	qglBindTexture(GL_TEXTURE_2D, rt.texture);		
+	qglCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 0, 0, rt.width, rt.height, 0);
+}
 
 qboolean loadShaderSource(char *file, char **source) {
 	int		length;
@@ -1145,7 +1153,6 @@ void RE_UploadCinematic (int w, int h, int cols, int rows, const byte *data, int
 		}
 	}
 }
-
 
 /*
 =============

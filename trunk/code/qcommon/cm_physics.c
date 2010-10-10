@@ -23,7 +23,7 @@ void CM_InitPhysics()
 	sdk = plNewBulletSdk();
 	world = plCreateDynamicsWorld(sdk);
 
-	clip = CM_InlineModel(0);
+	/*clip = CM_InlineModel(0);
 	cmodel = CM_ClipHandleToModel(clip);
 
 	//leaf = cmodel->leaf;
@@ -68,7 +68,7 @@ void CM_InitPhysics()
 
 			plAddRigidBody(world,body);
 		}
-	}
+	}*/
 }
 
 void CM_ShutdownPhysics()

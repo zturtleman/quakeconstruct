@@ -186,4 +186,21 @@ local function takeShot()
 end
 concommand.add("jpegshot",takeShot)
 
+local function takeShot()
+	local atkname = "player"
+	local pos = Vector(0,0,0)
+	local dmg = 2
+	local death = MOD_FALLING
+	local self = true
+	local self2 = LocalPlayer()
+	local suicide = true
+	local hp = _CG.stats[STAT_HEALTH] - dmg
+	local dir = Vector(0,0,1)
+	local id = 0
+	CallHook("Damaged",atkname,pos,dmg,death,self,suicide,hp,dir,self2:GetPos())
+	CallHook("PlayerDamaged",self2,atkname,pos,dmg,death,self,suicide,hp,id,pos,dir)
+	CallHook("PlayerDamaged2",self2,dmg,death,pos,dir,hp)
+end
+concommand.add("damage",takeShot)
+
 hook.add("Respawned","cl_init",takeShot)

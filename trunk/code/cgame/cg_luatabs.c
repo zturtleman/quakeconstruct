@@ -5,8 +5,12 @@ void setTableRefDef(lua_State *L, char *str, refdef_t refdef) {
 	lua_pushstring(L, str);
 	lua_createtable(L,8,0);
 	tabid = lua_gettop(L);
-	
-	setTableBoolean(L,"renderTarget",refdef.renderTarget);
+
+	setTableString(L,"glsl_override","");
+
+	setTableBoolean(L,"isRenderTarget",refdef.renderTarget);
+	setTableInt(L,"renderTarget",refdef.rt_index);
+	setTableInt(L,"flags",refdef.rdflags);
 
 	setTableFloat(L,"x",refdef.x);
 	setTableFloat(L,"y",refdef.y);
@@ -16,6 +20,9 @@ void setTableRefDef(lua_State *L, char *str, refdef_t refdef) {
 	setTableFloat(L,"fov_y",refdef.fov_y);
 	setTableVector(L,"origin",refdef.vieworg);
 	setTableVector(L,"angles",refdef.viewaxis[0]);
+	
+	setTableFloat(L,"zNear",refdef.zNear);
+	setTableFloat(L,"zFar",refdef.zFar);
 
 	setTableVector(L,"forward",refdef.viewaxis[0]);
 	setTableVector(L,"right",refdef.viewaxis[1]);
@@ -113,6 +120,7 @@ void CG_PushCGTab(lua_State *L) {
 		setTableTable(L,"stats", cg.snap->ps.stats, STAT_MAX_HEALTH+1);
 		setTableTable(L,"pers", cg.snap->ps.persistant, PERS_CAPTURES+1);
 		setTableTable(L,"ammo", cg.snap->ps.ammo, WP_NUM_WEAPONS);
+		setTableTable(L,"powerups", cg.snap->ps.powerups, PW_NUM_POWERUPS);
 	}
 	lua_setglobal(L,"_CG");
 
