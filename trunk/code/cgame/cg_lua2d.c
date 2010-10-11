@@ -545,6 +545,18 @@ int qlua_vectorToScreen(lua_State *L) {
 	return 1;
 }
 
+int qlua_customscale(lua_State *L) {
+	DRAW_CUSTOMSCALE_X = lua_tonumber(L,1);
+	DRAW_CUSTOMSCALE_Y = lua_tonumber(L,2);
+	return 0;
+}
+
+int qlua_customoffset(lua_State *L) {
+	DRAW_CUSTOMOFFSET_X = lua_tonumber(L,1);
+	DRAW_CUSTOMOFFSET_Y = lua_tonumber(L,2);
+	return 0;
+}
+
 static const luaL_reg Draw_methods[] = {
   {"SetColor",		qlua_setcolor},
   {"Rect",			qlua_rect},
@@ -562,6 +574,8 @@ static const luaL_reg Draw_methods[] = {
   {"Get3DCoord",	qlua_get3DCoord},
   {"GetPixel",		qlua_getpixel},
   {"VectorToScreen",qlua_vectorToScreen},
+  {"CustomScale",	qlua_customscale},
+  {"CustomOffset",	qlua_customoffset},
   {0,0}
 };
 

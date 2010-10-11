@@ -42,14 +42,30 @@ void CG_AdjustFrom640( float *x, float *y, float *w, float *h ) {
 	*y *= cgs.screenYScale;
 	*w *= cgs.screenXScale;
 	*h *= cgs.screenYScale;
+
+	*x *= DRAW_CUSTOMSCALE_X;
+	*y *= DRAW_CUSTOMSCALE_Y;
+	*w *= DRAW_CUSTOMSCALE_X;
+	*h *= DRAW_CUSTOMSCALE_Y;
+
+	*x += DRAW_CUSTOMOFFSET_X * cgs.screenXScale;
+	*y += DRAW_CUSTOMOFFSET_Y * cgs.screenYScale;
 }
 
 void CG_AdjustTo640( float *x, float *y, float *w, float *h ) {
+	*x -= DRAW_CUSTOMOFFSET_X * cgs.screenXScale;
+	*y -= DRAW_CUSTOMOFFSET_Y * cgs.screenYScale;
+
 	// scale for screen sizes
 	*x = *x / cgs.screenXScale;
 	*y = *y / cgs.screenYScale;
 	*w = *w / cgs.screenXScale;
 	*h = *h / cgs.screenYScale;
+
+	*x /= DRAW_CUSTOMSCALE_X;
+	*y /= DRAW_CUSTOMSCALE_Y;
+	*w /= DRAW_CUSTOMSCALE_X;
+	*h /= DRAW_CUSTOMSCALE_Y;
 }
 
 void DrawRect2(float x, float y, float w, float h, float s, float t, float s2, float t2, qhandle_t shader) {

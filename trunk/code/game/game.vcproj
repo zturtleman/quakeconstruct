@@ -1729,6 +1729,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\g_luautil.c"
+				>
+			</File>
+			<File
 				RelativePath=".\g_luavector.c"
 				>
 			</File>

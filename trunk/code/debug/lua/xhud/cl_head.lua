@@ -486,7 +486,7 @@ end
 local function processDamage(attacker,pos,dmg,death,waslocal,wasme,health)
 	if(waslocal == false) then return end
 	if(death == MOD_FALLING) then
-		m_headanims["PAIN_L"]:Reset()
+		if(animate) then m_headanims["PAIN_L"]:Reset() end
 		headStartYaw = 180;
 		headStartPitch = 25
 		
@@ -500,7 +500,7 @@ local function processDamage(attacker,pos,dmg,death,waslocal,wasme,health)
 		headEndTime = LevelTime() + 200;
 	end
 	if(death == MOD_WATER) then
-		m_headanims["WATER_PAIN_L"]:Reset()
+		if(animate) then m_headanims["WATER_PAIN_L"]:Reset() end
 		headStartYaw = 180 + (2);
 		
 		headStartPitch = -30

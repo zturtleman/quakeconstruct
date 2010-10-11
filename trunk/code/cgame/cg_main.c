@@ -91,6 +91,10 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 		CloseClientLua();
 		return 0;
 	case CG_RESTART_LUA:
+		DRAW_CUSTOMSCALE_X = 1;
+		DRAW_CUSTOMSCALE_Y = 1;
+		DRAW_CUSTOMOFFSET_X = 0;
+		DRAW_CUSTOMOFFSET_Y = 0;
 		CloseClientLua();
 		CG_InitLua();
 
@@ -2277,6 +2281,11 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum ) {
 
 	cg.clientNum = clientNum;
 
+	DRAW_CUSTOMSCALE_X = 1;
+	DRAW_CUSTOMSCALE_Y = 1;
+	DRAW_CUSTOMOFFSET_X = 0;
+	DRAW_CUSTOMOFFSET_Y = 0;
+
 	cgs.processedSnapshotNum = serverMessageNum;
 	cgs.serverCommandSequence = serverCommandSequence;
 
@@ -2400,6 +2409,10 @@ Called before every level change or subsystem restart
 =================
 */
 void CG_Shutdown( void ) {
+	DRAW_CUSTOMSCALE_X = 1;
+	DRAW_CUSTOMSCALE_Y = 1;
+	DRAW_CUSTOMOFFSET_X = 0;
+	DRAW_CUSTOMOFFSET_Y = 0;
 	CG_ShutdownLuaPhysics();
 	CloseClientLua();
 	// some mods may need to do cleanup work here,

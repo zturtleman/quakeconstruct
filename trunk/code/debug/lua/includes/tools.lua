@@ -21,15 +21,75 @@ function intToBool(i)
 	return true
 end
 
+function gOR(...)
+	if(#arg < 2) then return arg[1] or 0 end
+	local v = arg[1]
+	for i=2, #arg do
+		v = bitOr(v,arg[i])
+	end
+	return v
+end
+
+function gAND(...)
+	if(#arg < 2) then return arg[1] or 0 end
+	local v = arg[1]
+	for i=2, #arg do
+		v = bitAnd(v,arg[i])
+	end
+	return v
+end
+
 function entityWaterLevel(pl)
+	local wtype = 0
 	local level = 0
+	local viewHeight = 0
+	local minZ = -24
+	local isPL = pl:IsPlayer()
+	if(isPL) then
+		if(SERVER) then
+			viewHeight = util.GetViewHeight(pl)
+		else
+			viewHeight = util.GetViewHeight()
+		end
+	end
 	local pos = pl:GetPos()
-	local mask = CONTENTS_WATER
-	local res = TraceLine(pos + Vector(0,0,28),pos,pl,mask)
+	local o = pos.z
+	if(isPL) then
+		pos.z = o + minZ + 1;
+	end
+	
+	local cont = util.GetPointContents(pos,pl:EntIndex())
+	local sample2 = viewHeight - minZ
+	local sample1 = sample2 / 2
+	
+	if(isPL) then
+		if(bitAnd(cont,MASK_WATER) ~= 0) then
+			wtype = cont
+			level = 1
+			pos.z = o + minZ + sample1
+			cont = util.GetPointContents(pos,pl:EntIndex())
+			if(bitAnd(cont,MASK_WATER) ~= 0) then
+				level = 2
+				pos.z = o + minZ + sample2
+				cont = util.GetPointContents(pos,pl:EntIndex())
+				if(bitAnd(cont,MASK_WATER) ~= 0) then
+					level = 3
+				end
+			end
+		end
+	end
+	return level,wtype
+
+--[[	local level = 0
+	local pos = pl:GetPos()
+	local mask = gOR(CONTENTS_WATER,CONTENTS_LAVA,CONTENTS_SLIME)
+	local res = TraceLine(pos + Vector(0,0,28),pos - Vector(0,0,65),pl,mask)
 	if(res.fraction < .5) then level = 1 end
 	if(res.fraction < .35) then level = 2 end
 	if(res.fraction <= 0) then level = 3 end
-	return level
+	print(res.fraction .. "\n")
+	print(bitAnd(res.contents,CONTENTS_LAVA) .. "\n")
+	return level,res.contents]]
 end
 
 function ColorToLong(r,g,b,a)
@@ -63,24 +123,6 @@ function LongToColor(long)
 	local b = gAND(bitShift(long,16),255)/255
 	local a = gAND(bitShift(long,24),255)/255
 	return r,g,b,a
-end
-
-function gOR(...)
-	if(#arg < 2) then return arg[1] or 0 end
-	local v = arg[1]
-	for i=2, #arg do
-		v = bitOr(v,arg[i])
-	end
-	return v
-end
-
-function gAND(...)
-	if(#arg < 2) then return arg[1] or 0 end
-	local v = arg[1]
-	for i=2, #arg do
-		v = bitAnd(v,arg[i])
-	end
-	return v
 end
 
 function lastChar(v)

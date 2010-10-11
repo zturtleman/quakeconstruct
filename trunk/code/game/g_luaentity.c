@@ -1226,21 +1226,29 @@ int qlua_damageplayer(lua_State *L) {
 			if(lua_type(L,carg) == LUA_TVECTOR) {
 				lua_tovector(L,carg,dir);
 				ddir = qtrue;
+			} else {
+				carg--;
 			}
 			carg++;
 			if(lua_type(L,carg) == LUA_TVECTOR) {
 				lua_tovector(L,carg,point);
 				dpoint = qtrue;
+			} else {
+				carg--;
+			}
+			carg++;
+			if(lua_type(L,carg) == LUA_TNUMBER) {
+				df = lua_tointeger(L,carg);
 			}
 		}
 
 		if ( mod >= 0 && mod <= MOD_MAX ) {
 			qlua_lockdamage = qtrue;
-			df |= DAMAGE_THRU_LUA;
+			//df |= DAMAGE_THRU_LUA;
 			if(ddir && dpoint) {
-				G_Damage(targ,inflictor,attacker,dir,point,damage,0,mod);
+				G_Damage(targ,inflictor,attacker,dir,point,damage,df,mod);
 			} else {
-				G_Damage(targ,inflictor,attacker,NULL,NULL,damage,0,mod);
+				G_Damage(targ,inflictor,attacker,NULL,NULL,damage,df,mod);
 			}
 			qlua_lockdamage = qfalse;
 		} else {
@@ -1305,6 +1313,7 @@ int qlua_playsound(lua_State *L) {
 	const char *file = "";
 	char	buffer[MAX_QPATH];
 	int index = 0;
+	int channel = CHAN_AUTO;
 
 	luaL_checktype(L,1,LUA_TUSERDATA);
 	luaL_checktype(L,2,LUA_TSTRING);
@@ -1319,9 +1328,17 @@ int qlua_playsound(lua_State *L) {
 				Q_strncpyz( buffer, file, sizeof(buffer) );
 			}
 
+			if(lua_gettop(L) > 2) {
+				channel = lua_tointeger(L,3);
+				if(channel > CHAN_ANNOUNCER || channel < CHAN_AUTO) {
+					channel = CHAN_AUTO;
+				}
+			}
+
 			index = G_SoundIndex(buffer);
 			if(index) {
-				G_AddEvent( luaentity, EV_GENERAL_SOUND, index );
+				//G_AddEvent( luaentity, EV_GENERAL_SOUND, index );
+				G_Sound( luaentity, channel, index );
 			}
 		}
 	}
@@ -2040,6 +2057,19 @@ int qlua_setanims(lua_State *L) {
 	return 0;
 }
 
+int qlua_setpaindebounce(lua_State *L) {
+	gentity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TNUMBER);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		luaentity->pain_debounce_time = lua_tointeger(L,2);
+	}
+	return 0;
+}
+
 static const luaL_reg Entity_methods[] = {
   {"GetInfo",		qlua_getclientinfo},
   {"SetInfo",		qlua_setclientinfo},
@@ -2137,6 +2167,7 @@ static const luaL_reg Entity_methods[] = {
   {"Fire",			qlua_use},
   {"SetClientNum",  qlua_clientnum},
   {"SetAnims",		qlua_setanims},
+  {"SetPainDebounce", qlua_setpaindebounce},
   {0,0}
 };
 
