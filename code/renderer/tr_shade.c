@@ -1031,10 +1031,10 @@ static void RB_IterateStagesGeneric( shaderCommands_t *input )
 			}
 
 			//LOL WTF, I don't need to do this!
-			/*if(pStage->clamp) {
+			if(pStage->clamp) {
 				qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP );
 				qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );	
-			}*/
+			}
 
 			//
 			// set state

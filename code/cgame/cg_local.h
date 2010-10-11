@@ -1846,3 +1846,8 @@ void CG_PlayerAnimation( centity_t *cent, int *legsOld, int *legs, float *legsBa
 void playReplay( void );
 qboolean replayRunning( void );
 void CG_RegisterSounds( void );
+
+float DRAW_CUSTOMSCALE_X;
+float DRAW_CUSTOMSCALE_Y;
+float DRAW_CUSTOMOFFSET_X;
+float DRAW_CUSTOMOFFSET_Y;

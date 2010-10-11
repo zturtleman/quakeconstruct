@@ -493,7 +493,8 @@ int qlua_pointcontents(lua_State *L) {
 	int pass = -1;
 	int contents;
 
-	luaL_checkudata(L,1,"Vector");
+	//luaL_checkudata(L,1,"Vector");
+	if(lua_type(L,1) != LUA_TUSERDATA) return 0;
 
 	lua_tovector(L,1,point);
 
@@ -511,6 +512,11 @@ int qlua_enableCP(lua_State *L) {
 
 	CG_EnableObituaryCP(lua_toboolean(L,1));
 	return 0;
+}
+
+int qlua_getviewheight(lua_State *L) {
+	lua_pushinteger(L,cg.predictedPlayerState.viewheight);
+	return 1;
 }
 
 static const luaL_reg Util_methods[] = {
@@ -542,6 +548,7 @@ static const luaL_reg Util_methods[] = {
   {"GetPointContents",	qlua_pointcontents},
   {"SetCvar",			qlua_cvar},
   {"EnableCenterPrint",	qlua_enableCP},
+  {"GetViewHeight",		qlua_getviewheight},
   {0,0}
 };
 

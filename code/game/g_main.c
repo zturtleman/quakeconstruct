@@ -496,6 +496,7 @@ void G_InitLua() {
 	G_InitLuaMessages(L);
 	G_InitLuaTeam(L);
 	G_InitLuaWeapon(L);
+	G_InitLuaUtil(L);
 	G_InitLuaPhysics(L);
 
 	lua_register(L,"LevelTime",qlua_curtime);

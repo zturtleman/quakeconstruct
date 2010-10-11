@@ -1954,6 +1954,7 @@ CG_DrawCrosshair
 */
 static void CG_DrawCrosshair(void) {
 	float		w, h;
+	float		rw,rh;
 	qhandle_t	hShader;
 	float		f;
 	float		x, y;
@@ -1982,6 +1983,8 @@ static void CG_DrawCrosshair(void) {
 	}
 
 	w = h = cg_crosshairSize.value;
+	rw = cg.refdef.width * DRAW_CUSTOMSCALE_X;
+	rh = cg.refdef.height * DRAW_CUSTOMSCALE_Y;
 
 	// pulse the size of the crosshair when picking up items
 	f = cg.time - cg.itemPickupBlendTime;
@@ -1994,6 +1997,7 @@ static void CG_DrawCrosshair(void) {
 	x = cg_crosshairX.integer;
 	y = cg_crosshairY.integer;
 	CG_AdjustFrom640( &x, &y, &w, &h );
+	
 
 	ca = cg_drawCrosshair.integer;
 	if (ca < 0) {
@@ -2001,8 +2005,8 @@ static void CG_DrawCrosshair(void) {
 	}
 	hShader = cgs.media.crosshairShader[ ca % NUM_CROSSHAIRS ];
 
-	trap_R_DrawStretchPic( x + cg.refdef.x + 0.5 * (cg.refdef.width - w), 
-		y + cg.refdef.y + 0.5 * (cg.refdef.height - h), 
+	trap_R_DrawStretchPic( x + cg.refdef.x + 0.5 * (rw - w), 
+		y + cg.refdef.y + 0.5 * (rh - h), 
 		w, h, 0, 0, 1, 1, hShader );
 }
 
@@ -2660,6 +2664,10 @@ CG_DrawActive
 Perform all drawing needed to completely fill the screen
 =====================
 */
+float DRAW_CUSTOMSCALE_X = 1;
+float DRAW_CUSTOMSCALE_Y = 1;
+float DRAW_CUSTOMOFFSET_X = 0;
+float DRAW_CUSTOMOFFSET_Y = 0;
 void CG_DrawActive( stereoFrame_t stereoView ) {
 	float		separation;
 	vec3_t		baseOrg;

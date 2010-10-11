@@ -98,7 +98,9 @@ Check for lava / slime contents and drowning
 */
 void P_WorldEffects( gentity_t *ent ) {
 	qboolean	envirosuit;
+	qboolean	burn = qtrue;
 	int			waterlevel;
+	lua_State	*L = GetServerLuaState();
 
 	if ( ent->client->noclip ) {
 		ent->client->airOutTime = level.time + 12000;	// don't need air
@@ -109,6 +111,17 @@ void P_WorldEffects( gentity_t *ent ) {
 
 	envirosuit = ent->client->ps.powerups[PW_BATTLESUIT] > level.time;
 
+	if(L) {
+		lua_getglobal(L,"DROWNING_ENABLED");
+		if(lua_type(L,-1) == LUA_TBOOLEAN && lua_toboolean(L,-1) == qfalse && waterlevel == 3) {
+			waterlevel = 2;
+		}
+
+		lua_getglobal(L,"BURNING_ENABLED");
+		if(lua_type(L,-1) == LUA_TBOOLEAN && lua_toboolean(L,-1) == qfalse) {
+			burn = qfalse;
+		}
+	}
 	//
 	// check for drowning
 	//
@@ -153,7 +166,7 @@ void P_WorldEffects( gentity_t *ent ) {
 	// check for sizzle damage (move to pmove?)
 	//
 	if (waterlevel && 
-		(ent->watertype&(CONTENTS_LAVA|CONTENTS_SLIME)) ) {
+		(ent->watertype&(CONTENTS_LAVA|CONTENTS_SLIME)) && burn ) {
 		if (ent->health > 0
 			&& ent->pain_debounce_time <= level.time	) {
 
@@ -182,6 +195,7 @@ G_SetClientSound
 ===============
 */
 void G_SetClientSound( gentity_t *ent ) {
+	lua_State	*L = GetServerLuaState();
 #ifdef MISSIONPACK
 	if( ent->s.eFlags & EF_TICKING ) {
 		ent->client->ps.loopSound = G_SoundIndex( "sound/weapons/proxmine/wstbtick.wav");
@@ -189,6 +203,12 @@ void G_SetClientSound( gentity_t *ent ) {
 	else
 #endif
 	if (ent->waterlevel && (ent->watertype&(CONTENTS_LAVA|CONTENTS_SLIME)) ) {
+		if(L) {
+			lua_getglobal(L,"BURNING_ENABLED");
+			if(lua_type(L,-1) == LUA_TBOOLEAN && lua_toboolean(L,-1) == qfalse) {
+				return;
+			}
+		}
 		ent->client->ps.loopSound = level.snd_fry;
 	} else {
 		ent->client->ps.loopSound = 0;
