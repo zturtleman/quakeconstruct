@@ -195,8 +195,8 @@ end
 local function d3d()
 
 	--Vector(-550,65,400)
-	doScoreboard(Vector(-850,65 + 1200,800),50,1.5)
-	doScoreboard(Vector(-850,65 - 1200,800),130,1.5)
+	--doScoreboard(Vector(-850,65 + 1200,800),50,1.5)
+	--doScoreboard(Vector(-850,65 - 1200,800),130,1.5)
 	--[[local base = _CG.refdef.origin
 	local normal = _CG.refdef.forward
 	local angle = VectorToAngles(normal)
@@ -214,8 +214,13 @@ local function d3d()
 end
 hook.add("Draw3D","cl_scores",d3d)
 
+local function shouldDraw(d)
+	if(d == "HUD_SCOREBOARD") then return false end
+end
+hook.add("ShouldDraw","cl_scores",shouldDraw)
+
 local function draw2d()
-	--drawScoreBoard()
+	if(_CG.showScores or _CG.stats[STAT_HEALTH] <= 0) then drawScoreBoard() end
 	
 	if(scoreGrabTimer < LevelTime()) then
 		util.GetScores()
