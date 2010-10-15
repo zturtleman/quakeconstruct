@@ -1,7 +1,8 @@
 local rtSize = 256
+local rtSize2 = 196
 
 render.SetupRenderTarget(1,rtSize,rtSize,true)
-render.SetupRenderTarget(2,rtSize,rtSize,true)
+render.SetupRenderTarget(2,rtSize2,rtSize2,true)
 
 local WATER_TYPE_WATER = 0
 local WATER_TYPE_QUAD = .5
@@ -159,11 +160,11 @@ local function post()
 	
 	--print(wType .. "\n")
 	
-	local rtoff = 480 - rtSize
+	local rtoff = 480 - rtSize2
 	draw.SetColor(0,0,0,1)
 	draw.Rect(0,0,640,480)
 	draw.SetColor(.5 + s,.5 + t,wType,(1-dwt)*fade)
-	draw.Rect(0,rtoff,rtSize,rtSize,renderTarget)
+	draw.Rect(0,rtoff,rtSize2,rtSize2,renderTarget)
 	local a = .4
 	if(level == 2) then
 		a = .6
@@ -172,10 +173,10 @@ local function post()
 	end
 	if(bitAnd(liquid,CONTENTS_LAVA) ~= 0) then
 		draw.SetColor(1,.7,.3,((1-dwt)*fade) * a)
-		draw.Rect(0,rtoff,rtSize,rtSize,lava)
+		draw.Rect(0,rtoff,rtSize2,rtSize2,lava)
 	elseif(bitAnd(liquid,CONTENTS_SLIME) ~= 0) then
 		draw.SetColor(.4,1,0,((1-dwt)*fade) * a)
-		draw.Rect(0,rtoff,rtSize,rtSize,lava)	
+		draw.Rect(0,rtoff,rtSize2,rtSize2,lava)	
 	end
 	
 	render.ForceCommands()
