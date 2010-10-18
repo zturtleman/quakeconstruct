@@ -656,7 +656,9 @@ void CM_LoadMap( const char *name, qboolean clientload, int *checksum ) {
 		Q_strncpyz( cm.name, name, sizeof( cm.name ) );
 	}
 
+#ifdef PHYSICS
 	CM_InitPhysics();
+#endif
 }
 
 /*

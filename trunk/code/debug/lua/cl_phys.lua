@@ -185,6 +185,14 @@ local function d3d()
 			ref:SetShader(plaincolor)
 			ref:Render()
 		end
+		
+		if(v.gib) then
+			if(v.bt < LevelTime()) then
+			ParticleEffect("BloodSplash",ref:GetPos())
+			ParticleEffect("BloodCloud",ref:GetPos())
+			v.bt = LevelTime() + math.random(20,60)*10
+			end
+		end
 	end
 	
 	--ptraceline()
@@ -209,6 +217,12 @@ local gibs = {
 
 concommand.add("spawn",function()
 	--local b = addPhysBox(Vector(20,20,20),_CG.refdef.origin,10)
+	local start = _CG.refdef.origin
+	if(start == nil) then return end
+	local en = start + _CG.refdef.forward * 1000
+	
+	local pos,normal,body = phys.TraceLine(start,en)
+	
 	local list = getGibModels(LocalPlayer())
 	local skins = getGibSkins(LocalPlayer())
 	for i=1, #list do
@@ -220,23 +234,22 @@ concommand.add("spawn",function()
 		local skin = skins[i]
 		if(skin == -1) then skin = nil end
 		local b,tab = addPhysModel(gib,Vector(100,0,50),5,Vector(1),Vector(0,0,0),skin)
-		local start = _CG.refdef.origin
-		if(start == nil) then return end
-		local en = start + _CG.refdef.forward * 1000
-		
-		local pos,normal,body = phys.TraceLine(start,en)
 		phys.SetPos(b,pos+Vector(0,0,10)+VectorRandom()*10)
 		phys.ApplyImpulse(b,v)
 		phys.ApplyTorque(b,VectorRandom()*2000)
 		phys.SetRestitution(b, .45)
 		
+		tab.gib = true
+		tab.bt = LevelTime() + 30
+		
 		Timer(8+math.random()*3,function()
 			removePhysObject(tab)
 		end)
 	end
+	ParticleEffect("BigBloodExplosion",pos)
 end)
 
-hook.add("Think","cl_phys",function()
+--[[hook.add("Think","cl_phys",function()
 	if(first == true) then
 		lt = LevelTime()
 		first = false
@@ -244,4 +257,4 @@ hook.add("Think","cl_phys",function()
 	local dt = LevelTime() - lt
 	phys.Simulate(dt/1000)
 	lt = LevelTime()
-end)
+end)]]

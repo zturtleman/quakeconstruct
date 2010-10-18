@@ -1,5 +1,5 @@
 --include("lua/includes/treeparser.lua")
-
+print("PARTICLE TOOLS\n")
 HSV = 2
 
 local function RValueFromT(t,d)
@@ -77,12 +77,12 @@ local function SetupParticleRef(t,l)
 	if(t.model) then
 		local model = RValueFromT(t.model)
 		if(model ~= nil) then
-			--print("model: " .. model .. "\n")
+			--print("model: " .. tostring(model) .. " " .. type(model) .. "\n")
 			if(type(model) == "string") then
 				model = LoadModel(model)
 			end
 			if(type(model) == "function") then
-				s,model = pcall(model)
+				s,model = pcall(model,l,ref)
 				if(type(model) == "table") then
 					skin = model[2]
 					model = model[1]
@@ -272,6 +272,11 @@ function LoadParticleScripts()
 end
 LoadParticleScripts()
 
+function ReloadParticleEffect(name)
+	parser:ReloadNode(name,tree)
+	parser:SetMeta(tree)
+end
+
 function ParticleEffect(name,pos,normal)
 	name = tostring(name)
 	if(tree[name] == nil) then 
@@ -301,4 +306,9 @@ local function load(p,c,a)
 	LoadParticleScripts()
 end
 concommand.add("loadParticles",load)
+
+local function load(p,c,a)
+	ReloadParticleEffect(a[1])
+end
+concommand.add("loadParticle",load)
 --parser.parse(s)

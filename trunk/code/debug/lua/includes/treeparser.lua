@@ -1,8 +1,13 @@
 local NULL = "null"
 local parser = {}
+parser.currentfile = nil
 parser.keys = {}
 parser.codebuffer = {}
 parser.nodes = {}
+parser.nodelines = {}
+parser.tempnode = nil
+parser.found = false
+parser.skip = false
 parser.filecache = {}
 
 function parser.keys.import(s)
@@ -18,12 +23,13 @@ function parser.keys.import(s)
 	parser.parsefile(s,true)
 end
 
-function parser.checkkeys(n,line)
+function parser.checkkeys(n,line,reload)
 	local len = string.len(line)
 	for k,v in pairs(parser.keys) do
 		local f = string.find(line,k)
 		local l = string.len(k)
 		if(f ~= nil) then
+			--if(reload) then return true end
 			local val = string.sub(line,f+l,len)
 			val = killGaps(val)
 			local b,e = pcall(v,val)
@@ -61,14 +67,41 @@ function parser.checkGrouping(k,v,f)
 	end
 end
 
-function parser.checkLevel(n,line)
+function parser.checkLevel(n,line,reload)
 	line = killGaps(line)
+	local lineNumber = n
 	local t = string.ToTable(line)
 	local b = ""
+	if(parser.found == true and parser.tempnode == nil and reload) then
+		return true
+	end
+	if(parser.skip == true and reload) then
+		if(parser.level == 0 and string.find(line,"{")) then
+			parser.skip = false
+		else
+			return true
+		end
+	end
+	--if(reload) then
+		--print("C: " .. line .. "\n")
+	--end
 	for n,ch in pairs(t) do
 		b = b .. ch
 		if(ch == "{") then
 			b = string.sub(b,1,string.len(b)-1)
+			if(parser.level == 0) then
+				--print("First Number: " .. lineNumber .. " | " .. b .. " | " .. parser.currentfile .. "\n")
+				parser.nodelines[b] = {} 
+				parser.nodelines[b].file = parser.currentfile
+				parser.tempnode = b
+				if(reload ~= nil and b == reload) then
+					parser.found = true
+					parser.skip = false
+				elseif(reload ~= nil) then
+					parser.skip = true
+					return true
+				end
+			end
 			parser.level = parser.level + 1
 			--print("^2LEVEL: " .. parser.level .. "-'" .. b ..  "'\n")
 			parser.codebuffer[parser.level] = {}
@@ -97,6 +130,10 @@ function parser.checkLevel(n,line)
 			end
 			--print("^3LOAD: " .. t.title .. "\n")
 			parser.level = parser.level - 1
+			if(parser.level == 0) then
+				b = parser.tempnode
+				parser.tempnode = nil
+			end
 			return true
 		end	
 	end
@@ -278,20 +315,23 @@ function parser.setup(keepnodes)
 	parser.level = 0
 	parser.locs = {}
 	parser.codebuffer = {}
+	parser.tempnode = nil
+	parser.found = false
+	parser.skip = false
 	if not (keepnodes) then
 		parser.nodes = {}
 	end
 end
 
-function parser.parseLine(n,line)
+function parser.parseLine(n,line,reload)
 	if(string.find(line,"//")) then return end
-	if(parser.checkLevel(n,line)) then return end
-	if(parser.checkkeys(n,line)) then return end
+	if(parser.checkLevel(n,line,reload)) then return end
+	if(parser.checkkeys(n,line,reload)) then return end
 	if(parser.checkField(n,line)) then return end
 end
 
-function parser.parse(str,keepnodes)
-	str = string.Replace(str,"\r","\n")
+function parser.parse(str,keepnodes,reload)
+	str = string.Replace(str,"\r","")
 	parser.setup(keepnodes)
 	local lines = string.Explode("\n",str)
 	for k,v in pairs(lines) do
@@ -299,21 +339,28 @@ function parser.parse(str,keepnodes)
 	end
 	parser.checkGrouping(nil,nil,true)
 	for k,v in pairs(lines) do
-		parser.parseLine(k,v)
+		parser.parseLine(k,v,reload)
 	end	
 	
 	return parser.nodes
 end
 
-function parser.parsefile(file,keepnodes)
+function parser.parsefile(file,keepnodes,reload)
+	if(parser.filecache[file] ~= nil and reload == nil) then
+		return parser.filecache[file]
+	end
 	local txt = packRead(file)
 	if(txt == nil) then
 		ffile = io.open("../../" .. file,"r")
 		if(ffile ~= nil) then
-			local lines = 0
+			local linenum = 0
 			local content = ""
 			for line in ffile:lines() do
-				content = content .. line .. "\n"
+				if not (string.find(line,"\n") or string.find(line,"\r")) then
+					content = content .. line .. "\n"
+				else
+					content = content .. line
+				end
 			end
 			ffile:close()
 		end
@@ -321,14 +368,36 @@ function parser.parsefile(file,keepnodes)
 	if(txt == nil) then 
 		print("^1Error: Could Not Read File: " .. file .. ".\n") 
 		return nil
+	else
+		
 	end
-	local p = parser.parse(txt,keepnodes)
-	parser.filecache[file] = p
+	
+	parser.inc = parser.inc + 1
+	--print("---PARSE FILE: " .. parser.inc .. " " .. file .. " ---\n")
+	if(parser.inc > 0) then
+		parser.included[parser.inc] = file
+	end
+	
+	parser.currentfile = file
+	local p = parser.parse(txt,keepnodes,reload)
+	
+	if(parser.inc > 1) then
+		parser.inc = parser.inc - 1
+		parser.currentfile = parser.included[parser.inc]
+		--print("---BACK TO FILE: " .. parser.inc .. " " .. parser.currentfile .. " ---\n")
+	end
+	if(reload == nil) then
+		parser.filecache[file] = p
+	end
 	return p
 end
 
 function parser.clear()
+	parser.inc = -1
+	parser.included = {}
 	parser.filecache = {}
+	parser.nodelines = {}
+	parser.currentfile = nil
 end
 
 function parser.setMeta(tab)
@@ -359,6 +428,40 @@ function parser.setMeta(tab)
 end
 
 local ParserT = {}
+
+function ParserT:CheckReload(reload)
+	local file = nil
+	if(reload) then
+		if(parser.nodelines and parser.nodelines[reload]) then
+			file = parser.nodelines[reload].file
+		else
+			return
+		end
+	end
+	return file
+end
+
+function ParserT:ReloadNode(reload,tab)
+	local file = self:CheckReload(reload)
+	if(file) then
+		parser.filecache[file] = nil
+		local p = parser.parsefile(file,false,reload)
+		if(type(tab) == "table" and p) then
+			for k,v in pairs(p) do
+				tab[k] = v
+				if(k == reload) then
+					print("Reloaded: " .. k .. "\n")
+				end
+			end
+		end	
+	else
+		if(file == nil) then
+			error("Node '" .. reload .. "' not found (no file signature)")
+		else
+			error("Node '" .. reload .. "' not found in file '" .. file .. "'")
+		end
+	end
+end
 
 function ParserT:ParseFile(f,tab)
 	local p = parser.parsefile(f)

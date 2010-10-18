@@ -23,16 +23,16 @@ void CM_InitPhysics()
 	sdk = plNewBulletSdk();
 	world = plCreateDynamicsWorld(sdk);
 
-	/*clip = CM_InlineModel(0);
+	clip = CM_InlineModel(0);
 	cmodel = CM_ClipHandleToModel(clip);
 
 	//leaf = cmodel->leaf;
-	Com_Printf("Init Physics\n");
+	Com_Printf("Init Physics: %i leafs. \n",cm.numLeafs);
 
 	for (j=0; j<cm.numLeafs; j++) {
 		leaf = cm.leafs[j];
 
-		//Com_Printf("\n----\n--------ADDING BRUSHES[%i]--------\n----\n", leaf.numLeafBrushes);
+		Com_Printf("\n----\n--------ADDING BRUSHES[(%i) %i/%i]--------\n----\n", leaf.numLeafBrushes, j, cm.numLeafs);
 
 		for (k=0 ; k<leaf.numLeafBrushes ; k++) {
 			brushnum = cm.leafbrushes[leaf.firstLeafBrush+k];
@@ -68,7 +68,7 @@ void CM_InitPhysics()
 
 			plAddRigidBody(world,body);
 		}
-	}*/
+	}
 }
 
 void CM_ShutdownPhysics()
@@ -78,6 +78,12 @@ void CM_ShutdownPhysics()
 		plDeletePhysicsSdk(sdk);
 		world = NULL;
 		sdk = NULL;
+	}
+}
+
+void CM_SimulatePhysics(float step) {
+	if(world != NULL && sdk != NULL) {
+		plStepSimulation(world,step);
 	}
 }
 

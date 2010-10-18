@@ -4,6 +4,7 @@
 	Version="9.00"
 	Name="BulletDynamics"
 	ProjectGUID="{22E0A3E9-8A9B-4FB8-8D08-2F6EB7C98D27}"
+	RootNamespace="BulletDynamics"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="0"
 	>
