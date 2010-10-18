@@ -1067,4 +1067,6 @@ extern huffman_t clientHuffTables;
 #define	CL_ENCODE_START		12
 #define CL_DECODE_START		4
 
+void CM_SimulatePhysics(float step);
+
 #endif // _QCOMMON_H_

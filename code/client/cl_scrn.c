@@ -481,7 +481,6 @@ void SCR_DrawScreenField( stereoFrame_t stereoFrame ) {
 			//printf("Connecting Screen!\n");
 			// draw the game information screen and loading progress
 			CL_CGameRendering( stereoFrame );
-
 			// also draw the connection information, so it doesn't
 			// flash away too briefly on local or lan games
 			// refresh to update the time
@@ -490,6 +489,9 @@ void SCR_DrawScreenField( stereoFrame_t stereoFrame ) {
 			break;
 		case CA_ACTIVE:
 			CL_CGameRendering( stereoFrame );
+#ifdef PHYSICS
+			CM_SimulatePhysics((float)(cls.frametime)/1000.0); //STEP
+#endif
 			SCR_DrawDemoRecording();
 			break;
 		}

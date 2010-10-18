@@ -224,7 +224,7 @@ int qlua_phsimulate(lua_State *L) {
 
 	step = lua_tonumber(L,1);
 
-	plStepSimulation(world,step);
+	//plStepSimulation(world,step);
 
 	return 0;
 }
@@ -278,20 +278,21 @@ static const luaL_reg Physics_methods[] = {
 
 void CG_InitLuaPhysics(lua_State *L) {
 	plVector3 grav;
-
-	luaL_openlib(L, "phys", Physics_methods, 0);
 /*
 	sdk = plNewBulletSdk();
 	world = plCreateDynamicsWorld(sdk);
 */
 
 	world = (plDynamicsWorldHandle) trap_CM_GetPhysicsWorld();
+	if(world != NULL) {
+		grav[0] = 0.0f;
+		grav[1] = 0.0f;
+		grav[2] = -DEFAULT_GRAVITY * worldscale;
 
-	grav[0] = 0.0f;
-	grav[1] = 0.0f;
-	grav[2] = -DEFAULT_GRAVITY * worldscale;
+		plSetGravity(world,grav);
 
-	plSetGravity(world,grav);
+		luaL_openlib(L, "phys", Physics_methods, 0);
+	}
 }
 
 void CG_ShutdownLuaPhysics() {
