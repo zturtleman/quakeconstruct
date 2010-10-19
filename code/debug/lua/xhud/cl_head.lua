@@ -441,7 +441,7 @@ function DrawHead(x,y,ICON_SIZE,HEALTH)
 	if(calpha < 0.5) then calpha = 0.5 end
 	
 	ref:Render()
-	ref2:SetColor(1,.2,.2,calpha2)
+	--[[ref2:SetColor(1,.2,.2,calpha2)
 	ref2:SetShader(blood1)
 	ref2:Render()
 	
@@ -451,7 +451,7 @@ function DrawHead(x,y,ICON_SIZE,HEALTH)
 	
 	ref2:SetColor(1,1,1,calpha)
 	ref2:SetShader(blood2)
-	ref2:Render()
+	ref2:Render()]]
 	
 	--angles.y = angles.y + 180
 	local forward = VectorForward(angles)

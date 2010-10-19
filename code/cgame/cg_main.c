@@ -2378,6 +2378,8 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum ) {
 
 	CG_LoadingString( "" );
 
+	CG_ClearLoadingIcons();
+
 #ifdef MISSIONPACK
 	CG_InitTeamChat();
 #endif

@@ -352,7 +352,7 @@ int qlua_weaponinfo(lua_State *L) {
 	gitem_t *item;
 	int id = lua_tointeger(L,1);
 
-	if(id < WP_NONE || id > WP_GRAPPLING_HOOK) {
+	if(id < WP_NONE || id >= WP_NUM_WEAPONS) {
 		lua_pushstring(L,"Weapon out of bounds.");
 		lua_error(L);
 		return 1;
@@ -388,7 +388,11 @@ int qlua_weaponinfo(lua_State *L) {
 	setTableFloat(L,"wiTrailTime",weapon->wiTrailTime);
 	setTableInt(L,"weaponState",cg.predictedPlayerState.weaponstate);
 	setTableInt(L,"weaponTime",cg.predictedPlayerState.weaponTime);
-	setTableInt(L,"item",item->id);
+	if(item != NULL) {
+		setTableInt(L,"item",item->id);
+	} else {
+		setTableInt(L,"item",0);
+	}
 
 	return 1;
 }
@@ -519,6 +523,34 @@ int qlua_getviewheight(lua_State *L) {
 	return 1;
 }
 
+int qlua_registerweapon(lua_State *L) {
+	return 0;
+}
+
+int qlua_registeritem(lua_State *L) {
+	return 0;
+}
+
+int qlua_updateitems(lua_State *L) {
+	char		items[MAX_ITEMS+1];
+	int i;
+	strcpy( items, CG_ConfigString( CS_ITEMS) );
+
+	for ( i = 1 ; i < bg_numItems ; i++ ) {
+		if ( items[ i ] == '1' || cg_buildScript.integer ) {
+			//CG_LoadingItem( i );
+			CG_RegisterItemVisuals( i );
+		}
+	}
+	return 0;
+}
+
+int qlua_loadingstring(lua_State *L) {
+	luaL_checkstring(L,1);
+	CG_LoadingString(lua_tostring(L,1));
+	return 0;
+}
+
 static const luaL_reg Util_methods[] = {
   {"GetNumItems",		qlua_numitems},
   {"GetItemIcon",		qlua_getitemicon},
@@ -549,6 +581,10 @@ static const luaL_reg Util_methods[] = {
   {"SetCvar",			qlua_cvar},
   {"EnableCenterPrint",	qlua_enableCP},
   {"GetViewHeight",		qlua_getviewheight},
+  {"RegisterWeapon",	qlua_registerweapon},
+  {"RegisterItem",		qlua_registeritem},
+  {"UpdateItems",		qlua_updateitems},
+  {"LoadingString",		qlua_loadingstring},
   {0,0}
 };
 

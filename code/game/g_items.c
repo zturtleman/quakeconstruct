@@ -930,7 +930,13 @@ void RegisterItem( gitem_t *item ) {
 	itemRegistered[ item - bg_itemlist ] = qtrue;
 }
 
+qboolean ItemIsRegistered( gitem_t *item ) {
+	return itemRegistered[ item - bg_itemlist ];
+}
 
+int ItemIndex( gitem_t *item ) {
+	return item - bg_itemlist;
+}
 /*
 ===============
 SaveRegisteredItems

@@ -87,6 +87,20 @@ if(SERVER) then
 			if(v:EntIndex() == id) then return v end
 		end
 	end
+	
+	hook.add("ItemRegistered","_RegisterItem",function(itemid)
+		for k,v in pairs(GetAllPlayers()) do
+			v:SendString("__RegisterItems")
+		end
+		print("^2SV_RegisterItems\n")
+	end)
+else
+	hook.add("MessageReceived","_RegisterItem",function(str)
+		if(str == "__RegisterItems") then
+			print("^2CL_RegisterItems\n")
+			util.UpdateItems()
+		end
+	end)
 end
 
 function FindEntityTargets(ent)
