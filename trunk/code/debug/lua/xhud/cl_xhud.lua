@@ -271,6 +271,8 @@ local function draw2D()
 	draw.SetColor(1,1,1,1)
 	if(armor > 0) then draw.Text(armorx,my+420,"armor:",10,10) end
 	if(armor > 0) then drawNumbers(armorx,num_y,20,20,armor,8,unpack(col_armor)) end
+	
+	DrawWeaponSelector(320,0)
 end
 hook.add("Draw2D","cl_xhud",draw2D)
 
@@ -294,5 +296,6 @@ local function shouldDraw(str)
 	if(str == "HUD_STATUSBAR_ARMOR") then return false end
 	if(str == "HUD_STATUSBAR_AMMO") then return false end
 	if(str == "HUD_PICKUP") then return false end
+	if(str == "HUD_WEAPONSELECT") then return false end
 end
 hook.add("ShouldDraw","cl_xhud",shouldDraw)

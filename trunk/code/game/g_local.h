@@ -510,7 +510,7 @@ qboolean	G_SpawnString( const char *key, const char *defaultString, char **out )
 qboolean	G_SpawnFloat( const char *key, const char *defaultString, float *out );
 qboolean	G_SpawnInt( const char *key, const char *defaultString, int *out );
 qboolean	G_SpawnVector( const char *key, const char *defaultString, float *out );
-qboolean	G_CallSpawn( gentity_t *ent );	
+qboolean	G_CallSpawn( gentity_t *ent, qboolean lua );	
 void		G_SpawnEntitiesFromString( void );
 char *G_NewString( const char *string );
 
@@ -545,6 +545,7 @@ void Touch_Item (gentity_t *ent, gentity_t *other, trace_t *trace);
 void ClearRegisteredItems( void );
 void RegisterItem( gitem_t *item );
 void SaveRegisteredItems( void );
+qboolean ItemIsRegistered( gitem_t *item );
 
 //
 // g_utils.c

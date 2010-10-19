@@ -110,6 +110,7 @@ void CG_PushCGTab(lua_State *L) {
 	setTableInt(L,"itemPickupTime", cg.itemPickupTime);
 	setTableInt(L,"weaponSelect", cg.weaponSelect);
 	setTableInt(L,"weaponSelectTime", cg.weaponSelectTime);
+	setTableInt(L,"lowAmmoWarning", cg.lowAmmoWarning);
 	setTableRefDef(L,"refdef",cg.refdef);
 	setTableBoolean(L,"showScores",cg.showScores);
 	setTableScores(L);

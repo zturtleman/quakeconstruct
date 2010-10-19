@@ -88,6 +88,14 @@ void CG_LoadingItem( int itemNum ) {
 	CG_LoadingString( item->pickup_name );
 }
 
+void CG_ClearLoadingIcons() {
+	memset( loadingItemIcons, 0, sizeof( loadingItemIcons ) );
+	loadingItemIconCount = 0;
+
+	memset( loadingPlayerIcons, 0, sizeof( loadingPlayerIcons ) );
+	loadingPlayerIconCount = 0;
+}
+
 /*
 ===================
 CG_LoadingClient

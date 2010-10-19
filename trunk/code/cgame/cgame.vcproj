@@ -4,6 +4,7 @@
 	Version="9.00"
 	Name="cgame"
 	ProjectGUID="{C878E295-CB82-4B40-8ECF-5CE5525466FA}"
+	RootNamespace="cgame"
 	TargetFrameworkVersion="131072"
 	>
 	<Platforms>

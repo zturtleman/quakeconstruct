@@ -2261,7 +2261,7 @@ int qlua_createEntity(lua_State *L) {
 		ent->die = 0;
 		ent->think = 0;
 		ent->classname = (char*)classname;
-		if(G_CallSpawn(ent)) {
+		if(G_CallSpawn(ent,qtrue)) {
 			lua_pushentity(L,ent);
 			qlua_LinkEntity(ent);
 			if(ent->item != NULL) {

@@ -318,7 +318,7 @@ Finds the spawn function for the entity and calls it,
 returning qfalse if not found
 ===============
 */
-qboolean G_CallSpawn( gentity_t *ent ) {
+qboolean G_CallSpawn( gentity_t *ent, qboolean lua ) {
 	spawn_t	*s;
 	gitem_t	*item;
 	int i = 0;
@@ -331,6 +331,15 @@ qboolean G_CallSpawn( gentity_t *ent ) {
 	// check item spawn functions
 	for ( item=bg_itemlist+1 ; item->classname ; item++ ) {
 		if ( !strcmp(item->classname, ent->classname) ) {
+			if(lua) {
+				if(!ItemIsRegistered(item)) {
+					RegisterItem(item);
+					SaveRegisteredItems();
+					qlua_gethook(GetServerLuaState(),"ItemRegistered");
+					lua_pushinteger(GetServerLuaState(),ItemIndex(item));
+					qlua_pcall(GetServerLuaState(),1,0,qtrue);
+				}
+			}
 			G_Printf("Found Item: %s\n",item->classname);
 			G_SpawnItem( ent, item );
 			qlua_gethook(GetServerLuaState(),"EntityLinked");
@@ -551,7 +560,7 @@ void G_SpawnGEntityFromSpawnVars( void ) {
 	VectorCopy( ent->s.origin, ent->r.currentOrigin );
 
 	// if we didn't get a classname, don't bother spawning anything
-	if ( !G_CallSpawn( ent ) ) {
+	if ( !G_CallSpawn( ent, qfalse ) ) {
 		G_FreeEntity( ent );
 	}
 }
