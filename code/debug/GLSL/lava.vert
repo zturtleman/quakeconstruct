@@ -15,7 +15,7 @@ void main()
 	float cgt = cgtime * 410.0;
 	float tsin = sin((cgt + vpos.x*150.0)/100.0)*15.0;
 	float tcos = cos((cgt + vpos.y*150.0)/100.0)*15.0;
-	vpos.z += (tsin + tcos)/20.0;
+	//vpos.z += (tsin + tcos)/20.0;
 	
 	gl_Position = (gl_ModelViewProjectionMatrix * vpos);
 	Position = gl_Position.xyz;

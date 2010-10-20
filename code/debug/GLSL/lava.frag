@@ -42,6 +42,7 @@ void main()
 	gl_FragColor.rgb -= my/5.0;
 	gl_FragColor.a = tex.a;
 	
+	gl_FragColor *= vertColor;
 	
 	//gl_FragColor.r += 1.0 - tex.a*1.2;
 	//gl_FragColor.g += 1.0 - tex.a*1.2;
