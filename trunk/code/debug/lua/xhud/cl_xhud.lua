@@ -191,7 +191,7 @@ local function HealthBar(recty,mx,my)
 	draw.Rect(hrx,hry,e+hrw*hpp,hrh)
 	
 	draw.SetColor(1,1,1,1)
-	draw.Text(mx+5,recty-hrh,"health",10,10)
+	draw.Text(mx+5,recty-hrh,"health: " .. hp,10,10)
 end
 
 local HEAD_CENTER = true

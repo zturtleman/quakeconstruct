@@ -113,8 +113,8 @@ function d2d(tab)
 	
 	if(tab.itemIcons) then
 		for k,v in pairs(tab.itemIcons) do
-			draw.Rect(x,y,30,30,v)
-			x = x + 32
+			draw.Rect(x,y,20,20,v)
+			x = x + 22
 		end
 	end
 	
