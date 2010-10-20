@@ -132,7 +132,7 @@ end
 
 function AnimationT:SetFPS(f)
 	self.fps = f
-	self.lerp = f/1000
+	self.lerp = 1000/f
 end
 
 function AnimationT:GetFPS()
