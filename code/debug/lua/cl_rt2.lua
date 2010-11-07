@@ -145,6 +145,10 @@ local function post()
 		liquid = lqin
 	end
 	
+	if(level == 0) then
+		liquid = 0
+	end
+	
 	render.ForceCommands()
 	render.UpdateRenderTarget(1)
 	

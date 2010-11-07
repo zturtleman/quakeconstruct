@@ -423,6 +423,7 @@ void G_MoverTeam( gentity_t *ent ) {
 	vec3_t		move, amove;
 	gentity_t	*part, *obstacle;
 	vec3_t		origin, angles;
+	lua_State	*L = GetServerLuaState();
 
 	obstacle = NULL;
 
@@ -455,6 +456,13 @@ void G_MoverTeam( gentity_t *ent ) {
 		if (ent->blocked) {
 			ent->blocked( ent, obstacle );
 		}
+		if(L != NULL && ent->lua_blocked) {
+			if(qlua_getstored(GetServerLuaState(), ent->lua_blocked)) {
+				lua_pushentity(GetServerLuaState(), ent);
+				lua_pushentity(GetServerLuaState(), obstacle);
+				qlua_pcall(GetServerLuaState(), 2, 0, qfalse);
+			}
+		}
 		return;
 	}
 
@@ -465,6 +473,12 @@ void G_MoverTeam( gentity_t *ent ) {
 			if ( level.time >= part->s.pos.trTime + part->s.pos.trDuration ) {
 				if ( part->reached ) {
 					part->reached( part );
+					if(L != NULL && part->lua_reached) {
+						if(qlua_getstored(GetServerLuaState(), part->lua_reached)) {
+							lua_pushentity(GetServerLuaState(), part);
+							qlua_pcall(GetServerLuaState(), 1, 0, qfalse);
+						}
+					}
 				}
 			}
 		}
@@ -585,9 +599,17 @@ Reached_BinaryMover
 ================
 */
 void Reached_BinaryMover( gentity_t *ent ) {
+	lua_State *L = GetServerLuaState();
 
 	// stop the looping sound
 	ent->s.loopSound = ent->soundLoop;
+
+	if ( L != NULL) {
+		if(qlua_getstored(L, ent->lua_reached)) {
+			lua_pushentity(L, ent);
+			qlua_pcall(L, 1, 0, qfalse);
+		}
+	}
 
 	if ( ent->moverState == MOVER_1TO2 ) {
 		// reached pos2
@@ -634,11 +656,21 @@ Use_BinaryMover
 void Use_BinaryMover( gentity_t *ent, gentity_t *other, gentity_t *activator ) {
 	int		total;
 	int		partial;
+	lua_State *L = GetServerLuaState();
 
 	// only the master should be used
 	if ( ent->flags & FL_TEAMSLAVE ) {
 		Use_BinaryMover( ent->teammaster, other, activator );
 		return;
+	}
+
+	if(L != NULL) {
+		if(qlua_getstored(L, ent->lua_use)) {
+			lua_pushentity(L, ent);
+			lua_pushentity(L, other);
+			lua_pushentity(L, activator);
+			qlua_pcall(L, 3, 0, qfalse);
+		}
 	}
 
 	ent->activator = activator;
@@ -803,6 +835,7 @@ Blocked_Door
 ================
 */
 void Blocked_Door( gentity_t *ent, gentity_t *other ) {
+	lua_State *L = GetServerLuaState();
 	// remove anything other than a client
 	if ( !other->client ) {
 		// except CTF flags!!!!
@@ -813,6 +846,14 @@ void Blocked_Door( gentity_t *ent, gentity_t *other ) {
 		G_TempEntity( other->s.origin, EV_ITEM_POP );
 		G_FreeEntity( other );
 		return;
+	}
+
+	if ( L != NULL && other != NULL ) {
+		if(qlua_getstored(GetServerLuaState(), ent->lua_blocked)) {
+			lua_pushentity(GetServerLuaState(), ent);
+			lua_pushentity(GetServerLuaState(), other);
+			qlua_pcall(GetServerLuaState(), 2, 0, qfalse);
+		}
 	}
 
 	if ( ent->damage ) {
