@@ -99,6 +99,7 @@ typedef struct {
 typedef struct {
 	refTriMap_t		*tris;
 	int				num;
+	qhandle_t		shader;
 } refDecal_t;
 
 typedef struct {
@@ -148,7 +149,7 @@ typedef struct {
 	int ndecals;
 
 	polyVert_t	verts[128];		//Hxrmn's poly code
-//	refDecal_t	decals[32];
+	refDecal_t	decals[32];
 	vec3_t		lua_scale;
 	float		trailCoordBump;
 	float		trailCoordLength;

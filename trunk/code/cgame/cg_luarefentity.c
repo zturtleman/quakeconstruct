@@ -34,14 +34,14 @@ float pr[9] = {
 void setupPlane(vec3_t pos, vec3_t axis[3]) {
 	int i,j = 0;
 	VectorCopy(pos,p);
-	pr[0] = axis[1][0]; pr[1] = axis[1][1]; pr[2] = axis[1][2];
+/*	pr[0] = axis[1][0]; pr[1] = axis[1][1]; pr[2] = axis[1][2];
 	pr[3] = axis[2][0]; pr[4] = axis[2][1]; pr[5] = axis[2][2];
 	pr[6] = axis[0][0]; pr[7] = axis[0][1]; pr[8] = axis[0][2];
-
-/*	pr[0] = axis[1][0]; pr[1] = axis[2][0]; pr[2] = axis[0][0];
+*/
+	pr[0] = axis[1][0]; pr[1] = axis[2][0]; pr[2] = axis[0][0];
 	pr[3] = axis[1][1]; pr[4] = axis[2][1]; pr[5] = axis[0][1];
 	pr[6] = axis[1][2]; pr[7] = axis[2][2]; pr[8] = axis[0][2];
-*/
+
 
 	//VectorCopy(axis[0],plane[0]);
 	//VectorCopy(axis[1],plane[1]);
@@ -62,7 +62,7 @@ void RotateFoxAxis(vec3_t v, vec3_t axis[3]) {
 
 void projectRPointOnPlane(vec3_t point) {
 	vec3_t temp;
-	VectorSubtract(point,p,point);
+	//VectorSubtract(point,p,point);
 	matrixMult1x3to3x3(point,pr,temp);
 	//RotateFoxAxis(point,plane);
 	VectorCopy(temp,point);
@@ -610,26 +610,26 @@ int qlua_rgetcolor(lua_State *L) {
 
 int qlua_rrender(lua_State *L) {
 	refEntity_t	*e;
-	//refTri_t	tris;
-	//vec3_t		temp;
-	//vec4_t		color;
-	//int i=0,j=0,k=0,x,size;
+	refTri_t	tris;
+	vec3_t		temp;
+	vec4_t		color;
+	int i=0,j=0,k=0,x,size;
 
 	luaL_checktype(L,1,LUA_TUSERDATA);
-/*
+
 	color[0] = 1;
 	color[1] = 1;
 	color[2] = 1;
 	color[3] = 1;
-*/
+
 	e = lua_torefentity(L,1);
 	if(e != NULL) {
 		trap_R_AddRefEntityToScene( e );
-/*		if(e->ndecals == 0) return 0;
+		if(e->ndecals == 0) return 0;
 		for(i=0; i<e->ndecals; i++) {
 			//if(e->decals[i].tris[0] != NULL) {
 				size = e->decals[i].num;
-				CG_Printf("Render Decal %i,%i\n",i,size);
+				//CG_Printf("Render Decal %i,%i\n",i,size);
 				for(j=0; j<size; j++) {
 					if(trap_R_LerpTriangle( e->hModel, e->decals[i].tris[j].surface, e->decals[i].tris[j].triangle, &tris, e->oldframe, e->frame, 1.0 - e->backlerp )) {
 						for(k=0; k<3; k++) {
@@ -640,7 +640,7 @@ int qlua_rrender(lua_State *L) {
 							VectorCopy(temp,tris.verts[k]);
 						}
 						RenderTriangle(
-							cgs.media.bloodMarkShader, 
+							e->decals[i].shader, 
 							tris.verts[0], 
 							tris.verts[1],
 							tris.verts[2],
@@ -653,9 +653,8 @@ int qlua_rrender(lua_State *L) {
 							e->decals[i].tris[j].verts[2].st[1]);
 					}
 				}
-			//}
-		}*/
-	}
+			}
+		}
 	return 0;
 }
 
@@ -900,7 +899,7 @@ int qlua_rlerptriangle(lua_State *L) {
 	return 0;
 }
 
-/*int qlua_rdecal(lua_State *L) {
+int qlua_rdecal(lua_State *L) {
 	int i,j,k,x;
 	int alloc = 0;
 	qboolean d = qfalse;
@@ -913,6 +912,7 @@ int qlua_rlerptriangle(lua_State *L) {
 	vec3_t normal,tnormal;
 	vec3_t axis[3];
 	float map[3][2];
+	qhandle_t	shader;
 	md3Info_t	info;
 
 	luaL_checktype(L,1,LUA_TUSERDATA);
@@ -921,6 +921,7 @@ int qlua_rlerptriangle(lua_State *L) {
 	luaL_checktype(L,4,LUA_TVECTOR);
 	luaL_checktype(L,5,LUA_TVECTOR);
 	luaL_checktype(L,6,LUA_TNUMBER);
+	luaL_checktype(L,7,LUA_TNUMBER);
 
 	luaentity = lua_torefentity(L,1);
 	if(luaentity != NULL) {
@@ -928,7 +929,8 @@ int qlua_rlerptriangle(lua_State *L) {
 		lua_tovector(L,3,axis[0]);
 		lua_tovector(L,4,axis[1]);
 		lua_tovector(L,5,axis[2]);
-		size = lua_tonumber(L,4); s2 = size/2;
+		size = lua_tonumber(L,6); s2 = size/2;
+		shader = lua_tointeger(L,7);
 		trap_R_ModelInfo(luaentity->hModel, &info);
 
 		//VectorCopy(normal,axis[0]);
@@ -937,12 +939,12 @@ int qlua_rlerptriangle(lua_State *L) {
 
 		setupPlane(pos,axis);
 
-		CG_Printf("Projecting Verts\n");
+		CG_Printf("Projecting Verts To Size: %f\n",s2);
 
 		for(i=0; i<info.numSurfaces; i++) {
 			for(j=0; j<info.numTriangles[i]; j++) {
 				if(trap_R_LerpTriangle( luaentity->hModel, i, j, &tris, luaentity->oldframe, luaentity->frame, 1.0 - luaentity->backlerp )) {
-					lua_newtable(L);
+					//lua_newtable(L);
 					d = qfalse;
 
 					VectorSubtract(tris.verts[1],tris.verts[0],v1);
@@ -952,29 +954,32 @@ int qlua_rlerptriangle(lua_State *L) {
 					CrossProduct(v2,v1,tnormal);
 
 					for(k=0; k<3; k++) {
+						//CG_Printf("[%f,%f,%f]A\n",tris.verts[k][0],tris.verts[k][1],tris.verts[k][2]);
 						VectorCopy(luaentity->origin,temp);
 						for (x=0; x<3; x++ ) {
-							VectorMA( temp, tris.verts[i][x], luaentity->axis[x], temp );
+							VectorMA( temp, tris.verts[k][x], luaentity->axis[x], temp );
 						}
 						VectorCopy(temp,tris.verts[k]);
 
-						//VectorSubtract(tris.verts[k],p,tris.verts[k]);
+						VectorSubtract(tris.verts[k],p,tris.verts[k]);
+
+						//CG_Printf("[%f,%f,%f]B\n",tris.verts[k][0],tris.verts[k][1],tris.verts[k][2]);
 						projectRPointOnPlane(tris.verts[k]);
 						ts2 = tris.verts[k][0]/s2;
 						tt2 = tris.verts[k][1]/s2;
 						map[k][0] = (ts2/size)+.5;
 						map[k][1] = (tt2/size)+.5;
 
-						//CG_Printf("[%i, %i, %i] {%f,%f}\n",i,j,k,ts2,tt2);
-
 						if(ts2 > -1 && ts2 < 1 && tt2 > -1 && tt2 < 1) {
 							d = qtrue;
-							CG_Printf("DRAW\n");
+							//CG_Printf("[%i, %i, %i] {%f,%f}\n",i,j,k,ts2,tt2);
+							//CG_Printf("DRAW\n");
 						}
 					}
+
 					if(d) {
 						if(alloc < 64) {
-							if(DotProduct(axis[0],tnormal) < 0) {
+							if(DotProduct(axis[0],tnormal) <= .2) {
 								for(k=0; k<3; k++) {
 									maptris[alloc].verts[k].st[0] = map[k][0];
 									maptris[alloc].verts[k].st[1] = map[k][1];
@@ -1008,13 +1013,35 @@ int qlua_rlerptriangle(lua_State *L) {
 				}
 				
 				luaentity->decals[luaentity->ndecals].num = alloc;
+				luaentity->decals[luaentity->ndecals].shader = shader;
 				luaentity->ndecals++;
 			}
 		}
 	}
 
 	return 0;
-}*/
+}
+
+int qlua_rcleardecals(lua_State *L) {
+	refEntity_t	*luaentity;
+	int n = 0;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	luaentity = lua_torefentity(L,1);
+	if(luaentity != NULL) {
+		if(lua_type(L,2) == LUA_TNUMBER) {
+			n = lua_tointeger(L,2);
+			if(n < 0) n = 0;
+			luaentity->ndecals -= n;
+			if(luaentity->ndecals < 0) luaentity->ndecals = 0;
+		} else {
+			luaentity->ndecals = 0;
+		}
+	}
+
+	return 0;
+}
 
 static int Entity_tostring (lua_State *L)
 {
@@ -1079,7 +1106,8 @@ static const luaL_reg REntity_methods[] = {
   {"GetTrailMapLength",	qlua_rgettrailmaplength},
   {"GetInfo",			qlua_rgetinfo},
   {"LerpTriangle",		qlua_rlerptriangle},
-//  {"AddDecal",			qlua_rdecal},
+  {"AddDecal",			qlua_rdecal},
+  {"ClearDecals",		qlua_rcleardecals},
   {0,0}
 };
 

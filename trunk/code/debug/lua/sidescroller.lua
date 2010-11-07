@@ -344,6 +344,8 @@ if(CLIENT) then
 	local function draw2d()
 		draw.SetColor(1,1,1,1)
 		
+		--draw.Rect(vdelta[1],vdelta[2],20,20)
+		
 		local players = GetAllPlayers()
 		local pl = LocalPlayer()
 		table.insert(players,pl)
@@ -452,11 +454,23 @@ if(CLIENT) then
 		
 		local pl_pos = LocalPlayer():GetPos() + Vector(0,0,25)
 		
-		local ts = VectorToScreen(pl_pos)
+		ApplyView(npos,ang,90,73.73)
+		
+		local def = {
+			origin = npos,
+			angles = ang,
+			fov_x = 90,
+			fov_y = 73.73,
+			x = 0,
+			y = 0,
+			width = 640,
+			height = 480,
+		}
+		
+		local ts = VectorToScreen(pl_pos,def)
 		vdelta[1] = ts.x
 		vdelta[2] = ts.y
 		
-		ApplyView(npos,ang,90,73.73)
 		
 		local vel = LocalPlayer():GetTrajectory():GetDelta()
 		if(VectorLength(lastpos - pl_pos) > 100 and VectorLength(vel) < 500) then
@@ -549,7 +563,9 @@ if(CLIENT) then
 
 		buttons = bitOr(buttons,newbits)
 		angle = Vector(aim,qyaw,0)
-				
+			
+		--print(tostring(aim) .. "\n")
+			
 		SetUserCommand(angle,fm,rm,um,buttons,weapon)
 	end
 	hook.add("UserCommand","sidescroller",UserCmd)
