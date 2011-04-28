@@ -52,7 +52,11 @@ local function WriteTable(v)
 	write("{")
 	for k,v in pairs(v) do
 		if(type(k) == "string") then
-			write(k .. "=")
+			if(string.find(k," ") or string.find(k,"-") or string.find(k,"+")) then
+				write("[\"" .. k .. "\"]=")
+			else
+				write(k .. "=")
+			end
 		elseif(type(k) == "number") then
 			write("[" .. k .. "]=")
 		end

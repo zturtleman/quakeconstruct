@@ -194,6 +194,7 @@ void	trap_S_StartSound( vec3_t origin, int entityNum, int entchannel, sfxHandle_
 		lua_pushinteger(L,sfx);
 		qlua_pcall(L,1,1,qtrue);
 		if(lua_type(L,-1) == LUA_TBOOLEAN && lua_toboolean(L,-1) == qfalse) {
+			lua_pop(L,1);
 			return;
 		}
 	}
@@ -219,6 +220,7 @@ void	trap_S_AddLoopingSound( int entityNum, const vec3_t origin, const vec3_t ve
 		lua_pushinteger(L,sfx);
 		qlua_pcall(L,1,1,qtrue);
 		if(lua_type(L,-1) == LUA_TBOOLEAN && lua_toboolean(L,-1) == qfalse) {
+			lua_pop(L,1);
 			return;
 		}
 	}
@@ -236,6 +238,7 @@ void	trap_S_AddRealLoopingSound( int entityNum, const vec3_t origin, const vec3_
 		lua_pushinteger(L,sfx);
 		qlua_pcall(L,1,1,qtrue);
 		if(lua_type(L,-1) == LUA_TBOOLEAN && lua_toboolean(L,-1) == qfalse) {
+			lua_pop(L,1);
 			return;
 		}
 	}
@@ -668,18 +671,16 @@ int trap_N_ReadLong() {
 }
 
 char *trap_N_ReadString() {
-	char * str = (char*)calloc(MAX_STRING_CHARS, sizeof(char));
+	static char str[MAX_STRING_CHARS];
+	//char * str = (char*)calloc(MAX_STRING_CHARS, sizeof(char));
 	syscall( CG_N_READSTRING, str, MAX_STRING_CHARS * sizeof(char) );
 	return str;
 }
 
 float trap_N_ReadFloat() {
-	float out = 0;
-	float * f = malloc(sizeof(float));
-	syscall( CG_N_READFLOAT, f );
-	out = *f;
-	free(f);
-	return out;
+	float f;
+	syscall( CG_N_READFLOAT, &f );
+	return f;
 }
 
 int	trap_IsUI() {

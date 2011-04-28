@@ -233,7 +233,12 @@ function Skin:DrawShadow()
 end
 
 function Skin:DrawTextArea()
+	if(panel.drawborder) then
+		panel:DoBGColor()
+		SkinCall("DrawBackground")
+	end
 	panel:DoFGColor()
+	
 	sk.coloradjust(nil,0,panel:GetAlpha())
 	for k,v in pairs(panel.lines) do
 		k = k * panel.spacing

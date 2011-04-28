@@ -442,6 +442,7 @@ void InitClientLua( void ) {
 	SetGlobal("MASK_WATER",MASK_WATER);
 	SetGlobal("MASK_OPAQUE",MASK_OPAQUE);
 	SetGlobal("MASK_SHOT",MASK_SHOT);
+	SetGlobal("LOCALENT_DT",0);
 
 	lua_pushboolean(L,0);
 	lua_setglobal(L,"SERVER");

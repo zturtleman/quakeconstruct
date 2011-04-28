@@ -899,6 +899,130 @@ int qlua_rlerptriangle(lua_State *L) {
 	return 0;
 }
 
+int qlua_rgetdecal(lua_State *L) {
+	int i,j,k,x;
+	qboolean d = qfalse;
+	float size,s2,ts2,tt2;
+	refEntity_t	*luaentity;
+	vec3_t temp,v1,v2;
+	vec3_t pos;
+	vec3_t normal,tnormal;
+	vec3_t axis[3];
+	//vec3_t cmpv;
+	refTri_t	tris;
+	refTri_t	tris2;
+	float map[3][2];
+	md3Info_t	info;
+	int top0,top1,top2,top3;
+	int alloc = 0;
+	qboolean filter = qtrue;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TVECTOR);
+	luaL_checktype(L,3,LUA_TVECTOR);
+	luaL_checktype(L,4,LUA_TVECTOR);
+	luaL_checktype(L,5,LUA_TVECTOR);
+	luaL_checktype(L,6,LUA_TNUMBER);
+	//luaL_checktype(L,7,LUA_TVECTOR);
+
+	luaentity = lua_torefentity(L,1);
+	if(luaentity != NULL) {
+		lua_tovector(L,2,pos);
+		lua_tovector(L,3,axis[0]);
+		lua_tovector(L,4,axis[1]);
+		lua_tovector(L,5,axis[2]);
+		size = lua_tonumber(L,6); s2 = size; //2;
+		trap_R_ModelInfo(luaentity->hModel, &info);
+		if(lua_type(L,7) == LUA_TBOOLEAN) {
+			filter = lua_toboolean(L,7);
+		}
+		//lua_tovector(L,7,cmpv);
+
+		setupPlane(pos,axis);
+
+		//CG_Printf("Projecting Verts To Size: %f\n",s2);
+
+		lua_newtable(L);
+		top0 = lua_gettop(L);
+		for(i=0; i<info.numSurfaces; i++) {
+			for(j=0; j<info.numTriangles[i]; j++) {
+				if(trap_R_LerpTriangle( luaentity->hModel, i, j, &tris, luaentity->oldframe, luaentity->frame, 1.0 - luaentity->backlerp )) {
+					d = qfalse;
+
+					for(k=0; k<3; k++) {
+						VectorCopy(luaentity->origin,temp);
+						for (x=0; x<3; x++ ) {
+							VectorMA( temp, tris.verts[k][x], luaentity->axis[x], temp );
+						}
+						VectorCopy(temp,tris2.verts[k]);
+						VectorCopy(temp,tris.verts[k]);
+						VectorSubtract(tris.verts[k],p,tris.verts[k]);
+						projectRPointOnPlane(tris.verts[k]);
+						ts2 = tris.verts[k][0]/s2;
+						tt2 = tris.verts[k][1]/s2;
+						map[k][0] = (ts2/size)+.5;
+						map[k][1] = (tt2/size)+.5;
+						if(ts2 > -1 && ts2 < 1 && tt2 > -1 && tt2 < 1) {
+							d = qtrue;
+						}
+					}
+
+					VectorSubtract(tris2.verts[1],tris2.verts[0],v1);
+					VectorSubtract(tris2.verts[2],tris2.verts[0],v2);
+					VectorNormalize(v1);
+					VectorNormalize(v2);
+					CrossProduct(v2,v1,tnormal);
+
+					if(d) {
+						if(alloc < 512) {
+							if(DotProduct(axis[0],tnormal) <= .2 || filter == qfalse) {
+								lua_pushinteger(L, alloc+1);
+								lua_newtable(L);
+								top1 = lua_gettop(L);
+
+								lua_pushstring(L,"verts");
+								lua_newtable(L);
+								top2 = lua_gettop(L);
+								for(k=0; k<3; k++) {
+									lua_pushinteger(L,k+1);
+										lua_newtable(L);
+										top3 = lua_gettop(L);
+
+										lua_pushstring(L,"s");
+										lua_pushnumber(L,map[k][0]);
+										lua_settable(L,top3);
+
+										lua_pushstring(L,"t");
+										lua_pushnumber(L,map[k][1]);
+										lua_settable(L,top3);
+									lua_settable(L,top2);
+								}
+								lua_settable(L,top1);
+
+								lua_pushstring(L,"surface");
+								lua_pushinteger(L,i);
+								lua_settable(L,top1);
+
+								lua_pushstring(L,"triangle");
+								lua_pushinteger(L,j);
+								lua_settable(L,top1);
+
+								lua_settable(L,top0);
+								alloc++;
+							}
+						} else {
+							break;
+						}
+					}
+				} else {
+					CG_Printf("Lerp Tris Fail: %i,%i\n",i,j);
+				}
+			}
+		}
+	}
+	return 1;
+}
+
 int qlua_rdecal(lua_State *L) {
 	int i,j,k,x;
 	int alloc = 0;
@@ -1106,8 +1230,9 @@ static const luaL_reg REntity_methods[] = {
   {"GetTrailMapLength",	qlua_rgettrailmaplength},
   {"GetInfo",			qlua_rgetinfo},
   {"LerpTriangle",		qlua_rlerptriangle},
-  {"AddDecal",			qlua_rdecal},
-  {"ClearDecals",		qlua_rcleardecals},
+  //{"AddDecal",		qlua_rdecal},
+  {"GetDecal",			qlua_rgetdecal},
+  //{"ClearDecals",		qlua_rcleardecals},
   {0,0}
 };
 

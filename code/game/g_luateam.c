@@ -8,8 +8,16 @@ qboolean LuaTeamChanged(gentity_t *luaentity,int team) {
 	lua_pushentity(L,luaentity);
 	lua_pushinteger(L,team);
 	qlua_pcall(L,2,1,qtrue);
-	if(lua_type(L,-1) == LUA_TBOOLEAN)
-		return lua_toboolean(L,-1);
+	if(lua_type(L,-1) == LUA_TBOOLEAN) {
+		if(lua_toboolean(L,-1)) {
+			lua_pop(L,1);
+			return qfalse;
+		} else {
+			lua_pop(L,1);
+			return qfalse;
+		}
+	}
+	lua_pop(L,1);
 
 	return qtrue;
 }

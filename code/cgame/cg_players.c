@@ -2158,15 +2158,26 @@ Also called by CG_Missile for quad rockets, but nobody can tell...
 */
 void CG_AddRefEntityWithPowerups( refEntity_t *ent, entityState_t *state, int team, int part ) {
 	lua_State *L = GetClientLuaState();
+	refEntity_t *re;
 
 	if(L != NULL) {
 		qlua_gethook(L,"DrawPlayerModel");
 		lua_pushrefentity(L,ent);
-		lua_pushentity(L,&cg_entities[ state->clientNum ]);
+		lua_pushentity(L,&cg_entities[ state->number ]);
 		lua_pushinteger(L,part);
 		lua_pushinteger(L,team);
-		qlua_pcall(L,4,1,qtrue);
-		if(lua_type(L,-1) == LUA_TBOOLEAN && lua_toboolean(L,-1)) {
+		qlua_pcall(L,4,2,qtrue);
+		if(lua_type(L,-2) == LUA_TBOOLEAN && lua_toboolean(L,-2)) {
+			if(lua_type(L,-1) == LUA_TUSERDATA) {
+				//CG_Printf("USERDATA\n");
+				re = lua_torefentity(L,-1);
+				if(re != NULL) {
+					//CG_Printf("REFENT\n");
+					//memcpy(ent,re,sizeof(refEntity_t));
+					*ent = *re;
+				}
+			}
+			lua_pop(L,2);
 			return;
 		}
 	}

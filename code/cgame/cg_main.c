@@ -2013,6 +2013,7 @@ qboolean Cmd_Check_Lua( const char cmd[] ) {
 		qlua_pcall(L,1,1,qtrue);
 		if(lua_type(L,-1) == LUA_TBOOLEAN) {
 			if(lua_toboolean(L,-1) != 0) {
+				lua_pop(L,1);
 				return qtrue;
 			}
 		}
@@ -2453,8 +2454,13 @@ qboolean CG_KeyEvent(int key, qboolean down) {
 		lua_pushinteger(L,key);
 		lua_pushboolean(L,down);
 		qlua_pcall(L,2,1,qtrue);
-		if(lua_type(L,-1) == LUA_TBOOLEAN)
-			return lua_toboolean(L,-1);
+		if(lua_type(L,-1) == LUA_TBOOLEAN) {
+			if(lua_toboolean(L,-1)) {
+				lua_pop(L,1);
+				return qtrue;
+			}
+		}
+		lua_pop(L,1);
 	}
 	return qfalse;
 }

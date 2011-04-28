@@ -849,6 +849,7 @@ void CG_RegisterWeapon( int weaponNum ) {
 		weaponInfo->flashSound[0] = qlua_pullint_m(L,"flashSound",qfalse,weaponInfo->flashSound[0]);
 		weaponInfo->readySound = qlua_pullint_m(L,"readySound",qfalse,weaponInfo->readySound);
 		weaponInfo->firingSound = qlua_pullint_m(L,"firingSound",qfalse,weaponInfo->firingSound);
+		lua_pop(L,1);
 	}
 }
 
@@ -1482,6 +1483,7 @@ void CG_AddViewWeapon( playerState_t *ps ) {
 		qlua_pcall(L,1,1,qtrue);
 		if(lua_type(L,-1) == LUA_TUSERDATA) {
 			hand = *lua_torefentity(L,-1);
+			lua_pop(L,1);
 		}
 	}
 

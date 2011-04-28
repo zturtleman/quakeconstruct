@@ -808,12 +808,14 @@ int qlua_setteam(lua_State *L) {
 	if(luaentity != NULL) {
 		if(luaentity->client) {
 			team = lua_tonumber(L,2);
-			if(team < TEAM_FREE || team >= TEAM_NUM_TEAMS) {
+			if(team < TEAM_FREE) {
+				// || team >= TEAM_NUM_TEAMS
 				team = luaentity->client->sess.sessionTeam;
 			}
 			if(luaentity->client->sess.sessionTeam != team) {
 				LuaTeamChanged(luaentity,team);
 				luaentity->client->sess.sessionTeam = team;
+				ClientUserinfoChanged(luaentity->s.number);
 			}
 		}
 	}
