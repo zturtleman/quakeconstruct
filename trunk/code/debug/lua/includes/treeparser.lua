@@ -45,7 +45,7 @@ function parser.checkGrouping(k,v,f)
 			--print(parser.level .. "\n")
 			for i=1, parser.level do
 				local lk = parser.locs[i]
-				print("^1missing closing '}' for '{' at " .. lk[1] .. ":" .. lk[2] .. "\n")
+				print("^1[" .. parser.currentfile .. "] missing closing '}' for '{' at " .. lk[1] .. ":" .. lk[2] .. "\n")
 			end
 			error("")
 		end
@@ -61,7 +61,7 @@ function parser.checkGrouping(k,v,f)
 			if(parser.level > 0) then
 				parser.level = parser.level - 1
 			else
-				error("extra '}' at " .. k .. ":" .. n .. "\n")
+				error("[" .. parser.currentfile .. "] extra '}' at " .. k .. ":" .. n .. "\n")
 			end
 		end
 	end
@@ -296,6 +296,7 @@ function parser.checkField(n,line)
 		end
 		s,v = parser.checkValue(n,v)
 		if(s) then
+			print("VALUE: " .. v .. "\n")
 			table.insert(parser.codebuffer[parser.level].fields,v)
 			return true
 		end
@@ -334,12 +335,34 @@ function parser.parse(str,keepnodes,reload)
 	str = string.Replace(str,"\r","")
 	parser.setup(keepnodes)
 	local lines = string.Explode("\n",str)
+	local codeBlock = false
 	for k,v in pairs(lines) do
-		parser.checkGrouping(k,v)
+		local lv = string.lower(v)
+		if(string.find(lv,"[code]",0,true)) then codeBlock = true end
+		if(codeBlock == false) then parser.checkGrouping(k,v) end
+		if(string.find(lv,"[/code]",0,true)) then codeBlock = false end
 	end
 	parser.checkGrouping(nil,nil,true)
+	
+	codeBlock = false
+	local code = ""
 	for k,v in pairs(lines) do
-		parser.parseLine(k,v,reload)
+		local lv = string.lower(v)
+		if(codeBlock == true) then
+			if(string.find(lv,"[/code]",0,true)) then 
+				codeBlock = false
+				local b,e = pcall(loadstring(code))
+				if not (b) then
+					print("^1[" .. parser.currentfile .. "]-" .. k .. ":\n" .. e)
+				end
+				code = ""
+				v = nil
+			else
+				code = code .. v .. "\n"
+			end
+		end
+		if(string.find(lv,"[code]",0,true)) then codeBlock = true end
+		if(codeBlock == false and v ~= nil) then parser.parseLine(k,v,reload) end
 	end	
 	
 	return parser.nodes
@@ -453,7 +476,7 @@ function ParserT:ReloadNode(reload,tab)
 					print("Reloaded: " .. k .. "\n")
 				end
 			end
-		end	
+		end
 	else
 		if(file == nil) then
 			error("Node '" .. reload .. "' not found (no file signature)")

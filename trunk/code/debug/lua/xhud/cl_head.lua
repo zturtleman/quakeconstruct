@@ -15,6 +15,46 @@ local wDamageX = 0
 local wDamageY = 0
 local wDamageTime = 0
 
+NO_DECALS = true
+
+function genTex2(texture,t)
+	local m = ""
+	local m2 = "filter"
+	if(t) then m = "_2" end
+	if(t) then m2 = "blend" end
+	local overlay_d = [[{
+		polygonoffset
+		GLSL GLSL/alphamask]] .. m .. [[
+		{
+			map ]] .. texture .. [[
+			//tcMod turb 0 0.1 0 0.4
+			blendfunc ]] .. m2 .. [[
+			rgbGen entity
+			alphaGen entity
+		}
+	}]]
+	return CreateShader("f",overlay_d)
+end
+
+blood1 = genTex2("gfx/misc/dissolve2.tga",false)
+blood2 = genTex2("gfx/misc/dissolve2.tga",true)
+
+function genTex(texture)
+	local overlay_d = [[{
+		polygonoffset
+		GLSL GLSL/modulate2x
+		{
+			map ]] .. texture .. [[
+			blendfunc GL_DST_COLOR GL_SRC_COLOR
+			rgbGen vertex
+			alphaGen vertex
+		}
+	}]]
+	return CreateShader("f",overlay_d)
+end
+
+local blood_mark = genTex("gfx/damage/blood/Splat3.JPG")
+
 ref:SetModel(head)
 ref:SetSkin(skin)
 ref2:SetModel(head)
@@ -88,10 +128,12 @@ local function initHeadAnimations()
 end
 
 local function playingPainAnimations()
-	if(m_headanims["PAIN_L"].playing) then return true end
-	if(m_headanims["PAIN_R"].playing) then return true end
-	if(m_headanims["WATER_PAIN_L"].playing) then return true end
-	if(m_headanims["WATER_PAIN_R"].playing) then return true end
+	if(animate) then
+		if(m_headanims["PAIN_L"].playing) then return true end
+		if(m_headanims["PAIN_R"].playing) then return true end
+		if(m_headanims["WATER_PAIN_L"].playing) then return true end
+		if(m_headanims["WATER_PAIN_R"].playing) then return true end
+	end
 	return false
 end
 
@@ -116,6 +158,80 @@ function loadHeadModel(inf)
 	return m_headmodel or inf.headModel
 end
 
+local decals = LinkedList()
+function DECAL(pos,ang,HEALTH,damage)
+	if(NO_DECALS) then return end
+	local small = true
+	if(damage > 6 or HEALTH < 50) then
+		small = false
+	else
+		if(math.random() > .5) then return end
+	end
+	
+	local f,r,u = AngleVectors(ang)
+	local rnd = 2.50 + damage/20 --(math.random(1,100)/100)
+	ref:SetPos(Vector(0,0,0))
+	local d = ref:GetDecal(pos,f,r,u,rnd,blood_mark)
+	--for k,v in pairs(d) do
+		--print(#v.verts .. "\n")
+	--end
+	local ndecals = decals:Len()
+	local wait = damage*70
+	local life = 1000 + damage * 100
+	if(ndecals > 10) then 
+		wait = 0
+		life = 5000
+	elseif(ndecals > 16) then
+		wait = 0
+		life = 1000
+	end
+	local lt = LevelTime()
+	local h = HEALTH
+	if(h >= 100) then h = 99 end
+	decals:Add({decal=d,time2=lt,time=lt,life=life,a=1,hp=h,wait=wait,small=small})
+end
+
+function renderDecals(HEALTH)
+	local lt = LevelTime()
+	local maxDecals = 10
+	local i = 0
+	decals:IterReverse(function(v)
+		i = i + 1
+		if(v.hp >= HEALTH and (v.small == true or i <= maxDecals)) then
+			v.time = lt + v.wait
+		end
+		local dt2 = (lt - v.time2) / 600
+		local dt = (lt - v.time) / v.life
+		if(dt < 0) then dt = 0 end
+		if(dt2 > 1) then dt2 = 1 end
+		local drk = (1 - dt2) + dt --((1-dt)/2)
+		if(drk > 1) then drk = 1 end
+		local cr = 1 - drk
+		local cg = 1 - drk
+		local cb = 1 - drk
+		local ca = v.a * (1-dt)
+		for p,tr in pairs(v.decal) do
+			local tri = ref:LerpTriangle(tr.surface+1,tr.triangle+1)
+			if(tri == nil) then return end
+			render.Tris(
+				tri[1],
+				tri[2],
+				tri[3],
+				blood_mark,
+				cr,cg,cb,ca,
+				tr.verts[1].s,tr.verts[1].t,
+				tr.verts[2].s,tr.verts[2].t,
+				tr.verts[3].s,tr.verts[3].t
+			)
+		end
+		if(dt > 1) then 
+			decals:Remove()
+		end
+	end)
+end
+
+local wasdead = false
+local hpoints = 0
 function DrawHead(x,y,ICON_SIZE,HEALTH)
 	local hp = HEALTH
 	local hp2 = HEALTH + waterdamage
@@ -132,6 +248,16 @@ function DrawHead(x,y,ICON_SIZE,HEALTH)
 		head = nhead
 		
 		positionHead()
+	end
+	
+	if(hp <= 0) then
+		wasdead = true
+	else
+		if(wasdead) then
+			--ref:ClearDecals()
+			decals:Clear()
+			wasdead = false
+		end
 	end
 	
 	if(animate) then
@@ -185,8 +311,25 @@ function DrawHead(x,y,ICON_SIZE,HEALTH)
 				local heal = HEALTH - oldhealth
 				waterdamage = waterdamage - heal
 				if(waterdamage < 0) then waterdamage = 0 end
+				if(heal > 0) then
+					if(hpoints >= 8 + math.random(1,4)) then
+						--ref:ClearDecals(1)
+						hpoints = 0
+					end
+					hpoints = hpoints + 1
+				elseif(heal > 5) then
+					--ref:ClearDecals(1)
+				elseif(heal > 20) then
+					--ref:ClearDecals(4)
+				elseif(heal > 40) then
+					--ref:ClearDecals(7)
+				end
+				if(HEALTH >= 100) then
+					--ref:ClearDecals()
+					hpoints = 0
+				end
 			else
-
+				hpoints = 0
 			end
 		end
 		oldhealth = HEALTH
@@ -241,17 +384,19 @@ function DrawHead(x,y,ICON_SIZE,HEALTH)
 	local resetf = false
 	if(delta < DAMAGE_TIME) then
 		if(HEALTH > 0) then
-			if(waterlevel < 2) then
-				if(damageX < 0) then
-					m_headanims["PAIN_R"]:Reset()
+			if(animate) then
+				if(waterlevel < 2) then
+					if(damageX < 0) then
+						m_headanims["PAIN_R"]:Reset()
+					else
+						m_headanims["PAIN_L"]:Reset()
+					end
 				else
-					m_headanims["PAIN_L"]:Reset()
-				end
-			else
-				if(damageX < 0) then
-					m_headanims["WATER_PAIN_R"]:Reset()
-				else
-					m_headanims["WATER_PAIN_L"]:Reset()
+					if(damageX < 0) then
+						m_headanims["WATER_PAIN_R"]:Reset()
+					else
+						m_headanims["WATER_PAIN_L"]:Reset()
+					end
 				end
 			end
 		end
@@ -441,17 +586,24 @@ function DrawHead(x,y,ICON_SIZE,HEALTH)
 	if(calpha < 0.5) then calpha = 0.5 end
 	
 	ref:Render()
-	--[[ref2:SetColor(1,.2,.2,calpha2)
+	
+	if(calpha > .9) then calpha = .9 end
+	--ref2:SetColor(1,.2,.2,calpha2)
+	ref2:SetColor(.7,0,0,calpha2/2)
 	ref2:SetShader(blood1)
 	ref2:Render()
 	
-	ref2:SetColor(.6,.1,.1,(calpha2*.9)+.1)
-	ref2:SetShader(blood1)
-	ref2:Render()
 	
-	ref2:SetColor(1,1,1,calpha)
+	--ref2:SetColor(.6,.1,.1,(calpha2*.9)+.1)
+	--ref2:SetShader(blood1)
+	--ref2:Render()
+	
+	--print(calpha .. "\n")
+	ref2:SetColor(.3,0,0,1.39 - (calpha*1.1 - .13))
 	ref2:SetShader(blood2)
-	ref2:Render()]]
+	ref2:Render()
+	
+	renderDecals(HEALTH)
 	
 	--angles.y = angles.y + 180
 	local forward = VectorForward(angles)
@@ -484,22 +636,34 @@ function DrawHead(x,y,ICON_SIZE,HEALTH)
 end
 
 local function processDamage(attacker,pos,dmg,death,waslocal,wasme,health)
-	if(waslocal == false) then return end
+	if(waslocal == false and death ~= MOD_WATER) then return end
 	if(death == MOD_FALLING) then
-		if(animate) then m_headanims["PAIN_L"]:Reset() end
+		local d = 1
+		if(math.random() >= .5) then d = -1 end
+		if(animate) then 
+			if(d == 1) then
+				m_headanims["PAIN_L"]:Reset() 
+			else
+				m_headanims["PAIN_R"]:Reset() 
+			end
+		end
 		headStartYaw = 180;
-		headStartPitch = 25
+		headStartPitch = 35
 		
 		headEndYaw = 180;
-		headEndPitch = -10;
+		headEndPitch = 0;
 		
-		headStartRoll = -5
+		headStartRoll = -25 * d
 		headEndRoll = 0
 
 		headStartTime = LevelTime();
-		headEndTime = LevelTime() + 200;
-	end
-	if(death == MOD_WATER) then
+		
+		if(dmg >= 8) then
+			headEndTime = LevelTime() + 1100;
+		else
+			headEndTime = LevelTime() + 750;
+		end
+	elseif(death == MOD_WATER) then
 		if(animate) then m_headanims["WATER_PAIN_L"]:Reset() end
 		headStartYaw = 180 + (2);
 		
@@ -516,6 +680,14 @@ local function processDamage(attacker,pos,dmg,death,waslocal,wasme,health)
 		headEndTime = LevelTime() + 800 + math.random() * 100;
 		
 		waterdamage = waterdamage + dmg
+	else
+		DECAL(Vector(0,0,0),Vector(180 - math.random(-60,60),math.random(-50,50),0),health,dmg)
+		if(dmg > 20) then
+			--DECAL(Vector(0,0,0),Vector(180 - math.random(-60,60),math.random(-50,50),0),health,dmg)
+		end
+		if(dmg > 40) then
+			DECAL(Vector(0,0,0),Vector(180 - math.random(-60,60),math.random(-50,50),0),health,dmg)
+		end
 	end
 end
 hook.add("Damaged","cl_xhud_head",processDamage)

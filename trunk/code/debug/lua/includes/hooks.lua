@@ -188,7 +188,7 @@ function CallHookArgTForm(event,tform,...)
 			end
 		end
 		
-		local b,e = pcall(v.func,unpack(arg))
+		local b,e,x,y,z = pcall(v.func,unpack(arg))
 		if not b then
 			print("^1HOOK ERROR[" .. event .. "]: " .. e .. "\n")
 		else
@@ -203,11 +203,15 @@ function CallHookArgTForm(event,tform,...)
 						debugprint(tostring(e) .. ".\n")
 					end
 				end
-				retVal = e
+				retVal = retVal or {}
+				retVal[1] = e
+				if(x ~= nil) then retVal[2] = x end
+				if(y ~= nil) then retVal[3] = y end
+				if(z ~= nil) then retVal[4] = z end
 			end
 		end
 	end
-	if(retVal != nil) then return retVal end
+	if(retVal != nil) then return unpack(retVal) end
 end
 
 function CallHook(event,...)

@@ -75,6 +75,7 @@ int Pickup_Powerup( gentity_t *ent, gentity_t *other ) {
 		qlua_pcall(L,5,1,qtrue);
 		if(lua_type(L,-1) == LUA_TNUMBER) {
 			quantity = lua_tointeger(L,-1);
+			lua_pop(L,1);
 		}
 	}
 
@@ -249,6 +250,7 @@ int Pickup_Ammo (gentity_t *ent, gentity_t *other)
 		qlua_pcall(L,5,1,qtrue);
 		if(lua_type(L,-1) == LUA_TNUMBER) {
 			quantity = lua_tointeger(L,-1);
+			lua_pop(L,1);
 		}
 	}
 
@@ -295,6 +297,7 @@ int Pickup_Weapon (gentity_t *ent, gentity_t *other) {
 		qlua_pcall(L,5,1,qtrue);
 		if(lua_type(L,-1) == LUA_TNUMBER) {
 			quantity = lua_tointeger(L,-1);
+			lua_pop(L,1);
 		}
 	}
 
@@ -351,6 +354,7 @@ int Pickup_Health (gentity_t *ent, gentity_t *other) {
 		qlua_pcall(L,5,1,qtrue);
 		if(lua_type(L,-1) == LUA_TNUMBER) {
 			quantity = lua_tointeger(L,-1);
+			lua_pop(L,1);
 		}
 	}
 
@@ -403,6 +407,7 @@ int Pickup_Armor( gentity_t *ent, gentity_t *other ) {
 		qlua_pcall(L,5,1,qtrue);
 		if(lua_type(L,-1) == LUA_TNUMBER) {
 			quantity = lua_tointeger(L,-1);
+			lua_pop(L,1);
 		}
 	}
 
@@ -514,8 +519,10 @@ void Touch_Item (gentity_t *ent, gentity_t *other, trace_t *trace) {
 		qlua_pcall(L,4,1,qtrue);
 		if(lua_type(L,-1) == LUA_TBOOLEAN) {
 			if(lua_toboolean(L,-1) == 0) {
+				lua_pop(L,1);
 				return;
 			}
+			lua_pop(L,1);
 		}
 	}
 
@@ -713,8 +720,10 @@ gentity_t *Drop_Item( gentity_t *ent, gitem_t *item, float angle ) {
 		qlua_pcall(L,1,1,qtrue);
 		if(lua_type(L,-1) == LUA_TBOOLEAN) {
 			if(lua_toboolean(L,-1) == 0) {
+				lua_pop(L,1);
 				return NULL;
 			}
+			lua_pop(L,1);
 		}
 	}
 

@@ -147,7 +147,7 @@ local function angles()
 end
 
 local function HealthBar(recty,mx,my)
-	if(hp <= 0) then return end
+	--if(hp <= 0) then return end
 	
 	local col_hp = colors.health_norm
 	if(hp > 100) then col_hp = colors.health_high end
@@ -259,9 +259,9 @@ local function draw2D()
 	draw.SetColor(1,1,1,1)
 	--draw.Text(10,50,"" .. deltaang.x .. " - " .. deltaang.y .. "",10,10)
 	
-	if(_CG.weapon != WP_NONE) then draw.Text(mx+5,my+420,"ammo:",10,10) end
+	if(_CG.weapon != WP_NONE or true) then draw.Text(mx+5,my+420,"ammo:",10,10) end
 	--draw.Text(mx+200,my+420,"health:",10,10)
-	if(_CG.weapon != WP_NONE) then drawNumbers(mx,num_y,20,20,ammo,8,unpack(col_ammo)) end
+	if(_CG.weapon != WP_NONE or true) then drawNumbers(mx,num_y,20,20,ammo,8,unpack(col_ammo)) end
 	
 	--drawNumbers(mx+190,num_y,20,20,hp,8,unpack(col_hp))
 	

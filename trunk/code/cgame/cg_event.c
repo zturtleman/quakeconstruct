@@ -468,6 +468,7 @@ void CG_PainEvent( centity_t *cent, int health ) {
 		lua_pushvector(L,cent->currentState.angles);
 		qlua_pcall(L,4,1,qtrue);
 		if(lua_type(L,-1) == LUA_TBOOLEAN && lua_toboolean(L,-1)) {
+			lua_pop(L,1);
 			return;
 		}
 	}
@@ -527,6 +528,7 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 		lua_pushvector(L,dir);
 		qlua_pcall(L,4,1,qtrue);
 		if(lua_type(L,-1) == LUA_TBOOLEAN && lua_toboolean(L,-1)) {
+			lua_pop(L,1);
 			return;
 		}
 	}

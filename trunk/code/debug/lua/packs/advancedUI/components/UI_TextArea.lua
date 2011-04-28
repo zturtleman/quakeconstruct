@@ -39,6 +39,9 @@ function Panel:Initialize()
 	self.latch = false
 	self.ex = 20
 	self.edited = false
+	self.multiline = true
+	self.expandable = true
+	self.drawborder = false
 end
 
 function Panel:ParseLine(str)
@@ -109,6 +112,20 @@ function Panel:SetEditable(b)
 	self.editable = b
 end
 
+function Panel:SetExpandable(b)
+	self.expandable = b
+end
+
+function Panel:SetDrawBorder(b)
+	self.drawborder = b
+end
+
+function Panel:SetCaret(x,y)
+	self.caret[1] = x
+	self.caret[2] = y
+	self:ContrainCaret()
+end
+
 function Panel:ContrainCaret()
 	if(self.caret[1] < 0) then self.caret[1] = 0 end
 	if(self.caret[2] < 0) then self.caret[2] = 0 end
@@ -132,6 +149,10 @@ function Panel:InsertText(id,txt)
 	self.lines[id] = s .. txt .. e
 	
 	self.caret[1] = self.caret[1] + string.len(txt)
+end
+
+function Panel:SetMultiline(b)
+	self.multiline = b
 end
 
 function Panel:KeyTyped(k)
@@ -159,17 +180,19 @@ function Panel:KeyTyped(k)
 	elseif(k == K_TAB) then
 		self:InsertText(id,self.faketab)
 	elseif(k == K_ENTER) then
-		local line = self.lines[id]
-		local s = string.sub(line,0,self.caret[1])
-		local e = string.sub(line,self.caret[1]+1,string.len(line))
-	
-		table.insert(self.lines,id+1,"")
+		if(self.multiline) then
+			local line = self.lines[id]
+			local s = string.sub(line,0,self.caret[1])
+			local e = string.sub(line,self.caret[1]+1,string.len(line))
 		
-		self.lines[id] = s
-		self.lines[id+1] = e
-		
-		self.caret[1] = 0
-		self.caret[2] = self.caret[2] + 1
+			table.insert(self.lines,id+1,"")
+			
+			self.lines[id] = s
+			self.lines[id+1] = e
+			
+			self.caret[1] = 0
+			self.caret[2] = self.caret[2] + 1
+		end
 	elseif(k == K_BACKSPACE) then
 		if(self.caret[1] <= 0 and self.caret[2] <= 0) then return end
 		if(self.caret[1] <= 0 and #self.lines > 1 and self.caret[2] > 0) then
@@ -209,11 +232,13 @@ function Panel:KeyTyped(k)
 end
 
 function Panel:PerformLineSize()
-	self.totalw = self:ParseStringWidth() - self.ex
-	self.totalh = self:ParseStringHeight() - self.ex
-	self:DoLayout()
-	if(self:GetParent() != nil) then
-		self:GetParent():DoLayout()
+	if(self.expandable) then
+		self.totalw = self:ParseStringWidth() - self.ex
+		self.totalh = self:ParseStringHeight() - self.ex
+		self:DoLayout()
+		if(self:GetParent() != nil) then
+			self:GetParent():DoLayout()
+		end
 	end
 end
 
@@ -239,7 +264,11 @@ function Panel:GetText(str)
 end
 
 function Panel:DoLayout()
-	self:SetSize(self.totalw + self.ex*2,self.totalh + self.ex*2)
+	if(self.expandable) then
+		self:SetSize(self.totalw + self.ex*2,self.totalh + self.ex*2)
+	else
+		self["BaseClass"].DoLayout(self)
+	end
 	if(self:GetParent() != nil and self.latch != true) then
 		self:GetParent().MousePressed = function(par,x,y) self:MousePressed(x,y) end
 		self.latch = true

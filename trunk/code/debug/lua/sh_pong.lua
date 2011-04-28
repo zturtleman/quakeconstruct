@@ -1,6 +1,10 @@
-local player1 = CreateNetworkedTable(111)
-local player2 = CreateNetworkedTable(112)
-local game = CreateNetworkedTable(113)
+ClearNetworkedTable(211)
+ClearNetworkedTable(212)
+ClearNetworkedTable(213)
+
+local player1 = CreateNetworkedTable(211)
+local player2 = CreateNetworkedTable(212)
+local game = CreateNetworkedTable(213)
 
 local function def(var,value)
 	return var or value

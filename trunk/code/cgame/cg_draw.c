@@ -49,6 +49,7 @@ qboolean CG_ShouldDraw(const char *name) {
 		lua_pushstring(L,name);
 		qlua_pcall(L,1,1,qtrue);
 		if(lua_type(L,-1) == LUA_TBOOLEAN && lua_toboolean(L,-1) == qfalse) {
+			lua_pop(L,1);
 			return qfalse;
 		}
 	}

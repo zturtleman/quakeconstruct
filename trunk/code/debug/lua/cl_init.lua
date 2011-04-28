@@ -52,8 +52,32 @@ local function newParticle(pos,indir,freeze)
 end
 
 local function ItemPickup(class,pos,vel,itemid)
-	newParticle(pos + Vector(0,0,5),(vel * .002) + Vector(0,0,1),false)
+	--newParticle(pos + Vector(0,0,5),(vel * .002) + Vector(0,0,1),false)
+	local n = VectorNormalize(vel)
+	ParticleEffect("ItemPickup",pos,n,{pos=pos + Vector(0,0,40),speed=-8,friction=85,noclamp=true})
+	--ParticleEffect("ItemSpawn",pos,Vector(0,0,1),{pos=pos + Vector(0,0,40),speed=-8})
+	--Vector(0,0,1)
 end
+
+local function ItemThinks()
+	--GetMiscTime
+	local lt = LevelTime()
+	for k,v in pairs(GetAllEntities()) do
+		local tab = v:GetTable()
+		local t = v:GetMiscTime()
+		local dt = lt - t
+		tab.sc = tab.sc or 0
+		if(dt > 0 and dt < 1000 and tab.sc == 0) then
+			local pos = v:GetPos()
+			ParticleEffect("ItemSpawn",pos,Vector(0,0,1),{pos=pos + Vector(0,0,40),speed=-8})
+			tab.sc = 1
+		end
+		if(dt < 0 or dt > 1000) then
+			tab.sc = 0
+		end
+	end
+end
+hook.add("Think","cl_init",ItemThinks)
 
 local function readVector()
 	local vec = Vector()
@@ -195,7 +219,7 @@ local function takeShot()
 	local self2 = LocalPlayer()
 	local suicide = true
 	local hp = _CG.stats[STAT_HEALTH] - dmg
-	local dir = Vector(0,0,1)
+	local dir = Vector(1,0,1)
 	local id = 0
 	CallHook("Damaged",atkname,pos,dmg,death,self,suicide,hp,dir,self2:GetPos())
 	CallHook("PlayerDamaged",self2,atkname,pos,dmg,death,self,suicide,hp,id,pos,dir)

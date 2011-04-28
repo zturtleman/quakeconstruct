@@ -2,6 +2,10 @@
 print("PARTICLE TOOLS\n")
 HSV = 2
 
+particletools = particletools or {}
+particletools.physicsModules = particletools.physicsModules or {}
+particletools.initializers = particletools.initializers or {}
+
 local function RValueFromT(t,d)
 	if(t == nil) then return d end
 	if(type(t) == "table") then
@@ -154,6 +158,70 @@ local function SetupParticle(t,l)
 			end
 		end)	
 	end
+	if(t.init) then
+		--particletools.initializers
+		local pa = l:GetTable().initargs
+		pa = pa or {}
+		local k = 1
+		local v = t.init[k]
+		while(v ~= nil and l ~= nil) do
+			local m = particletools.initializers[t.init[k]]
+			if(m ~= nil) then
+				local pax = pa
+				if(type(pa) == "table") then
+					pax = pa[k]
+				end
+				local b,e = pcall(m,l,pa)
+				if not (b) then print("^1Initializer[" .. t.init[k] .. "]: " .. e .. "\n") end
+			end
+			k = k + 1
+			v = t.init[k]
+		end
+	end
+	if(t.physics) then
+		--local k = 1
+		--local v = t.physics[k]
+		local calls = {}
+		local k = 1
+		local v = t.physics[k]
+		while(v ~= nil and l ~= nil) do
+			local m = particletools.physicsModules[t.physics[k]]
+			if(m ~= nil) then
+				table.insert(calls,m)
+			end
+			k = k + 1
+			v = t.physics[k]
+		end
+		l:GetTable().calls = calls
+		--[[while(v ~= nil) do
+			k = k + 1
+			
+			local module = particletools.physicsModules[v]
+			print(v .. "\n")
+			if(module ~= nil) then
+				table.insert(calls,module)
+			end
+			
+			v = t.physics[k]
+		end]]
+		l:SetCallback(LOCALENTITY_CALLBACK_THINK,function(lex)
+			local calls = lex:GetTable().calls
+			if(calls ~= nil) then
+				local pa = lex:GetTable().physargs
+				pa = pa or {}
+				for k,v in pairs(calls) do
+					local pax = pa
+					if(type(pa) == "table") then
+						pax = pa[k]
+					end
+					local b,e = pcall(v,lex,pa)
+					if not (b) then print("^1" .. e .. "\n") end
+				end
+			end
+			lex:SetNextThink(LevelTime())
+		end)
+		l:SetNextThink(LevelTime())
+	end
 	
 	SetupParticleRef(t,l)
 end
@@ -170,12 +238,17 @@ local function StartEmitter(t,le,cb)
 				local lle,lref = BuildParticleEmitter(v)
 				lle:SetPos(le:GetPos())
 				lle:SetAngles(le:GetAngles())
+				lle:GetTable().physargs = le:GetTable().physargs
+				lle:GetTable().initargs = le:GetTable().initargs
 				StartEmitter(v,lle)
 				k = k + 1
 				v = t.emit.others[k]
 			end
 		end
 		le:Emitter(LevelTime()+estart, LevelTime()+estart+duration, d, function(l,lt)
+			l:GetTable().physargs = le:GetTable().physargs
+			l:GetTable().calls = le:GetTable().calls
+			l:GetTable().initargs = le:GetTable().initargs
 			EMITTER_TIME = (1 - lt)
 			--print(EMITTER_TIME .. "\n")
 			local rnd = VectorRandom()*(t.emit.spread or 0)
@@ -184,9 +257,9 @@ local function StartEmitter(t,le,cb)
 			local f,r,u = AngleVectors(a)
 			f = f  +  rnd/180
 			f = VectorNormalize(f)
-			SetupParticle(t,l)
 			l:SetVelocity(f*(t.emit.speed or 0))
 			l:SetPos(le:GetPos())
+			SetupParticle(t,l)
 			
 			if(t.emit.velocity) then
 				l:SetVelocity(VectorFromT(t.emit.velocity,Vector(0)))
@@ -197,6 +270,8 @@ local function StartEmitter(t,le,cb)
 				local v = t.emit.attach[k]
 				while(v ~= nil and l ~= nil) do
 					local lle,lref = BuildParticleEmitter(v)
+					lle:GetTable().physargs = le:GetTable().physargs
+					lle:GetTable().initargs = le:GetTable().initargs
 					StartEmitter(v,lle,function(le2,lt2)
 						if(l ~= nil) then
 							if(l:GetPos() ~= nil) then
@@ -225,8 +300,21 @@ local function StartEmitter(t,le,cb)
 					v = t.emit.attachstatic[k]
 				end
 				l:SetCallback(LOCALENTITY_CALLBACK_THINK,function(lex)
+					local calls = lex:GetTable().calls
 					local pos = lex:GetPos()
 					local angles = lex:GetAngles()
+					if(calls ~= nil) then
+						local pa = lex:GetTable().physargs
+						pa = pa or {}
+						for k,v in pairs(calls) do
+							local pax = pa
+							if(type(pa) == "table") then
+								pax = pa[k]
+							end
+							local b,e = pcall(v,lex,pa)
+							if not (b) then print("^1" .. e .. "\n") end
+						end
+					end
 					for k,v in pairs(particles) do
 						if(v ~= nil and pos ~= nil) then
 							v:SetPos(pos)
@@ -254,6 +342,16 @@ local function StartEmitter(t,le,cb)
 	return le,ref
 end
 
+particletools.registerPhysicsModule = function(name,f)
+	particletools.physicsModules[name] = f
+	print("Registered Physics Module: " .. tostring(name) .. " = " .. tostring(f) .. "\n")
+end
+
+particletools.registerInitializer = function(name,f)
+	particletools.initializers[name] = f
+	print("Registered Initializer: " .. tostring(name) .. " = " .. tostring(f) .. "\n")
+end
+
 local tree = {}
 local parser = TreeParser()
 function LoadParticleScripts()
@@ -277,7 +375,7 @@ function ReloadParticleEffect(name)
 	parser:SetMeta(tree)
 end
 
-function ParticleEffect(name,pos,normal)
+function ParticleEffect(name,pos,normal,physargs,initargs)
 	name = tostring(name)
 	if(tree[name] == nil) then 
 		error("Particle System: " .. name .. " does not exist\n")
@@ -286,6 +384,12 @@ function ParticleEffect(name,pos,normal)
 	local le,ref = BuildParticleEmitter(tree[name],normal)
 	
 	le:SetPos(pos)
+	if(physargs) then
+		le:GetTable().physargs = physargs
+	end
+	if(initargs) then
+		le:GetTable().initargs = initargs
+	end
 	
 	StartEmitter(tree[name],le)
 	return le,ref
@@ -297,7 +401,9 @@ local function spawn(p,c,a)
 	local le,ref = BuildParticleEmitter(tree[n],tr.normal)
 
 	le:SetPos(tr.endpos + tr.normal)
-
+	le:GetTable().physargs = {pos=tr.endpos + Vector(0,0,40),speed=-8}
+	le:GetTable().initargs = {pos=tr.endpos,speed=-50,spawnbox=Vector(40,40,10),spawnradius=25}
+	
 	StartEmitter(tree[n],le)
 end
 concommand.add("particles",spawn)

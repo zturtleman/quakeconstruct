@@ -824,7 +824,7 @@ void PM_DeadMove( void ) {
 	// extra friction
 
 	forward = VectorLength (pm->ps->velocity);
-	forward -= 10; //20 -HXRMN
+	forward -= 5; //20 -HXRMN
 	if ( forward <= 0 ) {
 		VectorClear (pm->ps->velocity);
 	} else {
@@ -1612,8 +1612,10 @@ static void PM_Weapon( lua_State *L ) {
 		if(lua_type(L,-1) == LUA_TNUMBER) {
 			addTime = lua_tointeger(L,-1);
 			if(addTime == -1) {
+				lua_pop(L,1);
 				return;
 			}
+			lua_pop(L,1);
 		}
 	}
 
@@ -2101,13 +2103,16 @@ void Pmove (pmove_t *pmove, lua_State *L) {
 			lua_pushboolean(L,pml.walking);
 			lua_pushvector(L,pml.forward);
 			lua_pushvector(L,pml.right);
-			qlua_pcall(L,4,1,qtrue);
+			lua_pushboolean(L,pml.groundPlane);
+			lua_pushtrace(L,pml.groundTrace);
+			qlua_pcall(L,6,1,qtrue);
 			if(lua_type(L,-1) == LUA_TBOOLEAN || lua_toboolean(L,-1)) {
 				PmoveEnd(L);
 			} else {
 				PmoveSingle(pmove);
 				PmoveEnd(L);
 			}
+			lua_pop(L,1);
 		} else {
 			PmoveBegin( pmove );
 			PmoveSingle( pmove );

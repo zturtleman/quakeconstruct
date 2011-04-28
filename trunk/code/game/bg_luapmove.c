@@ -155,6 +155,16 @@ int pm_setmask(lua_State *L) {
 	return 0;
 }
 
+int pm_getflags(lua_State *L) {
+	pmove_t *pm = PM_GetMove();
+
+	if(pm != NULL) {
+		lua_pushinteger(L,pm->ps->pm_flags);
+		return 1;
+	}
+	return 0;
+}
+
 int pm_getmove(lua_State *L) {
 	pmove_t	*pm = PM_GetMove();//lua_toPM(L,1);
 
@@ -163,6 +173,18 @@ int pm_getmove(lua_State *L) {
 		lua_pushnumber(L,(float)pm->cmd.rightmove);
 		lua_pushnumber(L,(float)pm->cmd.upmove);
 		return 3;
+	}
+
+	return 0;
+}
+
+int pm_setmove(lua_State *L) {
+	pmove_t	*pm = PM_GetMove();//lua_toPM(L,1);
+
+	if(pm != NULL) {
+		pm->cmd.forwardmove = luaL_optnumber(L,2,pm->cmd.forwardmove);
+		pm->cmd.rightmove = luaL_optnumber(L,3,pm->cmd.rightmove);
+		pm->cmd.upmove = luaL_optnumber(L,4,pm->cmd.upmove);
 	}
 
 	return 0;
@@ -197,7 +219,9 @@ static const luaL_reg PM_meta[] = {
 };
 
 static const luaL_reg PM_methods[] = {
+  {"GetFlags",pm_getflags},
   {"GetMove",pm_getmove},
+  {"SetMove",pm_setmove},
   {"GetScale",pm_getcmdscale},
   {"GetType",pm_gettype},
   {"GetMask",pm_getmask},

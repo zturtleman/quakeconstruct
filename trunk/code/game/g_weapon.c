@@ -861,9 +861,11 @@ void FireWeapon( gentity_t *ent ) {
 		}
 		if(lua_type(L,-1) == LUA_TBOOLEAN) {
 			if(lua_toboolean(L,-1) == qtrue) {
+				lua_pop(L,1);
 				return;
 			}
 		}
+		lua_pop(L,1);
 	}
 
 	// fire the specific weapon

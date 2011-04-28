@@ -22,7 +22,6 @@ int qlua_readlong(lua_State *L) {
 int qlua_readstring(lua_State *L) {
 	char *str = trap_N_ReadString();
 	lua_pushstring(L,str);
-	free(str);
 	return 1;
 }
 

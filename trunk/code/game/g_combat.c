@@ -518,6 +518,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 		qlua_pcall(L,5,1,qtrue);
 		if(lua_type(L,-1) == LUA_TBOOLEAN)
 			doObituary = !lua_toboolean(L,-1);
+		lua_pop(L,1);
 	}
 
 	// broadcast the death event to everyone
@@ -936,6 +937,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 		qlua_pcall(L,callargs,1,qtrue);
 		if(lua_type(L,-1) == LUA_TNUMBER)
 			damage = lua_tointeger(L,-1);
+		lua_pop(L,1);
 	}
 
 	if(damage == 0) return;
@@ -1063,6 +1065,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 		qlua_pcall(L,callargs,1,qtrue);
 		if(lua_type(L,-1) == LUA_TNUMBER)
 			take = lua_tointeger(L,-1);
+		lua_pop(L,1);
 	}
 
 	if ( g_debugDamage.integer ) {
@@ -1131,6 +1134,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 			qlua_pcall(L,callargs,1,qtrue);
 			if(lua_type(L,-1) == LUA_TNUMBER)
 				targ->health = lua_tointeger(L,-1);
+			lua_pop(L,1);
 		}
 
 		if ( targ->client ) {

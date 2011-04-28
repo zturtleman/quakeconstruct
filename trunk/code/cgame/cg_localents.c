@@ -924,6 +924,7 @@ localEntity_t *CG_LocalEntityEmit( localEntity_t *le ) {
 	newEnt->prev = prev;
 	newEnt->next = next;
 	newEnt->id = i;
+	newEnt->luatable = 0;
 
 	newEnt->pos.trTime = cg.time;
 	newEnt->angles.trTime = cg.time;
@@ -1020,12 +1021,27 @@ CG_AddLocalEntities
 
 ===================
 */
+
+int	lastTime = 0;
 void CG_AddLocalEntities( void ) {
 	localEntity_t	*le, *next;
 	vec3_t		vlen;
 	vec3_t		temp[256];
 	int			size,i,size2;
+	int			dtime;
+	lua_State	*L = GetClientLuaState();
 
+	if(lastTime == 0) {
+		lastTime = cg.time;
+	}
+	dtime = (cg.time - lastTime);
+	lastTime = cg.time;
+
+	if(L != NULL) {
+		lua_pushinteger(L,dtime);
+		lua_setglobal(L,"LOCALENT_DT");
+	}
+	
 	// walk the list backwards, so any new local entities generated
 	// (trails, marks, etc) will be present this frame
 	le = cg_activeLocalEntities.prev;

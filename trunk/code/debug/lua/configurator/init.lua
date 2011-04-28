@@ -76,7 +76,32 @@ local damagestrings = {
 	"falling",
 }
 
-local function ClientThink(item,player,quantity,itype,itag)
+local pTab = {}
+local function ClientThink(cl)
+	local id = cl:EntIndex()
+	local tab = pTab[id] or {}
+	local lt = LevelTime()
+	local hp = cl:GetHealth()
+	
+	tab.nextHeal = tab.nextHeal or 0
+	if(tab.nextHeal < lt) then
+		local amt = getValue("g_regen_amt",0)
+		if(hp < 100 and hp > 0) then
+			hp = hp + amt
+			if(hp > 100) then hp = 100 end
+			cl:SetHealth(hp)
+		end
+		tab.nextHeal = lt + getValue("g_regen_rate",1) * 1000
+	end
+	if(hp >= 100) then
+		tab.nextHeal = lt + getValue("g_regen_rate",1) * 1000
+	end
+	
+	pTab[id] = tab
+end
+hook.add("ClientThink","configurator",ClientThink)
+
+local function ClientPickup(item,player,quantity,itype,itag)
 	itype = EnumToString(itemType_t,itype)
 	itype = string.sub(itype,string.len("IT_")+1,string.len(itype))
 	itype = string.lower(itype)
@@ -92,7 +117,7 @@ local function ClientThink(item,player,quantity,itype,itag)
 	
 	return new
 end
-hook.add("ItemPickupQuantity","configurator",ClientThink)
+hook.add("ItemPickupQuantity","configurator",ClientPickup)
 
 local function PreDamage(self,inflictor,attacker,damage,dtype) 
 	if(dtype <= MOD_BFG_SPLASH) then

@@ -471,6 +471,9 @@ gentity_t *CopyToBodyQue( gentity_t *ent ) {
 
 	VectorCopy ( body->s.pos.trBase, body->r.currentOrigin );
 	trap_LinkEntity (body);
+
+	body->s.time = level.bodyQueIndex;
+
 	return body;
 }
 
@@ -1298,6 +1301,7 @@ void ClientSpawn(gentity_t *ent, gentity_t *plbody) {
 			trap_LinkEntity (ent);
 		}
 	}
+	lua_pop(L,1);
 	if ( ent->client->sess.sessionTeam != TEAM_SPECTATOR ) {
 		client->ps.weapon = WP_MACHINEGUN;
 		client->ps.weaponstate = WEAPON_READY;

@@ -328,6 +328,7 @@ qboolean gui_mouse_quickcall(lua_State *L, panel_t *panel, char *inside, char *o
 				lua_pushinteger(L,param);
 				qlua_pcall(L,3,1,qtrue);
 				if(lua_type(L,-1) != LUA_TBOOLEAN || lua_toboolean(L,-1) == qfalse) {
+					lua_pop(L,1);
 					return qtrue;
 				}
 			} else {

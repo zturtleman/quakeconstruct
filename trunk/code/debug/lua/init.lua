@@ -112,6 +112,12 @@ local function makeEnt(p,c,a)
 end
 concommand.add("remove",makeEnt,true)
 
+local function kill(p,c,a)
+	if(p:GetHealth() <= 0) then return end
+	p:Damage(nil,nil,p:GetHealth(),MOD_FALLING,DAMAGE_NO_ARMOR)
+end
+concommand.add("suicide",kill,false)
+
 local function makeEnt(p,c,a)
 	local tr = PlayerTrace(p)
 	local ent = CreateMissile("grenade",p)

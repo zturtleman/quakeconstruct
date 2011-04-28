@@ -12,14 +12,17 @@ sliderTemplate:SetTextSize(8,8)
 sliderTemplate:SetSize(16,16)
 sliderTemplate:Remove()
 
+local textTemplate = UI_Create("textarea")
+textTemplate:SetSize(16,16)
+textTemplate:Remove()
+
+local button = UI_Create("button")
+button:SetSize(16,16)
+button:Remove()
+
 local seperatorTemplate = UI_Create("label")
 seperatorTemplate:SetSize(22,22)
 seperatorTemplate:Remove()
-
-local function sliderMoved(tab,v)
-	print("Value For: " .. tab[3] .. " [" .. v .. "]\n")
-	SendString("cnfvar " .. tab[3] .. " " .. v .. "")
-end
 
 local SL_TYPE = 1
 local SL_LABEL = 2
@@ -30,8 +33,18 @@ local SL_DEF = 6
 local SL_FMT = 7
 local SL_STEP = 8
 local SL_COMP = 9
+local SL_CURRENT = 10
+
+local function sliderMoved(tab,v)
+	print("Value For: " .. tab[SL_VAR] .. " [" .. v .. "]\n")
+	SendString("cnfvar " .. tab[SL_VAR] .. " " .. v .. "")
+	tab[SL_CURRENT] = v
+end
 
 local sliders = {
+	["Presets"] = {
+		{"presetmanager"}
+	},
 	["Pickups"] = {
 		{"group","Quantities:"},
 		{"slider","Pickup Multiplier","pk_multiplier",0,10,1,"lowerfloat",nil},
@@ -66,6 +79,8 @@ local sliders = {
 		{"slider","Speed","-g_speed",0,1000,320,"int",20},
 		{"slider","Starting Health","g_starthp",1,1000,125,"int",5},
 		{"slider","Maximum Health","g_maxhp",0,1000,100,"int",5},
+		{"slider","Regen Rate","g_regen_rate",0,10,1,"float",nil},
+		{"slider","Regen Amount","g_regen_amt",0,10,0,"int",1},
 	},
 }
 
@@ -102,9 +117,10 @@ local function message(str,pl)
 					if(panel != nil) then
 						local fnc = panel.OnValue
 						panel:SetValue(val,true)
+						sl[SL_CURRENT]  = val
 						print("Set Value " .. var .. " = " .. val .. "\n")
 					else
-						print("Panel was nil\n")
+						sl[SL_CURRENT]  = val
 					end
 				end
 			end
@@ -158,6 +174,18 @@ local function slider(list,tab)
 	return panel
 end
 
+local d = 0
+for k,v in pairs(sliders) do
+	for _,sl in pairs(v) do
+		if(sl[SL_TYPE] == "slider") then
+			Timer(d,function()
+			SendString("gcnfvar " .. sl[SL_VAR])
+			end)
+			d = d + .05
+		end
+	end
+end
+
 local function seperator(list,label)
 	local panel = list:AddPanel(seperatorTemplate,true)
 	
@@ -174,6 +202,169 @@ local function addPanel(class)
 	return panel
 end
 
+local loadPresets = nil
+local presetSaveDialog = nil
+local function sliderForVar(var)
+	for k,v in pairs(sliders) do
+		for _,sl in pairs(v) do
+			if(sl[SL_TYPE] == "slider") then
+				if(sl[SL_VAR] == var) then return sl end
+			end
+		end
+	end
+	return nil
+end
+
+local function loadDefaults()
+	local d = 0
+	for k,v in pairs(sliders) do
+		for _,sl in pairs(v) do
+			if(sl[SL_TYPE] == "slider") then
+				if(sl[SL_CURRENT] ~= nil and sl[SL_CURRENT] ~= sl[SL_DEF]) then
+					Timer(d,function()
+						SendString("cnfvar " .. sl[SL_VAR] .. " " .. sl[SL_DEF] .. "")
+					end)
+					sl[SL_CURRENT] = sl[SL_DEF]
+					d = d + .1
+				end
+			end
+		end
+	end
+end
+
+local function loadPreset(name,preset)
+	local d = 0
+	for k,v in pairs(preset.values) do
+		local sl = sliderForVar(k)
+		if(sl ~= nil) then
+			local value = sl[SL_CURRENT] or sl[SL_DEF]
+			if(v ~= value) then
+				sl[SL_CURRENT] = v
+				Timer(d,function()
+					SendString("cnfvar " .. k .. " " .. v .. "")
+				end)
+				d = d + .1
+			end
+		end
+	end
+	print("Loaded Preset: " .. name .. "\n")
+end
+
+local function savePreset(name)
+	local presets = persist.Load("configpresets").presets or {}
+	presets[name] = {}
+	presets[name].values = {}
+	
+	for k,v in pairs(sliders) do
+		for _,sl in pairs(v) do
+			if(sl[SL_TYPE] == "slider") then
+				local v = sl[SL_CURRENT] or sl[SL_DEF]
+				if(v ~= sl[SL_DEF]) then
+					presets[name].values[sl[SL_VAR]] = v
+				end
+			end
+		end
+	end
+	
+	persist.Start("configpresets")
+	persist.Write("presets",presets)
+	print("Saved Preset: '" .. name .. "'\n")
+	persist.Close()
+end
+
+local function deletePreset(name,list)
+	local presets = persist.Load("configpresets").presets or {}
+	presets[name] = nil
+	
+	persist.Start("configpresets")
+	persist.Write("presets",presets)
+	print("Delete Preset: '" .. name .. "'\n")
+	persist.Close()
+	loadPresets(list)
+end
+
+--Close()
+--Write()
+--Start()
+loadPresets = function(list)
+	list:Clear()
+	
+	button:SetSize(16,30)
+	local btn = list:AddPanel(button,true)
+	btn:SetText("Save Preset")
+	btn.DoClick = function() presetSaveDialog(list) end
+	
+	local presets = persist.Load("configpresets").presets or {}
+	local t_panel = UI_Create("button")
+	t_panel:SetSize(16,20)
+	t_panel:Remove()
+	
+	button:SetSize(16,30)
+	local btn = list:AddPanel(button,true)
+	btn:SetText("Load Defaults")
+	btn.DoClick = function(self) loadDefaults() end
+	
+	for k,v in pairs(presets) do
+		local panel = list:AddPanel(t_panel,true)
+		--[[local label = UI_Create("button",panel)
+		label.DoLayout = function(self)
+			self:SetSize(panel:GetWidth()-80,panel:GetHeight()) end
+		label:SetText(k)]]
+		
+		panel:SetText(k)
+		panel:TextAlignLeft()
+		panel.DoClick = function(self) loadPreset(k,v) end
+		
+		local btn0 = UI_Create("button",panel)
+		btn0.DoLayout = function(self)
+			self:SetSize(80,panel:GetHeight()) 
+			self:SetPos(panel:GetWidth()-80,0) 
+		end
+		btn0.DoClick = function(self) deletePreset(k,list) end
+		btn0:SetText("^1Delete")
+	end
+	
+	list:DoLayout()
+end
+
+presetSaveDialog = function(plist)
+	local frame = UI_Create("frame")
+	local w,h = 640,480
+	local pw,ph = w/3,h/5
+	frame:SetPos((w/2) - pw/2,(h/2) - ph/2)
+	frame:SetSize(pw,ph)
+	frame:SetTitle("Save Preset")
+	frame:CatchMouse(true)
+	frame:RemoveOnClose(true)
+
+	local list = UI_Create("listpane",frame)
+	local panel = list:AddPanel(textTemplate,true)
+	
+	panel:SetText("unnamed")
+	panel:CatchKeyboard(true)
+	panel:SetTextSize(14,16)
+	panel:SetExpandable(false)
+	panel:SetMultiline(false)
+	panel:SetDrawBorder(true)
+	panel:SetSize(16,17)
+	panel:SetCaret(9999,1)
+	
+	local btn = list:AddPanel(button,true)
+	btn:SetText("Ok")
+	btn.DoClick = function() 
+		savePreset(panel:GetText())
+		frame:Close()
+		loadPresets(plist)
+	end
+	
+	list:DoLayout()
+end
+
+
+local function presets(list,tab)
+	loadPresets(list)
+end
+
 local function populate(panel)
 	--local list = UI_Create("listpane",panel)
 	--list:CatchMouse(true)
@@ -184,6 +375,7 @@ local function populate(panel)
 		for k,v in pairs(group) do
 			if(v[1] == "slider") then slider(panel,v) end
 			if(v[1] == "group") then seperator(panel,v[SL_LABEL]) end
+			if(v[1] == "presetmanager") then presets(panel,v) end
 		end
 	end
 end
@@ -239,12 +431,11 @@ function configurator.open()
 		local panel = configurator_panel
 		if(panel != nil) then
 			local w,h = 640,480
-			local pw,ph = w/2,h/2
+			local pw,ph = w/1.2,h/2
 			panel:SetPos((w/2) - pw/2,(h/2) - ph/2)
 			panel:SetSize(pw,ph)
 			panel:SetTitle("Configurator")
 			panel:CatchMouse(true)
-			panel:SetVisible(false)
 			panel:RemoveOnClose(false)
 			layout(panel)
 		end
@@ -257,5 +448,5 @@ if(addToAltMenu) then
 end
 concommand.add("openconfig",configurator.open)
 
-configurator.open()
+--configurator.open()
 print("BLAH\n")

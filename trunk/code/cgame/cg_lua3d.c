@@ -207,7 +207,7 @@ int qlua_polyref(lua_State *L) {
 	}
 
 	size = luaL_getn(L,1);
-	if(size > 1024) return 0;
+	if(size > 128) return 0;
 
 	for(i=0;i<size;i++) {
 		lua_pushinteger(L,i+1);
