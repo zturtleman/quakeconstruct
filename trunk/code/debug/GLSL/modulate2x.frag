@@ -8,7 +8,13 @@ varying vec4 vertColor;
 
 void main()
 {
-	vec4 texcolor = texture2D(texture, texture_coordinate);
+	vec2 tc = texture_coordinate;
+	if(tc.x > 1.0) tc.x = 1.0;
+	if(tc.x < -0.0) tc.x = -0.0;
+	if(tc.y > 1.0) tc.y = 1.0;
+	if(tc.y < -0.0) tc.y = -0.0;
+	
+	vec4 texcolor = texture2D(texture, tc);
 	vec4 color = texcolor;
 	
 	vec4 mid = vec4(0.5,0.5,0.5,0.0);
