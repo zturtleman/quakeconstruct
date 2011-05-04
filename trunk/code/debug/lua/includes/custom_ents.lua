@@ -322,7 +322,7 @@ else
 				
 				table.Update(ENTS[class], ENT)
 				
-				print("REPLACING CURRENT: " .. class .. "\n")
+				--print("REPLACING CURRENT: " .. class .. "\n")
 				for k,v in pairs(active) do
 					if(active[k]._classname == class) then
 						--active[k] = table.Inherit(ENTS[class], active[k])

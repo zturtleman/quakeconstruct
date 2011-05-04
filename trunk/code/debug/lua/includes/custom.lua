@@ -19,9 +19,9 @@ function FindCustomFiles(dir)
 	local out = {}
 	for filename in lfs.dir(dir) do
 		local attr = lfs.attributes(dir .. "/" .. filename)
-		print(filename .. "\n")
+		--print(filename .. "\n")
 		if (attr.mode == "directory" and checkdir(filename) ) then
-			print("Found " .. filename .. "\n")
+			--print("Found " .. filename .. "\n")
 			table.insert(out,{dir .. "/" .. filename,filename})
 		end
 	end

@@ -340,7 +340,7 @@ qboolean G_CallSpawn( gentity_t *ent, qboolean lua ) {
 					qlua_pcall(GetServerLuaState(),1,0,qtrue);
 				}
 			}
-			G_Printf("Found Item: %s\n",item->classname);
+			//G_Printf("Found Item: %s\n",item->classname);
 			G_SpawnItem( ent, item );
 			qlua_gethook(GetServerLuaState(),"EntityLinked");
 			lua_pushentity(GetServerLuaState(),ent);

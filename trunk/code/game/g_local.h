@@ -461,7 +461,7 @@ typedef struct {
 
 qboolean LuaTeamChanged(gentity_t *luaentity,int team);
 void G_InitLuaMessages(lua_State *L);
-void InitServerLua( void );
+void InitServerLua( int restart );
 void CloseServerLua( void );
 void DoLuaInit( void );
 void DoLuaIncludes( void );

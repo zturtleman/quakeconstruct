@@ -22,8 +22,7 @@ function __concommand(ent,cmd)
 		i = i + 1
 		if(i > 32) then break end --failsafe
 	end
-	local exist = concommand.Call(ent,cmd,args)
-	return exist
+	return concommand.Call(ent,cmd,args)
 end
 
 module("concommand")
@@ -54,23 +53,26 @@ function Call(ent,cmd,args)
 			else
 				ent:SendMessage("Silly Goose, you aren't the owner of this server.\n")
 			end
+			if(v.continue) then
+				return false
+			end
 		end
 		return true
 	end
 	return false
 end
 
-function Add(cmd,func,adminonly)
+function Add(cmd,func,adminonly,continue)
 	if(type(cmd) == "string" and type(func) == "function") then
 		--if(ccmds[cmd] == nil) then
 		ccmds[cmd] = {}
 		--end
-		table.insert(ccmds[cmd],{func=func,adminonly=adminonly})
+		table.insert(ccmds[cmd],{func=func,adminonly=adminonly,continue=continue})
 	end
 end
 
-function add(cmd,func,adminonly)
-	Add(cmd,func,adminonly)
+function add(cmd,func,adminonly,continue)
+	Add(cmd,func,adminonly,continue)
 end
 
 function woo(ent,cmd,args)

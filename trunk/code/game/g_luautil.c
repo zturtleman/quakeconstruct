@@ -27,9 +27,39 @@ int luautil_getviewheight(lua_State *L) {
 	return 1;
 }
 
+int luautil_itemInfo(lua_State *L) {
+	int icon = 0;
+	int size = bg_numItems;
+	gitem_t item2;
+
+	luaL_checktype(L,1,LUA_TNUMBER);
+
+	icon = lua_tointeger(L,1);
+
+	if(icon <= 0 || icon > size) {
+		lua_pushstring(L,"Item Index Out Of Bounds\n");
+		lua_error(L);
+		return 1;
+	}
+
+	item2 = bg_itemlist[icon];
+
+	lua_newtable(L);
+
+	setTableString(L,"classname",item2.classname);
+	setTableInt(L,"tag",item2.giTag);
+	setTableInt(L,"type",item2.giType);
+	setTableString(L,"pickupsound",item2.pickup_sound);
+	setTableString(L,"pickupname",item2.pickup_name);
+	setTableInt(L,"quantity",item2.quantity);
+
+	return 1;
+}
+
 static const luaL_reg Util_methods[] = {
   {"GetPointContents",	luautil_pointcontents},
   {"GetViewHeight",		luautil_getviewheight},
+  {"ItemInfo",			luautil_itemInfo},
   {0,0}
 };
 

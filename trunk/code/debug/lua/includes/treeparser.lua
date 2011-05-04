@@ -286,7 +286,7 @@ function parser.checkField(n,line)
 		local v = killGaps(line)
 		if(parser.nodes[v] ~= nil) then
 			local k = parser.codebuffer[parser.level].fieldcount + 1
-			print("NODE: " .. k .. " " .. v .. "\n")
+			--print("NODE: " .. k .. " " .. v .. "\n")
 			local node = parser.nodes[v]
 			node = parser.setMeta(node)
 			table.insert(parser.codebuffer[parser.level].fields,node)
@@ -296,7 +296,7 @@ function parser.checkField(n,line)
 		end
 		s,v = parser.checkValue(n,v)
 		if(s) then
-			print("VALUE: " .. v .. "\n")
+			--print("VALUE: " .. v .. "\n")
 			table.insert(parser.codebuffer[parser.level].fields,v)
 			return true
 		end
@@ -473,7 +473,7 @@ function ParserT:ReloadNode(reload,tab)
 			for k,v in pairs(p) do
 				tab[k] = v
 				if(k == reload) then
-					print("Reloaded: " .. k .. "\n")
+					--print("Reloaded: " .. k .. "\n")
 				end
 			end
 		end

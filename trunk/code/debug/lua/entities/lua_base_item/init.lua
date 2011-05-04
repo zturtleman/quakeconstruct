@@ -75,7 +75,7 @@ function ENT:Think()
 end
 
 function ENT:ShouldPickup(other,trace)
-	return other:IsPlayer()
+	return other:IsPlayer() and other:GetHealth() > 0
 end
 
 function ENT:Affect(other)

@@ -1,5 +1,7 @@
 print("^1SHARED\n")
 
+include("lua/states.lua")
+
 AddItem(0,
 "ammo_laserblazer",
 IT_AMMO,
@@ -42,4 +44,12 @@ else
 		return t
 	end
 	hook.add("RegisterWeapon","shared",register)
+end
+
+if(RESTARTED) then
+	if(SERVER) then
+		print("^2SV_RESTARTED\n")
+	else
+		print("^2CL_RESTARTED\n")
+	end
 end

@@ -8,6 +8,35 @@ local function getValue(var,def)
 	return vars[var]
 end
 
+if(ITEM_POSITIONS == nil) then
+	ITEM_POSITIONS = {}
+	for k,v in pairs(GetAllEntities()) do
+		local index = v:ItemIndex()
+		if(index ~= nil) then
+			local flags = v:GetSpawnFlags()
+			table.insert(ITEM_POSITIONS,{entity=v,class=v:Classname(),pos=v:GetPos(),item=v:ItemIndex(),wait=v:GetWait(),flags=flags})
+		end
+	end
+end
+
+local function replaceItem(item,with)
+	local inf = util.ItemInfo(with)
+	if(inf == nil) then return end
+	local class = inf.classname
+	
+	for k,v in pairs(ITEM_POSITIONS) do
+		if(v.item == item) then
+			if(v.entity ~= nil) then
+				v.entity:Remove()
+				v.entity = CreateEntity(class)
+				v.entity:SetSpawnFlags(v.flags)
+				v.entity:SetWait(0)
+				v.entity:SetPos(v.pos)
+			end
+		end
+	end
+end
+
 local function message(str,pl)
 	local args = string.Explode(" ",str)
 	if(args[1] == "cnfvar") then
@@ -16,8 +45,15 @@ local function message(str,pl)
 			var = args[2]
 			val = tonumber(args[3])
 			vars[var] = val
-			print("var " .. var .. "\n")
-			if(var == "g_maxhp") then for k,v in pairs(GetAllPlayers()) do v:SetMaxHealth(val) end end
+			if(string.sub(var,0,7) == "replace") then
+				var = tonumber(string.sub(var,8,string.len(var)))
+				print("replace " .. var .. " | " .. val .. "\n")
+				replaceItem(var,val)
+				pl:SendString("replace " .. var .. " " .. val)
+			else
+				print("var " .. var .. "\n")
+				if(var == "g_maxhp") then for k,v in pairs(GetAllPlayers()) do v:SetMaxHealth(val) end end
+			end
 		else
 			var = string.sub(args[2],2,string.len(args[2]))
 			val = args[3]
@@ -118,6 +154,25 @@ local function ClientPickup(item,player,quantity,itype,itag)
 	return new
 end
 hook.add("ItemPickupQuantity","configurator",ClientPickup)
+
+local function ItemRespawnTime(item,respawn)
+	local itype = util.ItemInfo(item:ItemIndex()).type
+	itype = EnumToString(itemType_t,itype)
+	itype = string.sub(itype,string.len("IT_")+1,string.len(itype))
+	itype = string.lower(itype)
+	local old = respawn
+	local new = old
+	local v = getValue("pk_wait",1) * getValue("pk_wait_" .. itype,1)
+	if(v != 1) then
+		new = math.ceil(respawn * v)
+		if(new < 1) then new = 1 end
+	end
+	
+	print("Item Respawn " .. itype .. " - " .. old .. " => " .. new .. "\n")
+	
+	return new
+end
+hook.add("ItemPickupRespawn","configurator",ItemRespawnTime)
 
 local function PreDamage(self,inflictor,attacker,damage,dtype) 
 	if(dtype <= MOD_BFG_SPLASH) then

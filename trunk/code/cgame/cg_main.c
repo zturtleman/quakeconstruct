@@ -96,7 +96,7 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 		DRAW_CUSTOMOFFSET_X = 0;
 		DRAW_CUSTOMOFFSET_Y = 0;
 		CloseClientLua();
-		CG_InitLua();
+		CG_InitLua(qtrue);
 
 		trap_GetGlconfig( &cgs.glconfig );
 		cgs.screenXScale = cgs.glconfig.vidWidth / 640.0;
@@ -2226,10 +2226,10 @@ int qlua_loopsound(lua_State *L) {
 	return 0;
 }
 
-void CG_InitLua() {
+void CG_InitLua(int restart) {
 	lua_State *L = NULL;
 
-	InitClientLua();
+	InitClientLua(restart);
 
 	L = GetClientLuaState();
 	if(L == NULL) return;
@@ -2336,7 +2336,7 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum ) {
 
 	trap_CM_LoadMap( cgs.mapname );
 
-	CG_InitLua();
+	CG_InitLua(qfalse);
 	DoLuaInit();
 
 

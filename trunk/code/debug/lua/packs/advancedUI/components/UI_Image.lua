@@ -8,6 +8,7 @@ function Panel:Initialize()
 end
 
 function Panel:SetImage(image)
+	if(type(image) == "number") then self.shader = image return end
 	self.shader = LoadShader(image)
 end
 

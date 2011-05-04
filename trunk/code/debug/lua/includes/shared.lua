@@ -136,3 +136,5 @@ else
 end
 
 hook.reserve("includes")
+
+_GBASELINE = table.Copy(_G)
