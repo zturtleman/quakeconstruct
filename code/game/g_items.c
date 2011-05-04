@@ -565,6 +565,17 @@ void Touch_Item (gentity_t *ent, gentity_t *other, trace_t *trace) {
 		return;
 	}
 
+	if(L != NULL) {
+		qlua_gethook(L, "ItemPickupRespawn");
+		lua_pushentity(L, ent);
+		lua_pushinteger(L, respawn);
+		qlua_pcall(L,2,1,qtrue);
+		if(lua_type(L,-1) == LUA_TNUMBER) {
+			respawn = lua_tointeger(L,-1);
+			lua_pop(L,1);
+		}
+	}
+
 	if ( !respawn ) {
 		return;
 	}

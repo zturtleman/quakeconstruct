@@ -969,7 +969,7 @@ void BG_InitItems(void) {
 	for ( i=n2; i<bg_numItems; i++) {
 		gitem_t *slot = &bg_itemlist[i];
 		if(slot != NULL) {
-			Com_Printf("Init Slot: %s\n",slot->classname);
+			//Com_Printf("Init Slot: %s\n",slot->classname);
 			slot->pickup_sound = "sound/misc/w_pkup.wav";
 		}
 	}

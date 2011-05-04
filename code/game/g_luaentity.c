@@ -1749,6 +1749,19 @@ int qlua_getground(lua_State *L) {
 	return 0;
 }
 
+int qlua_getwait(lua_State *L) {
+	gentity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		lua_pushinteger(L,luaentity->wait);
+		return 1;
+	}
+	return 0;
+}
+
 int qlua_setwait(lua_State *L) {
 	gentity_t	*luaentity;
 
@@ -1758,6 +1771,19 @@ int qlua_setwait(lua_State *L) {
 	luaentity = lua_toentity(L,1);
 	if(luaentity != NULL) {
 		luaentity->wait = lua_tonumber(L,2);
+	}
+	return 0;
+}
+
+int qlua_getspflags(lua_State *L) {
+	gentity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		lua_pushinteger(L,luaentity->spawnflags);
+		return 1;
 	}
 	return 0;
 }
@@ -2072,6 +2098,21 @@ int qlua_setpaindebounce(lua_State *L) {
 	return 0;
 }
 
+int qlua_getItemIndex(lua_State *L) {
+	gentity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		if(luaentity->item != NULL) {
+			lua_pushinteger(L,luaentity->item->id);
+			return 1;
+		}
+	}
+	return 0;
+}
+
 static const luaL_reg Entity_methods[] = {
   {"GetInfo",		qlua_getclientinfo},
   {"SetInfo",		qlua_setclientinfo},
@@ -2150,7 +2191,9 @@ static const luaL_reg Entity_methods[] = {
   {"GetArmor",		lua_getarmor},
   {"SetGroundEntity",		qlua_setground},
   {"GetGroundEntity",		qlua_getground},
+  {"GetWait",		qlua_getwait},
   {"SetWait",		qlua_setwait},
+  {"GetSpawnFlags", qlua_getspflags},
   {"SetSpawnFlags",	qlua_setspflags},
   {"SetBounce",		qlua_setbounce},
   {"SetType",		qlua_setetype},
@@ -2170,6 +2213,7 @@ static const luaL_reg Entity_methods[] = {
   {"SetClientNum",  qlua_clientnum},
   {"SetAnims",		qlua_setanims},
   {"SetPainDebounce", qlua_setpaindebounce},
+  {"ItemIndex",		qlua_getItemIndex},
   {0,0}
 };
 

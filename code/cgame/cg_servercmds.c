@@ -497,7 +497,7 @@ static void CG_MapRestart( void ) {
 		CG_Printf( "CG_MapRestart\n" );
 	}
 
-	CG_InitLua();
+	CG_InitLua(qtrue);
 	if(cg_scalesound.integer != 0) {
 		CG_RegisterSounds();
 	}

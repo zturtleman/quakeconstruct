@@ -1,5 +1,5 @@
 --include("lua/includes/treeparser.lua")
-print("PARTICLE TOOLS\n")
+--print("PARTICLE TOOLS\n")
 HSV = 2
 
 particletools = particletools or {}
@@ -344,18 +344,18 @@ end
 
 particletools.registerPhysicsModule = function(name,f)
 	particletools.physicsModules[name] = f
-	print("Registered Physics Module: " .. tostring(name) .. " = " .. tostring(f) .. "\n")
+	--print("Registered Physics Module: " .. tostring(name) .. " = " .. tostring(f) .. "\n")
 end
 
 particletools.registerInitializer = function(name,f)
 	particletools.initializers[name] = f
-	print("Registered Initializer: " .. tostring(name) .. " = " .. tostring(f) .. "\n")
+	--print("Registered Initializer: " .. tostring(name) .. " = " .. tostring(f) .. "\n")
 end
 
 local tree = {}
 local parser = TreeParser()
 function LoadParticleScripts()
-	print("Loading Particle Scripts\n")
+	--print("Loading Particle Scripts\n")
 	tree = {}
 	parser:Clear()
 	local test = packList("particles",".psf")
@@ -365,7 +365,7 @@ function LoadParticleScripts()
 	parser:SetMeta(tree)
 	
 	for k,v in pairs(tree) do
-		print("Loaded: " .. k .. "\n")
+		--print("Loaded: " .. k .. "\n")
 	end
 end
 LoadParticleScripts()

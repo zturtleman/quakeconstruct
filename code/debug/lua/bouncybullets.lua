@@ -25,6 +25,7 @@ local function bullet(i,start,angle,pl,spread,damage,mod)
 
 	local r = math.random() * math.pi * 2
 	local u = math.sin(r) * crand() * spread * 16
+	local bounced = false
 	r = math.cos(r) * crand() * spread * 16
 	
 	local vend = start + forward * 8192*16
@@ -57,16 +58,20 @@ local function bullet(i,start,angle,pl,spread,damage,mod)
 		else
 			if(i < 3) then
 				local dot = DotProduct( forward, tr.normal );
-				local reflect = VectorNormalize(vAdd(forward,vMul(tr.normal,-2*dot)))
-				local angle = VectorToAngles(reflect)
-				Timer(.06,function()
-					bullet(i+1,tr.endpos,angle,pl,spread/2,damage*2,mod)
-				end)
+				--if(i == 0) then print(dot .. "\n") end
+				if(dot > -.6) then
+					local reflect = VectorNormalize(vAdd(forward,vMul(tr.normal,-2*dot)))
+					local angle = VectorToAngles(reflect)
+					bounced = true
+					Timer(.06,function()
+						bullet(i+1,tr.endpos,angle,pl,spread/2,damage*2,mod)
+					end)
+				end
 			end
 		end
-		if(i ~= -1) then sendline(start,tr.endpos,mod,i) end
+		if(i ~= -1 and (i > 0 or bounced)) then sendline(start,tr.endpos,mod,i) end
 	else
-		if(i ~= -1) then sendline(start,vend,mod,i) end
+		if(i ~= -1 and (i > 0 or bounced)) then sendline(start,vend,mod,i) end
 	end
 end
 
@@ -148,7 +153,7 @@ local function HandleMessage(msgid)
 		
 		local d = VectorNormalize(e-s)
 		local tr = TraceLine(s,e+d*1000)
-		ParticleEffect("Spark",e,tr.normal)
+		--ParticleEffect("Spark",e,tr.normal)
 		
 		--[[for k,v in pairs(tr) do
 			print(k .. " = " .. tostring(v) .. "\n")

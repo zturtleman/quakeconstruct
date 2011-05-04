@@ -35,6 +35,11 @@ local SL_STEP = 8
 local SL_COMP = 9
 local SL_CURRENT = 10
 
+local IR_DEF = 2
+local IR_CURRENT = 3
+local IR_VAR = 4
+local IR_INDEX = 5
+
 local function sliderMoved(tab,v)
 	print("Value For: " .. tab[SL_VAR] .. " [" .. v .. "]\n")
 	SendString("cnfvar " .. tab[SL_VAR] .. " " .. v .. "")
@@ -53,6 +58,14 @@ local sliders = {
 		{"slider","Health Multiplier","pk_mult_health",0,10,1,"lowerfloat",nil},
 		{"slider","Powerup Multiplier","pk_mult_powerup",0,10,1,"lowerfloat",nil},
 		{"slider","Weapon Multiplier","pk_mult_weapon",0,10,1,"lowerfloat",nil},
+		{"group","Respawn Times:"},
+		{"slider","Pickup Respawn","pk_wait",0,10,1,"lowerfloat",nil},
+		{"slider","Ammo Respawn","pk_wait_ammo",0,10,1,"lowerfloat",nil},
+		{"slider","Armor Respawn","pk_wait_armor",0,10,1,"lowerfloat",nil},
+		{"slider","Health Respawn","pk_wait_health",0,10,1,"lowerfloat",nil},
+		{"slider","Powerup Respawn","pk_wait_powerup",0,10,1,"lowerfloat",nil},
+		{"slider","Weapon Respawn","pk_wait_weapon",0,10,1,"lowerfloat",nil},
+		{"group","Replace:"}
 	},
 	["Hazards"] = {
 		{"group","Damage%:"},
@@ -91,6 +104,80 @@ local function weapVars(name)
 	nxt = nxt + 1
 end
 
+local NUM_ITEMS = util.GetNumItems() - 31
+local ITEM_INFOS = {}
+local b,e = pcall(function()
+	for i=1, NUM_ITEMS do
+		ITEM_INFOS[i] = util.ItemInfo(i)
+		local n = #sliders["Pickups"]
+		table.insert(sliders["Pickups"],{"itemreplace",i,i,"replace"..i,n+1})
+	end
+end)
+if not (b) then print("^1ERROR: " .. e .. "\n") end
+
+local function outline(x,y,w,h,i)
+	SkinCall("DrawBGRect",x,y,w,i,nil)
+	--SkinCall("DrawBGRect",x+(w-i),y,i,h,nil)
+	--SkinCall("DrawBGRect",x,y+(h-i),w,i,nil)
+	SkinCall("DrawBGRect",x,y,i,h,nil)
+end
+
+local tool_template = UI_Create("button")
+tool_template:SetSize(32,32)
+tool_template.DrawBackground = function(self)
+	self.data = sliders["Pickups"][self.data[IR_INDEX]]
+	SkinCall("DrawButtonBackground",self:MouseOver(),self:MouseDown())
+	draw.SetColor(1,1,1,1)
+	SkinCall("DrawBGRect",self:GetX(),self:GetY(),32,32,ITEM_INFOS[self.data[2]].icon)
+	SkinCall("DrawBGRect",self:GetX()+32,self:GetY(),32,32,ITEM_INFOS[self.data[3]].icon)
+	draw.SetColor(1,.75,.5,1)
+	outline(self:GetX()+32,self:GetY(),32,32,2)
+	SkinCall("Text",self:GetX() + 64,self:GetY() + 11,ITEM_INFOS[self.data[3]].classname,10,10)
+	--classname
+	--[[for i=1, NUM_ITEMS do
+		draw.SetColor(.5,.5,.5,1)
+		if(i == self.data[3]) then draw.SetColor(1,1,1,1) end
+		local x,y,w,h = self:GetX()+64 + ((i-1)*12),self:GetY()+22,12,12
+		SkinCall("DrawBGRect",x,y,w,h,ITEM_INFOS[i].icon)
+	end]]
+end
+tool_template.MousePressed = function(self) self.drag = true end
+tool_template.MouseReleased = function(self) 
+	self.drag = false 
+	SendString("cnfvar replace" .. self.data[2] .. " " .. self.data[3] .. "")
+end
+tool_template.MouseReleasedOutside = function(self,x,y,other)
+	if(self.drag) then
+		self:MouseReleased()
+	end
+end
+
+tool_template.Think = function(self)
+	self.BaseClass:Think()
+	if(self.drag) then
+		local mx = GetXMouse()
+		local x = self:GetX() + 64
+		local w = self:GetWidth() - 64
+		
+		local v = ((mx - x) / w) * NUM_ITEMS
+		v = math.ceil(v)
+		if(v > NUM_ITEMS) then v = NUM_ITEMS end
+		if(v < 1) then v = 1 end
+		self.data[3] = v
+		sliders["Pickups"][self.data[IR_INDEX]][3] = v
+	end
+end
+
+tool_template:Remove()
+
+
+local function itemReplacePanel(panel,v)
+	local tool = panel:AddPanel(tool_template,true)
+	tool.data = v
+	SendString("gcnfvar " .. v[IR_VAR])
+end
+
+
 weapVars("Gauntlet")
 weapVars("MachineGun")
 weapVars("Shotgun")
@@ -122,6 +209,8 @@ local function message(str,pl)
 					else
 						sl[SL_CURRENT]  = val
 					end
+				elseif(sl[SL_TYPE] == "itemreplace" and sl[IR_VAR] == var) then
+					sl[IR_CURRENT] = val
 				end
 			end
 		end
@@ -215,6 +304,17 @@ local function sliderForVar(var)
 	return nil
 end
 
+local function replacerForVar(var)
+	for k,v in pairs(sliders) do
+		for _,sl in pairs(v) do
+			if(sl[SL_TYPE] == "itemreplace") then
+				if(("replace" .. sl[IR_DEF]) == var) then return sl end
+			end
+		end
+	end
+	return nil
+end
+
 local function loadDefaults()
 	local d = 0
 	for k,v in pairs(sliders) do
@@ -225,6 +325,15 @@ local function loadDefaults()
 						SendString("cnfvar " .. sl[SL_VAR] .. " " .. sl[SL_DEF] .. "")
 					end)
 					sl[SL_CURRENT] = sl[SL_DEF]
+					d = d + .1
+				end
+			end
+			if(sl[SL_TYPE] == "itemreplace") then
+				if(sl[IR_CURRENT] ~= nil and sl[IR_CURRENT] ~= sl[IR_DEF]) then
+					Timer(d,function()
+						SendString("cnfvar replace" .. sl[IR_DEF] .. " " .. sl[IR_DEF] .. "")
+					end)
+					sl[IR_DEF] = sl[IR_DEF]
 					d = d + .1
 				end
 			end
@@ -245,8 +354,21 @@ local function loadPreset(name,preset)
 				end)
 				d = d + .1
 			end
+		else
+			local ir = replacerForVar(k)
+			if(ir ~= nil) then
+				local value = ir[IR_CURRENT] or ir[IR_DEF]
+				if(v ~= value) then
+					ir[IR_CURRENT] = v
+					Timer(d,function()
+						SendString("cnfvar " .. k .. " " .. v .. "")
+					end)
+					d = d + .1
+				end
+			end
 		end
 	end
+	--SendString("cnfvar replace" .. self.data[2] .. " " .. self.data[3] .. "")
 	print("Loaded Preset: " .. name .. "\n")
 end
 
@@ -261,6 +383,11 @@ local function savePreset(name)
 				local v = sl[SL_CURRENT] or sl[SL_DEF]
 				if(v ~= sl[SL_DEF]) then
 					presets[name].values[sl[SL_VAR]] = v
+				end
+			elseif(sl[SL_TYPE] == "itemreplace") then
+				local v = sl[IR_CURRENT] or sl[IR_DEF]
+				if(v ~= sl[IR_DEF]) then
+					presets[name].values["replace" .. sl[IR_DEF]] = v
 				end
 			end
 		end
@@ -376,6 +503,7 @@ local function populate(panel)
 			if(v[1] == "slider") then slider(panel,v) end
 			if(v[1] == "group") then seperator(panel,v[SL_LABEL]) end
 			if(v[1] == "presetmanager") then presets(panel,v) end
+			if(v[1] == "itemreplace") then itemReplacePanel(panel,v) end
 		end
 	end
 end

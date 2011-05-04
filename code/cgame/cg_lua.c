@@ -225,7 +225,23 @@ int qlua_runstr(lua_State *L) {
 
 qboolean FS_doScript( const char *filename ) {
 	if(limited) return qtrue;
+
+	qlua_gethook(L,"PreScriptLoaded");
+	lua_pushstring(L,filename);
+	qlua_pcall(L,1,1,qtrue);
+	if(lua_isboolean(L,-1) && lua_toboolean(L,-1) == qtrue) {
+		qlua_gethook(L,"ScriptLoadError");
+		lua_pushstring(L,filename);
+		lua_pushstring(L,"Blocked");
+		qlua_pcall(L,2,0,qtrue);
+		return qfalse;
+	}
+
 	if(luaL_loadfile(L,filename) || lua_pcall(L, 0, 0, 0)) {
+		qlua_gethook(L,"ScriptLoadError");
+		lua_pushstring(L,filename);
+		lua_pushstring(L,lua_tostring(L,-1));
+		qlua_pcall(L,2,0,qtrue);
 		return qfalse;
 	}
 
@@ -426,7 +442,7 @@ void SetGlobal(const char *n, int v) {
 	lua_setglobal(L,n);
 }
 
-void InitClientLua( void ) {
+void InitClientLua( int restart ) {
 	CloseClientLua();
 	L = lua_open();
 
@@ -448,6 +464,8 @@ void InitClientLua( void ) {
 	lua_setglobal(L,"SERVER");
 	lua_pushboolean(L,1);
 	lua_setglobal(L,"CLIENT");
+	lua_pushboolean(L,restart);
+	lua_setglobal(L,"RESTARTED");
 
 	luaL_openlibs(L);
 	luaopen_lfs(L);

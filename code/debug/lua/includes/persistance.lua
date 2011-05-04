@@ -48,14 +48,16 @@ function Start(file)
 end
 
 local WriteValue = nil
-local function WriteTable(v)
-	write("{")
+local function WriteTable(v,nobrac)
+	if not (nobrac) then write("{") end
 	for k,v in pairs(v) do
 		if(type(k) == "string") then
-			if(string.find(k," ") or string.find(k,"-") or string.find(k,"+")) then
-				write("[\"" .. k .. "\"]=")
-			else
+			local m = string.match(k,"^[A-Za-z_0-9]+$")
+			--if(m) then print(k .. " | " .. m .. "\n") end
+			if(m and m == k) then
 				write(k .. "=")
+			else
+				write("[\"" .. k .. "\"]=")
 			end
 		elseif(type(k) == "number") then
 			write("[" .. k .. "]=")
@@ -63,7 +65,7 @@ local function WriteTable(v)
 		WriteValue(v)
 		write(",")
 	end
-	write("}")
+	if not (nobrac) then write("}") end
 end
 
 WriteValue = function(v)
@@ -80,7 +82,12 @@ WriteValue = function(v)
 	elseif(t == "number") then
 		write(tostring(v))
 	elseif(t == "function") then
-		write("loadstring(\"" .. string.dump(v) .. "\")")
+		local s,dump = pcall(string.dump,v)
+		if(s) then
+			write("loadstring(\"" .. dump .. "\")")
+		else
+			write("nil")
+		end
 	else
 		write("nil")
 	end
@@ -90,7 +97,7 @@ function Write(n,v)
 	if(type(n) ~= "string") then error("persist.Write: Invalid Argument 1 (Expected String)\n") end
 	write(n .. "=")
 	WriteValue(v)
-	write(", ")
+	write(",")
 end
 
 function Close()

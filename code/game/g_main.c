@@ -196,7 +196,7 @@ void G_InitGame( int levelTime, int randomSeed, int restart );
 void G_RunFrame( int levelTime );
 void G_ShutdownGame( int restart );
 void CheckExitRules( void );
-void G_InitLua( void );
+void G_InitLua( int restart );
 
 
 /*
@@ -246,7 +246,7 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 		return 0;
 	case GAME_RESTART_LUA:
 		CloseServerLua();
-		G_InitLua();
+		G_InitLua(qtrue);
 		return 0;
 	case BOTAI_START_FRAME:
 		return BotAIStartFrame( arg0 );
@@ -477,11 +477,11 @@ void pushents(lua_State *L) {
 	}
 }
 
-void G_InitLua() {
+void G_InitLua(int restart) {
 	lua_State *L = NULL;
 
 	//trap_SendServerCommand(-1,"postlua");
-	InitServerLua();
+	InitServerLua(restart);
 
 	L = GetServerLuaState();
 	if(L == NULL) return;
@@ -591,7 +591,7 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 
 	ClearRegisteredItems();
 
-	G_InitLua();
+	G_InitLua(restart);
 
 	// parse the key/value pairs and spawn gentities
 	G_SpawnEntitiesFromString();
