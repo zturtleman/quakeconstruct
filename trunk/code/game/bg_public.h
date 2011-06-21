@@ -50,6 +50,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define	DEFAULT_VIEWHEIGHT	26
 #define CROUCH_VIEWHEIGHT	12
 #define	DEAD_VIEWHEIGHT		-16
+//#define LUA_WEAPONS
 
 //
 // config strings are a general means of communicating variable length strings
@@ -682,7 +683,7 @@ extern	gitem_t	bg_itemlist[];
 extern	int		bg_numItems;
 
 void BG_InitItems(void);
-void BG_AddItem(gitem_t *item, int id);
+void BG_AddItem(gitem_t *item, int id, qboolean replace);
 gitem_t	*BG_FindItem( const char *pickupName );
 gitem_t *BG_FindItemByClass( const char *pickupName );
 int BG_FindItemIndexByClass( const char *pickupName );

@@ -254,7 +254,9 @@ int Pickup_Ammo (gentity_t *ent, gentity_t *other)
 		}
 	}
 
+	#ifndef LUA_WEAPONS
 	Add_Ammo (other, ent->item->giTag, quantity);
+	#endif
 
 	return RESPAWN_AMMO;
 }
@@ -266,6 +268,7 @@ int Pickup_Weapon (gentity_t *ent, gentity_t *other) {
 	int		quantity;
 	lua_State	*L = GetServerLuaState();
 
+	
 	if ( ent->count < 0 ) {
 		quantity = 0; // None for you, sir!
 	} else {
@@ -274,7 +277,7 @@ int Pickup_Weapon (gentity_t *ent, gentity_t *other) {
 		} else {
 			quantity = ent->item->quantity;
 		}
-
+#ifndef LUA_WEAPONS
 		// dropped items and teamplay weapons always have full ammo
 		if ( ! (ent->flags & FL_DROPPED_ITEM) && g_gametype.integer != GT_TEAM ) {
 			// respawning rules
@@ -285,6 +288,7 @@ int Pickup_Weapon (gentity_t *ent, gentity_t *other) {
 				quantity = 1;		// only add a single shot
 			}
 		}
+#endif
 	}
 
 	if(L != NULL) {
@@ -302,12 +306,14 @@ int Pickup_Weapon (gentity_t *ent, gentity_t *other) {
 	}
 
 	// add the weapon
+	#ifndef LUA_WEAPONS
 	other->client->ps.stats[STAT_WEAPONS] |= ( 1 << ent->item->giTag );
 
 	Add_Ammo( other, ent->item->giTag, quantity );
-
+	
 	if (ent->item->giTag == WP_GRAPPLING_HOOK)
 		other->client->ps.ammo[ent->item->giTag] = -1; // unlimited ammo
+	#endif
 
 	// team deathmatch has slow weapon respawns
 	if ( g_gametype.integer == GT_TEAM ) {

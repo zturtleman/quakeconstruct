@@ -84,8 +84,8 @@ local function doWaterEffect()
 end
 
 local frame = 0
-local function pre()
-	if(_CG == nil) then return end
+
+local function view()
 	local rd = _CG.refdef
 	if(rd == nil) then return end
 	if(doWaterEffect()) then RT = true end
@@ -103,13 +103,12 @@ local function pre()
 	if(RT) then
 		draw.CustomScale(rtSize/640,rth)
 		draw.CustomOffset(0,480 - rtSize)
+	else
+		draw.CustomScale(1,1)
+		draw.CustomOffset(0,0)
 	end
-	
-	--draw.SetColor(0,0,0,1)
-	--draw.Rect(0,0,640,480)
-	--render.ForceCommands()
 end
-hook.add("PreRender","cl_rt2",pre)
+hook.add("PostView","cl_rt2",view)
 
 local function tpass(m)
 	for i=0, 360, 45 do

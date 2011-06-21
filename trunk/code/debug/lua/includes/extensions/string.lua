@@ -174,3 +174,7 @@ function string.CountSlashes(str)
 	return c
 end
 
+function string.StartsWith(str,key)
+	local len = string.len(key)
+	return string.sub(str,0,len) == key
+end

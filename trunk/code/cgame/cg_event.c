@@ -421,7 +421,8 @@ static void CG_ItemPickup( int itemNum ) {
 		lua_pushinteger(L,itemNum);
 		qlua_pcall(L,1,0,qtrue);
 	}
-	
+
+#ifndef LUA_WEAPONS
 	// see if it should be the grabbed weapon
 	if ( bg_itemlist[itemNum].giType == IT_WEAPON ) {
 		// select it immediately
@@ -430,7 +431,7 @@ static void CG_ItemPickup( int itemNum ) {
 			cg.weaponSelect = bg_itemlist[itemNum].giTag;
 		}
 	}
-
+#endif
 }
 
 

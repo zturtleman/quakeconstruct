@@ -1875,6 +1875,65 @@ void PlayerInfoMessage( gentity_t *ent ) {
 	trap_SendServerCommand( ent-g_entities, va("playerinfo %i %s", cnt, string) );
 }
 
+static void MonsterDie(gentity_t* self, gentity_t* inflictor, gentity_t* attacker, int damage, int mod) {
+	int contents;
+	int killer;
+
+	if (attacker) {
+		killer = attacker->s.number;
+	}
+	else {
+		killer = ENTITYNUM_NONE;
+	}
+
+	contents = trap_PointContents(self->r.currentOrigin, -1);
+	//self->health = GIB_HEALTH;
+
+	self->s.powerups = 0;
+	self->r.contents = CONTENTS_CORPSE;
+	self->s.loopSound = 0;
+	self->r.maxs[2] = -8;
+
+	{
+		// normal death
+		int i;
+		int anim;
+
+		i = rand() % 3;
+
+		switch (i) {
+		case 0:
+			anim = BOTH_DEATH1;
+			break;
+		case 1:
+			anim = BOTH_DEATH2;
+			break;
+		case 2:
+		default:
+			anim = BOTH_DEATH3;
+			break;
+		}
+
+		// for the no-blood option, we need to prevent the health
+		// from going to gib level
+		if (self->health <= GIB_HEALTH) {
+			self->health = GIB_HEALTH + 1;
+		}
+
+		self->s.legsAnim =
+			((self->s.legsAnim & ANIM_TOGGLEBIT) ^ ANIM_TOGGLEBIT) | anim;
+		self->s.torsoAnim =
+			((self->s.torsoAnim & ANIM_TOGGLEBIT) ^ ANIM_TOGGLEBIT) | anim;
+
+		G_AddEvent(self, EV_DEATH1 + i, killer);
+
+		// the body can still be gibbed
+		self->die = body_die;
+
+	}
+	trap_LinkEntity(self);
+}
+
 void G_RunClientless( gentity_t *ent ) {
 	lua_State *L = GetServerLuaState();
 	pmove_t		pm;
@@ -1887,15 +1946,18 @@ void G_RunClientless( gentity_t *ent ) {
 	memset (&pm, 0, sizeof(pm));
 	memset (&pm.cmd, 0, sizeof(pm.cmd));
 
-	ps.clientNum = 0;
-	ps.commandTime = level.time;
+	ps.clientNum = 63; //MONSTER
+	ps.stats[STAT_HEALTH] = ent->health;
+	ps.commandTime = level.time - 100;
 	ps.legsAnim = ent->s.legsAnim;
 	ps.torsoAnim = ent->s.torsoAnim;
+	ps.gravity = g_gravity.integer;
+	ps.speed = g_speed.integer;
 	ps.pm_type = PM_NORMAL;
+	if(ent->health <= 0) ps.pm_type = PM_DEAD;
 	ps.pm_flags = 0;
-	ps.pm_time = level.time;
+	ps.pm_time = 100;
 	ps.movementDir = 0;
-	ps.speed = 0;
 	ps.bobCycle = 0;
 	VectorClear(ps.delta_angles);
 	VectorClear(ps.viewangles);
@@ -1925,8 +1987,25 @@ void G_RunClientless( gentity_t *ent ) {
 	pm.noFootsteps = ( g_dmflags.integer & DF_NO_FOOTSTEPS ) > 0;
 
 	pm.pmove_fixed = pmove_fixed.integer;
-	pm.pmove_msec = pmove_msec.integer;
+	pm.pmove_msec = 10000;
+	pm.cmd.serverTime = level.time;
+	pm.cmd.weapon = WP_ROCKET_LAUNCHER;
+	if(ent->die == 0) {
+		ent->s.weapon = WP_ROCKET_LAUNCHER;
+		ent->die = MonsterDie;
+		ent->takedamage = qtrue;
+		ent->damage = 0;
+		ent->r.contents = CONTENTS_BODY;
+		ent->clipmask = MASK_PLAYERSOLID;
+		ent->flags = 0;
+		ent->r.svFlags = 0;
+		ent->s.clientNum = ps.clientNum;
+	}
+	
+	trap_LinkEntity(ent);
+
 	Pmove (&pm,L);
+	ClientImpacts(ent,&pm);
 
 	if (g_smoothClients.integer) {
 		BG_PlayerStateToEntityStateExtraPolate( pm.ps, &ent->s, pm.ps->commandTime, qtrue );
@@ -2015,9 +2094,10 @@ void G_RunFrame( int levelTime ) {
 			continue;
 		}
 
-/*		if ( ent->s.eType == ET_PLAYER && ent->client == NULL ) {
+		if ( ent->s.eType == ET_PLAYER && (ent->client == NULL && ent->health > 0) ) {
 			G_RunClientless( ent );
-		}*/
+			continue;
+		}
 
 		if ( ent->s.eType == ET_LUA ) {
 			G_RunMissile( ent );

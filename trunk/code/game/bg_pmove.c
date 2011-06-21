@@ -1473,7 +1473,7 @@ static void PM_BeginWeaponChange( int weapon ) {
 	if ( weapon <= WP_NONE || weapon >= WP_NUM_WEAPONS ) {
 		return;
 	}
-
+#ifndef LUA_WEAPONS
 	if ( !( pm->ps->stats[STAT_WEAPONS] & ( 1 << weapon ) ) ) {
 		return;
 	}
@@ -1481,6 +1481,7 @@ static void PM_BeginWeaponChange( int weapon ) {
 	if ( pm->ps->weaponstate == WEAPON_DROPPING ) {
 		return;
 	}
+#endif
 
 	PM_AddEvent( EV_CHANGE_WEAPON );
 	pm->ps->weaponstate = WEAPON_DROPPING;
@@ -1498,6 +1499,8 @@ static void PM_FinishWeaponChange( void ) {
 	int		weapon;
 
 	weapon = pm->cmd.weapon;
+
+#ifndef LUA_WEAPONS
 	if ( weapon < WP_NONE || weapon >= WP_NUM_WEAPONS ) {
 		weapon = WP_NONE;
 	}
@@ -1505,7 +1508,7 @@ static void PM_FinishWeaponChange( void ) {
 	if ( !( pm->ps->stats[STAT_WEAPONS] & ( 1 << weapon ) ) ) {
 		weapon = WP_NONE;
 	}
-
+#endif
 	pm->ps->weapon = weapon;
 	pm->ps->weaponstate = WEAPON_RAISING;
 	pm->ps->weaponTime += 250;
@@ -1601,7 +1604,7 @@ static void PM_Weapon( lua_State *L ) {
 		break;
 #endif
 	}
-
+#ifndef LUA_WEAPONS
 	if(L != NULL) {
 		qlua_gethook(L, "FiredWeapon");
 		lua_pushinteger(L, pm->ps->clientNum);
@@ -1618,7 +1621,7 @@ static void PM_Weapon( lua_State *L ) {
 			lua_pop(L,1);
 		}
 	}
-
+#endif
 #ifdef MISSIONPACK
 	if( bg_itemlist[pm->ps->stats[STAT_PERSISTANT_POWERUP]].giTag == PW_SCOUT ) {
 		addTime /= 1.5;
@@ -1708,6 +1711,7 @@ static void PM_Weapon( lua_State *L ) {
 	pm->ps->weaponstate = WEAPON_FIRING;
 
 	// check for out of ammo
+#ifndef LUA_WEAPONS
 	if ( ! pm->ps->ammo[ pm->ps->weapon ] ) {
 		PM_AddEvent( EV_NOAMMO );
 		pm->ps->weaponTime += 500;
@@ -1718,6 +1722,24 @@ static void PM_Weapon( lua_State *L ) {
 	if ( pm->ps->ammo[ pm->ps->weapon ] != -1 ) {
 		pm->ps->ammo[ pm->ps->weapon ]--;
 	}
+#else
+	if(L != NULL) {
+		lua_getglobal(L,"__CanFire");
+		lua_pushinteger(L, pm->ps->clientNum);
+		lua_pushinteger(L, pm->ps->weapon);
+		lua_pushinteger(L, addTime);
+		lua_pushvector(L, pm->ps->viewangles);
+		qlua_pcall(L,4,2,qtrue);
+		if(lua_type(L,-1) == LUA_TNUMBER) {
+			addTime = lua_tointeger(L,-1);
+			if(addTime == -1) {
+				lua_pop(L,1);
+				return;
+			}
+			lua_pop(L,1);
+		}
+	}
+#endif
 
 	// fire weapon
 	PM_AddEvent( EV_FIRE_WEAPON );
@@ -1884,13 +1906,22 @@ void PmoveBegin (pmove_t *pmove) {
 	}
 
 	// set the firing flag for continuous beam weapons
+#ifndef LUA_WEAPONS
 	if ( !(pm->ps->pm_flags & PMF_RESPAWNED) && pm->ps->pm_type != PM_INTERMISSION
 		&& ( pm->cmd.buttons & BUTTON_ATTACK ) && pm->ps->ammo[ pm->ps->weapon ] ) {
 		pm->ps->eFlags |= EF_FIRING;
 	} else {
 		pm->ps->eFlags &= ~EF_FIRING;
 	}
-
+#else
+	if ( !(pm->ps->pm_flags & PMF_RESPAWNED) && pm->ps->pm_type != PM_INTERMISSION
+		&& ( pm->cmd.buttons & BUTTON_ATTACK )) {
+		pm->ps->eFlags |= EF_FIRING;
+	} else {
+		pm->ps->eFlags &= ~EF_FIRING;
+	}
+	//HFIXME Lua weapon code
+#endif
 	// clear the respawned flag if attack and use are cleared
 	if ( pm->ps->stats[STAT_HEALTH] > 0 && 
 		!( pm->cmd.buttons & (BUTTON_ATTACK | BUTTON_USE_HOLDABLE) ) ) {

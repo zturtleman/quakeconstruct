@@ -846,7 +846,10 @@ void CG_RegisterWeapon( int weaponNum ) {
 	lua_pushinteger(L,weaponNum);
 	qlua_pcall(L,1,1,qtrue);
 	if(lua_type(L,-1) == LUA_TTABLE) {
-		weaponInfo->flashSound[0] = qlua_pullint_m(L,"flashSound",qfalse,weaponInfo->flashSound[0]);
+		weaponInfo->flashSound[0] = qlua_pullint_m(L,"flashSound0",qfalse,weaponInfo->flashSound[0]);
+		weaponInfo->flashSound[1] = qlua_pullint_m(L,"flashSound1",qfalse,weaponInfo->flashSound[1]);
+		weaponInfo->flashSound[2] = qlua_pullint_m(L,"flashSound2",qfalse,weaponInfo->flashSound[2]);
+		weaponInfo->flashSound[3] = qlua_pullint_m(L,"flashSound3",qfalse,weaponInfo->flashSound[3]);
 		weaponInfo->readySound = qlua_pullint_m(L,"readySound",qfalse,weaponInfo->readySound);
 		weaponInfo->firingSound = qlua_pullint_m(L,"firingSound",qfalse,weaponInfo->firingSound);
 		lua_pop(L,1);
@@ -1219,8 +1222,35 @@ float	CG_MachinegunSpinAngle( centity_t *cent ) {
 CG_AddWeaponWithPowerups
 ========================
 */
-static void CG_AddWeaponWithPowerups( refEntity_t *gun, int powerups ) {
+static void CG_AddWeaponWithPowerups( refEntity_t *gun, int powerups, entityState_t *state, int part, int team ) {
 	// add powerup effects
+	refEntity_t *re;
+	lua_State *L = GetClientLuaState();
+
+	if(L != NULL) {
+		qlua_gethook(L,"DrawGunModel");
+		lua_pushrefentity(L,gun);
+		lua_pushentity(L,&cg_entities[ state->number ]);
+		lua_pushinteger(L,part);
+		lua_pushinteger(L,team);
+		lua_pushboolean(L,qtrue);
+		qlua_pcall(L,5,2,qtrue);
+		if(lua_type(L,-2) == LUA_TBOOLEAN) {
+			if(!lua_toboolean(L,-2)) {
+				if(lua_type(L,-1) == LUA_TUSERDATA) {
+					re = lua_torefentity(L,-1);
+					if(re != NULL) {
+						*gun = *re;
+					}
+				}
+				lua_pop(L,2);
+			} else {
+				lua_pop(L,2);
+				return;
+			}
+		}
+	}
+
 	if ( powerups & ( 1 << PW_INVIS ) ) {
 		gun->customShader = cgs.media.invisShader;
 		trap_R_AddRefEntityToScene( gun );
@@ -1259,7 +1289,17 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
 //	int	col;
 
 	weaponNum = cent->currentState.weapon;
-
+#ifdef LUA_WEAPONS
+	{lua_State *L = GetClientLuaState();
+	if(L != NULL) {
+		lua_getglobal(L, "__AddPlayerWeapon");
+		lua_pushrefentity(L,parent);
+		lua_pushentity(L,cent);
+		lua_pushinteger(L,team);
+		lua_pcall(L,3,0,qtrue);
+		return;
+	}}
+#else
 	CG_RegisterWeapon( weaponNum );
 	weapon = &cg_weapons[weaponNum];
 
@@ -1306,7 +1346,7 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
 
 	CG_PositionEntityOnTag( &gun, parent, parent->hModel, "tag_weapon");
 
-	CG_AddWeaponWithPowerups( &gun, cent->currentState.powerups );
+	CG_AddWeaponWithPowerups( &gun, cent->currentState.powerups, &cent->currentState, 1, team );
 
 	// add the spinning barrel
 	if ( weapon->barrelModel ) {
@@ -1323,7 +1363,7 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
 
 		CG_PositionRotatedEntityOnTag( &barrel, &gun, weapon->weaponModel, "tag_barrel" );
 
-		CG_AddWeaponWithPowerups( &barrel, cent->currentState.powerups );
+		CG_AddWeaponWithPowerups( &barrel, cent->currentState.powerups, &cent->currentState, 2, team );
 	}
 
 	// make sure we aren't looking at cg.predictedPlayerEntity for LG
@@ -1388,6 +1428,7 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
 				weapon->flashDlightColor[1], weapon->flashDlightColor[2] );
 		}
 	}
+#endif
 }
 
 /*
@@ -1524,6 +1565,14 @@ void CG_DrawWeaponSelect( void ) {
 	trap_R_SetColor( color );
 	if(!CG_ShouldDraw("HUD_WEAPONSELECT")) return;
 
+#ifdef LUA_WEAPONS
+	{lua_State *L = GetClientLuaState();
+	if(L != NULL) {
+		lua_getglobal(L, "__DrawWeaponSelector");
+		lua_pushinteger(L,cg.weaponSelectTime);
+		lua_pcall(L,1,0,qtrue);
+	}}
+#else
 	// showing weapon select clears pickup item display, but not the blend blob
 	// cg.itemPickupTime = 0;
 
@@ -1571,7 +1620,7 @@ void CG_DrawWeaponSelect( void ) {
 			CG_DrawBigStringColor(x, y - 22, name, color);
 		}
 	}
-
+#endif
 	trap_R_SetColor( NULL );
 }
 
@@ -1582,13 +1631,14 @@ CG_WeaponSelectable
 ===============
 */
 static qboolean CG_WeaponSelectable( int i ) {
+#ifndef LUA_WEAPONS
 	if ( !cg.snap->ps.ammo[i] ) {
 		return qfalse;
 	}
 	if ( ! (cg.snap->ps.stats[ STAT_WEAPONS ] & ( 1 << i ) ) ) {
 		return qfalse;
 	}
-
+#endif
 	return qtrue;
 }
 
@@ -1611,6 +1661,7 @@ void CG_NextWeapon_f( void ) {
 	cg.weaponSelectTime = cg.time;
 	original = cg.weaponSelect;
 
+#ifndef LUA_WEAPONS
 	for ( i = 0 ; i < 16 ; i++ ) {
 		cg.weaponSelect++;
 		if ( cg.weaponSelect == 16 ) {
@@ -1626,6 +1677,21 @@ void CG_NextWeapon_f( void ) {
 	if ( i == 16 ) {
 		cg.weaponSelect = original;
 	}
+#else
+	{lua_State *L = GetClientLuaState();
+	if(L != NULL) {
+		lua_getglobal(L, "__NextWeapon");
+		lua_pushinteger(L,original);
+		lua_pcall(L,1,1,qtrue);
+		if(lua_type(L,-1) == LUA_TNUMBER) {
+			cg.weaponSelect = lua_tointeger(L,-1);
+			lua_pop(L,1);
+			return;
+		}
+		lua_pop(L,1);
+		return;
+	}}
+#endif
 }
 
 /*
@@ -1647,6 +1713,7 @@ void CG_PrevWeapon_f( void ) {
 	cg.weaponSelectTime = cg.time;
 	original = cg.weaponSelect;
 
+#ifndef LUA_WEAPONS
 	for ( i = 0 ; i < 16 ; i++ ) {
 		cg.weaponSelect--;
 		if ( cg.weaponSelect == -1 ) {
@@ -1662,6 +1729,21 @@ void CG_PrevWeapon_f( void ) {
 	if ( i == 16 ) {
 		cg.weaponSelect = original;
 	}
+#else
+	{lua_State *L = GetClientLuaState();
+	if(L != NULL) {
+		lua_getglobal(L, "__PrevWeapon");
+		lua_pushinteger(L,original);
+		lua_pcall(L,1,1,qtrue);
+		if(lua_type(L,-1) == LUA_TNUMBER) {
+			cg.weaponSelect = lua_tointeger(L,-1);
+			lua_pop(L,1);
+			return;
+		}
+		lua_pop(L,1);
+		return;
+	}}
+#endif
 }
 
 /*
@@ -1681,6 +1763,7 @@ void CG_Weapon_f( void ) {
 
 	num = atoi( CG_Argv( 1 ) );
 
+#ifndef LUA_WEAPONS
 	if ( num < 1 || num > 15 ) {
 		return;
 	}
@@ -1692,6 +1775,21 @@ void CG_Weapon_f( void ) {
 	}
 
 	cg.weaponSelect = num;
+#else
+	{lua_State *L = GetClientLuaState();
+	if(L != NULL) {
+		lua_getglobal(L, "__SelectWeapon");
+		lua_pushinteger(L,num);
+		lua_pcall(L,1,1,qtrue);
+		if(lua_type(L,-1) == LUA_TNUMBER) {
+			cg.weaponSelect = lua_tointeger(L,-1);
+			lua_pop(L,1);
+			return;
+		}
+		lua_pop(L,1);
+		return;
+	}}
+#endif
 }
 
 /*
@@ -1705,13 +1803,21 @@ void CG_OutOfAmmoChange( void ) {
 	int		i;
 
 	cg.weaponSelectTime = cg.time;
-
+#ifdef LUA_WEAPONS
+	{lua_State *L = GetClientLuaState();
+	if(L != NULL) {
+		lua_getglobal(L, "__OutOfAmmo");
+		lua_pcall(L,0,0,qtrue);
+		return;
+	}}
+#else
 	for ( i = 15 ; i > 0 ; i-- ) {
 		if ( CG_WeaponSelectable( i ) ) {
 			cg.weaponSelect = i;
 			break;
 		}
 	}
+#endif
 }
 
 

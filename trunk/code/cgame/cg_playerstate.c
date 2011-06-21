@@ -40,6 +40,7 @@ void CG_CheckAmmo( void ) {
 	int		previous;
 	int		weapons;
 
+#ifndef LUA_WEAPONS
 	// see about how many seconds of ammo we have remaining
 	weapons = cg.snap->ps.stats[ STAT_WEAPONS ];
 	total = 0;
@@ -79,6 +80,7 @@ void CG_CheckAmmo( void ) {
 	if ( cg.lowAmmoWarning != previous ) {
 		trap_S_StartLocalSound( cgs.media.noAmmoSound, CHAN_LOCAL_SOUND );
 	}
+#endif
 }
 
 /*

@@ -8,31 +8,34 @@ char *toChars(const char *str) {
 int additem(lua_State *L) {
 	int id;
 	gitem_t item;
+	qboolean replace;
 
 	//memset(&item,0,sizeof(item));
 
 	luaL_checktype(L,1,LUA_TNUMBER);
-	luaL_checktype(L,2,LUA_TSTRING);
+	luaL_checktype(L,2,LUA_TBOOLEAN);
+	luaL_checktype(L,3,LUA_TSTRING);
 
 	id = lua_tointeger(L,1);
+	replace = lua_toboolean(L,2);
 
-	item.classname = toChars(lua_tostring(L,2));
-	item.giType = luaL_optinteger(L,3,IT_BAD);
-	item.giTag = luaL_optinteger(L,4,WP_NONE);
-	item.icon = toChars(luaL_optstring(L,5,"icons/iconw_grapple"));
-	item.pickup_name =  toChars(luaL_optstring(L,6,"Unknown Item"));
-	item.pickup_sound = toChars(luaL_optstring(L,7,"sound/misc/w_pkup.wav"));
-	item.quantity = luaL_optinteger(L,8,0);
+	item.classname = toChars(lua_tostring(L,3));
+	item.giType = luaL_optinteger(L,4,IT_BAD);
+	item.giTag = luaL_optinteger(L,5,WP_NONE);
+	item.icon = toChars(luaL_optstring(L,6,"icons/iconw_grapple"));
+	item.pickup_name =  toChars(luaL_optstring(L,7,"Unknown Item"));
+	item.pickup_sound = toChars(luaL_optstring(L,8,"sound/misc/w_pkup.wav"));
+	item.quantity = luaL_optinteger(L,9,0);
 
-	item.world_model[0] = toChars(luaL_optstring(L,9,"models/powerups/health/medium_cross.md3"));
-	item.world_model[1] = toChars(luaL_optstring(L,10,""));
-	item.world_model[2] = toChars(luaL_optstring(L,11,""));
-	item.world_model[3] = toChars(luaL_optstring(L,12,""));
+	item.world_model[0] = toChars(luaL_optstring(L,10,"models/powerups/health/medium_cross.md3"));
+	item.world_model[1] = toChars(luaL_optstring(L,11,""));
+	item.world_model[2] = toChars(luaL_optstring(L,12,""));
+	item.world_model[3] = toChars(luaL_optstring(L,13,""));
 
 	item.precaches = "";
 	item.sounds = "";
 
-	BG_AddItem(&item, id);
+	BG_AddItem(&item, id, replace);
 	return 0;
 }
 

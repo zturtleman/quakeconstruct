@@ -1195,7 +1195,7 @@ netField_t	playerStateFields[] =
 { PSF(eventParms[0]), 8 },
 { PSF(eventParms[1]), 8 },
 { PSF(clientNum), 8 },
-{ PSF(weapon), 5 },
+{ PSF(weapon), 8 }, //Changed to byte to allow more weapons.
 { PSF(viewangles[2]), 0 },
 { PSF(grapplePoint[0]), 0 },
 { PSF(grapplePoint[1]), 0 },

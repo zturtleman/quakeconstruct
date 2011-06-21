@@ -44,6 +44,7 @@ void RE_UpdateRenderTarget(int irt) {
 	if(irt < 0 || irt >= 32) return;
 	rt = renderTargets[irt];
 	qglBindTexture(GL_TEXTURE_2D, rt.texture);		
+
 	qglCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 0, 0, rt.width, rt.height, 0);
 }
 
