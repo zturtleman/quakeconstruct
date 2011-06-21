@@ -255,7 +255,10 @@ int qlua_getclientinfo(lua_State *L) {
 				ci->health = cg.snap->ps.stats[STAT_HEALTH];
 				ci->armor = cg.snap->ps.stats[STAT_ARMOR];
 				ci->curWeapon = cg.snap->ps.weapon;
+#ifndef LUA_WEAPONS
 				ci->ammo = cg.snap->ps.ammo[ci->curWeapon];
+				//HFIXME Lua Weapon Code
+#endif
 			} else {
 				ci->health = luaentity->currentState.health;
 			}
@@ -518,6 +521,32 @@ int qlua_getctime(lua_State *L) {
 	return 0;
 }
 
+int qlua_getlegsanim(lua_State *L) {
+	centity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		lua_pushinteger(L, (luaentity->currentState.legsAnim & ~ANIM_TOGGLEBIT));
+		return 1;
+	}
+	return 0;
+}
+
+int qlua_gettorsoanim(lua_State *L) {
+	centity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		lua_pushinteger(L, (luaentity->currentState.torsoAnim & ~ANIM_TOGGLEBIT));
+		return 1;
+	}
+	return 0;
+}
+
 static int Entity_tostring (lua_State *L)
 {
   lua_pushfstring(L, "Entity: %p", lua_touserdata(L, 1));
@@ -566,6 +595,8 @@ static const luaL_reg Entity_methods[] = {
   {"GetWeapon",		lua_getweapon},
   {"CustomDraw",	lua_customdraw},
   {"StopSound",		qlua_stopsounds},
+  {"GetLegsAnim",	qlua_getlegsanim},
+  {"GetTorsoAnim",	qlua_gettorsoanim},
   {0,0}
 };
 

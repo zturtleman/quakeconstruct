@@ -85,6 +85,7 @@ void TossClientItems( gentity_t *self ) {
 	// drop the weapon if not a gauntlet or machinegun
 	weapon = self->s.weapon;
 
+#ifndef LUA_WEAPONS
 	// make a special check to see if they are changing to a new
 	// weapon that isn't the mg or gauntlet.  Without this, a client
 	// can pick up a weapon, be killed, and not drop the weapon because
@@ -98,7 +99,7 @@ void TossClientItems( gentity_t *self ) {
 		}
 	}
 
-	if ( weapon > WP_MACHINEGUN && weapon != WP_GRAPPLING_HOOK && 
+	if ( weapon > WP_GAUNTLET && weapon != WP_GRAPPLING_HOOK && 
 		self->client->ps.ammo[ weapon ] ) {
 		// find the item type for this weapon
 		item = BG_FindItemForWeapon( weapon );
@@ -106,6 +107,14 @@ void TossClientItems( gentity_t *self ) {
 		// spawn the item
 		Drop_Item( self, item, 0 );
 	}
+#else
+	{lua_State *L = GetServerLuaState();
+	if(L != NULL) {
+		lua_getglobal(L, "__DropWeapon");
+		lua_pushentity(L, self);
+		lua_pcall(L,1,0,qtrue);
+	}}
+#endif
 
 	// drop all the powerups if not in teamplay
 	if ( g_gametype.integer != GT_TEAM ) {

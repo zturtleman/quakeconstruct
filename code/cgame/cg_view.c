@@ -809,21 +809,8 @@ void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demo
 	// this counter will be bumped for every valid scene we generate
 	cg.clientFrame++;
 
-	// update cg.predictedPlayerState
-	CG_PredictPlayerState();
-
 	// decide on third person view
 	cg.renderingThirdPerson = cg_thirdPerson.integer || (cg.snap->ps.stats[STAT_HEALTH] <= 0);
-
-	// build cg.refdef
-	inwater = CG_CalcViewValues();
-
-	if(L != NULL) {
-		CG_PushCGTab(L);
-		CG_InitLuaView(L);
-		qlua_gethook(L,"PreRender");
-		qlua_pcall(L,0,0,qtrue);
-	}
 
 	if(doRT) {
 		if(L != NULL) {
@@ -833,9 +820,32 @@ void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demo
 	}
 	trap_R_ClearScene();
 
+	if(L != NULL) {
+		CG_PushCGTab(L);
+		CG_InitLuaView(L);
+		qlua_gethook(L,"PreRender");
+		qlua_pcall(L,0,0,qtrue);
+	}
+
+	// update cg.predictedPlayerState
+	CG_PredictPlayerState();
+
+	// build cg.refdef
+	inwater = CG_CalcViewValues();
+
+	if(L != NULL) {
+		CG_PushCGTab(L);
+		qlua_gethook(L,"PostView");
+		qlua_pcall(L,0,0,qtrue);
+	}
+
 	// first person blend blobs, done after AnglesToAxis
 	if ( !cg.renderingThirdPerson ) {
 		CG_DamageBlendBlob();
+	}
+
+	if ( L != NULL ) {
+		CG_PushCGTab(L);
 	}
 
 	// build the render lists

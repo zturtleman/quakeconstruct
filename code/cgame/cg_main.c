@@ -1220,11 +1220,14 @@ void CG_BuildSpectatorString() {
 CG_RegisterClients
 ===================
 */
+
 static void CG_RegisterClients( void ) {
 	int		i;
 
 	CG_LoadingClient(cg.clientNum);
 	CG_NewClientInfo(cg.clientNum);
+
+	CG_InitMonsterClientInfo(63);
 
 	for (i=0 ; i<MAX_CLIENTS ; i++) {
 		const char		*clientInfo;

@@ -803,13 +803,69 @@ void CalcMuzzlePointOrigin ( gentity_t *ent, vec3_t origin, vec3_t forward, vec3
 }
 
 int lua_firebullets(lua_State *L) {
-	//Bullet_Fire(ent,spread,damage);
+	gentity_t *ent = lua_toentity(L,1);
+	float spread = lua_tonumber(L,2);
+	float damage = lua_tonumber(L,3);
+
+	Bullet_Fire(ent,spread,damage);
 	return 0;
 }
 
+#ifdef LUA_WEAPONS
+int lua_fireWeapon(lua_State *L) {
+	gentity_t *ent = lua_toentity(L,1);
+	int w = lua_tointeger(L,2);
+
+	switch( w ) {
+	case WP_GAUNTLET:
+		Weapon_Gauntlet( ent );
+		break;
+	case WP_LIGHTNING:
+		Weapon_LightningFire( ent );
+		break;
+	case WP_SHOTGUN:
+		weapon_supershotgun_fire( ent );
+		break;
+	case WP_MACHINEGUN:
+		if ( g_gametype.integer != GT_TEAM ) {
+			Bullet_Fire( ent, MACHINEGUN_SPREAD, MACHINEGUN_DAMAGE );
+		} else {
+			Bullet_Fire( ent, MACHINEGUN_SPREAD, MACHINEGUN_TEAM_DAMAGE );
+		}
+		break;
+	case WP_GRENADE_LAUNCHER:
+		weapon_grenadelauncher_fire( ent );
+		break;
+	case WP_ROCKET_LAUNCHER:
+		Weapon_RocketLauncher_Fire( ent );
+		break;
+	case WP_PLASMAGUN:
+		Weapon_Plasmagun_Fire( ent );
+		break;
+	case WP_RAILGUN:
+		weapon_railgun_fire( ent );
+		break;
+	case WP_BFG:
+		BFG_Fire( ent );
+		break;
+	case WP_GRAPPLING_HOOK:
+		Weapon_GrapplingHook_Fire( ent );
+		break;
+	default:
+		break;
+	}
+
+	return 0;
+}
+
+#endif
 
 void G_InitLuaWeapon(lua_State *L) {
-	//lua_register(L,"G_FireBullet",lua_firebullets);
+	lua_register(L,"G_FireBullet",lua_firebullets);
+
+	#ifdef LUA_WEAPONS
+		lua_register(L,"__FireDefault",lua_fireWeapon);
+	#endif
 }
 
 /*
@@ -855,7 +911,8 @@ void FireWeapon( gentity_t *ent ) {
 		lua_pushinteger(L, ent->client->ps.weaponTime);
 		lua_pushvector(L, muzzle);
 		lua_pushvector(L, ent->client->ps.viewangles);
-		qlua_pcall(L,5,1,qtrue);
+		lua_pushentity(L, ent);
+		qlua_pcall(L,6,1,qtrue);
 		if(lua_type(L,-1) == LUA_TNUMBER) {
 			ent->client->ps.weaponTime = lua_tointeger(L,-1);
 		}
@@ -867,7 +924,7 @@ void FireWeapon( gentity_t *ent ) {
 		}
 		lua_pop(L,1);
 	}
-
+#ifndef LUA_WEAPONS
 	// fire the specific weapon
 	switch( ent->s.weapon ) {
 	case WP_GAUNTLET:
@@ -919,6 +976,7 @@ void FireWeapon( gentity_t *ent ) {
 // FIXME		G_Error( "Bad ent->s.weapon" );
 		break;
 	}
+#endif
 }
 
 

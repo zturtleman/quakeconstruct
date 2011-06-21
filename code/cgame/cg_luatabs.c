@@ -120,7 +120,10 @@ void CG_PushCGTab(lua_State *L) {
 
 		setTableTable(L,"stats", cg.snap->ps.stats, STAT_MAX_HEALTH+1);
 		setTableTable(L,"pers", cg.snap->ps.persistant, PERS_CAPTURES+1);
+#ifndef LUA_WEAPONS
 		setTableTable(L,"ammo", cg.snap->ps.ammo, WP_NUM_WEAPONS);
+		//HFIXME Lua Weapon Code
+#endif
 		setTableTable(L,"powerups", cg.snap->ps.powerups, PW_NUM_POWERUPS);
 	}
 	lua_setglobal(L,"_CG");

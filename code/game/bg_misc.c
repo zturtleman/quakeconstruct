@@ -993,12 +993,16 @@ void BG_AllocAndCopy(char **ptr, char *v) {
 	strcpy(*ptr,v);
 }
 
-void BG_AddItem(gitem_t *item, int id) {
+void BG_AddItem(gitem_t *item, int id, qboolean replace) {
 	int free = custom_band - id;
 	int customid = (bg_numItems - custom_band) + id;
 	gitem_t *slot;
+	if(replace) {
+		Com_Printf("^3Replacing Item: %i\n",id);
+		customid = id;
+	}
 
-	if(free <= 0) {
+	if(free <= 0 && !replace) {
 		Com_Printf("^1No free custom item slots.\n");
 		return;
 	}
@@ -1031,26 +1035,6 @@ void BG_AddItem(gitem_t *item, int id) {
 	
 	Com_Printf("^2Registered Item: %s.\n", slot->classname);
 	Com_Printf("  ^2%i Free Slots Left.\n", free-1);
-
-	//customItems++;
-	/*memcpy(bg_itemlist[bg_numItems],*item,sizeof(item));*/
-
-
-	//bg_itemlist[bg_numItems] = NULL;
-
-/*	{
-		"weapon_test",
-		"sound/misc/w_pkup.wav",
-        { "models/weapons2/bfg/bfg.md3", 
-		0, 0, 0},
-	"icons/iconw_grapple",
-	"Test Weapon",
-		600,
-		IT_WEAPON,
-		WP_TEST,
- "",
- ""
-	},*/
 }
 
 /*
@@ -1153,7 +1137,7 @@ int	BG_FindItemIndexByClass( const char *pickupName ) {
 		}
 	}
 
-	return 1;
+	return -1;
 }
 
 /*
@@ -1209,11 +1193,12 @@ qboolean BG_CanItemBeGrabbed( int gametype, const entityState_t *ent, const play
 		return qtrue;	// weapons are always picked up
 
 	case IT_AMMO:
+#ifndef LUA_WEAPONS
 		if ( ps->ammo[ item->giTag ] >= 200 ) {
 			return qfalse;		// can't hold any more
 		}
+#endif
 		return qtrue;
-
 	case IT_ARMOR:
 #ifdef MISSIONPACK
 		if( bg_itemlist[ps->stats[STAT_PERSISTANT_POWERUP]].giTag == PW_SCOUT ) {

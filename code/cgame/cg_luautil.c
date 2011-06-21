@@ -551,6 +551,13 @@ int qlua_loadingstring(lua_State *L) {
 	return 0;
 }
 
+int qlua_setweaponselect(lua_State *L) {
+	int w = luaL_optinteger(L,1,cg.weaponSelect);
+	cg.weaponSelect = w;
+	cg.weaponSelectTime = cg.time;
+	return 0;
+}
+
 static const luaL_reg Util_methods[] = {
   {"GetNumItems",		qlua_numitems},
   {"GetItemIcon",		qlua_getitemicon},
@@ -585,6 +592,7 @@ static const luaL_reg Util_methods[] = {
   {"RegisterItem",		qlua_registeritem},
   {"UpdateItems",		qlua_updateitems},
   {"LoadingString",		qlua_loadingstring},
+  {"SetWeaponSelect",	qlua_setweaponselect},
   {0,0}
 };
 

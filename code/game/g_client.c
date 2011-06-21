@@ -1206,7 +1206,7 @@ void ClientSpawn(gentity_t *ent, gentity_t *plbody) {
 	VectorCopy (playerMaxs, ent->r.maxs);
 
 	client->ps.clientNum = index;
-
+#ifndef LUA_WEAPONS
 	client->ps.stats[STAT_WEAPONS] = ( 1 << WP_MACHINEGUN );
 	if ( g_gametype.integer == GT_TEAM ) {
 		client->ps.ammo[WP_MACHINEGUN] = 50;
@@ -1217,6 +1217,7 @@ void ClientSpawn(gentity_t *ent, gentity_t *plbody) {
 	client->ps.stats[STAT_WEAPONS] |= ( 1 << WP_GAUNTLET );
 	client->ps.ammo[WP_GAUNTLET] = -1;
 	client->ps.ammo[WP_GRAPPLING_HOOK] = -1;
+#endif
 	client->ps.speed = g_speed.value; 
 
 	// health will count down towards max_health
@@ -1252,12 +1253,14 @@ void ClientSpawn(gentity_t *ent, gentity_t *plbody) {
 		// select the highest weapon number available, after any
 		// spawn given items have fired
 		client->ps.weapon = 1;
+		#ifndef LUA_WEAPONS
 		for ( i = WP_NUM_WEAPONS - 1 ; i > 0 ; i-- ) {
 			if ( client->ps.stats[STAT_WEAPONS] & ( 1 << i ) ) {
 				client->ps.weapon = i;
 				break;
 			}
 		}
+		#endif
 	}
 
 	// run a client frame to drop exactly to the floor,

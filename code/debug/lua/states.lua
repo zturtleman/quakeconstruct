@@ -12,12 +12,10 @@ local function SAVE(slot)
 	AS["lua/cl_init.lua"] = nil
 	AS["lua/states.lua"] = nil
 	AS["lua/shared.lua"] = nil
-	local inc = string.len("lua/includes")
-	local pers = string.len("persistance")
 	for k,v in pairs(AS) do
-		if(string.sub(k,0,inc) == "lua/includes") then AS[k] = nil end
-		if(string.sub(k,0,inc+1) == "lua/downloads") then AS[k] = nil end
-		if(string.sub(k,0,pers) == "persistance") then AS[k] = nil end
+		if(string.StartsWith(k,"lua/includes")) then AS[k] = nil end
+		if(string.StartsWith(k,"lua/downloads")) then AS[k] = nil end
+		if(string.StartsWith(k,"persistance")) then AS[k] = nil end
 	end
 	
 	local tab = persist.Load("lstate")
@@ -145,4 +143,7 @@ end
 
 concommand.add("savestate",function(p,c,a) SAVE(a[1]) end,true,true)
 concommand.add("loadstate",function(p,c,a) LOAD(a[1]) end,true,true)
-concommand.add("noauto",function(p,c,a) CLEAR("_auto") end,true,true)
+concommand.add("noauto",function(p,c,a) 
+	CLEAR("_auto")
+	_ACTIVESCRIPTS = {}
+end,true,true)

@@ -617,6 +617,7 @@ static void CG_DrawStatusBar( void ) {
 	//
 	// ammo
 	//
+#ifndef LUA_WEAPONS
 	if ( cent->currentState.weapon && CG_ShouldDraw("HUD_STATUSBAR_AMMO")) {
 		value = ps->ammo[cent->currentState.weapon];
 		if ( value > -1 ) {
@@ -647,7 +648,38 @@ static void CG_DrawStatusBar( void ) {
 			}
 		}
 	}
+#else
+	if ( cent->currentState.weapon && CG_ShouldDraw("HUD_STATUSBAR_AMMO")) {
+		value = 1; //HFIXME lua weapon code
+		if ( value > -1 ) {
+			if ( cg.predictedPlayerState.weaponstate == WEAPON_FIRING
+				&& cg.predictedPlayerState.weaponTime > 100 ) {
+				// draw as dark grey when reloading
+				color = 2;	// dark grey
+			} else {
+				if ( value >= 0 ) {
+					color = 0;	// green
+				} else {
+					color = 1;	// red
+				}
+			}
+			trap_R_SetColor( colors[color] );
+			
+			CG_DrawField (0, 432, 3, value);
+			trap_R_SetColor( NULL );
 
+			// if we didn't draw a 3D icon, draw a 2D icon for ammo
+			if ( !cg_draw3dIcons.integer && cg_drawIcons.integer ) {
+				qhandle_t	icon;
+
+				icon = cg_weapons[ cg.predictedPlayerState.weapon ].ammoIcon;
+				if ( icon ) {
+					CG_DrawPic( CHAR_WIDTH*3 + TEXT_ICON_SPACE, 432, ICON_SIZE, ICON_SIZE, icon );
+				}
+			}
+		}
+	}
+#endif
 	//
 	// health
 	//
@@ -2715,6 +2747,7 @@ void CG_DrawActive( stereoFrame_t stereoView ) {
 
 	// draw 3D view
 	if(L != NULL) {
+		CG_PushCGTab(L);
 		CG_Lock3D(qtrue);
 		qlua_gethook(L,"Draw3D");
 		qlua_pcall(L,0,0,qtrue);

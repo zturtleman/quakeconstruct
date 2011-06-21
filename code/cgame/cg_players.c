@@ -746,6 +746,55 @@ static void CG_LoadClientInfo( clientInfo_t *ci ) {
 	}
 }
 
+void CG_InitMonsterClientInfo(int clientNum) {
+	clientInfo_t* ci;
+	clientInfo_t newInfo;
+	const char* defaultModel;
+
+	ci = &cgs.clientinfo[clientNum];
+
+	// build into a temp buffer so the defer checks can use
+	// the old value
+	memset(&newInfo, 0, sizeof(newInfo));
+
+	VectorSet(newInfo.color1, 1, 1, 1);
+	VectorSet(newInfo.color2, 1, 1, 1);
+
+	newInfo.botSkill = 3;
+	newInfo.handicap = 100;
+
+	Q_strncpyz(newInfo.name, "DUDE", sizeof(newInfo.name));
+	defaultModel = "klesk";
+	Q_strncpyz(newInfo.modelName, "klesk/flisk", sizeof(newInfo.modelName));
+	newInfo.team = TEAM_FREE;
+
+	//CG_LoadingString(newInfo.modelName);
+	CG_LoadingClient(clientNum);
+
+	{
+		char* slash;
+
+		slash = strchr( newInfo.modelName, '/' );
+		if ( !slash ) {
+			// modelName didn not include a skin name
+			Q_strncpyz( newInfo.skinName, "default", sizeof( newInfo.skinName ) );
+		} else {
+			Q_strncpyz( newInfo.skinName, slash + 1, sizeof( newInfo.skinName ) );
+			// truncate modelName
+			*slash = 0;
+		}
+	}
+
+	// head model
+	Q_strncpyz(newInfo.headModelName, newInfo.modelName, sizeof(newInfo.headModelName));
+	Q_strncpyz(newInfo.headSkinName, newInfo.skinName, sizeof(newInfo.headSkinName));
+
+	CG_LoadClientInfo(&newInfo);
+
+	newInfo.infoValid = qtrue;
+	*ci = newInfo;
+}
+
 /*
 ======================
 CG_CopyClientInfoModel
@@ -2167,18 +2216,19 @@ void CG_AddRefEntityWithPowerups( refEntity_t *ent, entityState_t *state, int te
 		lua_pushinteger(L,part);
 		lua_pushinteger(L,team);
 		qlua_pcall(L,4,2,qtrue);
-		if(lua_type(L,-2) == LUA_TBOOLEAN && lua_toboolean(L,-2)) {
-			if(lua_type(L,-1) == LUA_TUSERDATA) {
-				//CG_Printf("USERDATA\n");
-				re = lua_torefentity(L,-1);
-				if(re != NULL) {
-					//CG_Printf("REFENT\n");
-					//memcpy(ent,re,sizeof(refEntity_t));
-					*ent = *re;
+		if(lua_type(L,-2) == LUA_TBOOLEAN) {
+			if(!lua_toboolean(L,-2)) {
+				if(lua_type(L,-1) == LUA_TUSERDATA) {
+					re = lua_torefentity(L,-1);
+					if(re != NULL) {
+						*ent = *re;
+					}
 				}
+				lua_pop(L,2);
+			} else {
+				lua_pop(L,2);
+				return;
 			}
-			lua_pop(L,2);
-			return;
 		}
 	}
 

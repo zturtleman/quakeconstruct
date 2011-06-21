@@ -1,6 +1,10 @@
 QLUA_DEBUG = false
 if(SERVER) then QLUA_DEBUG = false end
 
+function CLAMP(v,low,high)
+	return math.min(high,math.max(low,v))
+end
+
 function killGaps(line)
 	line = string.Replace(line," ","")
 	line = string.Replace(line,"\t","")

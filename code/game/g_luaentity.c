@@ -266,7 +266,7 @@ int qlua_setweapon(lua_State *L) {
 
 	luaL_checktype(L,1,LUA_TUSERDATA);
 	luaL_checktype(L,2,LUA_TNUMBER);
-
+#ifndef LUA_WEAPONS
 	if(lua_gettop(L) == 2) {
 		int weap = lua_tointeger(L,2);
 		if(weap < 1 || weap > WP_NUM_WEAPONS-1) {
@@ -296,6 +296,8 @@ int qlua_setweapon(lua_State *L) {
 		lua_error(L);
 		return 1;
 	}
+	//HFIXME Implement Lua Weapon Code
+#endif
 	return 0;
 }
 
@@ -304,7 +306,7 @@ int qlua_hasweapon(lua_State *L) {
 
 	luaL_checktype(L,1,LUA_TUSERDATA);
 	luaL_checktype(L,2,LUA_TNUMBER);
-
+#ifndef LUA_WEAPONS
 	if(lua_gettop(L) == 2) {
 		int weap = lua_tointeger(L,2);
 		if(weap < 1 || weap > WP_NUM_WEAPONS-1) {
@@ -327,6 +329,8 @@ int qlua_hasweapon(lua_State *L) {
 		lua_error(L);
 		return 1;
 	}
+	//HFIXME Implement Lua Weapon Code
+#endif
 	return 0;
 }
 
@@ -335,7 +339,7 @@ int qlua_hasammo(lua_State *L) {
 
 	luaL_checktype(L,1,LUA_TUSERDATA);
 	luaL_checktype(L,2,LUA_TNUMBER);
-
+#ifndef LUA_WEAPONS
 	if(lua_gettop(L) == 2) {
 		int weap = lua_tointeger(L,2);
 		if(weap < 1 || weap > WP_NUM_WEAPONS-1) {
@@ -358,6 +362,8 @@ int qlua_hasammo(lua_State *L) {
 		lua_error(L);
 		return 1;
 	}
+	//HFIXME Implement Lua Weapon Code
+#endif
 	return 0;
 }
 
@@ -368,7 +374,7 @@ int qlua_giveweapon(lua_State *L) {
 
 	luaL_checktype(L,1,LUA_TUSERDATA);
 	luaL_checktype(L,2,LUA_TNUMBER);
-
+#ifndef LUA_WEAPONS
 	if(lua_gettop(L) == 2) {
 		int weap = lua_tointeger(L,2);
 		if(weap < 1 || weap > WP_NUM_WEAPONS-1) {
@@ -400,6 +406,8 @@ int qlua_giveweapon(lua_State *L) {
 		lua_error(L);
 		return 1;
 	}
+	//HFIXME Implement Lua Weapon Code
+#endif
 	return 0;
 }
 
@@ -407,7 +415,7 @@ int qlua_removeweapons(lua_State *L) {
 	gentity_t	*luaentity;
 
 	luaL_checktype(L,1,LUA_TUSERDATA);
-
+#ifndef LUA_WEAPONS
 	luaentity = lua_toentity(L,1);
 	if(luaentity != NULL && luaentity->client != NULL) {
 		luaentity->client->ps.stats[STAT_WEAPONS] = (1 << WP_NONE);
@@ -415,7 +423,9 @@ int qlua_removeweapons(lua_State *L) {
 		luaentity->client->ps.weapon = WP_NONE;
 		luaentity->client->ps.weaponstate = WEAPON_READY;
 	}
-	return 1;
+	//HFIXME Implement Lua Weapon Code
+#endif
+	return 0;
 }
 
 int qlua_removepowerups(lua_State *L) {
@@ -549,7 +559,7 @@ int qlua_setammo(lua_State *L) {
 	luaL_checktype(L,1,LUA_TUSERDATA);
 	luaL_checktype(L,2,LUA_TNUMBER);
 	luaL_checktype(L,3,LUA_TNUMBER);
-
+#ifndef LUA_WEAPONS
 	if(lua_gettop(L) == 3) {
 		int weap = lua_tointeger(L,2);
 		int ammo = lua_tointeger(L,3);
@@ -570,6 +580,8 @@ int qlua_setammo(lua_State *L) {
 		lua_error(L);
 		return 1;
 	}
+	//HFIXME Implement Lua Weapon Code
+#endif
 	return 0;
 }
 
@@ -578,7 +590,7 @@ int qlua_getammo(lua_State *L) {
 
 	luaL_checktype(L,1,LUA_TUSERDATA);
 	luaL_checktype(L,2,LUA_TNUMBER);
-
+#ifndef LUA_WEAPONS
 	if(lua_gettop(L) == 2) {
 		int weap = lua_tointeger(L,2);
 		if(weap < 1 || weap > WP_NUM_WEAPONS-1) {
@@ -597,6 +609,8 @@ int qlua_getammo(lua_State *L) {
 		lua_error(L);
 		return 1;
 	}
+	//HFIXME Implement Lua Weapon Code
+#endif
 	return 0;
 }
 
