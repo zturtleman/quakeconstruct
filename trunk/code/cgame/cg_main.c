@@ -366,6 +366,49 @@ static cvarTable_t cvarTable[] = { // bk001129
 
 static int  cvarTableSize = sizeof( cvarTable ) / sizeof( cvarTable[0] );
 
+#ifdef LUA_WEAPONS
+int CG_GetLuaWeaponSFX( int weapon, const char *func ) {
+	lua_State *L = GetClientLuaState();
+	if(L != NULL) {
+		lua_getglobal(L,func);
+		lua_pushinteger(L,weapon);
+		lua_pcall(L,1,1,0);
+		if(lua_type(L,-1) == LUA_TNUMBER) {
+			return lua_tointeger(L,-1);
+		}
+	}
+	return 0;
+}
+
+int BG_GetAmmo(int client, int weapon) {
+	lua_State *L = GetClientLuaState();
+	if(L != NULL) {
+		lua_getglobal(L,"__GetAmmo");
+		lua_pushinteger(L,client);
+		lua_pushinteger(L,weapon);
+		lua_pcall(L,2,1,0);
+		if(lua_type(L,-1) == LUA_TNUMBER) {
+			return lua_tointeger(L,-1);
+		}
+	}
+	return 0;
+}
+	
+qboolean BG_HasWeapon(int client, int weapon) {
+	lua_State *L = GetClientLuaState();
+	if(L != NULL) {
+		lua_getglobal(L,"__HasWeapon");
+		lua_pushinteger(L,client);
+		lua_pushinteger(L,weapon);
+		lua_pcall(L,2,1,0);
+		if(lua_type(L,-1) == LUA_TBOOLEAN) {
+			return lua_toboolean(L,-1);
+		}
+	}
+	return qfalse;
+}
+#endif
+
 /*
 =================
 CG_RegisterCvars

@@ -662,6 +662,10 @@ void trap_LockMouse( qboolean lock ) {
 	syscall( CG_LOCKMOUSE, lock );
 }
 
+int trap_N_ReadByte() {
+	return syscall( CG_N_READBYTE );
+}
+
 int trap_N_ReadShort() {
 	return syscall( CG_N_READSHORT );
 }

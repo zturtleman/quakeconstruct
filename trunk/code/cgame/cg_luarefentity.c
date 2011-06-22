@@ -1167,6 +1167,56 @@ int qlua_rcleardecals(lua_State *L) {
 	return 0;
 }
 
+int qlua_rsetrenderfx(lua_State *L) {
+	refEntity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	luaentity = lua_torefentity(L,1);
+	if(luaentity != NULL) {
+		luaentity->renderfx = luaL_optint(L,2,luaentity->renderfx);
+	}
+	return 0;
+}
+
+int qlua_rgetrenderfx(lua_State *L) {
+	refEntity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	luaentity = lua_torefentity(L,1);
+	if(luaentity != NULL) {
+		lua_pushinteger(L,luaentity->renderfx);
+		return 1;
+	}
+	return 0;
+}
+
+int qlua_rsetlightingorigin(lua_State *L) {
+	refEntity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	luaentity = lua_torefentity(L,1);
+	if(luaentity != NULL) {
+		lua_tovector(L,2,luaentity->lightingOrigin);
+	}
+	return 0;
+}
+
+int qlua_rgetlightingorigin(lua_State *L) {
+	refEntity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	luaentity = lua_torefentity(L,1);
+	if(luaentity != NULL) {
+		lua_pushvector(L,luaentity->lightingOrigin);
+		return 1;
+	}
+	return 0;
+}
+
 static int Entity_tostring (lua_State *L)
 {
   lua_pushfstring(L, "RefEntity: %p", lua_touserdata(L, 1));
@@ -1187,6 +1237,10 @@ static int Entity_equal (lua_State *L)
 
 static const luaL_reg REntity_methods[] = {
   {"AddRenderFx",		qlua_rrenderfx},
+  {"SetLightingOrigin",		qlua_rsetlightingorigin},
+  {"GetLightingOrigin",		qlua_rgetlightingorigin},
+  {"SetRenderFx",		qlua_rsetrenderfx},
+  {"GetRenderFx",		qlua_rgetrenderfx},
   {"GetPos",			qlua_rgetpos},
   {"SetPos",			qlua_rsetpos},
   {"GetPos2",			qlua_rgetpos2},

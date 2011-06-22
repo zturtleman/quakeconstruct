@@ -1062,6 +1062,7 @@ int		trap_GeneticParentsAndChildSelection(int numranks, float *ranks, int *paren
 
 void	trap_N_CreateMessage( msg_t *msg, int client );
 void	trap_N_SendMessage( msg_t *msg, int client );
+void	trap_N_WriteByte( msg_t *msg, int in );
 void	trap_N_WriteShort( msg_t *msg, int in );
 void	trap_N_WriteLong( msg_t *msg, int in );
 void	trap_N_WriteString( msg_t *msg, const char *str );

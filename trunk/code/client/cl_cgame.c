@@ -684,6 +684,8 @@ int CL_CgameSystemCalls( int *args ) {
   case CG_LOCKMOUSE:
 	    IN_LockMouse( args[1] );
 		return 0;
+  case CG_N_READBYTE:
+	    return MSG_ReadByte(message);
   case CG_N_READSHORT:
 		return MSG_ReadShort(message);
   case CG_N_READLONG:

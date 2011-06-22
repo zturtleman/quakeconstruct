@@ -626,7 +626,7 @@ void CG_RegisterWeapon( int weaponNum ) {
 	lua_State		*L;
 
 	L = GetClientLuaState();
-
+#ifndef LUA_WEAPONS
 	weaponInfo = &cg_weapons[weaponNum];
 
 	if ( weaponNum == 0 ) {
@@ -854,6 +854,12 @@ void CG_RegisterWeapon( int weaponNum ) {
 		weaponInfo->firingSound = qlua_pullint_m(L,"firingSound",qfalse,weaponInfo->firingSound);
 		lua_pop(L,1);
 	}
+#else
+	if(L == NULL) return;
+	qlua_gethook(L,"__RegisterWeapon");
+	lua_pushinteger(L,weaponNum);
+	qlua_pcall(L,1,0,qtrue);
+#endif
 }
 
 /*
@@ -1296,7 +1302,13 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
 		lua_pushrefentity(L,parent);
 		lua_pushentity(L,cent);
 		lua_pushinteger(L,team);
-		lua_pcall(L,3,0,qtrue);
+		lua_pushinteger(L,weaponNum);
+		if(ps == NULL) {
+			lua_pushinteger(L,RF_THIRD_PERSON);
+		} else {
+			lua_pushinteger(L,RF_FIRST_PERSON);
+		}
+		lua_pcall(L,5,0,qtrue);
 		return;
 	}}
 #else
@@ -1466,12 +1478,14 @@ void CG_AddViewWeapon( playerState_t *ps ) {
 	if ( !cg_drawGun.integer ) {
 		vec3_t		origin;
 
+#ifndef LUA_WEAPONS
 		if ( cg.predictedPlayerState.eFlags & EF_FIRING ) {
 			// special hack for lightning gun...
 			VectorCopy( cg.refdef.vieworg, origin );
 			VectorMA( origin, -8, cg.refdef.viewaxis[2], origin );
 			CG_LightningBolt( &cg_entities[ps->clientNum], origin );
 		}
+#endif
 		return;
 	}
 
@@ -1489,8 +1503,9 @@ void CG_AddViewWeapon( playerState_t *ps ) {
 
 	cent = &cg.predictedPlayerEntity;	// &cg_entities[cg.snap->ps.clientNum];
 	CG_RegisterWeapon( ps->weapon );
+#ifndef LUA_WEAPONS
 	weapon = &cg_weapons[ ps->weapon ];
-
+#endif
 	memset (&hand, 0, sizeof(hand));
 
 	// set up gun position
@@ -1514,8 +1529,19 @@ void CG_AddViewWeapon( playerState_t *ps ) {
 		hand.oldframe = CG_MapTorsoToWeaponFrame( ci, cent->pe.torso.oldFrame );
 		hand.backlerp = cent->pe.torso.backlerp;
 	}
-
+#ifndef LUA_WEAPONS
 	hand.hModel = weapon->handsModel;
+#else
+	if(L != NULL) {
+		lua_getglobal(L,"__GetHandModel");
+		lua_pushinteger(L,ps->weapon);
+		lua_pcall(L,1,1,0);
+		if(lua_type(L,-1) == LUA_TNUMBER) {
+			hand.hModel = lua_tointeger(L,-1);
+		}
+		lua_pop(L,1);
+	}
+#endif
 	hand.renderfx = RF_DEPTHHACK | RF_FIRST_PERSON | RF_MINLIGHT;
 
 	if(L != NULL) {
@@ -1846,6 +1872,19 @@ void CG_FireWeapon( centity_t *cent ) {
 	if ( ent->weapon == WP_NONE ) {
 		return;
 	}
+
+#ifdef LUA_WEAPONS
+	{lua_State *L = GetClientLuaState();
+	cent->muzzleFlashTime = cg.time;
+	if(L != NULL) {
+		lua_getglobal(L, "__WeaponFired");
+		lua_pushentity(L,cent);
+		lua_pushinteger(L,ent->weapon);
+		lua_pushvector(L,cent->currentState.angles);
+		lua_pcall(L,3,0,0);
+		return;
+	}}
+#else
 	if ( ent->weapon >= WP_NUM_WEAPONS ) {
 		CG_Error( "CG_FireWeapon: ent->weapon >= WP_NUM_WEAPONS" );
 		return;
@@ -1886,6 +1925,7 @@ void CG_FireWeapon( centity_t *cent ) {
 	if ( weap->ejectBrassFunc && cg_brassTime.integer > 0 ) {
 		weap->ejectBrassFunc( cent );
 	}
+#endif
 }
 
 

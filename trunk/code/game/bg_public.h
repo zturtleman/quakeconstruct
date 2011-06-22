@@ -50,7 +50,12 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define	DEFAULT_VIEWHEIGHT	26
 #define CROUCH_VIEWHEIGHT	12
 #define	DEAD_VIEWHEIGHT		-16
-//#define LUA_WEAPONS
+#define LUA_WEAPONS
+
+#ifdef LUA_WEAPONS
+	int BG_GetAmmo(int client, int weapon);
+	qboolean BG_HasWeapon(int client, int weapon);
+#endif
 
 //
 // config strings are a general means of communicating variable length strings

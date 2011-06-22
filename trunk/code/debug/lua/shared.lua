@@ -2,7 +2,7 @@ print("^1SHARED\n")
 
 include("lua/weapons.lua")
 include("lua/states.lua")
-
+--[[
 AddItem(0,false,
 "ammo_laserblazer",
 IT_AMMO,
@@ -98,7 +98,7 @@ local function wfired(cl,wp,delay,angles)
 	end
 end
 hook.add("FiredWeapon","shared",wfired)
-
+]]
 if(RESTARTED) then
 	if(SERVER) then
 		print("^2SV_RESTARTED\n")

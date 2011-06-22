@@ -112,6 +112,7 @@ void TossClientItems( gentity_t *self ) {
 	if(L != NULL) {
 		lua_getglobal(L, "__DropWeapon");
 		lua_pushentity(L, self);
+		lua_pushinteger(L, weapon);
 		lua_pcall(L,1,0,qtrue);
 	}}
 #endif

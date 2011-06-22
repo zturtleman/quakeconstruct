@@ -1494,6 +1494,9 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
 void CG_DrawWeaponSelect( void );
 
 void CG_OutOfAmmoChange( void );	// should this be in pmove?
+#ifdef LUA_WEAPONS
+	int CG_GetLuaWeaponSFX( int weapon, const char *func );
+#endif
 
 //
 // cg_marks.c

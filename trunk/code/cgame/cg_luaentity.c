@@ -257,7 +257,8 @@ int qlua_getclientinfo(lua_State *L) {
 				ci->curWeapon = cg.snap->ps.weapon;
 #ifndef LUA_WEAPONS
 				ci->ammo = cg.snap->ps.ammo[ci->curWeapon];
-				//HFIXME Lua Weapon Code
+#else
+				ci->ammo = BG_GetAmmo(cg.snap->ps.clientNum, ci->curWeapon);
 #endif
 			} else {
 				ci->health = luaentity->currentState.health;

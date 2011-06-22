@@ -1470,18 +1470,22 @@ PM_BeginWeaponChange
 ===============
 */
 static void PM_BeginWeaponChange( int weapon ) {
+#ifndef LUA_WEAPONS
 	if ( weapon <= WP_NONE || weapon >= WP_NUM_WEAPONS ) {
 		return;
 	}
-#ifndef LUA_WEAPONS
+
 	if ( !( pm->ps->stats[STAT_WEAPONS] & ( 1 << weapon ) ) ) {
 		return;
 	}
-	
-	if ( pm->ps->weaponstate == WEAPON_DROPPING ) {
+#else
+	if ( !BG_HasWeapon(pm->ps->clientNum, weapon)) {
 		return;
 	}
 #endif
+	if ( pm->ps->weaponstate == WEAPON_DROPPING ) {
+		return;
+	}
 
 	PM_AddEvent( EV_CHANGE_WEAPON );
 	pm->ps->weaponstate = WEAPON_DROPPING;
@@ -1507,6 +1511,10 @@ static void PM_FinishWeaponChange( void ) {
 
 	if ( !( pm->ps->stats[STAT_WEAPONS] & ( 1 << weapon ) ) ) {
 		weapon = WP_NONE;
+	}
+#else
+	if ( !BG_HasWeapon(pm->ps->clientNum, weapon)) {
+		return;
 	}
 #endif
 	pm->ps->weapon = weapon;
@@ -1694,7 +1702,7 @@ static void PM_Weapon( lua_State *L ) {
 		pm->ps->weaponstate = WEAPON_READY;
 		return;
 	}
-
+#ifndef LUA_WEAPONS
 	// start the animation even if out of ammo
 	if ( pm->ps->weapon == WP_GAUNTLET ) {
 		// the guantlet only "fires" when it actually hits something
@@ -1705,6 +1713,9 @@ static void PM_Weapon( lua_State *L ) {
 		}
 		PM_StartTorsoAnim( TORSO_ATTACK2 );
 	} else {
+#else
+	if(qtrue) {
+#endif
 		PM_StartTorsoAnim( TORSO_ATTACK );
 	}
 
@@ -1727,24 +1738,34 @@ static void PM_Weapon( lua_State *L ) {
 		lua_getglobal(L,"__CanFire");
 		lua_pushinteger(L, pm->ps->clientNum);
 		lua_pushinteger(L, pm->ps->weapon);
+		lua_pushinteger(L, pm->ps->weaponTime);
 		lua_pushinteger(L, addTime);
 		lua_pushvector(L, pm->ps->viewangles);
-		qlua_pcall(L,4,2,qtrue);
+		lua_pushinteger(L, pm->ps->weaponstate);
+		lua_pcall(L,6,3,0);
 		if(lua_type(L,-1) == LUA_TNUMBER) {
-			addTime = lua_tointeger(L,-1);
-			if(addTime == -1) {
-				lua_pop(L,1);
+			pm->ps->weaponTime = lua_tointeger(L,-1);
+		}
+		if(lua_type(L,-2) == LUA_TNUMBER) {
+			pm->ps->weaponstate = lua_tointeger(L,-2);
+		}
+		if(lua_type(L,-3) == LUA_TBOOLEAN) {
+			qboolean ret = lua_toboolean(L,-3);
+			if(ret) {
+				pm->ps->weaponstate = WEAPON_READY;
+				PM_AddEvent( EV_NOAMMO );
+				lua_pop(L,3);
 				return;
 			}
-			lua_pop(L,1);
 		}
+		lua_pop(L,3);
 	}
 #endif
 
 	// fire weapon
 	PM_AddEvent( EV_FIRE_WEAPON );
 
-	pm->ps->weaponTime += addTime;
+	//pm->ps->weaponTime += addTime;
 }
 
 /*
@@ -1915,7 +1936,7 @@ void PmoveBegin (pmove_t *pmove) {
 	}
 #else
 	if ( !(pm->ps->pm_flags & PMF_RESPAWNED) && pm->ps->pm_type != PM_INTERMISSION
-		&& ( pm->cmd.buttons & BUTTON_ATTACK )) {
+		&& ( pm->cmd.buttons & BUTTON_ATTACK ) && BG_GetAmmo(pm->ps->clientNum, pm->ps->weapon) > 0) {
 		pm->ps->eFlags |= EF_FIRING;
 	} else {
 		pm->ps->eFlags &= ~EF_FIRING;

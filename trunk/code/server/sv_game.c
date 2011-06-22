@@ -887,6 +887,9 @@ int SV_GameSystemCalls( int *args ) {
 		SV_SendMessageToClient( VMA(1), &svs.clients[args[2]] );
 		return 0;
 
+	case TRAP_N_WRITEBYTE:
+		MSG_WriteByte( VMA(1), args[2] );
+		return 0;
 	case TRAP_N_WRITESHORT:
 		MSG_WriteShort( VMA(1), args[2] );
 		return 0;
