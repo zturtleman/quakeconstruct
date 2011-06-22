@@ -797,6 +797,10 @@ void trap_N_SendMessage( msg_t *msg, int client ) {
 	syscall( TRAP_N_SENDMESSAGE, msg, client );
 }
 
+void trap_N_WriteByte( msg_t *msg, int in ) {
+	syscall( TRAP_N_WRITEBYTE, msg, in );
+}
+
 void trap_N_WriteShort( msg_t *msg, int in ) {
 	syscall( TRAP_N_WRITESHORT, msg, in );
 }

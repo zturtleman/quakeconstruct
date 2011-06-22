@@ -1291,7 +1291,9 @@ BotSelectActivateWeapon
 ==================
 */
 int BotSelectActivateWeapon(bot_state_t *bs) {
+	int i;
 	//
+//#ifndef LUA_WEAPONS
 	if (bs->inventory[INVENTORY_MACHINEGUN] > 0 && bs->inventory[INVENTORY_BULLETS] > 0)
 		return WEAPONINDEX_MACHINEGUN;
 	else if (bs->inventory[INVENTORY_SHOTGUN] > 0 && bs->inventory[INVENTORY_SHELLS] > 0)
@@ -1315,6 +1317,17 @@ int BotSelectActivateWeapon(bot_state_t *bs) {
 	else {
 		return -1;
 	}
+//#else
+/*	for(i=0; i<255; i++) {
+		if(BG_HasWeapon(bs->client,i)) {
+			int ammo = BG_GetAmmo(bs->client,i);
+			if(ammo > 0 || ammo == -1) {
+				return i;
+			}
+		}
+	}
+	return 0;*/
+//#endif
 }
 
 /*

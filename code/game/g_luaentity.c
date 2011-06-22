@@ -297,6 +297,18 @@ int qlua_setweapon(lua_State *L) {
 		return 1;
 	}
 	//HFIXME Implement Lua Weapon Code
+#else
+	if(lua_gettop(L) == 2) {
+		int weap = lua_tointeger(L,2);
+		luaentity = lua_toentity(L,1);
+		if(luaentity != NULL) {
+			if(luaentity->client != NULL) {
+				luaentity->client->ps.weapon = weap;
+			} else {
+				luaentity->s.weapon = weap;
+			}
+		}
+	}
 #endif
 	return 0;
 }
@@ -2127,6 +2139,23 @@ int qlua_getItemIndex(lua_State *L) {
 	return 0;
 }
 
+int qlua_getPredicted(lua_State *L) {
+	gentity_t	*luaentity;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+
+	luaentity = lua_toentity(L,1);
+	if(luaentity != NULL) {
+		if(luaentity->client != NULL) {
+			lua_pushinteger(L,luaentity->client->ps.clientNum);
+		} else {
+			lua_pushinteger(L,luaentity->s.clientNum);
+		}
+		return 1;
+	}
+	return 0;
+}
+
 static const luaL_reg Entity_methods[] = {
   {"GetInfo",		qlua_getclientinfo},
   {"SetInfo",		qlua_setclientinfo},
@@ -2228,6 +2257,7 @@ static const luaL_reg Entity_methods[] = {
   {"SetAnims",		qlua_setanims},
   {"SetPainDebounce", qlua_setpaindebounce},
   {"ItemIndex",		qlua_getItemIndex},
+  {"GetPredicted",	qlua_getPredicted},
   {0,0}
 };
 

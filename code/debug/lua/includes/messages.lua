@@ -2,6 +2,7 @@ D_SHORT = 1 --At first this was 0 but now I realize that 'tostring' truncates 0'
 D_LONG = 2
 D_STRING = 3
 D_FLOAT = 4
+D_BYTE = 5
 
 local msgIDs = {}
 local strings = {}
@@ -9,18 +10,21 @@ strings[D_SHORT] = "Short"
 strings[D_LONG] = "Long"
 strings[D_STRING] = "String"
 strings[D_FLOAT] = "Float"
+strings[D_BYTE] = "Byte"
 
 local types = {}
 types[D_SHORT] = "number"
 types[D_LONG] = "number"
 types[D_STRING] = "string"
 types[D_FLOAT] = "number"
+types[D_BYTE] = "number"
 
 local defaults = {}
 defaults[D_SHORT] = 0
 defaults[D_LONG] = 0
 defaults[D_STRING] = ""
 defaults[D_FLOAT] = 0
+defaults[D_BYTE] = 0
 
 local connections = {}
 
@@ -33,6 +37,7 @@ if(SERVER) then
 	funcs[D_LONG] = _message.WriteLong
 	funcs[D_STRING] = _message.WriteString
 	funcs[D_FLOAT] = _message.WriteFloat
+	funcs[D_BYTE] = _message.WriteByte
 
 	local function check(m)
 		if(m != nil and m.ismessage) then
@@ -55,7 +60,7 @@ if(SERVER) then
 			error("^5MESSAGE ERROR[B]: Data type was nil (this error should never happen!)\n")
 			return false
 		end
-		if(t < D_SHORT or t > D_FLOAT) then return false end
+		if(t < D_SHORT or t > D_BYTE) then return false end
 		if(type(v) != types[t]) then reportDataType(v,t,m) return false end
 		return true
 	end
@@ -78,12 +83,17 @@ if(SERVER) then
 		tab.pl = pl
 		tab.msgid = msgid
 		tab.argcount = 0
+		tab.WriteByte = message.WriteByte
 		tab.WriteShort = message.WriteShort
 		tab.WriteLong = message.WriteLong
 		tab.WriteString = message.WriteString
 		tab.WriteFloat = message.WriteFloat
 		tab.WriteVector = message.WriteVector
 		return tab
+	end
+
+	function message.WriteByte(m,s)
+		addData(m,s,D_BYTE)
 	end
 	
 	function message.WriteShort(m,s)
@@ -108,6 +118,10 @@ if(SERVER) then
 		message.WriteFloat(m,v.z)
 	end
 	
+	function message.WriteEntity(m,e)
+		message.WriteShort(m,e:EntIndex())
+	end
+	
 	local d_Message = _Message
 	local d_Send = _SendDataMessage
 	
@@ -121,7 +135,7 @@ if(SERVER) then
 			tab.msglist = tab.msglist or {}
 			if(tab.msglist[id] != true) then
 				local msg = d_Message(pl,2)
-				_message.WriteShort(msg,msgIDs[id])
+				_message.WriteByte(msg,msgIDs[id])
 				_message.WriteString(msg,id)
 				d_Send(msg)
 				tab.msglist[id] = true
@@ -156,7 +170,7 @@ if(SERVER) then
 		for i=1, ts do
 			local v = send[i]
 			debugprint("Send: " .. v[1] .. "->" .. v[2] .. "\n")
-			_message.WriteShort(msg,v[1])
+			_message.WriteByte(msg,v[1])
 			_message.WriteString(msg,v[2])
 		end
 		d_Send(msg)
@@ -218,7 +232,7 @@ if(SERVER) then
 			if(contents == "") then contents = "9" end
 			--print("Sent Contents: " .. contents .. "\n")
 			_message.WriteLong(msg,tonumber(contents))
-			_message.WriteShort(msg,msgid)
+			_message.WriteByte(msg,msgid)
 			for k,v in pairs(m) do
 				if(type(v) == "table") then
 					local data = v[1]
@@ -276,6 +290,7 @@ if(CLIENT) then
 	local stack = {}
 	local funcs = {}
 	local lastInStack = -1
+	funcs[D_BYTE] = _message.ReadByte
 	funcs[D_SHORT] = _message.ReadShort
 	funcs[D_LONG] = _message.ReadLong
 	funcs[D_STRING] = _message.ReadString
@@ -313,6 +328,10 @@ if(CLIENT) then
 		return #stack
 	end
 	
+	function message.ReadByte()
+		return readData(D_BYTE)
+	end
+	
 	function message.ReadShort()
 		return readData(D_SHORT)
 	end
@@ -327,6 +346,10 @@ if(CLIENT) then
 	
 	function message.ReadFloat()
 		return readData(D_FLOAT)
+	end
+	
+	function message.ReadEntity()
+		return GetEntityByIndex(readData(D_SHORT))
 	end
 	
 	function message.ReadRaw()
@@ -344,7 +367,7 @@ if(CLIENT) then
 		if(msgid == 1) then
 			stack = {}
 			local contents = tostring(_message.ReadLong())
-			local strid = _message.ReadShort()
+			local strid = _message.ReadByte()
 			if(msgIDs[strid] == nil) then
 				print("^5MESSAGE ERROR[L]: Invalid Message ID: " .. strid .. "\n")
 			end
@@ -380,14 +403,14 @@ if(CLIENT) then
 			tstack = {}
 			stack = {}
 		elseif(msgid == 2) then
-			local id = _message.ReadShort()
+			local id = _message.ReadByte()
 			local str = _message.ReadString()
 			msgIDs[id] = str
 			debugprint("Got messageID: " .. id .. "->" .. str .. "\n")
 		elseif(msgid == 3) then
 			local count = _message.ReadLong()
 			for i=1, count do
-				local id = _message.ReadShort()
+				local id = _message.ReadByte()
 				local str = _message.ReadString()
 				msgIDs[id] = str
 				debugprint("Got messageID: " .. id .. "->" .. str .. "\n")

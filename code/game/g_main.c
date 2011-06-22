@@ -278,6 +278,36 @@ void QDECL G_Error( const char *fmt, ... ) {
 	trap_Error( text );
 }
 
+#ifdef LUA_WEAPONS
+int BG_GetAmmo(int client, int weapon) {
+	lua_State *L = GetServerLuaState();
+	if(L != NULL) {
+		lua_getglobal(L,"__GetAmmo");
+		lua_pushinteger(L,client);
+		lua_pushinteger(L,weapon);
+		lua_pcall(L,2,1,0);
+		if(lua_type(L,-1) == LUA_TNUMBER) {
+			return lua_tointeger(L,-1);
+		}
+	}
+	return 0;
+}
+	
+qboolean BG_HasWeapon(int client, int weapon) {
+	lua_State *L = GetServerLuaState();
+	if(L != NULL) {
+		lua_getglobal(L,"__HasWeapon");
+		lua_pushinteger(L,client);
+		lua_pushinteger(L,weapon);
+		lua_pcall(L,2,1,0);
+		if(lua_type(L,-1) == LUA_TBOOLEAN) {
+			return lua_toboolean(L,-1);
+		}
+	}
+	return qfalse;
+}
+#endif
+
 /*
 ================
 G_FindTeams

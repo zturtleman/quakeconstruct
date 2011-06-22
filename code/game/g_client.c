@@ -1206,6 +1206,8 @@ void ClientSpawn(gentity_t *ent, gentity_t *plbody) {
 	VectorCopy (playerMaxs, ent->r.maxs);
 
 	client->ps.clientNum = index;
+	client->ps.ammo[WP_MACHINEGUN] = 50; //For Bots?
+	client->ps.stats[STAT_WEAPONS] = ( 1 << WP_MACHINEGUN );
 #ifndef LUA_WEAPONS
 	client->ps.stats[STAT_WEAPONS] = ( 1 << WP_MACHINEGUN );
 	if ( g_gametype.integer == GT_TEAM ) {

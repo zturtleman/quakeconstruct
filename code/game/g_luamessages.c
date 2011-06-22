@@ -59,6 +59,11 @@ int qlua_sendmessage(lua_State *L) {
 	return 0;
 }
 
+int qlua_writebyte(lua_State *L) {
+	trap_N_WriteByte(qlua_tomessage(L,1)->msg,lua_tointeger(L,2));
+	return 0;
+}
+
 int qlua_writeshort(lua_State *L) {
 	trap_N_WriteShort(qlua_tomessage(L,1)->msg,lua_tointeger(L,2));
 	return 0;
@@ -84,6 +89,7 @@ static const luaL_reg Message_methods[] = {
   {"WriteLong",			qlua_writelong},
   {"WriteString",		qlua_writestring},
   {"WriteFloat",		qlua_writefloat},
+  {"WriteByte",			qlua_writebyte},
   {0,0}
 };
 

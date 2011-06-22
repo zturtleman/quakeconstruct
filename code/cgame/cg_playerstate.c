@@ -80,6 +80,18 @@ void CG_CheckAmmo( void ) {
 	if ( cg.lowAmmoWarning != previous ) {
 		trap_S_StartLocalSound( cgs.media.noAmmoSound, CHAN_LOCAL_SOUND );
 	}
+#else
+	previous = cg.lowAmmoWarning;
+	{lua_State *L = GetClientLuaState();
+		if(L != NULL) {
+			lua_getglobal(L,"__AmmoWarning");
+			lua_pushinteger(L,previous);
+			lua_pcall(L,1,1,0);
+			if(lua_type(L,-1) == LUA_TNUMBER) {
+				cg.lowAmmoWarning = lua_tointeger(L,-1);
+			}
+		}
+	}
 #endif
 }
 

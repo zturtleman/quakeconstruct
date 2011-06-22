@@ -576,8 +576,13 @@ static void CG_DrawStatusBar( void ) {
 		origin[1] = 0;
 		origin[2] = 0;
 		angles[YAW] = 90 + 20 * sin( cg.time / 1000.0 );
+#ifndef LUA_WEAPONS
 		CG_Draw3DModel( CHAR_WIDTH*3 + TEXT_ICON_SPACE, 432, ICON_SIZE, ICON_SIZE,
 					   cg_weapons[ cent->currentState.weapon ].ammoModel, 0, origin, angles );
+#else
+		CG_Draw3DModel( CHAR_WIDTH*3 + TEXT_ICON_SPACE, 432, ICON_SIZE, ICON_SIZE,
+			CG_GetLuaWeaponSFX(cent->currentState.weapon,"__GetAmmoModel"), 0, origin, angles );
+#endif
 	}
 
 	if(CG_ShouldDraw("HUD_STATUSBAR_HEALTH")) {
@@ -617,69 +622,45 @@ static void CG_DrawStatusBar( void ) {
 	//
 	// ammo
 	//
+	if ( cent->currentState.weapon && CG_ShouldDraw("HUD_STATUSBAR_AMMO")) {
+		#ifndef LUA_WEAPONS
+			value = ps->ammo[cent->currentState.weapon];
+		#else
+			value = BG_GetAmmo(ps->clientNum, cent->currentState.weapon);
+		#endif
+		if ( value > -1 ) {
+			if ( cg.predictedPlayerState.weaponstate == WEAPON_FIRING
+				&& cg.predictedPlayerState.weaponTime > 100 ) {
+				// draw as dark grey when reloading
+				color = 2;	// dark grey
+			} else {
+				if ( value >= 0 ) {
+					color = 0;	// green
+				} else {
+					color = 1;	// red
+				}
+			}
+			trap_R_SetColor( colors[color] );
+			
+			CG_DrawField (0, 432, 3, value);
+			trap_R_SetColor( NULL );
+
+			// if we didn't draw a 3D icon, draw a 2D icon for ammo
+			if ( !cg_draw3dIcons.integer && cg_drawIcons.integer ) {
+				qhandle_t	icon;
+
 #ifndef LUA_WEAPONS
-	if ( cent->currentState.weapon && CG_ShouldDraw("HUD_STATUSBAR_AMMO")) {
-		value = ps->ammo[cent->currentState.weapon];
-		if ( value > -1 ) {
-			if ( cg.predictedPlayerState.weaponstate == WEAPON_FIRING
-				&& cg.predictedPlayerState.weaponTime > 100 ) {
-				// draw as dark grey when reloading
-				color = 2;	// dark grey
-			} else {
-				if ( value >= 0 ) {
-					color = 0;	// green
-				} else {
-					color = 1;	// red
-				}
-			}
-			trap_R_SetColor( colors[color] );
-			
-			CG_DrawField (0, 432, 3, value);
-			trap_R_SetColor( NULL );
-
-			// if we didn't draw a 3D icon, draw a 2D icon for ammo
-			if ( !cg_draw3dIcons.integer && cg_drawIcons.integer ) {
-				qhandle_t	icon;
-
-				icon = cg_weapons[ cg.predictedPlayerState.weapon ].ammoIcon;
-				if ( icon ) {
-					CG_DrawPic( CHAR_WIDTH*3 + TEXT_ICON_SPACE, 432, ICON_SIZE, ICON_SIZE, icon );
-				}
-			}
-		}
-	}
+					icon = cg_weapons[ cg.predictedPlayerState.weapon ].ammoIcon;
 #else
-	if ( cent->currentState.weapon && CG_ShouldDraw("HUD_STATUSBAR_AMMO")) {
-		value = 1; //HFIXME lua weapon code
-		if ( value > -1 ) {
-			if ( cg.predictedPlayerState.weaponstate == WEAPON_FIRING
-				&& cg.predictedPlayerState.weaponTime > 100 ) {
-				// draw as dark grey when reloading
-				color = 2;	// dark grey
-			} else {
-				if ( value >= 0 ) {
-					color = 0;	// green
-				} else {
-					color = 1;	// red
-				}
-			}
-			trap_R_SetColor( colors[color] );
-			
-			CG_DrawField (0, 432, 3, value);
-			trap_R_SetColor( NULL );
-
-			// if we didn't draw a 3D icon, draw a 2D icon for ammo
-			if ( !cg_draw3dIcons.integer && cg_drawIcons.integer ) {
-				qhandle_t	icon;
-
-				icon = cg_weapons[ cg.predictedPlayerState.weapon ].ammoIcon;
+					icon = CG_GetLuaWeaponSFX(cg.predictedPlayerState.weapon, "__GetAmmoIcon");
+#endif
+				//HTODO Add Weapon Icon Hook
 				if ( icon ) {
 					CG_DrawPic( CHAR_WIDTH*3 + TEXT_ICON_SPACE, 432, ICON_SIZE, ICON_SIZE, icon );
 				}
 			}
 		}
 	}
-#endif
 	//
 	// health
 	//

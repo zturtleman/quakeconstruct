@@ -9,6 +9,11 @@ void qlua_HandleMessage() {
 	}
 }
 
+int qlua_readbyte(lua_State *L) {
+	lua_pushinteger(L,trap_N_ReadByte());
+	return 1;
+}
+
 int qlua_readshort(lua_State *L) {
 	lua_pushinteger(L,trap_N_ReadShort());
 	return 1;
@@ -31,6 +36,7 @@ int qlua_readfloat(lua_State *L) {
 }
 
 static const luaL_reg Message_methods[] = {
+  {"ReadByte",		qlua_readbyte},
   {"ReadShort",		qlua_readshort},
   {"ReadLong",		qlua_readlong},
   {"ReadString",	qlua_readstring},

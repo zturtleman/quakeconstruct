@@ -1717,7 +1717,7 @@ BotUpdateInventory
 */
 void BotUpdateInventory(bot_state_t *bs) {
 	int oldinventory[MAX_ITEMS];
-
+//HTODO Add Bot Weapon Code
 	memcpy(oldinventory, bs->inventory, sizeof(oldinventory));
 	//armor
 	bs->inventory[INVENTORY_ARMOR] = bs->cur_ps.stats[STAT_ARMOR];
@@ -2197,6 +2197,7 @@ BotAggression
 ==================
 */
 float BotAggression(bot_state_t *bs) {
+	//HTODO Add Bot Weapon Code
 	//if the bot has quad
 	if (bs->inventory[INVENTORY_QUAD]) {
 		//if the bot is not holding the gauntlet or the enemy is really nearby
@@ -2245,6 +2246,7 @@ BotFeelingBad
 ==================
 */
 float BotFeelingBad(bot_state_t *bs) {
+	//HTODO Add Bot Weapon Code
 	if (bs->weaponnum == WP_GAUNTLET) {
 		return 100;
 	}
@@ -2692,11 +2694,16 @@ bot_moveresult_t BotAttackMove(bot_state_t *bs, int tfl) {
 			bs->attackjump_time = FloatTime() + 1;
 		}
 	}
+#ifndef LUA_WEAPONS
 	if (bs->cur_ps.weapon == WP_GAUNTLET) {
 		attack_dist = 0;
 		attack_range = 0;
 	}
 	else {
+#else
+	//HTODO Add Bot Weapon Code
+	{
+#endif
 		attack_dist = IDEAL_ATTACKDIST;
 		attack_range = 40;
 	}
@@ -3603,11 +3610,14 @@ void BotCheckAttack(bot_state_t *bs) {
 	//
 	VectorSubtract(bs->aimtarget, bs->eye, dir);
 	//
+#ifndef LUA_WEAPONS
 	if (bs->weaponnum == WP_GAUNTLET) {
 		if (VectorLengthSquared(dir) > Square(60)) {
 			return;
 		}
 	}
+	//HTODO Add Bot Weapon Code
+#endif
 	if (VectorLengthSquared(dir) < Square(100))
 		fov = 120;
 	else
