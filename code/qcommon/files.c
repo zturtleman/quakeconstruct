@@ -201,7 +201,7 @@ or configs will never get loaded from disk!
 // every time a new demo pk3 file is built, this checksum must be updated.
 // the easiest way to get it is to just run the game and see what it spits out
 #define	DEMO_PAK_CHECKSUM	2985612116 //437558517u
-#define QC_CONTENT_PAK_CHECKSUM		3901944831
+#define QC_CONTENT_PAK_CHECKSUM		154769449
 #define QC_GIBS_PAK_CHECKSUM		3376319979
 #define QC_PRESENTS_PAK_CHECKSUM	222703110
 #define QC_GEOM_PAK_CHECKSUM		148146879
