@@ -1,6 +1,6 @@
 print("^1SHARED\n")
 
-include("lua/weapons.lua")
+--include("lua/weapons.lua")
 include("lua/states.lua")
 --[[
 AddItem(0,false,
