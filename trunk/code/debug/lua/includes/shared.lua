@@ -83,12 +83,18 @@ ENTITYNUM_WORLD	= 1022
 ENTITYNUM_MAX_NORMAL = 1022
 
 if(SERVER) then
+	local readies = {}
 	local function message(str,pl)
 		if(str == "_clientready") then
-			CallHook("ClientReady",pl)
-			--Timer(3.8,CallHook,"ClientReady",pl)
-			if(pl:IsAdmin()) then
-				Timer(1,pl.SendString,pl,"_admin")
+			if not (readies[pl:EntIndex()]) then
+				CallHook("ClientReady",pl)
+				--Timer(3.8,CallHook,"ClientReady",pl)
+				if(pl:IsAdmin()) then
+					Timer(1,pl.SendString,pl,"_admin")
+				else
+					Timer(1,pl.SendString,pl,"_verify")
+				end
+				readies[pl:EntIndex()] = true
 			end
 		elseif(str == "_demostarted") then
 			CallHook("DemoStarted",pl)
@@ -98,7 +104,14 @@ if(SERVER) then
 	end
 	hook.add("MessageReceived","includes",message)
 else
-	hook.add("InitialSnapshot","includes",function() Timer(.1,SendString,"_clientready") end)
+	local timers = {}
+	hook.add("InitialSnapshot","includes",function() 
+		--Keep trying to tell the server that we're ready
+		for i=1, 20 do
+			local t = Timer(i/2,SendString,"_clientready") 
+			table.insert(timers,t)
+		end
+	end)
 	
 	local called = false
 	
@@ -115,6 +128,9 @@ else
 			CallHook("ClientReady")
 			CLIENT_READY = true
 			called = true
+			for k,v in pairs(timers) do StopTimer(v) end
+		elseif(str == "_verify") then
+			for k,v in pairs(timers) do StopTimer(v) end
 		end
 	end
 	hook.add("MessageReceived","includes",message)
