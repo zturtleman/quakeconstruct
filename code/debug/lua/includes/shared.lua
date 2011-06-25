@@ -85,8 +85,9 @@ ENTITYNUM_MAX_NORMAL = 1022
 if(SERVER) then
 	local readies = {}
 	local function message(str,pl)
+		local pli = pl:EntIndex() + 1
 		if(str == "_clientready") then
-			if not (readies[pl:EntIndex()+1]) then
+			if not (readies[pli]) then
 				CallHook("ClientReady",pl)
 				--Timer(3.8,CallHook,"ClientReady",pl)
 				if(pl:IsAdmin()) then
@@ -94,9 +95,9 @@ if(SERVER) then
 				else
 					Timer(1,pl.SendString,pl,"_verify")
 				end
-				readies[pl:EntIndex()+1] = true
+				readies[pli] = true
 				Timer(20,function()
-					readies[pl:EntIndex()+1] = false
+					readies[pli] = false
 				end)
 			end
 		elseif(str == "_demostarted") then
@@ -111,7 +112,10 @@ else
 	hook.add("InitialSnapshot","includes",function() 
 		--Keep trying to tell the server that we're ready
 		for i=1, 20 do
-			local t = Timer(i/2,SendString,"_clientready") 
+			local t = Timer(i,function() 
+				SendString("_clientready")
+				print("MSGConnect Attempt: " .. i .. "\n")
+			end)
 			table.insert(timers,t)
 		end
 	end)
