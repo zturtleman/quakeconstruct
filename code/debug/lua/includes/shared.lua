@@ -86,7 +86,7 @@ if(SERVER) then
 	local readies = {}
 	local function message(str,pl)
 		if(str == "_clientready") then
-			if not (readies[pl:EntIndex()]) then
+			if not (readies[pl:EntIndex()+1]) then
 				CallHook("ClientReady",pl)
 				--Timer(3.8,CallHook,"ClientReady",pl)
 				if(pl:IsAdmin()) then
@@ -94,7 +94,10 @@ if(SERVER) then
 				else
 					Timer(1,pl.SendString,pl,"_verify")
 				end
-				readies[pl:EntIndex()] = true
+				readies[pl:EntIndex()+1] = true
+				Timer(20,function()
+					readies[pl:EntIndex()+1] = false
+				end)
 			end
 		elseif(str == "_demostarted") then
 			CallHook("DemoStarted",pl)
