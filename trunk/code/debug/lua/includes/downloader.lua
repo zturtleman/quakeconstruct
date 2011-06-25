@@ -281,15 +281,17 @@ if(SERVER) then
 	hook.add("MessageReceived","__downloader.lua",message)
 	
 	function downloader.initplayer(pl)
-		if(pl != nil) then
-			local ptab = pl:GetTable()
-			ptab.files = {}
-			ptab.ready = true
-			ptab.downloading = false
-			ptab.currentdownload = nil
-			debugprint("Initialized Player: " .. pl:GetInfo().name .. " " .. #ptab.files .. " " .. pl:EntIndex() .. "\n")
-			downloader.notify()
-		end
+		Timer(4,function()
+			if(pl != nil) then
+				local ptab = pl:GetTable()
+				ptab.files = {}
+				ptab.ready = true
+				ptab.downloading = false
+				ptab.currentdownload = nil
+				debugprint("Initialized Player: " .. pl:GetInfo().name .. " " .. #ptab.files .. " " .. pl:EntIndex() .. "\n")
+				downloader.notify()
+			end
+		end)
 	end
 	hook.add("ClientReady","__downloader.lua",downloader.initplayer)
 	hook.add("Think","__downloader.lua",function()
