@@ -259,25 +259,25 @@ if(SERVER) then
 	local MessageQueue = {}
 	
 	function QueueMessage(m,player,msgid)
-		local expires = LevelTime() + 100
+		local expires = LevelTime() + 8000
 		table.insert(MessageQueue,{m,player,msgid,expires})
 	end
 	
 	function SendDataMessage(m,pl,msgid)
 		pl = pl or m.pl
 		msgid = msgid or m.msgid
-		if(connections[pl:EntIndex()]) then
+		--if(connections[pl:EntIndex()]) then
 			QueueMessage(m,pl,msgid)
-		end
+		--end
 	end
 	
 	function SendDataMessageToAll(m,msgid)
 		msgid = msgid or m.msgid
 		--print("Message To All!\n")
 		for k,v in pairs(GetAllPlayers()) do
-			if(connections[v:EntIndex()]) then
+			--if(connections[v:EntIndex()]) then
 				SendDataMessage(m,v,msgid)
-			end
+			--end
 		end	
 	end
 	

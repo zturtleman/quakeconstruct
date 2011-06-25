@@ -359,11 +359,9 @@ if(SERVER) then
 
 	function downloader.initplayer(pl)
 		if(pl != nil) then
-			Timer(4,function()
-				local ptab = newStream(pl)
-				debugprint("Initialized Player: " .. pl:GetInfo().name .. " " .. #ptab:GetFiles() .. " " .. pl:EntIndex() .. "\n")
-				downloader.notify()
-			end)
+			local ptab = newStream(pl)
+			debugprint("Initialized Player: " .. pl:GetInfo().name .. " " .. #ptab:GetFiles() .. " " .. pl:EntIndex() .. "\n")
+			downloader.notify()
 		end
 	end
 	hook.add("ClientReady","__downloader.lua",downloader.initplayer)
