@@ -136,8 +136,10 @@ else
 			CLIENT_READY = true
 			called = true
 			for k,v in pairs(timers) do StopTimer(v) end
+			print("Got Server Validation\n")
 		elseif(str == "_verify") then
 			for k,v in pairs(timers) do StopTimer(v) end
+			print("Got Server Validation\n")
 		end
 	end
 	hook.add("MessageReceived","includes",message)
