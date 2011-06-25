@@ -70,7 +70,10 @@ if(SERVER) then
 		if(!checkData(v,t,m)) then 
 			v = defaults[t]
 		end
-		if(check(m)) then table.insert(m,{v,t})end
+		if(check(m)) then 
+			debugprint("AddToStack: " .. strings[t] .. "\n")
+			table.insert(m,{v,t})
+		end
 	end
 
 	function Message(pl,msgid)
@@ -203,7 +206,7 @@ if(SERVER) then
 		return "[" .. pl:EntIndex() .. "]: " .. name .. " " .. ping .. "ms\n"
 	end
 	
-	function SendDataMessage(m,pl,msgid)
+	local function L_SendDataMessage(m,pl,msgid)
 		--print("Sending Data Message...\n")
 		if(check(m)) then
 			local start = ticks() / 1000
@@ -221,7 +224,8 @@ if(SERVER) then
 			
 			local msg = d_Message(pl,1)
 			local contents = ""
-			for k,v in pairs(m) do
+			for i=1, #m do
+				local v = m[i]
 				if(type(v) == "table") then
 					local dtype = v[2]
 					if(dtype != nil) then
@@ -229,11 +233,13 @@ if(SERVER) then
 					end
 				end
 			end
+			
 			if(contents == "") then contents = "9" end
-			--print("Sent Contents: " .. contents .. "\n")
+			debugprint("Sent Contents: " .. contents .. "\n")
 			_message.WriteLong(msg,tonumber(contents))
 			_message.WriteByte(msg,msgid)
-			for k,v in pairs(m) do
+			for i=1, #m do
+				local v = m[i]
 				if(type(v) == "table") then
 					local data = v[1]
 					local dtype = v[2]
@@ -250,6 +256,21 @@ if(SERVER) then
 		end
 	end
 	
+	local MessageQueue = {}
+	
+	function QueueMessage(m,player,msgid)
+		local expires = LevelTime() + 100
+		table.insert(MessageQueue,{m,player,msgid,expires})
+	end
+	
+	function SendDataMessage(m,pl,msgid)
+		pl = pl or m.pl
+		msgid = msgid or m.msgid
+		if(connections[pl:EntIndex()]) then
+			QueueMessage(m,pl,msgid)
+		end
+	end
+	
 	function SendDataMessageToAll(m,msgid)
 		msgid = msgid or m.msgid
 		--print("Message To All!\n")
@@ -259,6 +280,34 @@ if(SERVER) then
 			end
 		end	
 	end
+	
+	local function Think()
+		for i=1, 3 do --try and do 3 messages
+			if(#MessageQueue == 0) then return end
+			print("Queue: " .. #MessageQueue .. "\n")
+			local ltime = LevelTime()
+			local focus = MessageQueue[1]
+			local m = focus[1]
+			local player = focus[2]
+			local msgid = focus[3]
+			local expires = focus[4]
+			
+			if(player == nil) then
+				table.remove(MessageQueue,1)	
+			else
+				if(connections[player:EntIndex()]) then
+					L_SendDataMessage(m,player,msgid)
+					table.remove(MessageQueue,1)
+				else
+					if(expires < ltime) then
+						table.remove(MessageQueue,1)
+						print("^6Message Expired: " .. msgid .. "\n")
+					end
+				end
+			end
+		end
+	end
+	hook.add("Think","messages",Think)
 	
 	local function PlayerJoined(pl)
 		if(pl == nil) then return end
@@ -427,7 +476,7 @@ if(CLIENT) then
 		for k,v in pairs(contents) do
 			v = tonumber(v)
 			if(v != 9) then
-				--debugprint(strings[v] .. ",")
+				debugprint(strings[v] .. ",")
 			end
 		end
 		debugprint("EOM\n")

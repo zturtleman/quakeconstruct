@@ -7,12 +7,12 @@ local function checkdir(str)
 end
 
 function Execute(dir)
+	pcall(include,dir .. "/shared.lua")
 	if(SERVER) then
 		pcall(include,dir .. "/init.lua")
 	else
 		pcall(include,dir .. "/cl_init.lua")
 	end
-	pcall(include,dir .. "/shared.lua")
 end
 
 function FindCustomFiles(dir)

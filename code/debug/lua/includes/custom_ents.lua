@@ -55,13 +55,13 @@ end
 
 function ExecuteEntity(v)
 	ENT = {}
+	ENT._classname = string.lower(v[2])
 	
 	setmetatable(ENT,META)
 	META.__index = META
 	
 	Execute(v[1])
 	
-	ENT._classname = string.lower(v[2])
 	if(!ENT.Base) then
 		WriteEntityFunctions(ENT)
 	end
@@ -91,6 +91,39 @@ function ExecuteEntitySub(v)
 	else
 		ExecuteEntity(v)
 	end
+end
+
+function RegisterEntityClass(class,ENT)
+	if(type(ENT) ~= "table") then print("^1Argument 2 is not Entity Table\n") return end
+	class = string.lower(class)
+	
+	local current = ENTS[class]
+	if(current != nil) then
+		table.Update(ENTS[class],ENT)
+		
+		for k,v in pairs(active) do
+			if(active[k]._classname == class) then
+				table.Update(active[k],ENT)
+				metaCall(active[k],"ReInitialize")
+			end
+		end
+	else
+		setmetatable(ENT,META)
+		META.__index = META
+
+		ENT._classname = class
+		if(!ENT.Base) then
+			WriteEntityFunctions(ENT)
+		end
+		
+		ENTS[ENT._classname] = ENT
+		table.insert(_CUSTOM,{data=ENT,type="entity"})		
+	end
+	print("Registered Entity Class: " .. class .. "\n")
+end
+
+function __GEntityOverride(classname)
+	return ENTS[classname] ~= nil
 end
 
 local function InheritEntities()
@@ -135,6 +168,10 @@ print("Loading custom entities\n")
 
 local function FindEntity(name)
 	return ENTS[string.lower(name)]
+end
+
+function FindCustomEntityClass(name)
+	return FindEntity(name)
 end
 
 local function SetCallbacks(ent,tab)
@@ -332,13 +369,13 @@ else
 				end
 			else
 				ENT = {}
+				ENT._classname = string.lower(name)
 				
 				setmetatable(ENT,META)
 				META.__index = META
 			
 				pcall(include,file)
 				
-				ENT._classname = string.lower(name)
 				if(!ENT.Base) then
 					WriteEntityFunctions(ENT)
 				end

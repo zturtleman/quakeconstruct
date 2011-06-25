@@ -1585,10 +1585,12 @@ void CG_DrawWeaponSelect( void ) {
 	}
 
 	color = CG_FadeColor( cg.weaponSelectTime, WEAPON_SELECT_TIME );
+#ifndef LUA_WEAPONS
 	if ( !color ) {
 		return;
 	}
 	trap_R_SetColor( color );
+#endif
 	if(!CG_ShouldDraw("HUD_WEAPONSELECT")) return;
 
 #ifdef LUA_WEAPONS

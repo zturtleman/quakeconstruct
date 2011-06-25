@@ -322,10 +322,45 @@ qboolean G_CallSpawn( gentity_t *ent, qboolean lua ) {
 	spawn_t	*s;
 	gitem_t	*item;
 	int i = 0;
+	lua_State *L;
 
 	if ( !ent->classname ) {
 		G_Printf ("G_CallSpawn: NULL classname\n");
 		return qfalse;
+	}
+
+	//Spawn Lua Entity Here :) -Hxrmn
+	//spawn_lua_parse
+
+	L = GetServerLuaState();
+	if(L != NULL) {
+		lua_getglobal(L,"__GEntityOverride");
+		lua_pushstring(L,ent->classname);
+		lua_pcall(L,1,1,0);
+		if(lua_type(L,-1) == LUA_TBOOLEAN) {
+			ent->spawn_lua_parse = lua_toboolean(L,-1);
+		}
+		lua_pop(L,1);
+	}
+
+	if(ent->spawn_lua_parse) {
+		G_Printf ("^2Found lua entity: %s\n", ent->classname);
+		ent->client = NULL;
+		ent->touch = 0;
+		ent->pain = 0;
+		ent->die = 0;
+		ent->think = 0;
+		ent->s.eType = ET_LUA;
+		ent->r.svFlags = SVF_BROADCAST;
+		ent->s.weapon = WP_NONE;
+		ent->clipmask = MASK_SHOT;
+		ent->target_ent = NULL;
+		strcpy(ent->s.luaname, ent->classname);
+		VectorCopy(ent->s.pos.trBase,ent->s.origin2);
+		qlua_allowSpawnString = qtrue;
+		qlua_LinkEntity(ent);
+		qlua_allowSpawnString = qfalse;
+		return qtrue;
 	}
 
 	// check item spawn functions
@@ -358,29 +393,6 @@ qboolean G_CallSpawn( gentity_t *ent, qboolean lua ) {
 			s->spawn(ent);
 			return qtrue;
 		}
-	}
-
-	//Spawn Lua Entity Here :) -Hxrmn
-	//spawn_lua_parse
-
-	if(ent->spawn_lua_parse) {
-		G_Printf ("^2Found lua entity: %s\n", ent->classname);
-		ent->client = NULL;
-		ent->touch = 0;
-		ent->pain = 0;
-		ent->die = 0;
-		ent->think = 0;
-		ent->s.eType = ET_LUA;
-		ent->r.svFlags = SVF_BROADCAST;
-		ent->s.weapon = WP_NONE;
-		ent->clipmask = MASK_SHOT;
-		ent->target_ent = NULL;
-		strcpy(ent->s.luaname, ent->classname);
-		VectorCopy(ent->s.pos.trBase,ent->s.origin2);
-		qlua_allowSpawnString = qtrue;
-		qlua_LinkEntity(ent);
-		qlua_allowSpawnString = qfalse;
-		return qtrue;
 	}
 
 	G_Printf ("%s doesn't have a spawn function\n", ent->classname);

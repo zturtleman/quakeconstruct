@@ -571,7 +571,11 @@ static void CG_DrawStatusBar( void ) {
 	VectorClear( angles );
 
 	// draw any 3D icons first, so the changes back to 2D are minimized
+#ifndef LUA_WEAPONS
 	if ( cent->currentState.weapon && cg_weapons[ cent->currentState.weapon ].ammoModel && CG_ShouldDraw("HUD_STATUSBAR_AMMO")) {
+#else
+	if ( cent->currentState.weapon && CG_ShouldDraw("HUD_STATUSBAR_AMMO")) {
+#endif
 		origin[0] = 70;
 		origin[1] = 0;
 		origin[2] = 0;
