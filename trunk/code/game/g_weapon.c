@@ -857,11 +857,38 @@ int lua_fireWeapon(lua_State *L) {
 
 	return 0;
 }
-
 #endif
+
+int qlua_radiusDamage(lua_State *L) {
+	vec3_t origin;
+	gentity_t *attacker;
+	float damage;
+	float radius;
+	gentity_t *ignore;
+	int mod = MOD_SUICIDE;
+
+	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,2,LUA_TUSERDATA);
+	luaL_checktype(L,3,LUA_TNUMBER);
+	luaL_checktype(L,4,LUA_TNUMBER);
+
+	lua_tovector(L,1,origin);
+	attacker = lua_toentity(L,2);
+	damage = lua_tonumber(L,3);
+	radius = lua_tonumber(L,4);
+
+	if(lua_type(L,5) == LUA_TUSERDATA) {
+		ignore = lua_toentity(L,5);
+		if(lua_type(L,6) == LUA_TNUMBER) mod = lua_tointeger(L,6);
+	}
+
+	G_RadiusDamage(origin,attacker,damage,radius,ignore,mod);
+	return 0;
+}
 
 void G_InitLuaWeapon(lua_State *L) {
 	lua_register(L,"G_FireBullet",lua_firebullets);
+	lua_register(L,"G_RadiusDamage",qlua_radiusDamage);
 
 	#ifdef LUA_WEAPONS
 		lua_register(L,"__FireDefault",lua_fireWeapon);

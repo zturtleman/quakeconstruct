@@ -85,7 +85,7 @@ local function makeEnt(p,c,a)
 		ent:SetPos(tr.endpos + Vector(0,0,20))
 	end
 	--ent:SetWait(1)
-	ent:SetTrType(TR_STATIONARY)
+	--ent:SetTrType(TR_STATIONARY)
 	--ent:SetSpawnFlags(1)
 end
 concommand.add("entity",makeEnt)

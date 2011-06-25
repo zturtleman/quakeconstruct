@@ -88,7 +88,7 @@ if(SERVER) then
 			CallHook("ClientReady",pl)
 			--Timer(3.8,CallHook,"ClientReady",pl)
 			if(pl:IsAdmin()) then
-				Timer(2,pl.SendString,pl,"_admin")
+				Timer(1,pl.SendString,pl,"_admin")
 			end
 		elseif(str == "_demostarted") then
 			CallHook("DemoStarted",pl)
@@ -98,7 +98,7 @@ if(SERVER) then
 	end
 	hook.add("MessageReceived","includes",message)
 else
-	hook.add("InitialSnapshot","includes",function() Timer(.6,SendString,"_clientready") end)
+	hook.add("InitialSnapshot","includes",function() Timer(.1,SendString,"_clientready") end)
 	
 	local called = false
 	

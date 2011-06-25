@@ -6,7 +6,7 @@ if (table.Inherit) then return end
 function table.Inherit( t, base )
 
 	for k, v in pairs( base ) do 
-		if ( t[k] == nil ) then	t[k] = v end
+		if ( t[k] == nil ) then t[k] = v end
 	end
 	
 	t["BaseClass"] = base
@@ -45,7 +45,7 @@ function table.Update(dest, source, tf)
 				dest[k] = source[k]
 			end
 		else
-			dest[k] = source[k]		
+			dest[k] = source[k]
 		end
 	end
 end
@@ -356,6 +356,14 @@ function table.Flip( Table )
 	end
 	
 	return t2
+end
+
+function table.ReverseLookup( Table, value )
+	for k,v in pairs(Table) do
+		if(v == value) then return k end
+	end
+	
+	return nil
 end
 
 function table.Fuse( Table, Condition )

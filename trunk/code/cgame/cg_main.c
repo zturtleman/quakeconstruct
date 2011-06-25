@@ -964,6 +964,17 @@ static void CG_RegisterGraphics( void ) {
 		cgs.media.numberShaders[i] = trap_R_RegisterShader( sb_nums[i] );
 	}
 
+#ifdef LUA_WEAPONS
+	cgs.media.bulletExplosionShader = trap_R_RegisterShader( "bulletExplosion" );
+	cgs.media.rocketExplosionShader = trap_R_RegisterShader( "rocketExplosion" );
+	cgs.media.grenadeExplosionShader = trap_R_RegisterShader( "grenadeExplosion" );
+	cgs.media.plasmaExplosionShader = trap_R_RegisterShader( "plasmaExplosion" );
+
+	cgs.media.railExplosionShader = trap_R_RegisterShader( "railExplosion" );
+	cgs.media.railRingsShader = trap_R_RegisterShader( "railDisc" );
+	cgs.media.railCoreShader = trap_R_RegisterShader( "railCore" );
+#endif
+
 	cgs.media.botSkillShaders[0] = trap_R_RegisterShader( "menu/art/skill1.tga" );
 	cgs.media.botSkillShaders[1] = trap_R_RegisterShader( "menu/art/skill2.tga" );
 	cgs.media.botSkillShaders[2] = trap_R_RegisterShader( "menu/art/skill3.tga" );
