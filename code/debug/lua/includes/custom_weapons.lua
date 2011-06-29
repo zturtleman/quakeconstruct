@@ -262,7 +262,7 @@ if(SERVER) then
 	message.Precache("_winv")
 
 	GetPredictedClient = function(pl)
-		return GetPlayerByIndex(pl:GetPredicted())
+		return GetPlayerByIndex(pl:GetPredicted()) or pl
 	end
 
 	GetClient = function(n)
@@ -319,7 +319,7 @@ end
 
 function GetAmmoIndexForWeapon(i_weapon)
 	local class = GetWeaponClass(i_weapon)
-	if(class == nil) then return end
+	if(class == nil) then return 1 end
 	return class.ammoClass
 end
 
@@ -459,9 +459,11 @@ if(SERVER) then
 		__WeaponFired(player,iweapon,muzzle,angles)
 	end)
 
+	local spawned = {}
 	function PlayerSpawned(pl)
 		if(pl == nil) then print ("^3WHY NULL PLAYER?") return end
 		local client = pl:EntIndex()
+		spawned[client] = true
 		pl:SetWeapon(0)
 		__RemoveAllWeapons(client)
 		--__GiveCustomWeapon(pl,"weapon_deagle",25)
@@ -470,8 +472,21 @@ if(SERVER) then
 			__GiveCustomWeapon(pl,WEAPON_CLASSES[i],25)
 		end
 	end
-	hook.add("ClientReady","weapons",PlayerSpawned)
 	hook.add("PlayerSpawned","weapons",PlayerSpawned)
+	
+	--This checks to make sure that players get their stuff
+	function PostSpawned(pl)
+		local client = pl:EntIndex()
+		if(spawned[client]) then
+			local inv = CheckPlayer(client)
+			for k,v in pairs(inv.weapons) do
+				if(v == 1) then
+					UpdatePlayerInventory(client,CMD_GOTWEAPON,k,__GetAmmo(pl,k))
+				end
+			end
+		end
+	end
+	hook.add("ClientReady","weapons",PostSpawned)
 	
 	Timer(2,function()
 		for k,v in pairs(GetAllEntities()) do

@@ -71,7 +71,7 @@ if(SERVER) then
 			v = defaults[t]
 		end
 		if(check(m)) then 
-			debugprint("AddToStack: " .. strings[t] .. "\n")
+			--debugprint("AddToStack: " .. strings[t] .. "\n")
 			table.insert(m,{v,t})
 		end
 	end
@@ -284,7 +284,7 @@ if(SERVER) then
 	local function Think()
 		for i=1, 3 do --try and do 3 messages
 			if(#MessageQueue == 0) then return end
-			print("Queue: " .. #MessageQueue .. "\n")
+			--print("Queue: " .. #MessageQueue .. "\n")
 			local ltime = LevelTime()
 			local focus = MessageQueue[1]
 			local m = focus[1]

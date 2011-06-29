@@ -2,11 +2,11 @@ local sounds = {}
 local strings = {}
 
 local function loaded(str,i,compressed)
-	debugprint("Loaded Sound: " .. str .. " | " .. i .. "\n")
+	--[[debugprint("Loaded Sound: " .. str .. " | " .. i .. "\n")
 	if(i != 0) then
 		strings[i] = str
 		table.insert(sounds,{str,i,compressed})
-	end
+	end]]
 end
 hook.add("SoundLoaded","sounds",loaded)
 

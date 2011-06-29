@@ -2,11 +2,11 @@ local models = {}
 local strings = {}
 
 local function loaded(str,i)
-	debugprint("Loaded Model: " .. str .. " | " .. i .. "\n")
-	if(i != 0) then
+	--debugprint("Loaded Model: " .. str .. " | " .. i .. "\n")
+	--[[if(i != 0) then
 		strings[i] = str
 		table.insert(models,{str,i})
-	end
+	end]]
 end
 hook.add("ModelLoaded","models",loaded)
 
@@ -21,6 +21,9 @@ function LoadModel(str)
 			return v[2]
 		end
 	end]]
+	if(__RESOURCE_REGISTERING) then
+		util.LoadingString("lua media: " .. string.GetFileFromFilename(str))
+	end
 	return __loadmodel(str)
 end
 

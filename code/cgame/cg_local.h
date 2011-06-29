@@ -1800,6 +1800,7 @@ int			trap_IsUI(void);
 void		trap_R_Screenshot(int x, int y, int w, int h, char *file);
 void		trap_R_ClearImage(const char *file);
 qhandle_t	trap_CM_GetPhysicsWorld();
+void		trap_N_SetPrimed();
 
 typedef enum {
   SYSTEM_PRINT,
