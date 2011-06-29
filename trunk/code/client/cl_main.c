@@ -1359,13 +1359,16 @@ void CL_DownloadsComplete( void ) {
 	cls.cgameStarted = qtrue;
 
 	CL_InitCGame();
-
+/*
 	// set pure checksums
 	CL_SendPureChecksums();
 
 	CL_WritePacket();
 	CL_WritePacket();
 	CL_WritePacket();
+
+	//ONLY WHEN PRIMED -HXRMN
+*/
 }
 
 /*

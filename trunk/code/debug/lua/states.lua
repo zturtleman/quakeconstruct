@@ -124,7 +124,7 @@ hook.add("ScriptLoaded","_statemanagement",function(script)
 		_ACTIVESCRIPTS[script] = 1
 		IGNORE = nil
 	else
-		print("^5IGNORING: " .. script .. "\n")
+		--print("^5IGNORING: " .. script .. "\n")
 	end
 	if(type(_SaveState) == "function") then
 		_SCRIPT_STATE_CALLS[script] = _SaveState

@@ -88,6 +88,7 @@ end
 --***********
 if(SERVER) then
 	DLStream = {}
+	PLSTREAMS = {}
 
 	STREAM_IDLE = 1
 	STREAM_WCM = 2
@@ -108,13 +109,15 @@ if(SERVER) then
 		o.queue = {}
 		
 		ptab.stream = o
+		PLSTREAMS[client:EntIndex() + 1] = o
 		
 		return o;
 	end
 
 	function getPlayerStream(client)
-		local ptab = client:GetTable()
-		return ptab.stream
+		--local ptab = client:GetTable()
+		--return ptab.stream
+		return PLSTREAMS[client:EntIndex() + 1]
 	end
 
 	function DLStream:GetFiles()
@@ -144,10 +147,10 @@ if(SERVER) then
 		if(filex.lines != nil) then
 			local lines = 0
 			for _,line in pairs (filex.lines) do
-				Timer(.1*lines,self.SendLine,self,line)
+				self:SendLine(line)
 				lines = lines + 1
 			end
-			Timer((.1*lines) + 0.2,self.FinishedFile,self)
+			self:FinishedFile()
 		else
 			self.current.status = FILE_FAILED
 			self:Notify()
@@ -255,6 +258,7 @@ if(SERVER) then
 	end
 	
 	function DLStream:Notify()
+		print("DL: Stream Notified\n")
 		self:SendNextFile()
 	end
 --************
@@ -333,7 +337,9 @@ if(SERVER) then
 
 	local function pushQueueToStream(stream)
 		local doNotify = false
+		print("DL: PUSHING STREAMS\n")
 		for k,v in pairs(FQueue) do
+			print("DL: " .. k .. "\n")
 			if(v.status == FILE_PENDINGEXECUTION) then
 				stream:ExecuteFile(v)
 			else
@@ -362,6 +368,8 @@ if(SERVER) then
 			local ptab = newStream(pl)
 			debugprint("Initialized Player: " .. pl:GetInfo().name .. " " .. #ptab:GetFiles() .. " " .. pl:EntIndex() .. "\n")
 			downloader.notify()
+		else
+			debugprint("^1Unable To Initialize Null Player\n")
 		end
 	end
 	hook.add("ClientReady","__downloader.lua",downloader.initplayer)
@@ -377,8 +385,7 @@ if(SERVER) then
 	end
 
 	function downloader.notify()
-		for k,v in pairs(GetAllPlayers()) do
-			local stream = getPlayerStream(v)
+		for k,stream in pairs(PLSTREAMS) do
 			if(stream != nil) then
 				pushQueueToStream(stream)
 			end
@@ -496,6 +503,9 @@ if(CLIENT) then
 			frame = nil
 			flist = nil
 		end
+		if(#QUEUE == 0) then
+			CallHook("DownloadsFinished")
+		end
 		--print("FINISHED!\n");
 		if(CONTENTS != "") then writeToFile() end
 		LINECOUNT = 0
@@ -528,11 +538,12 @@ if(CLIENT) then
 				if(v[1] == name) then v[2] = lines return end
 			end
 			table.insert(QUEUE,{name,lines})
-			update()
-			--print("F_QUEUE: " .. name .. " - " .. lines .. " lines.\n")
+			--update()
+			print("F_QUEUE: " .. name .. " - " .. lines .. " lines.\n")
+			CallHook("DLFileQueued",name,lines)
 		elseif(msgid == "__fileheader") then
 			if(#tab == 0 and start) then
-				--print("CL_FINISH\n")
+				print("CL_FINISH\n")
 				finished()
 				return
 			end
@@ -540,37 +551,40 @@ if(CLIENT) then
 			local name = base64.dec(message.ReadString() or "")
 			local lines = message.ReadShort()
 			local md5 = base64.dec(message.ReadString() or "")
-			--print("F_HEADER: " .. name .. " - " .. lines .. " lines.\n")
+			print("F_HEADER: " .. name .. " - " .. lines .. " lines.\n")
 			CONTENTS = ""
 			FILENAME = name
 			LINECOUNT = lines
 			LINEITER = 0
 			if(checkForFile(FILENAME,md5)) then
-				--print("F_SENT_CANCEL\n")
+				print("F_SENT_CANCEL\n")
 				SendString("_downloadaction cancel")
 				includeFile(FILENAME) --FIX THIS OMG! -Hxrmn
 				finished()
+				CallHook("DLFileAction",name,lines,md5,false)
 			else
 				if(frame == nil) then
-					makeFrame()
-					update()
+					--makeFrame()
+					--update()
 				end
-				--print("F_SENT_ACCEPT\n")
+				print("F_SENT_ACCEPT\n")
 				SendString("_downloadaction accept")
+				CallHook("DLFileAction",name,lines,md5,true)
 			end
 		elseif(msgid == "__fileline") then
 			local str = base64.dec(message.ReadString() or "")
 			CONTENTS = CONTENTS .. str -- .. "\n"
 			LINEITER = LINEITER + 1
 			--print("F_LINE: " .. str .. " [X] " .. LINEITER .. "/" .. LINECOUNT .. "\n")
-			update()
+			--update()
+			CallHook("DLFileLine",str)
 			if(LINEITER == LINECOUNT) then
 				finished()
 			end
 		elseif(msgid == "__runfile") then
 			local name = base64.dec(message.ReadString() or "")
 			--FILENAME = name
-			--print("F_EXECUTE: " .. name .. "\n")
+			print("F_EXECUTE: " .. name .. "\n")
 			includeFile(name)
 		end
 	end

@@ -801,6 +801,19 @@ int CL_CgameSystemCalls( int *args ) {
 		return 0;
 	case CG_CM_GETPHYSICSWORLD:
 		return CM_GetPhysicsWorld();
+	case CG_SETPRIMED:
+		if(cls.state == CA_LOADING) {
+			cls.state = CA_PRIMED;
+			Com_Printf("PRIMED\n");
+			CL_SendPureChecksums();
+
+			CL_WritePacket();
+			CL_WritePacket();
+			CL_WritePacket();
+		} else {
+			Com_Printf("CAN'T PRIME, ALREADY LOADED\n");
+		}
+		return 0;
 
 	default:
 	        assert(0); // bk010102
@@ -857,7 +870,7 @@ void CL_InitCGame( void ) {
 	VM_Call( cgvm, CG_INIT, clc.serverMessageSequence, clc.lastExecutedServerCommand, clc.clientNum );
 	// we will send a usercmd this frame, which
 	// will cause the server to send us the first snapshot
-	cls.state = CA_PRIMED;
+	//cls.state = CA_PRIMED; THIS NEEDS TO BE DONE AT SOME POINT -HXRMN
 
 	t2 = Sys_Milliseconds();
 

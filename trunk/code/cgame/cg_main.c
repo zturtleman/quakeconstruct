@@ -23,6 +23,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // cg_main.c -- initialization and primary entry point for cgame
 #include "cg_local.h"
 #include "Bullet-C-Api.h"
+#include <windows.h>
 
 #ifdef MISSIONPACK
 #include "../ui/ui_shared.h"
@@ -935,6 +936,7 @@ This function may execute for a couple of minutes with a slow disk.
 static void CG_RegisterGraphics( void ) {
 	int			i;
 	char		items[MAX_ITEMS+1];
+	lua_State	*L = GetClientLuaState();
 	static char		*sb_nums[11] = {
 		"gfx/2d/numbers/zero_32b",
 		"gfx/2d/numbers/one_32b",
@@ -948,6 +950,12 @@ static void CG_RegisterGraphics( void ) {
 		"gfx/2d/numbers/nine_32b",
 		"gfx/2d/numbers/minus_32b",
 	};
+
+	if(L != NULL) {
+		CG_LoadingString( "lua media" );
+		qlua_gethook(L,"RegisterGraphics");
+		qlua_pcall(L,0,0,qtrue);
+	}
 
 	// clear any references to old media
 	memset( &cg.refdef, 0, sizeof( cg.refdef ) );
@@ -2063,6 +2071,8 @@ qboolean Cmd_Check_Lua( const char cmd[] ) {
 	
 	qlua_nextarg = 1;
 
+	if(cg_entities == NULL) return qfalse;
+	if(cg.snap == NULL) return qfalse;
 	if(L != NULL) {
 		lua_getglobal(L, "__concommand");
 		lua_pushentity(L, &cg_entities[ cg.snap->ps.clientNum ]);
@@ -2145,6 +2155,7 @@ int qlua_loadcustomsound(lua_State *L) {
 			snd = lua_tostring(L,1);
 		}
 	} else {
+		if(cg.snap == NULL) return 0;
 		ent = &cg_entities[ cg.snap->ps.clientNum ];	
 		if(lua_type(L,1) == LUA_TSTRING) {
 			snd = lua_tostring(L,1);
@@ -2190,7 +2201,8 @@ int qlua_playsound(lua_State *L) {
 	vec3_t	origin;
 	sfxHandle_t	handle;
 	soundChannel_t channel = CHAN_AUTO;
-	
+
+	if(cg.snap == NULL) return 0;
 	if(IsEntity(L,1)) {
 		ent = lua_toentity(L,1);
 		if(lua_type(L,2) == LUA_TNUMBER) {
@@ -2235,6 +2247,7 @@ int qlua_loopsound(lua_State *L) {
 	vec3_t	origin, vel;
 	sfxHandle_t	handle;
 	
+	if(cg.snap == NULL) return 0;
 	if(IsEntity(L,1)) {
 		ent = lua_toentity(L,1);
 		if(lua_type(L,2) == LUA_TNUMBER) {
@@ -2329,6 +2342,8 @@ void interupt() {
 
 void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum ) {
 	const char	*s;
+	LARGE_INTEGER tick, tick2;
+	LARGE_INTEGER ticksPerSecond;
 
 	// clear everything
 	memset( &cgs, 0, sizeof( cgs ) );
@@ -2384,6 +2399,19 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum ) {
 
 	CG_ParseServerinfo();
 
+	QueryPerformanceFrequency(&ticksPerSecond);
+	QueryPerformanceCounter(&tick);
+
+	CG_LoadingString( "lua subsystem" );
+	CG_InitLua(qfalse);
+	DoLuaInit();
+
+	QueryPerformanceCounter(&tick2);
+
+	{
+		float taken = (float) (tick2.QuadPart - tick.QuadPart) / ticksPerSecond.QuadPart;
+		CG_Printf("^6LUA Subsystem Init took %f seconds.\n", taken);
+	}
 
 	CG_Printf("PhysicsTest\n");
 	//CG_DoPhysicsTest();
@@ -2392,10 +2420,6 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum ) {
 	CG_LoadingString( "collision map" );
 
 	trap_CM_LoadMap( cgs.mapname );
-
-	CG_InitLua(qfalse);
-	DoLuaInit();
-
 
 #ifdef MISSIONPACK
 	String_Init();

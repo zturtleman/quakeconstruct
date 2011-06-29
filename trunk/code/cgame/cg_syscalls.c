@@ -702,3 +702,7 @@ void trap_R_ClearImage(const char *file) {
 qhandle_t trap_CM_GetPhysicsWorld() {
 	return syscall(CG_CM_GETPHYSICSWORLD);
 }
+
+void trap_N_SetPrimed() {
+	syscall(CG_SETPRIMED);
+}

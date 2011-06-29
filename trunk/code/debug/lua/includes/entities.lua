@@ -199,8 +199,9 @@ end
 hook.add("EntityLinked","_LinkToLua",LinkEntity,999)
 hook.add("EntityUnlinked","_UnlinkFromLua",UnlinkEntity,999)
 hook.add("PlayerDisconnected","_UnlinkFromLua",UnlinkPlayer,999)
-hook.add("PlayerJoined","_LinkToLua",function(ent) Timer(.2,LinkEntity,ent) end,999)
-hook.add("PlayerSpawned","_LinkToLua",function(ent) Timer(.2,LinkEntity,ent) end,999)
+hook.add("PlayerJoined","_LinkToLua",function(ent) LinkEntity(ent) end,999)
+hook.add("PlayerSpawned","_LinkToLua",function(ent) LinkEntity(ent) end,999)
+hook.add("ClientReady","_LinkToLua",function(ent) LinkEntity(ent) end,999)
 --Delay player linking so that other entities can link up first
 
 debugprint("^3Entity code loaded.\n")

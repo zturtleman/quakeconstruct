@@ -1,8 +1,10 @@
 --[[for k,v in pairs(_G) do
 	print(k .. "\n")
 end]]
+local TOTAL_LOADTIME = 0
 
 local function includex(s)
+	local t_start = ticks()
 	local ext = "lua"
 	local path = "lua/includes"
 	if(COMPILED) then
@@ -19,6 +21,12 @@ local function includex(s)
 			--print("^2Loaded: " .. s .. "\n")
 		end
 	end
+	local t_end = ticks()
+	local t_rez = ticksPerSecond()
+	local loadtime = (t_end - t_start) / t_rez
+	TOTAL_LOADTIME = TOTAL_LOADTIME + loadtime
+	
+	print("^6---" .. s .. " took " .. loadtime .. " seconds. ::: " .. TOTAL_LOADTIME .. "\n")
 end
 
 --[[includex("tools")
@@ -70,7 +78,21 @@ if(CLIENT) then includex("qml") end
 if(CLIENT) then includex("particletools") end
 includex("input")
 includex("packs")
-includex("custom")
+if(SERVER) then
+	includex("custom")
+else
+	if not (RESTARTED) then
+		hook.add("RegisterGraphics","includes",function()
+			--Load custom stuff during the graphics step.
+			print("^6Registering Graphics\n")
+			__RESOURCE_REGISTERING = true
+			includex("custom")
+			__RESOURCE_REGISTERING = false
+		end)
+	else
+		includex("custom")
+	end
+end
 includex("persistance")
 --require "includes/functiondump"
 
@@ -88,6 +110,7 @@ if(SERVER) then
 		local pli = pl:EntIndex() + 1
 		if(str == "_clientready") then
 			if not (readies[pli]) then
+				print("CLIENT IS READY\n")
 				CallHook("ClientReady",pl)
 				--Timer(3.8,CallHook,"ClientReady",pl)
 				if(pl:IsAdmin()) then
@@ -109,7 +132,7 @@ if(SERVER) then
 	hook.add("MessageReceived","includes",message)
 else
 	local timers = {}
-	hook.add("InitialSnapshot","includes",function() 
+	--[[hook.add("InitialSnapshot","includes",function() 
 		--Keep trying to tell the server that we're ready
 		for i=1, 20 do
 			local t = Timer(i,function() 
@@ -118,7 +141,81 @@ else
 			end)
 			table.insert(timers,t)
 		end
+	end)]]
+	
+	local files = {}
+	local currentFile = 0
+	local num_files = 0
+	local function update()
+		num_files = 0
+		for k,v in pairs(files) do num_files = num_files + 1 end
+	end
+	
+	function DrawDownloads()
+		if(num_files == 0) then return end
+		
+		draw.SetColor(0,0,0,.8)
+		draw.Rect(0,0,640,480)
+		local y = 10
+		for k,v in pairs(files) do
+			if(v ~= nil) then
+				draw.SetColor(1,1,.5,.8)
+				if(k == currentFile) then
+					draw.SetColor(1,1,1,1)
+				end
+				draw.Text(25,y,k .. ": " .. v.got .. "/" .. v.lines .. "",8,10)
+				y = y + 10
+			end
+		end
+	end
+	
+	hook.add("DLFileQueued","includes",function(name,lines)
+		files[name] = {lines = lines, got = 0}
+		update()
 	end)
+	
+	hook.add("DLFileAction","includes",function(name,lines,md5,accept)
+		files[name] = files[name] or {lines = 0, got = 0}
+		files[name].lines = lines or files[name].lines
+		files[name].md5 = md5
+		if(accept == false) then
+			files[name] = nil
+		else
+			currentFile = name
+		end
+		update()
+	end)
+	
+	hook.add("DLFileLine","includes",function(line)
+		if(files[currentFile] == nil) then return end
+		local file = files[currentFile]
+		file.got = file.got + 1
+		if(file.got == file.lines) then
+			files[currentFile] = nil
+		else
+			files[currentFile] = file
+		end
+		update()
+	end)
+	
+	local LOADED = false
+	hook.add("Loaded","includes",function()
+		SendString("_clientready")
+		LOADED = true
+	end)
+	
+	hook.add("DrawInfo","includes",function()
+		if(LOADED) then
+			DrawDownloads()
+		end
+	end,-9999)
+	
+	hook.add("DownloadsFinished","includes",function()
+		_setprimed()
+		print("Downloads Are Finished\n")
+	end,9999)
+	
+	hook.add("Draw2D","includes",DrawDownloads)
 	
 	local called = false
 	
@@ -154,6 +251,10 @@ else
 		CallHook("ClientReady")
 		CLIENT_READY = true
 	end end)
+	
+	if(RESTARTED) then
+		SendString("_clientready")
+	end
 	
 	function IsAdmin()
 		return ADMIN

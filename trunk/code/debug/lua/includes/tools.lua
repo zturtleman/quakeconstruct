@@ -1,6 +1,8 @@
 QLUA_DEBUG = false
 if(SERVER) then QLUA_DEBUG = false end
 
+--QLUA_DEBUG = true
+
 function CLAMP(v,low,high)
 	return math.min(high,math.max(low,v))
 end

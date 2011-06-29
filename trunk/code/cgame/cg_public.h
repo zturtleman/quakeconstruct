@@ -218,6 +218,8 @@ typedef enum {
 	CG_CM_GETPHYSICSWORLD,
 	CG_R_ForceRenderCommands,
 	CG_R_UpdateRenderTarget,
+
+	CG_SETPRIMED,
 } cgameImport_t;
 
 

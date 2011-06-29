@@ -437,6 +437,11 @@ int qclose(lua_State *L) {
 	return 0;
 }
 
+int qsetprimed(lua_State *L) {
+	trap_N_SetPrimed();
+	return 0;
+}
+
 void SetGlobal(const char *n, int v) {
 	lua_pushinteger(L,v);
 	lua_setglobal(L,n);
@@ -491,6 +496,7 @@ void InitClientLua( int restart ) {
 	lua_register(L,"_profArgs",qprof_argtest);
 	lua_register(L,"_profFunc",qprof_functest);
 	lua_register(L,"startReplay",replay);
+	lua_register(L,"_setprimed",qsetprimed);
 
 	CG_Printf("----------------Done-----------------\n");
 	ready = qtrue;
