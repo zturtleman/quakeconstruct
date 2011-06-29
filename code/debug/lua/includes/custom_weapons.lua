@@ -39,6 +39,10 @@ local function metaCall(tab,func,...)
 	return false
 end
 
+local function sortWeaponClasses()
+	table.sort(WEAPON_CLASSES)
+end
+
 function ExecuteWeapon(v)
 	WEAPON = {}
 	WEAPON.ITEM = {}
@@ -59,6 +63,7 @@ function ExecuteWeapon(v)
 	table.insert(_CUSTOM,{data=WEAPON,type="weapon"})
 	if(WEAPON.register == true) then
 		table.insert(WEAPON_CLASSES,WEAPON._classname)
+		sortWeaponClasses()
 	end
 end
 
@@ -146,6 +151,11 @@ for k,v in pairs(list) do
 end
 print("Loading custom weapons\n")
 
+--WRITE WEAPONS MANIFEST SO CLIENT KNOWS WHICH WEAPON IS WHICH
+function WriteWeaponsManifest()
+
+end
+
 local function FindWeapon(name)
 	return WEAPONS[string.lower(name)]
 end
@@ -212,6 +222,7 @@ if(CLIENT) then
 				table.insert(_CUSTOM,{data=WEAPON,type="weapon"})
 				if(WEAPON.register == true) then
 					table.insert(WEAPON_CLASSES,WEAPON._classname)
+					sortWeaponClasses()
 				end
 				InheritWeapons()
 				if(WEAPON.register == true) then
