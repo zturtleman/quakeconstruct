@@ -717,7 +717,7 @@ qboolean CL_ReadyToSendPacket( void ) {
 	if ( cls.state != CA_ACTIVE && 
 		cls.state != CA_PRIMED && 
 		!*clc.downloadTempName &&
-		cls.realtime - clc.lastPacketSentTime < 1000 ) {
+		cls.realtime - clc.lastPacketSentTime < 100 ) { //WE'RE IN LUA TOWN NOW, SO LET'S GO CRAZY -HXRMN
 		return qfalse;
 	}
 
