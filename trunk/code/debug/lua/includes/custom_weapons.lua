@@ -252,6 +252,9 @@ local CMD_CLEARWEAPONS = 3
 local CMD_GOTWEAPON = 4
 local CMD_LOSTWEAPON = 5
 
+local INV_PROTO_0 = MessagePrototype("_winv0"):Byte():E()
+local INV_PROTO_1 = MessagePrototype("_winv1"):Byte():Byte():Short():E()
+
 local AMMO_CLASSES = {}
 
 for i=1, #WEAPON_CLASSES do
@@ -270,31 +273,25 @@ for i=1, #WEAPON_CLASSES do
 end
 
 if(SERVER) then
-	message.Precache("_winv")
+	
 
 	GetPredictedClient = function(pl)
 		return GetPlayerByIndex(pl:GetPredicted()) or pl
 	end
 
 	GetClient = function(n)
-		return GetPlayerByIndex(n)
+		return n--GetPlayerByIndex(n)
 	end
 
 	UpdatePlayerInventory = function(pl,cmd,w,n)
-		pl = GetPredictedClient(GetClient(pl))
+		--pl = GetPredictedClient(GetClient(pl))
 		if(pl == nil) then print("^1No Predicted Client") return end
 		
-		local msg = Message(pl,"_winv")
-		message.WriteByte(msg,cmd)
-		if(cmd == CMD_AMMOCHANGE) then
-			message.WriteByte(msg,w)
-			message.WriteShort(msg,n)
+		if(cmd == CMD_AMMOCHANGE or cmd == CMD_GOTWEAPON or cmd == CMD_LOSTWEAPON) then
+			INV_PROTO_1:Send(pl,cmd,w,n)
+		else
+			INV_PROTO_0:Send(pl,cmd)
 		end
-		if(cmd == CMD_GOTWEAPON or cmd == CMD_LOSTWEAPON) then
-			message.WriteByte(msg,w)
-			message.WriteShort(msg,n)
-		end
-		SendDataMessage(msg)
 	end
 end
 
@@ -486,13 +483,12 @@ if(SERVER) then
 	hook.add("PlayerSpawned","weapons",PlayerSpawned)
 	
 	--This checks to make sure that players get their stuff
-	function PostSpawned(pl)
-		local client = pl:EntIndex()
+	function PostSpawned(client)
 		if(spawned[client]) then
 			local inv = CheckPlayer(client)
 			for k,v in pairs(inv.weapons) do
 				if(v == 1) then
-					UpdatePlayerInventory(client,CMD_GOTWEAPON,k,__GetAmmo(pl,k))
+					UpdatePlayerInventory(client,CMD_GOTWEAPON,k,__GetAmmo(client,k))
 				end
 			end
 		end
@@ -750,44 +746,44 @@ else
 		WeaponMeta(i,"Register")
 	end
 	
-	local function HandleMessage(msgid)
-		if(msgid == "_winv") then
-			local cmd = message.ReadByte()
-			if(cmd == CMD_AMMOCHANGE) then
-				local index = message.ReadByte()
-				local value = message.ReadShort()
-				
-				local inv = LocalInventory()
-				__SetAmmo(inv.index,index,value)
-			elseif(cmd == CMD_CLEARWEAPONS) then
-				local inv = LocalInventory()
-				for i=1,255 do
-					inv.weapons[i] = 0
-					inv.ammo[i] = 0
-				end
-				print("Clearing Weapons\n")
-			elseif(cmd == CMD_GOTWEAPON) then
-				local index = message.ReadByte()
-				local value = message.ReadShort()
-				local inv = LocalInventory()
-				inv.weapons[index] = 1
-				__SetAmmo(inv.index,index,value)
-				print("Got Weapon: " .. index .. "\n")
-				__SetSelection(index)
-			elseif(cmd == CMD_LOSTWEAPON) then
-				local index = message.ReadByte()
-				local inv = LocalInventory()
-				inv.weapons[index] = 0
-				__SetSelection(__FindBestWeapon(client()))
-			elseif(cmd == CMD_CLEARAMMO) then
-				local inv = LocalInventory()
-				for i=1,255 do
-					inv.ammo[i] = 0
-				end
+	function INV_PROTO_1:Recv(data)
+		local cmd = data[1]
+		local index = data[2]
+		local value = data[3]
+		
+		if(cmd == CMD_AMMOCHANGE) then
+			local inv = LocalInventory()
+			__SetAmmo(inv.index,index,value)
+		elseif(cmd == CMD_GOTWEAPON) then
+			local inv = LocalInventory()
+			inv.weapons[index] = 1
+			__SetAmmo(inv.index,index,value)
+			print("Got Weapon: " .. index .. "\n")
+			__SetSelection(index)
+		elseif(cmd == CMD_LOSTWEAPON) then
+			local inv = LocalInventory()
+			inv.weapons[index] = 0
+			__SetSelection(__FindBestWeapon(client()))
+		end
+	end
+	
+	function INV_PROTO_0:Recv(data)
+		local cmd = data[1]
+		if(cmd == CMD_CLEARWEAPONS) then
+			local inv = LocalInventory()
+			for i=1,255 do
+				inv.weapons[i] = 0
+				inv.ammo[i] = 0
+			end
+			print("Clearing Weapons\n")
+		elseif(cmd == CMD_CLEARAMMO) then
+			local inv = LocalInventory()
+			for i=1,255 do
+				inv.ammo[i] = 0
 			end
 		end
 	end
-	hook.add("HandleMessage","weapons",HandleMessage)
+	
 
 	for i=1, #WEAPON_CLASSES do
 		__RegisterWeapon(i)

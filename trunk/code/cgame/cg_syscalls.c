@@ -687,6 +687,10 @@ float trap_N_ReadFloat() {
 	return f;
 }
 
+float trap_N_ReadBits(int n) {
+	return syscall( CG_N_READBITS, n );
+}
+
 int	trap_IsUI() {
 	return syscall(CG_ISUI);
 }

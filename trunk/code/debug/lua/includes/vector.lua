@@ -165,6 +165,10 @@ function IsVector(v)
 	return false
 end
 
+function XYZ(v)
+	return v.x, v.y, v.z
+end
+
 function Vectorv(tab)
 	return Vector(tab.x,tab.y,tab.z) --{x=tab.x,y=tab.y,z=tab.z}
 end

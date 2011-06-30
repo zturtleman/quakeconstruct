@@ -30,17 +30,19 @@ int SendTest(lua_State *L) {
 
 int qlua_createmessage(lua_State *L) {
 	msg_t msg;
-	gentity_t *ent;
+	int num;
+	//gentity_t *ent;
 
-	luaL_checktype(L,1,LUA_TUSERDATA);
+	luaL_checktype(L,1,LUA_TNUMBER);
 	luaL_checktype(L,2,LUA_TNUMBER);
 
-	ent = lua_toentity(L,1);
+	num = lua_tonumber(L,1);
+	//ent = lua_toentity(L,1);
 
-	trap_N_CreateMessage(&msg, ent->s.clientNum);
+	trap_N_CreateMessage(&msg,num);
 	trap_N_WriteByte(&msg,lua_tointeger(L,2));
 
-	qlua_pushmessage(L,&msg, ent->s.clientNum);
+	qlua_pushmessage(L,&msg, num);
 
 	return 1;
 }
@@ -85,12 +87,18 @@ int qlua_writefloat(lua_State *L) {
 	return 0;
 }
 
+int qlua_writebits(lua_State *L) {
+	trap_N_WriteBits(qlua_tomessage(L,1)->msg,lua_tointeger(L,2),lua_tointeger(L,3));
+	return 0;
+}
+
 static const luaL_reg Message_methods[] = {
   {"WriteShort",		qlua_writeshort},
   {"WriteLong",			qlua_writelong},
   {"WriteString",		qlua_writestring},
   {"WriteFloat",		qlua_writefloat},
   {"WriteByte",			qlua_writebyte},
+  {"WriteBits",			qlua_writebits},
   {0,0}
 };
 

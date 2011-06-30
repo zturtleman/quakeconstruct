@@ -31,54 +31,63 @@ local function isBlackListed(var)
 	return false
 end
 
+local d_Message = _Message
+local d_Send = _SendDataMessage
+
 if(SERVER) then
 	local function isFloat(n)
 		return (math.floor(n) != n)
 	end
+
+	local function WriteBit(msg,bit)
+		if(bit) then _message.WriteBits(msg,1,1) else _message.WriteBits(msg,0,1) end
+	end
 	
-	message.Precache(n_msgid)
+	local function _sendVariable(self,var,val,new,pl)
+		local msg = d_Message(pl,LUA_NETVAR)
 
-	local function sendVariable(self,var,val,new,pl)
-		local msg = Message(n_msgid)
-
-		message.WriteShort(msg,self.tindex)
+		_message.WriteShort(msg,self.tindex)
+		_message.WriteByte(msg,self._ids[var] or -1)
 		
+		WriteBit(msg,val == nil)
 		if(val == nil) then
 			if(new == true) then msg = nil return end
-			message.WriteShort(msg,self._ids[var] or -1)
 		else
+			WriteBit(msg,new)
 			if(new) then
-				message.WriteString(msg,tostring(var))
+				_message.WriteString(msg,tostring(var))
 			end
 			
-			message.WriteShort(msg,self._ids[var] or -1)
-			
+			WriteBit(msg,type(val) == "number")
 			if(type(val) == "number") then
+				WriteBit(msg,isFloat(val))
 				if(isFloat(val)) then
-					message.WriteFloat(msg,val)
+					_message.WriteFloat(msg,val)
 				else
 					if(val < 32767 and val > -32768) then
-						message.WriteShort(msg,val)
+						_message.WriteBits(msg,0,1)
+						_message.WriteShort(msg,val)
 					else
-						message.WriteLong(msg,val)
+						_message.WriteBits(msg,1,1)
+						_message.WriteLong(msg,val)
 					end
 				end
 			elseif(type(val) == "string") then
-				message.WriteString(msg,val)
+				_message.WriteString(msg,val)
 			end
 		end
-		--Timer((senddelay * sendQueue), function()
-			if(pl == nil) then
-				for k,v in pairs(GetAllPlayers()) do
-					SendDataMessage(msg,v)
-				end
-			else
-				SendDataMessage(msg,pl)
+
+		d_Send(msg)
+	end
+	
+	local function sendVariable(self,var,val,new,pl)
+		if(pl ~= nil) then
+			_sendVariable(self,var,val,new,pl)
+		else
+			for k,v in pairs(GetAllPlayers()) do
+				_sendVariable(self,var,val,new,v:EntIndex())
 			end
-			--print("SENDVAR\n")
-			--sendQueue = sendQueue - 1
-		--end)
-		--sendQueue = sendQueue + 1
+		end
 	end
 	
 	local function variableChanged(self,last,var,val)
@@ -200,8 +209,99 @@ else
 		mt._vars[var] = val
 	end
 
+	local function readBit()
+		return _message.ReadBits(1) == 1
+	end
+	
 	local function NetVar(msgid)
-		if(msgid == n_msgid) then
+		if(msgid ~= LUA_NETVAR) then return end
+		local tableindex = _message.ReadShort()
+		local varindex = _message.ReadByte()
+		local varname = nil
+		local data = nil
+		
+		print("TABLEINDEX: " .. tableindex .. "\n")
+		if(_NetTables[tableindex] == nil) then
+			_NetTables[tableindex] = {}
+			setmetatable(_NetTables[tableindex],network_meta)
+			rawset(_NetTables[tableindex],"__mt",table.Copy(network_meta))
+			
+			_NetTables[tableindex].tindex = tableindex
+			_NetTables[tableindex]:Init()
+			nt = _NetTables[tableindex]
+			print("^3Server Forced Client Networked Table: " .. tableindex .. "\n")
+		end
+		
+		if not (readBit()) then --nil
+			if(readBit()) then
+				varname = _message.ReadString()
+			end
+			
+			if(readBit()) then --number
+				if not (readBit()) then --int
+					if(readBit()) then
+						local long = _message.ReadLong()
+						data = long
+					else
+						local short = _message.ReadShort()
+						data = short
+					end
+				else --float
+					local float = _message.ReadFloat()
+					data = float
+				end
+			else --string
+				local str = _message.ReadString()
+				data = str
+			end
+		end
+		
+		local mtab = _NetTables[tableindex].__mt
+		if(varname ~= nil) then
+			debugprint("Got New Variable\n")
+			local var = varname
+			local id = varindex
+			local value = data
+			var = tonumber(var) or var
+			mtab._ids[id] = var
+			if (var ~= nil) then
+				debugprint(var .. "[" .. id .. "]: " .. tostring(value) .. "\n")
+			else
+				debugprint("NIL " .. "[" .. id .. "]: " .. tostring(value) .. "\n")
+			end
+
+			mtab._vars[var] = value
+			local self = _NetTables[tableindex]
+			if(self.VariableChanged != nil) then
+				pcall(self.VariableChanged,self,var,value,nil)
+			end
+		elseif(data ~= nil) then
+			debugprint("Variable Changed\n")
+			local id = varindex
+			local var = tostring(mtab._ids[id])
+			var = tonumber(var) or var
+			local value = data
+			debugprint(var .. "[" .. id .. "]: " .. tostring(value) .. "\n")
+
+			local self = _NetTables[tableindex]
+			if(self.VariableChanged != nil) then
+				pcall(self.VariableChanged,self,var,value,mtab._vars[var])
+			end
+			mtab._vars[var] = value
+		elseif(data == nil) then
+			debugprint("Variable Cleared\n")
+			local id = varindex
+			local var = tostring(mtab._ids[id])				
+			var = tonumber(var) or var
+
+			local self = _NetTables[tableindex]
+			if(self.VariableChanged != nil) then
+				pcall(self.VariableChanged,self,var,nil,mtab._vars[var])
+			end
+			mtab._vars[var] = value
+		end
+	
+		--[[if(msgid == n_msgid) then
 			local tindex = message.ReadShort()
 			local first = message.ReadRaw()
 
@@ -256,9 +356,9 @@ else
 				end
 				mtab._vars[var] = value
 			end
-		end
+		end]]
 	end
-	hook.add("HandleMessage","netvars2",NetVar)
+	hook.add("_HandleMessage","netvars2",NetVar)
 end
 
 local function Internal_CreateNetworkedTable(index)

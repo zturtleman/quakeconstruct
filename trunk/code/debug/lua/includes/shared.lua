@@ -60,7 +60,7 @@ includex("vector")
 includex("spring")
 includex("matrix")
 includex("angles")
-includex("messages")
+--includex("messages")
 includex("messageproto")
 includex("netvars")
 --includex("scriptmanager")
@@ -112,16 +112,16 @@ ENTITYNUM_MAX_NORMAL = 1022
 if(SERVER) then
 	local readies = {}
 	local function message(str,pl,clientnum)
-		local pli = pl:EntIndex() + 1
+		local pli = clientnum + 1
 		if(str == "_clientready") then
 			if not (readies[pli]) then
 				print("CLIENT IS READY: " .. pli .. " | " .. clientnum .. "\n")
-				CallHook("ClientReady",pl)
+				CallHook("ClientReady",clientnum)
 				--Timer(3.8,CallHook,"ClientReady",pl)
 				if(pl:IsAdmin()) then
-					Timer(1,pl.SendString,pl,"_admin")
+					Timer(1,pl.SendString,clientnum,"_admin")
 				else
-					Timer(1,pl.SendString,pl,"_verify")
+					Timer(1,pl.SendString,clientnum,"_verify")
 				end
 				readies[pli] = true
 				Timer(20,function()

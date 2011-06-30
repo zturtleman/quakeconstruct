@@ -23,7 +23,6 @@ luac -o compiled\init.luc init.lua
 luac -o compiled\input.luc input.lua
 luac -o compiled\linkedlist.luc linkedlist.lua
 luac -o compiled\matrix.luc matrix.lua
-luac -o compiled\messages.luc messages.lua
 luac -o compiled\messageproto.luc messageproto.lua
 luac -o compiled\model.luc model.lua
 luac -o compiled\netvars.luc netvars.lua

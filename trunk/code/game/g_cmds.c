@@ -1602,8 +1602,6 @@ static void CG_ParseLuaMsg( int clientNum ) {
 
 	lua_State *L = GetServerLuaState();
 
-	ent->s.clientNum = clientNum;
-
 	if(L != NULL && str != NULL && ent != NULL) {
 		qlua_gethook(L,"MessageReceived");
 		lua_pushstring(L,str);

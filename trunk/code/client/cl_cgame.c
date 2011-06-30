@@ -697,6 +697,8 @@ int CL_CgameSystemCalls( int *args ) {
 	    ptrf = VMA(1);
 		*ptrf = MSG_ReadFloat(message);
 		return 0;
+  case CG_N_READBITS:
+		return MSG_ReadBits(message,args[1]);
   case CG_ISUI:
 		return (cls.keyCatchers & KEYCATCH_UI);
   case CG_SCREENSHOT:

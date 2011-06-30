@@ -903,6 +903,9 @@ int SV_GameSystemCalls( int *args ) {
 		ptrf = VMA(2);
 		MSG_WriteFloat( VMA(1), *ptrf );
 		return 0;
+	case TRAP_N_WRITEBITS:
+		MSG_WriteBits( VMA(1), args[2], args[3] );
+		return 0;
 	case G_ANGLES_TO_QUAT:
 		AnglesToQuat(VMA(1), VMA(2));
 		return 0;

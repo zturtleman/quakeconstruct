@@ -35,12 +35,19 @@ int qlua_readfloat(lua_State *L) {
 	return 1;
 }
 
+int qlua_readbits(lua_State *L) {
+	int n = lua_tointeger(L,1);
+	lua_pushnumber(L,trap_N_ReadBits(n));
+	return 1;
+}
+
 static const luaL_reg Message_methods[] = {
   {"ReadByte",		qlua_readbyte},
   {"ReadShort",		qlua_readshort},
   {"ReadLong",		qlua_readlong},
   {"ReadString",	qlua_readstring},
   {"ReadFloat",		qlua_readfloat},
+  {"ReadBits",		qlua_readbits},
   {0,0}
 };
 

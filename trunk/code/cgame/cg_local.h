@@ -1794,6 +1794,7 @@ int			trap_N_ReadShort();
 int			trap_N_ReadLong();
 char		*trap_N_ReadString();
 float		trap_N_ReadFloat();
+int			trap_N_ReadBits(int n);
 void		trap_SetUserCommand( usercmd_t *cmd );
 void		trap_EnableCommandOverride( qboolean b );
 int			trap_IsUI(void);

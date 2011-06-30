@@ -817,6 +817,10 @@ void trap_N_WriteFloat( msg_t *msg, float f ) {
 	syscall( TRAP_N_WRITEFLOAT, msg, &f );
 }
 
+void trap_N_WriteBits( msg_t *msg, int v, int n ) {
+	syscall( TRAP_N_WRITEBITS, msg, v, n );
+}
+
 void trap_AnglesToQuat( float *angles, float *quat ) {
 	syscall( G_ANGLES_TO_QUAT, angles, quat );
 }
