@@ -539,7 +539,7 @@ if(CLIENT) then
 			end
 			table.insert(QUEUE,{name,lines})
 			--update()
-			print("F_QUEUE: " .. name .. " - " .. lines .. " lines.\n")
+			--print("F_QUEUE: " .. name .. " - " .. lines .. " lines.\n")
 			CallHook("DLFileQueued",name,lines)
 		elseif(msgid == "__fileheader") then
 			if(#tab == 0 and start) then
@@ -551,13 +551,14 @@ if(CLIENT) then
 			local name = base64.dec(message.ReadString() or "")
 			local lines = message.ReadShort()
 			local md5 = base64.dec(message.ReadString() or "")
-			print("F_HEADER: " .. name .. " - " .. lines .. " lines.\n")
+			--print("F_HEADER: " .. name .. " - " .. lines .. " lines.\n")
 			CONTENTS = ""
 			FILENAME = name
 			LINECOUNT = lines
 			LINEITER = 0
+			--TODO: Persistantly acknowledge until we get the next file.
 			if(checkForFile(FILENAME,md5)) then
-				print("F_SENT_CANCEL\n")
+				--print("F_SENT_CANCEL\n")
 				SendString("_downloadaction cancel")
 				includeFile(FILENAME) --FIX THIS OMG! -Hxrmn
 				finished()
@@ -567,7 +568,7 @@ if(CLIENT) then
 					--makeFrame()
 					--update()
 				end
-				print("F_SENT_ACCEPT\n")
+				--print("F_SENT_ACCEPT\n")
 				SendString("_downloadaction accept")
 				CallHook("DLFileAction",name,lines,md5,true)
 			end
@@ -584,7 +585,7 @@ if(CLIENT) then
 		elseif(msgid == "__runfile") then
 			local name = base64.dec(message.ReadString() or "")
 			--FILENAME = name
-			print("F_EXECUTE: " .. name .. "\n")
+			--print("F_EXECUTE: " .. name .. "\n")
 			includeFile(name)
 		end
 	end

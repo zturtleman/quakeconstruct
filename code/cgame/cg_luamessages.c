@@ -2,7 +2,7 @@
 
 void qlua_HandleMessage() {
 	if(GetClientLuaState() != NULL) {
-		int data = trap_N_ReadShort();
+		int data = trap_N_ReadByte();
 		qlua_gethook(GetClientLuaState(),"_HandleMessage");
 		lua_pushinteger(GetClientLuaState(),data);
 		qlua_pcall(GetClientLuaState(),1,0,qtrue);

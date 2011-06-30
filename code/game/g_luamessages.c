@@ -6,6 +6,7 @@ void qlua_pushmessage(lua_State *L, msg_t *msg, int clientnum) {
 	out = (luamsg_t*)lua_newuserdata(L, sizeof(luamsg_t));
 	out->msg = (msg_t*) malloc(sizeof(msg_t));
 	memcpy(out->msg,msg,sizeof(msg_t));
+
 	out->clientnum = clientnum;
 }
 
@@ -37,7 +38,7 @@ int qlua_createmessage(lua_State *L) {
 	ent = lua_toentity(L,1);
 
 	trap_N_CreateMessage(&msg, ent->s.clientNum);
-	trap_N_WriteShort(&msg,lua_tointeger(L,2));
+	trap_N_WriteByte(&msg,lua_tointeger(L,2));
 
 	qlua_pushmessage(L,&msg, ent->s.clientNum);
 
@@ -54,7 +55,7 @@ int qlua_sendmessage(lua_State *L) {
 	if(msg->msg != NULL) {
 		trap_N_SendMessage(msg->msg,msg->clientnum);
 	} else {
-		G_Printf("Error Error ERRRROOOOORRRR!\n");
+		G_Printf("Error Error ERRRROOOOORRRR! MESSAGE SYSTEM!\n");
 	}
 	return 0;
 }

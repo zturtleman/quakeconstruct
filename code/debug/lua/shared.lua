@@ -2,6 +2,23 @@ print("^1SHARED\n")
 
 --include("lua/weapons.lua")
 include("lua/states.lua")
+
+
+local m_proto = MessagePrototype("test"):String():Byte():E()
+
+if(SERVER) then
+	concommand.add("prototest",function(p,c,a)
+		m_proto:Send(p,"OhLook,Proto",102)
+	end)
+else
+	function m_proto:Recv(data)
+		print("PROTO SUCCESS\n")
+		print(data[1] .. "\n")
+		print(data[2] .. "\n")
+	end
+end
+
+
 --[[
 AddItem(0,false,
 "ammo_laserblazer",
