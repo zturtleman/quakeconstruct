@@ -302,6 +302,7 @@ else
 				standIns[id] = __MessagePrototype(str,id)
 				standIns[id]:SetStack(contents)
 			else
+				proto = Prototypes[proto]
 				proto._id = id
 				proto:SetStack(contents)
 			end
