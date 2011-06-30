@@ -138,6 +138,7 @@ local function ParseDamage()
 	--print("Attacked: " .. dmg .. " " .. EnumToString(meansOfDeath_t,death) .. " " .. attacker .. "\n")
 end
 
+--[[
 local function HandleMessage(msgid)
 	if(msgid == "itempickup") then
 		local class = message.ReadString()
@@ -163,6 +164,7 @@ local function HandleMessage(msgid)
 	end
 end
 hook.add("HandleMessage","cl_init",HandleMessage)
+]]
 
 local function makeShader(file)
 	local data = [[{

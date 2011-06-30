@@ -1,11 +1,9 @@
 if(downloader == nil) then downloader = {} end
 
-if(SERVER) then
-	message.Precache("__fileheader")
-	message.Precache("__fileline")
-	message.Precache("__queuefile")
-	message.Precache("__runfile")
-end
+local __fileheader 	= 	MessagePrototype("__fileheader"):String():Short():String():E()
+local __fileline 	= 	MessagePrototype("__fileline"):String():E()
+local __queuefile 	= 	MessagePrototype("__queuefile"):String():Short():E()
+local __runfile 	= 	MessagePrototype("__runfile"):String():E()
 
 --******
 --CONFIG
@@ -96,20 +94,19 @@ if(SERVER) then
 
 	function newStream(client)
 		local o = {}
-		local ptab = client:GetTable()
+		--local ptab = client:GetTable()
 
 		setmetatable(o,DLStream)
 		DLStream.__index = DLStream
 		
 		o.client = client
-		o.clientID = client:EntIndex()
 		o.status = STREAM_IDLE
 		o.current = nil
 		o.pendingnotify = false
 		o.queue = {}
 		
-		ptab.stream = o
-		PLSTREAMS[client:EntIndex() + 1] = o
+		--ptab.stream = o
+		PLSTREAMS[client] = o
 		
 		return o;
 	end
@@ -117,7 +114,7 @@ if(SERVER) then
 	function getPlayerStream(client)
 		--local ptab = client:GetTable()
 		--return ptab.stream
-		return PLSTREAMS[client:EntIndex() + 1]
+		return PLSTREAMS[client]
 	end
 
 	function DLStream:GetFiles()
@@ -125,19 +122,13 @@ if(SERVER) then
 	end
 
 	function DLStream:SendFileHeader(file)
-		local msg = self:Message("__fileheader")
-		message.WriteString(msg,base64.enc(file.name))
-		message.WriteShort(msg,#file.lines)
-		message.WriteString(msg,base64.enc(file.md5))
-		SendDataMessage(msg)
+		__fileheader:Send(self.client,base64.enc(file.name),#file.lines,base64.enc(file.md5))
 		self:SetStatus(STREAM_WCM)
 		self.current = file
 	end
 	
 	function DLStream:SendLine(line)
-		local msg = self:Message("__fileline")
-		message.WriteString(msg,base64.enc(line) or "")
-		SendDataMessage(msg)
+		__fileline:Send(self.client,base64.enc(line) or "")
 	end
 
 	function DLStream:SendFileData()
@@ -184,9 +175,7 @@ if(SERVER) then
 	end
 	
 	function DLStream:ExecuteFile(file)
-		local msg = self:Message("__runfile")
-		message.WriteString(msg,base64.enc(file.name))
-		SendDataMessage(msg)
+		__runfile:Send(self.client,base64.enc(file.name))
 	end
 	
 	function DLStream:DropFile()
@@ -200,20 +189,13 @@ if(SERVER) then
 			self:Notify()
 		end
 	end
-	
-	function DLStream:Message(s)
-		return Message(self.client,s)
-	end
 
 	function DLStream:AddFile(file)
 		if(!table.HasValue(self.queue,file)) then
 			local exist = getFileByName(file,self.queue)
 			if(exist) then
 				if(exist.status != FILE_PENDING) then
-					local msg = self:Message("__queuefile")
-					message.WriteString(msg,base64.enc(file.name))
-					message.WriteShort(msg,#file.lines)
-					SendDataMessage(msg)
+					__queuefile:Send(self.client,base64.enc(file.name),#file.lines)
 				end
 			
 				exist.status = FILE_PENDING
@@ -225,10 +207,7 @@ if(SERVER) then
 			file.status = FILE_PENDING
 			table.insert(self.queue,file)
 			
-			local msg = self:Message("__queuefile")
-			message.WriteString(msg,base64.enc(file.name))
-			message.WriteShort(msg,#file.lines)
-			SendDataMessage(msg)
+			__queuefile:Send(self.client,base64.enc(file.name),#file.lines)
 			
 			debugprint("File added to player stream: '" .. file.name .. "'\n")
 			return true
@@ -337,9 +316,9 @@ if(SERVER) then
 
 	local function pushQueueToStream(stream)
 		local doNotify = false
-		print("DL: PUSHING STREAMS\n")
+		--print("DL: PUSHING STREAMS\n")
 		for k,v in pairs(FQueue) do
-			print("DL: " .. k .. "\n")
+			--print("DL: " .. k .. "\n")
 			if(v.status == FILE_PENDINGEXECUTION) then
 				stream:ExecuteFile(v)
 			else
@@ -351,11 +330,11 @@ if(SERVER) then
 --*********
 --PLAYER IO
 --*********
-	local function message(str,pl)
+	local function message(str,pl,client)
 		local args = string.Explode(" ",str)
 		if(args[1] == "_downloadaction") then
 			table.remove(args,1)
-			local stream = getPlayerStream(pl)
+			local stream = getPlayerStream(client)
 			if(stream != nil) then
 				stream:ClientAction(unpack(args))
 			end
@@ -363,10 +342,10 @@ if(SERVER) then
 	end
 	hook.add("MessageReceived","__downloader.lua",message)
 
-	function downloader.initplayer(pl)
-		if(pl != nil) then
-			local ptab = newStream(pl)
-			debugprint("Initialized Player: " .. pl:GetInfo().name .. " " .. #ptab:GetFiles() .. " " .. pl:EntIndex() .. "\n")
+	function downloader.initplayer(client)
+		if(client != nil) then
+			local ptab = newStream(client)
+			debugprint("Initialized Player: " .. client .. " " .. #ptab:GetFiles() .. "\n")
 			downloader.notify()
 		else
 			debugprint("^1Unable To Initialize Null Player\n")
@@ -530,7 +509,71 @@ if(CLIENT) then
 		return false
 	end
 	
-	local function HandleMessage(msgid,tab)
+	function __queuefile:Recv(data)
+		local name = base64.dec(data[1] or "")
+		local lines = data[2]
+		for k,v in pairs(QUEUE) do
+			if(v[1] == name) then v[2] = lines return end
+		end
+		table.insert(QUEUE,{name,lines})
+		--update()
+		--print("F_QUEUE: " .. name .. " - " .. lines .. " lines.\n")
+		CallHook("DLFileQueued",name,lines)
+	end
+	
+	function __fileheader:Recv(data)
+		if(data[1] == "" and start) then
+			print("CL_FINISH\n")
+			finished()
+			return
+		end
+		start = true
+		local name = base64.dec(data[1] or "")
+		local lines = data[2]
+		local md5 = base64.dec(data[3] or "")
+		--print("F_HEADER: " .. name .. " - " .. lines .. " lines.\n")
+		CONTENTS = ""
+		FILENAME = name
+		LINECOUNT = lines
+		LINEITER = 0
+		--TODO: Persistantly acknowledge until we get the next file.
+		if(checkForFile(FILENAME,md5)) then
+			--print("F_SENT_CANCEL\n")
+			SendString("_downloadaction cancel")
+			includeFile(FILENAME) --FIX THIS OMG! -Hxrmn
+			finished()
+			CallHook("DLFileAction",name,lines,md5,false)
+		else
+			if(frame == nil) then
+				--makeFrame()
+				--update()
+			end
+			--print("F_SENT_ACCEPT\n")
+			SendString("_downloadaction accept")
+			CallHook("DLFileAction",name,lines,md5,true)
+		end	
+	end
+	
+	function __fileline:Recv(data)
+		local str = base64.dec(data[1] or "")
+		CONTENTS = CONTENTS .. str -- .. "\n"
+		LINEITER = LINEITER + 1
+		--print("F_LINE: " .. str .. " [X] " .. LINEITER .. "/" .. LINECOUNT .. "\n")
+		--update()
+		CallHook("DLFileLine",str)
+		if(LINEITER == LINECOUNT) then
+			finished()
+		end	
+	end
+	
+	function __runfile:Recv(data)
+		local name = base64.dec(data[1] or "")
+		--FILENAME = name
+		--print("F_EXECUTE: " .. name .. "\n")
+		includeFile(name)
+	end
+	
+--[[	local function HandleMessage(msgid,tab)
 		if(msgid == "__queuefile") then
 			local name = base64.dec(message.ReadString() or "")
 			local lines = message.ReadShort()
@@ -589,5 +632,5 @@ if(CLIENT) then
 			includeFile(name)
 		end
 	end
-	hook.add("HandleMessage","__downloader.lua",HandleMessage)
+	hook.add("HandleMessage","__downloader.lua",HandleMessage)]]
 end

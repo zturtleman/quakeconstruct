@@ -1,9 +1,9 @@
 if(SERVER) then downloader.add("lua/entities/projectile/shared.lua") end
 
+local explosionProto = MessagePrototype("p_explode"):Vector():E()
+
 if(SERVER) then
 //__DL_BLOCK
-	message.Precache("_projectile")
-
 	function ENT:Initialized()
 		self.Entity:SetMins(Vector(-1,-1,-1))
 		self.Entity:SetMaxs(Vector(1,1,1))
@@ -61,9 +61,13 @@ if(SERVER) then
 			
 		self.Entity:PlaySound("sound/weapons/rocket/rocklx1a.wav")
 
-		local msg = Message(pl,"_projectile")
-		message.WriteVector(msg,self.Entity:GetPos())
-		SendDataMessageToAll(msg)
+		--local msg = Message(pl,"_projectile")
+		--message.WriteVector(msg,self.Entity:GetPos())
+		--SendDataMessageToAll(msg)
+		
+		for k,pl in pairs(GetAllPlayers()) do
+			explosionProto:Send(pl,XYZ(self.Entity:GetPos()))
+		end
 		
 		self.touch = true
 		
@@ -120,11 +124,15 @@ else
 	end
 	hook.add("Draw3D","projectile",d3d)
 
-	function pmessage(msgid)
+	function explosionProto:Recv(data)
+		local pos = Vector(data[1],data[2],data[3])
+		table.insert(Explosions,{pos,LevelTime()})
+	end
+	--[[function pmessage(msgid)
 		if(msgid == "_projectile") then
 			local pos = message.ReadVector()
 			table.insert(Explosions,{pos,LevelTime()})
 		end
 	end
-	hook.add("HandleMessage","projectile",pmessage)
+	hook.add("HandleMessage","projectile",pmessage)]]
 end

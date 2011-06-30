@@ -2,9 +2,9 @@
 
 --require "sh_notify"
 
-message.Precache("itempickup")
-message.Precache("playerdamage")
-message.Precache("playerrespawn")
+--message.Precache("itempickup")
+--message.Precache("playerdamage")
+--message.Precache("playerrespawn")
 include("lua/shared.lua")
 
 --[[
@@ -18,13 +18,13 @@ hook.add("EntityLinked","super",Fuse)
 
 print("^2CURRENT GAME: " .. GetCvar("g_luagame") .. "\n")
 
-local function writeVector(msg,v)
+--[[local function writeVector(msg,v)
 	message.WriteFloat(msg,v.x)
 	message.WriteFloat(msg,v.y)
 	message.WriteFloat(msg,v.z)
-end
+end]]
 
-local function ItemPickup(item, other, trace, itemid)
+--[[local function ItemPickup(item, other, trace, itemid)
 	if(item and other and itemid) then
 		local vec = item:GetPos()
 		local vec2 = other:GetVelocity()
@@ -74,7 +74,7 @@ local function PlayerSpawned(pl)
 	end
 end
 hook.add("PlayerSpawned","init",PlayerSpawned)
-
+]]
 local function makeEnt(p,c,a)
 	if(a[1] == nil) then return end
 	local tr = PlayerTrace(p)

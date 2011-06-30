@@ -1,23 +1,24 @@
+local bulletbounce = MessagePrototype("bulletbounce"):Vector():Vector():Short():E()
+
 //__DL_BLOCK
 if(SERVER) then
 downloader.add("lua/bouncybullets.lua")
 
 local MASK_SHOT = gOR(CONTENTS_SOLID,CONTENTS_BODY,CONTENTS_CORPSE)
 
-message.Precache("bulletbounce")
-
 local function crand()
 	return 2 * (math.random() - 0.5)
 end
 
 local function sendline(s,e,t,p)
-	local msg = Message()
+	--local msg = Message()
 	local ttype = bitShift(t,-8)
 	local t = bitOr(ttype,p)
-	message.WriteVector(msg,s)
-	message.WriteVector(msg,e)
-	message.WriteShort(msg,t)
-	SendDataMessageToAll(msg,"bulletbounce")
+	--message.WriteVector(msg,s)
+	--message.WriteVector(msg,e)
+	--message.WriteShort(msg,t)
+	--SendDataMessageToAll(msg,"bulletbounce")
+	bulletbounce:Send(XYZ(s),XYZ(e),t)
 end
 
 local function bullet(i,start,angle,pl,spread,damage,mod)
@@ -145,7 +146,41 @@ local function qbeam(v1,v2,r,g,b,size,np,delay,stdelay)
 	end
 end
 
-local function HandleMessage(msgid)
+function bulletbounce:Recv(data)
+	local s = Vector(data[1],data[2],data[3])
+	local e = Vector(data[4],data[5],data[6])
+	local t = data[7]
+	
+	local d = VectorNormalize(e-s)
+	local tr = TraceLine(s,e+d*1000)
+	--ParticleEffect("Spark",e,tr.normal)
+	
+	--[[for k,v in pairs(tr) do
+		print(k .. " = " .. tostring(v) .. "\n")
+	end]]
+	
+	local ttype = bitShift(t,8)
+	local power = bitAnd(t,255)
+	
+	local r,g,b = 1,.7,.4
+	local size = 1
+	local c = .3 + power/5
+	
+	if(ttype == MOD_SHOTGUN) then
+		size = size + 3
+		r = 0.8 + math.random()*.2
+		g = 0.3 + math.random()*.4
+	end
+	
+	size = size * (power+0.5)
+	
+	r = r * c
+	g = g * c
+	b = b * c
+	qbeam(s,e,r,g,b,size,false,800)
+end
+
+--[[local function HandleMessage(msgid)
 	if(msgid == "bulletbounce") then
 		local s = message.ReadVector()
 		local e = message.ReadVector()
@@ -180,4 +215,4 @@ local function HandleMessage(msgid)
 		qbeam(s,e,r,g,b,size,false,800)
 	end
 end
-hook.add("HandleMessage","cl_instagib",HandleMessage)
+hook.add("HandleMessage","cl_instagib",HandleMessage)]]

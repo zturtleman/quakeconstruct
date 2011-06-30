@@ -1067,6 +1067,7 @@ void	trap_N_WriteShort( msg_t *msg, int in );
 void	trap_N_WriteLong( msg_t *msg, int in );
 void	trap_N_WriteString( msg_t *msg, const char *str );
 void	trap_N_WriteFloat( msg_t *msg, float f );
+void	trap_N_WriteBits( msg_t *msg, int v, int n );
 
 void	trap_SnapVector( float *v );
 qhandle_t trap_CM_GetPhysicsWorld();

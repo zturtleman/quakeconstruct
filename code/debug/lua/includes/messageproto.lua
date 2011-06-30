@@ -77,6 +77,8 @@ function MessageT:Short() table.insert(self.stack,D_SHORT) return self end
 function MessageT:Long() table.insert(self.stack,D_LONG) return self end
 function MessageT:String() table.insert(self.stack,D_STRING) return self end
 function MessageT:Float() table.insert(self.stack,D_FLOAT) return self end
+function MessageT:Vector() for i=1, 3 do table.insert(self.stack,D_FLOAT) end return self end
+function MessageT:Angle() for i=1, 3 do table.insert(self.stack,D_FLOAT) end return self end
 function MessageT:Recv(data) end
 
 function MessageT:E()
@@ -89,7 +91,8 @@ function MessageT:E()
 end
 
 function MessageT:Send(pl,...) 
-	if(type(pl) ~= "userdata") then return end
+	if(type(pl) == "userdata") then pl = pl:EntIndex() end
+	if(type(pl) ~= "number") then error("Not a player\n") return end
 	
 	local data = {}
 	--local msg = d_Message(pl,LUA_PROTOMESSAGE_MSG)
@@ -119,7 +122,7 @@ function MessageT:Read()
 		if not (b) then
 			print("Error reading message data: " .. strings[v] .. " : " .. e .. "\n")
 		else
-			print("ProtoRead[" .. i .. "]: " .. strings[v] .. " - " .. tostring(e) .. "\n")
+			--print("ProtoRead[" .. i .. "]: " .. strings[v] .. " - " .. tostring(e) .. "\n")
 			table.insert(self.data, e)
 		end
 	end
@@ -205,18 +208,18 @@ if(SERVER) then
 			if(player == nil) then
 				table.remove(messageQueue,1)	
 			else
-				if(connections[player:EntIndex()]) then
+				if(connections[player]) then
 					table.remove(messageQueue,1)
 					local msg = d_Message(player,msgid)
 					for i=1, #data do
 						local t = data[i][1]
 						local v = data[i][2]
 						local b,e = pcall(funcs[t],msg,v)
-						print("Type: " .. t .. "\n")
+						--print("Type: " .. t .. "\n")
 						if not (b) then
 							print("^1Error sending message data: " .. strings[t] .. " : " .. e .. "\n")
 						else
-							print("  " .. v .. "\n")
+							--print("  " .. v .. "\n")
 						end
 					end
 					d_Send(msg)
@@ -233,7 +236,7 @@ if(SERVER) then
 	
 	local function PlayerJoined(pl)
 		if(pl == nil) then return end
-		if(!pl:IsBot()) then connections[pl:EntIndex()] = true end
+		connections[pl] = true
 		
 		for k,v in pairs(Prototypes) do
 			sendPrototype(v,pl)
@@ -251,7 +254,7 @@ if(SERVER) then
 		if(pl == nil) then return end
 		
 		for k,v in pairs(Prototypes) do
-			sendPrototype(v,pl)
+			sendPrototype(v,pl:EntIndex())
 		end
 	end
 	hook.add("DemoStarted","messageproto",DemoSend,9999)
@@ -314,7 +317,7 @@ else
 			
 			if(proto ~= nil) then
 				proto:Read()
-				print("Read Prototype\n")
+				--print("Read Prototype\n")
 			else
 				error("GOT NO PROTOTYPE, MESSAGE LOST, GAME OVER [" .. id .. "]\n")
 			end
