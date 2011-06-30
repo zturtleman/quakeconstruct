@@ -718,7 +718,7 @@ qboolean CL_ReadyToSendPacket( void ) {
 		cls.state != CA_PRIMED && 
 		!*clc.downloadTempName &&
 		cls.realtime - clc.lastPacketSentTime < 100 ) { //WE'RE IN LUA TOWN NOW, SO LET'S GO CRAZY -HXRMN
-		return qfalse;
+		return qfalse;									//10 PACKETS A SECOND CAN'T HURT.
 	}
 
 	// send every frame for loopbacks

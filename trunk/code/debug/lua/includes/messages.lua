@@ -137,7 +137,7 @@ if(SERVER) then
 			local tab = pl:GetTable()
 			tab.msglist = tab.msglist or {}
 			if(tab.msglist[id] != true) then
-				local msg = d_Message(pl,2)
+				local msg = d_Message(pl,LUA_MESSAGE_INDEX)
 				_message.WriteByte(msg,msgIDs[id])
 				_message.WriteString(msg,id)
 				d_Send(msg)
@@ -168,7 +168,7 @@ if(SERVER) then
 			end
 		end
 		local ts = #send
-		local msg = d_Message(pl,3)
+		local msg = d_Message(pl,LUA_MESSAGE_CACHE)
 		_message.WriteLong(msg,ts)
 		for i=1, ts do
 			local v = send[i]
@@ -222,7 +222,7 @@ if(SERVER) then
 			local msgid = MessageID(pl,tostring(msgid))
 			if(msgid == nil) then print("^5Forced Message Precache[" .. prev .. "]\nUse message.Precache(name)\n") return end
 			
-			local msg = d_Message(pl,1)
+			local msg = d_Message(pl,LUA_MESSAGE_MSG)
 			local contents = ""
 			for i=1, #m do
 				local v = m[i]
@@ -413,7 +413,7 @@ if(CLIENT) then
 	end
 	
 	local function handle(msgid)
-		if(msgid == 1) then
+		if(msgid == LUA_MESSAGE_MSG) then
 			stack = {}
 			local contents = tostring(_message.ReadLong())
 			local strid = _message.ReadByte()
@@ -451,12 +451,12 @@ if(CLIENT) then
 			onHookCall = function() end
 			tstack = {}
 			stack = {}
-		elseif(msgid == 2) then
+		elseif(msgid == LUA_MESSAGE_INDEX) then
 			local id = _message.ReadByte()
 			local str = _message.ReadString()
 			msgIDs[id] = str
 			debugprint("Got messageID: " .. id .. "->" .. str .. "\n")
-		elseif(msgid == 3) then
+		elseif(msgid == LUA_MESSAGE_CACHE) then
 			local count = _message.ReadLong()
 			for i=1, count do
 				local id = _message.ReadByte()
@@ -464,12 +464,9 @@ if(CLIENT) then
 				msgIDs[id] = str
 				debugprint("Got messageID: " .. id .. "->" .. str .. "\n")
 			end
-		else
-			error("^5MESSAGE ERROR[N]: Invalid Internal Message ID\n")
 		end
 	end
 	hook.add("_HandleMessage","messages",handle)
-	hook.lock("_HandleMessage")
 	
 	local function report(msgid,contents)
 		debugprint("Message Received: " .. msgid .. "\nContents:\n")
@@ -483,6 +480,3 @@ if(CLIENT) then
 	end
 	hook.add("HandleMessage","messages",report)
 end
-
-_SendDataMessage = nil
-_Message = nil

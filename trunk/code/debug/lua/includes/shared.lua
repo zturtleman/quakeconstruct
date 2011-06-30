@@ -61,6 +61,7 @@ includex("spring")
 includex("matrix")
 includex("angles")
 includex("messages")
+includex("messageproto")
 includex("netvars")
 --includex("scriptmanager")
 includex("downloader2")
@@ -95,6 +96,10 @@ else
 end
 includex("persistance")
 --require "includes/functiondump"
+
+_SendDataMessage = nil
+_Message = nil
+hook.lock("_HandleMessage")
 
 for k,v in pairs(toadd) do
 	concommand.Add(v[1],v[2])
