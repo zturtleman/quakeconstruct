@@ -1198,7 +1198,11 @@ int qlua_entityid(lua_State *L) {
 
 	luaentity = lua_toentity(L,1);
 	if(luaentity != NULL) {
-		lua_pushinteger(L,luaentity->s.number);
+		if(luaentity->client != NULL) {
+			lua_pushinteger(L,luaentity->s.clientNum);
+		} else {
+			lua_pushinteger(L,luaentity->s.number);
+		}
 	}
 	return 1;
 }
