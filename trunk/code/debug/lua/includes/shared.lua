@@ -115,7 +115,7 @@ if(SERVER) then
 		local pli = pl:EntIndex() + 1
 		if(str == "_clientready") then
 			if not (readies[pli]) then
-				print("CLIENT IS READY\n")
+				print("CLIENT IS READY: " .. pli .. "\n")
 				CallHook("ClientReady",pl)
 				--Timer(3.8,CallHook,"ClientReady",pl)
 				if(pl:IsAdmin()) then
