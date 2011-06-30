@@ -151,6 +151,7 @@ else
 	local files = {}
 	local currentFile = 0
 	local num_files = 0
+	local DOWLOADING = false
 	local function update()
 		num_files = 0
 		for k,v in pairs(files) do num_files = num_files + 1 end
@@ -177,6 +178,7 @@ else
 	hook.add("DLFileQueued","includes",function(name,lines)
 		files[name] = {lines = lines, got = 0}
 		update()
+		DOWLOADING = true
 	end)
 	
 	hook.add("DLFileAction","includes",function(name,lines,md5,accept)
@@ -206,6 +208,14 @@ else
 	local LOADED = false
 	hook.add("Loaded","includes",function()
 		SendString("_clientready")
+		for i=1, 10 do
+			Timer(i,function()
+				if(DOWLOADING == false) then
+					print("Notify Attempt: " .. i .. "\n")
+					SendString("_clientready")
+				end
+			end)
+		end
 		LOADED = true
 	end)
 	
@@ -218,6 +228,7 @@ else
 	hook.add("DownloadsFinished","includes",function()
 		_setprimed()
 		print("Downloads Are Finished\n")
+		DOWLOADING = false
 	end,9999)
 	
 	hook.add("Draw2D","includes",DrawDownloads)
