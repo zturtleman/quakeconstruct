@@ -111,11 +111,11 @@ ENTITYNUM_MAX_NORMAL = 1022
 
 if(SERVER) then
 	local readies = {}
-	local function message(str,pl)
+	local function message(str,pl,clientnum)
 		local pli = pl:EntIndex() + 1
 		if(str == "_clientready") then
 			if not (readies[pli]) then
-				print("CLIENT IS READY: " .. pli .. "\n")
+				print("CLIENT IS READY: " .. pli .. " | " .. clientnum .. "\n")
 				CallHook("ClientReady",pl)
 				--Timer(3.8,CallHook,"ClientReady",pl)
 				if(pl:IsAdmin()) then
