@@ -3,7 +3,7 @@ print("^1SHARED\n")
 --include("lua/weapons.lua")
 include("lua/states.lua")
 
-
+--[[
 local m_proto = MessagePrototype("test"):String():Byte():E()
 
 if(SERVER) then
@@ -16,7 +16,7 @@ else
 		print(data[1] .. "\n")
 		print(data[2] .. "\n")
 	end
-end
+end]]
 
 
 --[[

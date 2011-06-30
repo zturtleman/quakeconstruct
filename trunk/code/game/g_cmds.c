@@ -1606,7 +1606,8 @@ static void CG_ParseLuaMsg( int clientNum ) {
 		qlua_gethook(L,"MessageReceived");
 		lua_pushstring(L,str);
 		lua_pushentity(L,ent);
-		qlua_pcall(L,2,0,qtrue);
+		lua_pushinteger(L,clientNum);
+		qlua_pcall(L,3,0,qtrue);
 	}
 }
 
