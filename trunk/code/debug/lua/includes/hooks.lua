@@ -162,12 +162,14 @@ end
 
 function CallHookArgTForm(event,tform,...)
 	--For overriding arguments
+	local __print = print
+	print = function(str) __print(str) LOG(str) end
 	for k,v in pairs(arg) do
 		if(type(v) == "vector3") then
 			arg[k] = Vectorv(v)
 		end
 	end
-	if(hook.events[event] == nil) then return end
+	if(hook.events[event] == nil) then print = __print return end
 	local retVal = nil
 	for k,v in pairs(hook.events[event]) do
 		local fname = v.name
@@ -211,7 +213,8 @@ function CallHookArgTForm(event,tform,...)
 			end
 		end
 	end
-	if(retVal != nil) then return unpack(retVal) end
+	if(retVal != nil) then print = __print return unpack(retVal) end
+	print = __print
 end
 
 function CallHook(event,...)

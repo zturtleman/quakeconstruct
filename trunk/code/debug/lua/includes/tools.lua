@@ -3,6 +3,11 @@ if(SERVER) then QLUA_DEBUG = false end
 
 --QLUA_DEBUG = true
 
+local logfile = io.output("lualog.txt", rw)
+function LOG(str)
+	logfile:write(tostring(str))
+end
+
 function CLAMP(v,low,high)
 	return math.min(high,math.max(low,v))
 end
