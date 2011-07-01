@@ -3,7 +3,13 @@ if(SERVER) then QLUA_DEBUG = false end
 
 --QLUA_DEBUG = true
 
-local logfile = io.output("lualog.txt", rw)
+local logfile = nil
+if(SERVER) then
+	logfile = io.output("sv_lualog.txt", rw)
+else
+	logfile = io.output("cl_lualog.txt", rw)
+end
+
 function LOG(str)
 	logfile:write(tostring(str))
 end
