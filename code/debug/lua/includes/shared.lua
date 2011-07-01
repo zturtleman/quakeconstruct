@@ -209,7 +209,7 @@ else
 	hook.add("Loaded","includes",function()
 		SendString("_clientready")
 		for i=1, 10 do
-			Timer(i,function()
+			Timer(i*2,function()
 				if(DOWLOADING == false) then
 					print("Notify Attempt: " .. i .. "\n")
 					SendString("_clientready")
@@ -228,7 +228,6 @@ else
 	hook.add("DownloadsFinished","includes",function()
 		_setprimed()
 		print("Downloads Are Finished\n")
-		DOWLOADING = false
 	end,9999)
 	
 	hook.add("Draw2D","includes",DrawDownloads)
