@@ -380,7 +380,7 @@ function __WeaponEmpty(client,weapon)
 	if(SERVER) then
 		local best = __FindBestWeapon(client)
 		print("Weapon Empty: " .. weapon .. ", switch to " .. best .. "\n")
-		GetClient(client):SetWeapon(best)
+		GetPlayerByIndex(client):SetWeapon(best)
 	else
 		print("Client can't do this\n")
 	end
@@ -395,9 +395,10 @@ function __CanFire(client,weapon,weapontime,addtime,angles,ws)
 	end
 	
 	local n = weapontime + addtime
-	if(SERVER) then print("AMMO: " .. weapon .. " | " .. __GetAmmo(client,weapon) .. "\n") end
-	if(__HasWeapon(client,weapon) == false or __GetAmmo(client,weapon) == 0) then __WeaponEmpty(client,weapon) return true,WEAPON_READY,n end
-	if(__GetAmmo(client,weapon) ~= -1) then __ConsumeAmmo(client,weapon,1) end
+	local ammo = __GetAmmo(client,weapon)
+	if(SERVER) then print("AMMO: " .. weapon .. " | " .. ammo .. "\n") end
+	if(__HasWeapon(client,weapon) == false or ammo == 0) then __WeaponEmpty(client,weapon) return true,WEAPON_READY,n end
+	if(ammo ~= -1) then __ConsumeAmmo(client,weapon,1) end
 	
 	return false,ws,n
 end
