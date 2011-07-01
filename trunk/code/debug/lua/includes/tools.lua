@@ -14,6 +14,8 @@ function LOG(str)
 	logfile:write(tostring(str))
 end
 
+LOG("\n\n----LOGGING: " .. os.date("%c") .. "----\n\n")
+
 function CLAMP(v,low,high)
 	return math.min(high,math.max(low,v))
 end
