@@ -7,6 +7,7 @@ D_LONG = 2
 D_STRING = 3
 D_FLOAT = 4
 D_BYTE = 5
+D_VECTOR = 6
 
 local strings = {}
 strings[D_SHORT] = "Short"
@@ -14,6 +15,7 @@ strings[D_LONG] = "Long"
 strings[D_STRING] = "String"
 strings[D_FLOAT] = "Float"
 strings[D_BYTE] = "Byte"
+strings[D_VECTOR] = "Vector"
 
 local types = {}
 types[D_SHORT] = "number"
@@ -21,6 +23,7 @@ types[D_LONG] = "number"
 types[D_STRING] = "string"
 types[D_FLOAT] = "number"
 types[D_BYTE] = "number"
+types[D_VECTOR] = "userdata"
 
 local defaults = {}
 defaults[D_SHORT] = 0
@@ -28,6 +31,7 @@ defaults[D_LONG] = 0
 defaults[D_STRING] = ""
 defaults[D_FLOAT] = 0
 defaults[D_BYTE] = 0
+defaults[D_VECTOR] = Vector(0,0,0)
 
 local MessageT = {}
 local Prototypes = {}
@@ -46,12 +50,23 @@ if(SERVER) then
 	funcs[D_STRING] = _message.WriteString
 	funcs[D_FLOAT] = _message.WriteFloat
 	funcs[D_BYTE] = _message.WriteByte
+	funcs[D_VECTOR] = function(m,v) 
+		_message.WriteFloat(m,v.x)
+		_message.WriteFloat(m,v.y)
+		_message.WriteFloat(m,v.z)
+	end
 else
 	funcs[D_BYTE] = _message.ReadByte
 	funcs[D_SHORT] = _message.ReadShort
 	funcs[D_LONG] = _message.ReadLong
 	funcs[D_STRING] = _message.ReadString
 	funcs[D_FLOAT] = _message.ReadFloat
+	funcs[D_VECTOR] = function(m,v) 
+		local x = _message.ReadFloat()
+		local y = _message.ReadFloat()
+		local z = _message.ReadFloat()
+		return Vector(x,y,z)
+	end
 end
 
 local function protoForName(name)
@@ -77,8 +92,7 @@ function MessageT:Short() table.insert(self.stack,D_SHORT) return self end
 function MessageT:Long() table.insert(self.stack,D_LONG) return self end
 function MessageT:String() table.insert(self.stack,D_STRING) return self end
 function MessageT:Float() table.insert(self.stack,D_FLOAT) return self end
-function MessageT:Vector() for i=1, 3 do table.insert(self.stack,D_FLOAT) end return self end
-function MessageT:Angle() for i=1, 3 do table.insert(self.stack,D_FLOAT) end return self end
+function MessageT:Vector() table.insert(self.stack,D_VECTOR) return self end
 function MessageT:Recv(data) end
 
 function MessageT:E()

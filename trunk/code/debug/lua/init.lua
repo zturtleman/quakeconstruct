@@ -75,6 +75,7 @@ local function PlayerSpawned(pl)
 end
 hook.add("PlayerSpawned","init",PlayerSpawned)
 ]]
+
 local function makeEnt(p,c,a)
 	if(a[1] == nil) then return end
 	local tr = PlayerTrace(p)

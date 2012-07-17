@@ -208,7 +208,7 @@ local function draw2D()
 	--if(my < -40) then my = -40 end
 	
 	local armor = _CG.stats[STAT_ARMOR]
-	local ammo = _CG.ammo[_CG.weapon+1]
+	--local ammo = _CG.ammo[_CG.weapon+1]
 	
 	if(hp <= 0) then armor = 0 end
 	if(hp <= 0) then ammo = 0 end
@@ -220,7 +220,7 @@ local function draw2D()
 	angles()
 	
 	--if(hp < 0) then hp = 0 end
-	if(ammo < 0) then ammo = 0 end
+	--if(ammo < 0) then ammo = 0 end
 	
 	doColors()
 	
@@ -236,7 +236,7 @@ local function draw2D()
 	draw.Rect(0,recty,640,480-recty)
 	draw.SetColor(1,1,1,1)
 	
-	DrawAmmo(mx+95+shakex,my+430+shakey,50,50)
+	--DrawAmmo(mx+95+shakex,my+430+shakey,50,50)
 	
 	if(HEAD_CENTER) then
 		DrawHead(mx+(200),my+295,180,hp)
@@ -246,7 +246,7 @@ local function draw2D()
 	
 	local col_ammo = colors.ammo_norm
 	local col_armor = colors.ammo_norm
-	if(ammo <= 5) then col_ammo = colors.ammo_low end
+	--if(ammo <= 5) then col_ammo = colors.ammo_low end
 	if(armor > 100) then col_armor = colors.health_high end
 	
 	
@@ -259,9 +259,9 @@ local function draw2D()
 	draw.SetColor(1,1,1,1)
 	--draw.Text(10,50,"" .. deltaang.x .. " - " .. deltaang.y .. "",10,10)
 	
-	if(_CG.weapon != WP_NONE or true) then draw.Text(mx+5,my+420,"ammo:",10,10) end
+	--if(_CG.weapon != WP_NONE or true) then draw.Text(mx+5,my+420,"ammo:",10,10) end
 	--draw.Text(mx+200,my+420,"health:",10,10)
-	if(_CG.weapon != WP_NONE or true) then drawNumbers(mx,num_y,20,20,ammo,8,unpack(col_ammo)) end
+	--if(_CG.weapon != WP_NONE or true) then drawNumbers(mx,num_y,20,20,ammo,8,unpack(col_ammo)) end
 	
 	--drawNumbers(mx+190,num_y,20,20,hp,8,unpack(col_hp))
 	
@@ -272,7 +272,7 @@ local function draw2D()
 	if(armor > 0) then draw.Text(armorx,my+420,"armor:",10,10) end
 	if(armor > 0) then drawNumbers(armorx,num_y,20,20,armor,8,unpack(col_armor)) end
 	
-	DrawWeaponSelector(320,0)
+	--DrawWeaponSelector(320,0)
 end
 hook.add("Draw2D","cl_xhud",draw2D)
 
@@ -296,6 +296,6 @@ local function shouldDraw(str)
 	if(str == "HUD_STATUSBAR_ARMOR") then return false end
 	if(str == "HUD_STATUSBAR_AMMO") then return false end
 	if(str == "HUD_PICKUP") then return false end
-	if(str == "HUD_WEAPONSELECT") then return false end
+	--if(str == "HUD_WEAPONSELECT") then return false end
 end
 hook.add("ShouldDraw","cl_xhud",shouldDraw)

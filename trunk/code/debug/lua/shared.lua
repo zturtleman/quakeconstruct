@@ -3,6 +3,76 @@ print("^1SHARED\n")
 --include("lua/weapons.lua")
 include("lua/states.lua")
 
+local DAMAGE_PROTO_0 = MessagePrototype("_damage0"):Short():Short():Short():Short():Vector():Byte():Short():E()
+
+if(SERVER) then
+	local function PlayerDamaged(self,inflictor,attacker,damage,meansOfDeath,asave,dir,pos)
+		print("PLAYER DAMAGE HOOKED\n");
+		for k,v in pairs(GetEntitiesByClass("player")) do
+			local db = DirToByte(Vector(0,0,-1))
+			if(dir != nil) then db = DirToByte(dir) end
+			local atk = -1
+			if(attacker) then
+				atk = attacker:EntIndex() or -1
+			end
+			
+			DAMAGE_PROTO_0:Send(
+				v,
+				damage,
+				meansOfDeath,
+				self:EntIndex(),
+				self:GetHealth(),
+				pos or Vector(0,0,0),
+				db,
+				atk)
+		end
+	end
+	hook.add("PostPlayerDamaged","init",PlayerDamaged)
+elseif(CLIENT) then
+	local lhp = 0
+	function DAMAGE_PROTO_0:Recv(data)
+		local attacker = nil
+		local pos = Vector()
+		local dmg = data[1]
+		local death = data[2]
+		local id = data[3]
+		local self = (id == LocalPlayer():EntIndex())
+		local self2 = GetEntityByIndex(id)
+		local suicide = false
+		local hp = data[4]
+		local pos = data[5]
+		local dir = ByteToDir(data[6])
+		local atkid = data[7]
+		local atkname = ""
+		if(self) then
+			_INCREMENT_COUNTER("damage_taken",dmg)
+			if(lhp > 0) then
+				if(hp <= 0) then
+					_INCREMENT_COUNTER("deaths",1)
+				end
+			end
+			if(lhp > -40) then
+				if(hp <= -40) then
+					_INCREMENT_COUNTER("gibbed",1)
+				end
+			end
+			lhp = hp
+		end
+		if(atkid != -1) then
+			attacker = GetEntityByIndex(atkid)
+			suicide = (atkid == LocalPlayer():EntIndex())
+		end
+		if(attacker != nil) then
+			atkname = attacker:GetInfo().name
+		end
+		CallHook("Damaged",atkname,pos,dmg,death,self,suicide,hp,dir,self2:GetPos())
+		CallHook("PlayerDamaged",self2,atkname,pos,dmg,death,self,suicide,hp,id,pos,dir)
+		CallHook("PlayerDamaged2",self2,dmg,death,pos,dir,hp)
+		attacker = attacker or ""
+		print("CLIENT PLAYER DAMAGE HOOKED\n");
+		--print("Attacked: " .. dmg .. " " .. EnumToString(meansOfDeath_t,death) .. " " .. attacker .. "\n")
+	end
+end
 --[[
 local m_proto = MessagePrototype("test"):String():Byte():E()
 
