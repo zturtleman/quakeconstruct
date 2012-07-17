@@ -66,7 +66,7 @@ if(SERVER) then
 		--SendDataMessageToAll(msg)
 		
 		for k,pl in pairs(GetAllPlayers()) do
-			explosionProto:Send(pl,XYZ(self.Entity:GetPos()))
+			explosionProto:Send(pl,self.Entity:GetPos())
 		end
 		
 		self.touch = true
@@ -125,8 +125,8 @@ else
 	hook.add("Draw3D","projectile",d3d)
 
 	function explosionProto:Recv(data)
-		local pos = Vector(data[1],data[2],data[3])
-		table.insert(Explosions,{pos,LevelTime()})
+		print("GOT: " .. tostring(data[1]) .. " - " .. type(data[1]) .. "\n")
+		table.insert(Explosions,{data[1],LevelTime()})
 	end
 	--[[function pmessage(msgid)
 		if(msgid == "_projectile") then

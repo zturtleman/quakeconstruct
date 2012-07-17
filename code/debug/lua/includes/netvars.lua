@@ -220,18 +220,6 @@ else
 		local varname = nil
 		local data = nil
 		
-		print("TABLEINDEX: " .. tableindex .. "\n")
-		if(_NetTables[tableindex] == nil) then
-			_NetTables[tableindex] = {}
-			setmetatable(_NetTables[tableindex],network_meta)
-			rawset(_NetTables[tableindex],"__mt",table.Copy(network_meta))
-			
-			_NetTables[tableindex].tindex = tableindex
-			_NetTables[tableindex]:Init()
-			nt = _NetTables[tableindex]
-			print("^3Server Forced Client Networked Table: " .. tableindex .. "\n")
-		end
-		
 		if not (readBit()) then --nil
 			if(readBit()) then
 				varname = _message.ReadString()
@@ -254,6 +242,18 @@ else
 				local str = _message.ReadString()
 				data = str
 			end
+		end
+		
+		print("TABLEINDEX: " .. tableindex .. "\n")
+		if(_NetTables[tableindex] == nil) then
+			_NetTables[tableindex] = {}
+			setmetatable(_NetTables[tableindex],network_meta)
+			rawset(_NetTables[tableindex],"__mt",table.Copy(network_meta))
+			
+			_NetTables[tableindex].tindex = tableindex
+			_NetTables[tableindex]:Init()
+			nt = _NetTables[tableindex]
+			print("^3Server Forced Client Networked Table: " .. tableindex .. "\n")
 		end
 		
 		local mtab = _NetTables[tableindex].__mt
