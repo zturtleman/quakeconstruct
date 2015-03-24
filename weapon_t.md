@@ -1,0 +1,16 @@
+## Enumeration: ##
+
+  * WP\_NONE,
+
+  * WP\_GAUNTLET,
+  * WP\_MACHINEGUN,
+  * WP\_SHOTGUN,
+  * WP\_GRENADE\_LAUNCHER,
+  * WP\_ROCKET\_LAUNCHER,
+  * WP\_LIGHTNING,
+  * WP\_RAILGUN,
+  * WP\_PLASMAGUN,
+  * WP\_BFG,
+  * WP\_GRAPPLING\_HOOK,
+
+  * WP\_NUM\_WEAPONS

@@ -1,0 +1,20 @@
+| Arguments: | 
+
+&lt;none&gt;
+
+ |
+|:-----------|:-----------------|
+| Returns: | a table containing information about the given player |
+| Example: | player:GetInfo()["name"] |
+
+**Notes:**
+
+The returned table contains:
+
+  * "name" (string)
+  * "health" (number)
+  * "score" (number)
+  * "connected" (boolean)
+  * "weapon" (number)
+  * "buttons" (number)
+  * "model" (number)
